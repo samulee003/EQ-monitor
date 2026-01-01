@@ -1,0 +1,16 @@
+{
+    "name": "今心 ImXin",
+    "short_name": "今心",
+    "description": "你的情緒素養與 RULER 教練",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fdfaf3",
+    "theme_color": "#d5c1a5",
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+[build]
+publish_dir = "dist"
+
+[serves]
+index = "index.html"
+history_api_fallback = true
+
+[env]
+NODE_ENV = "production"
+VITE_ZEABUR_URL = "${ZEABUR_WEB_URL}"
