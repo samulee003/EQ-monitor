@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import MoodMeter from './MoodMeter';
 import EmotionGrid from './EmotionGrid';
+import BodyScan from './BodyScan';
 import UnderstandingStep from './UnderstandingStep';
 import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
 import { Quadrant, Emotion } from '../data/emotionData';
 
-type Step = 'recognizing' | 'labeling' | 'understanding' | 'expressing' | 'regulating' | 'neuroCheck' | 'summary';
+type Step = 'recognizing' | 'bodyScan' | 'labeling' | 'understanding' | 'expressing' | 'regulating' | 'neuroCheck' | 'summary';
 
 const steps: { key: Step; label: string; letter: string }[] = [
     { key: 'recognizing', label: '辨別', letter: 'R' },
@@ -21,6 +22,7 @@ const CheckInFlow: React.FC = () => {
     const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null);
     const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
     const [emotionIntensity, setEmotionIntensity] = useState(5);
+    const [bodyScanData, setBodyScanData] = useState<{ location: string; sensation: string } | null>(null);
     const [understandingData, setUnderstandingData] = useState<any>(null);
     const [expressingData, setExpressingData] = useState<any>(null);
     const [regulatingData, setRegulatingData] = useState<any>(null);
@@ -39,6 +41,7 @@ const CheckInFlow: React.FC = () => {
                 setSelectedQuadrant(draft.selectedQuadrant || null);
                 setSelectedEmotion(draft.selectedEmotion || null);
                 setEmotionIntensity(draft.emotionIntensity || 5);
+                setBodyScanData(draft.bodyScanData || null);
                 setUnderstandingData(draft.understandingData || null);
                 setExpressingData(draft.expressingData || null);
                 setRegulatingData(draft.regulatingData || null);
@@ -60,6 +63,7 @@ const CheckInFlow: React.FC = () => {
                 selectedQuadrant,
                 selectedEmotion,
                 emotionIntensity,
+                bodyScanData,
                 understandingData,
                 expressingData,
                 regulatingData,
@@ -82,6 +86,11 @@ const CheckInFlow: React.FC = () => {
     const handleMoodComplete = (quadrant: Quadrant, intensity: number) => {
         setSelectedQuadrant(quadrant);
         setEmotionIntensity(intensity);
+        setStep('bodyScan');
+    };
+
+    const handleBodyScanComplete = (data: { location: string; sensation: string }) => {
+        setBodyScanData(data);
         setStep('labeling');
     };
 
@@ -99,6 +108,7 @@ const CheckInFlow: React.FC = () => {
         const fullData = {
             emotion: emotion || selectedEmotion,
             intensity: intensity || emotionIntensity,
+            bodyScan: bodyScanData,
             understanding: u || understandingData,
             expressing: e || expressingData,
             regulating: r || regulatingData,
@@ -165,11 +175,19 @@ const CheckInFlow: React.FC = () => {
                     />
                 )}
 
+                {step === 'bodyScan' && selectedQuadrant && (
+                    <BodyScan
+                        quadrant={selectedQuadrant}
+                        onComplete={handleBodyScanComplete}
+                        onBack={() => setStep('recognizing')}
+                    />
+                )}
+
                 {step === 'labeling' && selectedQuadrant && (
                     <EmotionGrid
                         quadrant={selectedQuadrant}
                         onSelectEmotion={handleEmotionSelect}
-                        onBack={() => setStep('recognizing')}
+                        onBack={() => setStep('bodyScan')}
                     />
                 )}
 

@@ -8,6 +8,13 @@ export interface Emotion {
     pleasantness: number; // 1-5 (Grid position horizontally)
 }
 
+export interface PsychologicalNeed {
+    id: string;
+    label: string;
+    icon: string;
+    desc: string;
+}
+
 export const emotions: Emotion[] = [
     // --- RED: High Energy, Low Pleasantness (Top Left 5x5) ---
     { id: 'enraged', name: '憤怒的', quadrant: 'red', energy: 5, pleasantness: 1 },
@@ -116,4 +123,14 @@ export const emotions: Emotion[] = [
     { id: 'serene', name: '平靜的', quadrant: 'green', energy: 1, pleasantness: 3 },
     { id: 'cozy', name: '舒適的', quadrant: 'green', energy: 1, pleasantness: 4 },
     { id: 'placid', name: '安詳的', quadrant: 'green', energy: 1, pleasantness: 5 },
+];
+
+export const psychologicalNeeds: PsychologicalNeed[] = [
+    { id: 'respect', label: '尊重與認可', icon: '🤝', desc: '渴望被看見、被聽見或被重視' },
+    { id: 'safety', label: '安全與穩定', icon: '🛡️', desc: '追求生理或心理上的安全感與預測性' },
+    { id: 'connection', label: '連結與歸屬', icon: '❤️', desc: '需要友誼、愛或群體的歸屬感' },
+    { id: 'autonomy', label: '自主與自由', icon: '🕊️', desc: '渴望自己做決定、掌控生活節奏' },
+    { id: 'meaning', label: '意義與價值', icon: '✨', desc: '希望感到自己有貢獻或生命有意義' },
+    { id: 'rest', label: '休息與放鬆', icon: '🛌', desc: '需要空間來恢復體力或精神能量' },
+    { id: 'growth', label: '挑戰與成長', icon: '🌱', desc: '渴望學習新事物或突破自我' },
 ];
