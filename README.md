@@ -1,16 +1,80 @@
-# React + Vite
+# 今心 ImXin - 專業級 RULER 情緒智能助手 🌿
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **今心，即為「念」。**  
+> 一個旨在陪伴使用者深入覺察、理解並精準調節情緒的數字避風港。
 
-Currently, two official plugins are available:
+「今心 ImXin」是一款基於耶魯大學 **RULER 情緒智能框架** 開發的高級 Web 應用。它不僅是一個簡單的情緒日記，更是一個專業的心理輔助工具，透過動態交互、身心聯結與儀式化宣洩，引導使用者從「覺察」走向「平衡」。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ 核心框架：RULER Pro
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+我們將經典的 RULER 模型進行了深度數位化與交互化升級：
 
-## Expanding the ESLint configuration
+- **Recognizing (辨別)**：
+    - **Mood Meter**：動態象限圖，精確定位情緒的「能量」與「愉悅感」。
+    - **Body Scan (具身認知)**：視覺化身體地圖，標記情緒在體感的具體反應（如緊繃、溫熱、空洞）。
+- **Understanding (理解)**：
+    - **需求探索**：協助使用者追蹤觸發事件，並挖掘底層的心理需求（如安全感、歸屬感、自主性）。
+- **Labeling (標記)**：
+    - 精選超過 100 種細膩的情緒詞彙，幫助使用者精準命名感受。
+- **Expressing (表達)**：
+    - **情緒碎紙機**：互動式碎紙動畫，提供心理宣洩儀式，處理想放下的負累。
+    - **私密書信**：專注於誠實面對自我的文字空間。
+- **Regulating (調節)**：
+    - **呼吸規律器 (Breathe Pacer)**：視覺化引導 4-4-6 呼吸節奏。
+    - **5-4-3-2-1 接地法**：互動式感官引導練習，快速平復強烈情緒。
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🎨 設計美學：Luminous Morandi
+
+App 採用 **「微光莫蘭迪」 (Luminous Morandi)** 設計風格：
+- **低飽和配色**：平和、靜謐的色彩語言，減少視覺壓力。
+- **毛玻璃效果**：優雅的玻璃擬態 (Glassmorphism)，營造層次感與通透感。
+- **微動效交互**：流暢的步驟切換與動態背景 aura，讓情緒流動可見。
+
+---
+
+## 🛠️ 技術棧
+
+- **前端**: React 19 + TypeScript
+- **建構工具**: Vite
+- **樣式**: Vanilla CSS (自定義現代化 UI 系統)
+- **數據持久化**: LocalStorage (隱私友好，本地存儲)
+- **數據可視化**: 自研熱力圖 (Heatmap) 與 強度趨勢圖
+- **部署**: Zeabur Optimized
+
+---
+
+## 🚀 快速開始
+
+### 本地開發
+1. 克隆倉庫:
+   ```bash
+   git clone https://github.com/samulee003/EQ-monitor.git
+   ```
+2. 安裝依賴:
+   ```bash
+   npm install
+   ```
+3. 啟動開發伺服器:
+   ```bash
+   npm run dev
+   ```
+
+### 環境變量
+若需啟用 AI 洞察功能（目前為測試階段），請參照 `.env.example` 配置 `VITE_ZEABUR_AI_API_KEY`。
+
+---
+
+## 📊 數據洞察 (Growth Dashboard)
+在「成長看板」中，你可以查看：
+- **情緒熱力圖**：過去 30 天的情緒分布趨勢。
+- **情緒韌性得分**：基於數據分析的心理彈性評估。
+- **強度趨勢**：追蹤情緒波幅的變化。
+
+---
+
+## 📄 授權協議
+MIT License. 歡迎在標註來源的前提下進行學習與創作。
