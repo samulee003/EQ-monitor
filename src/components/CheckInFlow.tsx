@@ -6,6 +6,7 @@ import UnderstandingStep from './UnderstandingStep';
 import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
 import { useRulerFlow, steps } from '../hooks/useRulerFlow';
+import { uiIcons } from './icons/SvgIcons';
 
 const CheckInFlow: React.FC = () => {
     const {
@@ -113,10 +114,9 @@ const CheckInFlow: React.FC = () => {
                         onBack={() => setStep('expressing')}
                     />
                 )}
-
                 {step === 'neuroCheck' && (
                     <div className="neuro-check-card">
-                        <div className="summary-icon">🧠</div>
+                        <div className="summary-icon">{uiIcons.brain}</div>
                         <h2>調節後的感覺？</h2>
                         <p className="summary-desc">觀察一下現在的內在狀態是否有微小的變化？</p>
 
@@ -144,7 +144,7 @@ const CheckInFlow: React.FC = () => {
 
                 {step === 'summary' && selectedEmotion && (
                     <div className="summary-card">
-                        <div className="summary-icon">✨</div>
+                        <div className="summary-icon">{uiIcons.sparkle}</div>
                         <h2>覺察之旅完成</h2>
                         <p className="summary-desc">
                             感謝你與自己的 <span style={{ color: `var(--color-${selectedEmotion.quadrant})`, fontWeight: 600 }}>{selectedEmotion.name}</span> 對話。
@@ -218,7 +218,15 @@ const CheckInFlow: React.FC = () => {
                     position: relative; overflow: hidden;
                 }
                 .summary-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top right, hsla(0,0%,100%,0.03), transparent); pointer-events: none; }
-                .summary-icon { font-size: 4rem; margin-bottom: var(--s-4); filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); }
+                .summary-icon { 
+                    width: 80px; 
+                    height: 80px; 
+                    margin: 0 auto var(--s-4); 
+                    color: var(--text-primary); 
+                    opacity: 0.8;
+                    filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); 
+                }
+                .summary-icon svg { width: 100%; height: 100%; }
                 .summary-desc { color: var(--text-secondary); margin-bottom: var(--s-10); font-size: 1.05rem; line-height: 1.6; }
 
                 .ruler-checklist { text-align: left; display: flex; flex-direction: column; gap: var(--s-4); margin-bottom: var(--s-10); }

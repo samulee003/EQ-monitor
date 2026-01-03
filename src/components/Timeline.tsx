@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import { uiIcons } from './icons/SvgIcons';
 const Timeline: React.FC = () => {
     const [logs, setLogs] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -82,7 +82,7 @@ const Timeline: React.FC = () => {
     if (logs.length === 0) {
         return (
             <div className="empty-state">
-                <div className="empty-icon">🍃</div>
+                <div className="empty-icon">{uiIcons.leaf}</div>
                 <p>尚無記錄，開始你的第一次情緒觀察吧。</p>
             </div>
         );
@@ -96,7 +96,7 @@ const Timeline: React.FC = () => {
                     <p>回顧你的情緒旅程與成長點滴。</p>
                 </div>
                 <button className="export-btn" onClick={handleExport} title="導出 JSON 數據">
-                    📁 導出數據
+                    <span className="export-icon">{uiIcons.folder}</span> 導出數據
                 </button>
             </div>
 
@@ -249,7 +249,16 @@ const Timeline: React.FC = () => {
                 .cancel-btn:hover { background: var(--glass-bg); }
 
                 .empty-state { text-align: center; padding: 5rem 2rem; color: var(--text-secondary); }
-                .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+                .empty-icon { 
+                    width: 64px; 
+                    height: 64px; 
+                    margin: 0 auto 1rem; 
+                    color: var(--text-secondary); 
+                    opacity: 0.5; 
+                }
+                .empty-icon svg { width: 100%; height: 100%; }
+                .export-icon { width: 16px; height: 16px; display: inline-flex; }
+                .export-icon svg { width: 100%; height: 100%; }
 
                 .delete-modal-overlay {
                     position: fixed;
@@ -271,7 +280,14 @@ const Timeline: React.FC = () => {
                     text-align: center;
                     animation: scaleIn 0.2s ease;
                 }
-                .delete-modal-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+                .delete-modal-icon { 
+                    width: 48px; 
+                    height: 48px; 
+                    margin: 0 auto 1rem; 
+                    color: var(--color-red); 
+                    opacity: 0.8;
+                }
+                .delete-modal-icon svg { width: 100%; height: 100%; }
                 .delete-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
                 .delete-modal p { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 1.5rem 0; }
                 .delete-modal-actions { display: flex; gap: 12px; justify-content: center; }
@@ -305,7 +321,7 @@ const Timeline: React.FC = () => {
             {deleteConfirmId && (
                 <div className="delete-modal-overlay" onClick={handleDeleteCancel}>
                     <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="delete-modal-icon">🗑️</div>
+                        <div className="delete-modal-icon">{uiIcons.trash}</div>
                         <h3>確定要刪除嗎？</h3>
                         <p>這項操作無法復原，記錄將永久移除。</p>
                         <div className="delete-modal-actions">

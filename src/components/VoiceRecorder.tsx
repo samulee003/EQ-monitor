@@ -1,71 +1,72 @@
 import React, { useState, useEffect } from 'react';
+import { uiIcons } from './icons/SvgIcons';
 
 interface VoiceRecorderProps {
-    onTranscription: (text: string) => void;
+  onTranscription: (text: string) => void;
 }
 
 const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
-    const [isRecording, setIsRecording] = useState(false);
-    const [timer, setTimer] = useState(0);
-    const [simulationState, setSimulationState] = useState<'idle' | 'recording' | 'processing'>('idle');
+  const [isRecording, setIsRecording] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [simulationState, setSimulationState] = useState<'idle' | 'recording' | 'processing'>('idle');
 
-    useEffect(() => {
-        let interval: any;
-        if (isRecording) {
-            interval = setInterval(() => {
-                setTimer((t) => t + 1);
-            }, 1000);
-        } else {
-            setTimer(0);
-        }
-        return () => clearInterval(interval);
-    }, [isRecording]);
+  useEffect(() => {
+    let interval: any;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setTimer((t) => t + 1);
+      }, 1000);
+    } else {
+      setTimer(0);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
-    const toggleRecording = () => {
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    };
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
-    const startRecording = () => {
-        setIsRecording(true);
-        setSimulationState('recording');
-    };
+  const startRecording = () => {
+    setIsRecording(true);
+    setSimulationState('recording');
+  };
 
-    const stopRecording = () => {
-        setIsRecording(false);
-        setSimulationState('processing');
+  const stopRecording = () => {
+    setIsRecording(false);
+    setSimulationState('processing');
 
-        // Simulate Transcription
-        setTimeout(() => {
-            onTranscription("這是一段模擬的語音輸入內容。我現在感覺身體有些緊繃，但呼吸還算平穩。");
-            setSimulationState('idle');
-        }, 2000);
-    };
+    // Simulate Transcription
+    setTimeout(() => {
+      onTranscription("這是一段模擬的語音輸入內容。我現在感覺身體有些緊繃，但呼吸還算平穩。");
+      setSimulationState('idle');
+    }, 2000);
+  };
 
-    const formatTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${m}:${s.toString().padStart(2, '0')}`;
-    };
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
-    return (
-        <div className="voice-recorder">
-            <div className={`record-btn ${simulationState}`} onClick={toggleRecording}>
-                {simulationState === 'idle' && <span className="icon">🎤</span>}
-                {simulationState === 'recording' && <span className="icon">⏹️</span>}
-                {simulationState === 'processing' && <div className="loader"></div>}
-            </div>
+  return (
+    <div className="voice-recorder">
+      <div className={`record-btn ${simulationState}`} onClick={toggleRecording}>
+        {simulationState === 'idle' && <span className="icon">{uiIcons.microphone}</span>}
+        {simulationState === 'recording' && <span className="icon stop-icon"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg></span>}
+        {simulationState === 'processing' && <div className="loader"></div>}
+      </div>
 
-            <div className="status-text">
-                {simulationState === 'idle' && "點擊開始語音表達"}
-                {simulationState === 'recording' && `正在聆聽... ${formatTime(timer)}`}
-                {simulationState === 'processing' && "AI 正在轉譯您的聲音..."}
-            </div>
+      <div className="status-text">
+        {simulationState === 'idle' && "點擊開始語音表達"}
+        {simulationState === 'recording' && `正在聆聽... ${formatTime(timer)}`}
+        {simulationState === 'processing' && "AI 正在轉譯您的聲音..."}
+      </div>
 
-            <style>{`
+      <style>{`
         .voice-recorder {
           display: flex;
           flex-direction: column;
@@ -129,8 +130,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
           to { transform: rotate(360deg); }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default VoiceRecorder;

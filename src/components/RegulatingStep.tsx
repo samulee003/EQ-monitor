@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Emotion, Quadrant } from '../data/emotionData';
-
+import { regulationIcons } from './icons/SvgIcons';
 import { RegulatingData } from '../types/RulerTypes';
 
 interface RegulatingStepProps {
@@ -9,30 +9,30 @@ interface RegulatingStepProps {
     onBack: () => void;
 }
 
-const strategiesByQuadrant: Record<Quadrant, { icon: string; title: string; desc: string; type?: 'interactive' }[]> = {
+const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive' }[]> = {
     red: [
-        { icon: '🌬️', title: '引導式深呼吸', desc: '進入跟隨節奏的呼吸練習', type: 'interactive' },
-        { icon: '🤚', title: '5-4-3-2-1 接地法', desc: '透過感官重新連結當下', type: 'interactive' },
-        { icon: '🏃', title: '強效宣洩', desc: '進行 30 秒的身心快速擺動' },
-        { icon: '💧', title: '冰水刺激', desc: '利用溫差快速平復情緒' },
+        { icon: regulationIcons.breathing, title: '引導式深呼吸', desc: '進入跟隨節奏的呼吸練習', type: 'interactive' },
+        { icon: regulationIcons.grounding, title: '5-4-3-2-1 接地法', desc: '透過感官重新連結當下', type: 'interactive' },
+        { icon: regulationIcons.running, title: '強效宣洩', desc: '進行 30 秒的身心快速擺動' },
+        { icon: regulationIcons.water, title: '冰水刺激', desc: '利用溫差快速平復情緒' },
     ],
     yellow: [
-        { icon: '📝', title: '感恩清單', desc: '寫三件此刻讓你感到美好的事' },
-        { icon: '✨', title: '傳遞喜悅', desc: '發送一則讚美訊息給他人' },
-        { icon: '🎯', title: '目標設定', desc: '趁著能量高設定今天的小目標' },
-        { icon: '🕺', title: '慶祝舞動', desc: '放一首歌，隨意地動一動身體' },
+        { icon: regulationIcons.gratitude, title: '感恩清單', desc: '寫三件此刻讓你感到美好的事' },
+        { icon: regulationIcons.sparkle, title: '傳遞喜悅', desc: '發送一則讚美訊息給他人' },
+        { icon: regulationIcons.target, title: '目標設定', desc: '趁著能量高設定今天的小目標' },
+        { icon: regulationIcons.dance, title: '慶祝舞動', desc: '放一首歌，隨意地動一動身體' },
     ],
     blue: [
-        { icon: '☕', title: '暖心儀式', desc: '為自己準備一杯有溫度的飲品' },
-        { icon: '🧹', title: '微小掌控', desc: '整理三件桌上的雜物' },
-        { icon: '🧸', title: '自我慈悲', desc: '對自己說一句溫柔的鼓勵' },
-        { icon: '🪴', title: '觀察植物', desc: '凝視一片葉子或窗外的景色' },
+        { icon: regulationIcons.coffee, title: '暖心儀式', desc: '為自己準備一杯有溫度的飲品' },
+        { icon: regulationIcons.tidy, title: '微小掌控', desc: '整理三件桌上的雜物' },
+        { icon: regulationIcons.selfLove, title: '自我慈悲', desc: '對自己說一句溫柔的鼓勵' },
+        { icon: regulationIcons.plant, title: '觀察植物', desc: '凝視一片葉子或窗外的景色' },
     ],
     green: [
-        { icon: '🧘', title: '三分鐘靜坐', desc: '純粹地與當下的平靜同在' },
-        { icon: '📖', title: '慢讀時刻', desc: '細讀一段優美的文字' },
-        { icon: '🖍️', title: '隨意塗鴉', desc: '不帶目的地記錄線條與色彩' },
-        { icon: '📵', title: '數位離線', desc: '給自己 10 分鐘的無擾空間' },
+        { icon: regulationIcons.meditate, title: '三分鐘靜坐', desc: '純粹地與當下的平靜同在' },
+        { icon: regulationIcons.book, title: '慢讀時刻', desc: '細讀一段優美的文字' },
+        { icon: regulationIcons.doodle, title: '隨意塗鴉', desc: '不帶目的地記錄線條與色彩' },
+        { icon: regulationIcons.offline, title: '數位離線', desc: '給自己 10 分鐘的無擾空間' },
     ],
 };
 
@@ -235,13 +235,16 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                 }
 
                 .strategy-icon { 
-                    font-size: 1.6rem; 
-                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
-                    opacity: 0.6;
+                    width: 24px;
+                    height: 24px;
+                    color: var(--text-secondary);
+                    opacity: 0.7;
                     transition: var(--transition-luxe); 
                 }
+                .strategy-icon svg { width: 100%; height: 100%; }
+                .strategy-item:hover .strategy-icon { opacity: 0.9; color: var(--text-primary); }
                 .strategy-item.active .strategy-icon { 
-                    filter: brightness(0) invert(1);
+                    color: var(--bg-color);
                     opacity: 1;
                     transform: scale(1.1); 
                 }

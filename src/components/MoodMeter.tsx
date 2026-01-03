@@ -38,6 +38,16 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
       </div>
 
       <div className="spheres-layout">
+        {/* 軸線 */}
+        <div className="axis-line axis-vertical" aria-hidden="true" />
+        <div className="axis-line axis-horizontal" aria-hidden="true" />
+
+        {/* 軸標籤 */}
+        <span className="axis-label axis-top">高能量</span>
+        <span className="axis-label axis-bottom">低能量</span>
+        <span className="axis-label axis-left">不愉快</span>
+        <span className="axis-label axis-right">愉快</span>
+
         {quadrants.map((q) => (
           <div
             key={q.id}
@@ -45,6 +55,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
             onClick={() => onSelectQuadrant(q.id)}
             onMouseEnter={() => updateAura(getHexColor(q.id))}
             onMouseLeave={() => updateAura(null)}
+            role="button"
+            tabIndex={0}
+            aria-label={`${q.label}: ${q.desc}`}
+            onKeyDown={(e) => e.key === 'Enter' && onSelectQuadrant(q.id)}
           >
             <div className="sphere-orbital">
               <div className="sphere">
@@ -98,6 +112,39 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           align-items: center;
           justify-content: center;
         }
+
+        /* Axis Lines */
+        .axis-line {
+          position: absolute;
+          background: var(--glass-border);
+          z-index: 1;
+        }
+        .axis-vertical {
+          width: 1px;
+          height: 100%;
+          left: 50%;
+        }
+        .axis-horizontal {
+          width: 100%;
+          height: 1px;
+          top: 50%;
+        }
+
+        /* Axis Labels */
+        .axis-label {
+          position: absolute;
+          font-size: 0.7rem;
+          font-weight: 600;
+          letter-spacing: 1px;
+          color: var(--text-secondary);
+          opacity: 0.7;
+          text-transform: uppercase;
+          z-index: 1;
+        }
+        .axis-top { top: -8px; left: 50%; transform: translateX(-50%); }
+        .axis-bottom { bottom: -8px; left: 50%; transform: translateX(-50%); }
+        .axis-left { left: -12px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+        .axis-right { right: -12px; top: 50%; transform: translateY(-50%) rotate(90deg); }
 
         .sphere-wrapper {
           position: absolute;

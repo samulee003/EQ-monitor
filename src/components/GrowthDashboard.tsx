@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { resilienceService, DailyResilience, GranularityData, StrategyDiversityData } from '../services/ResilienceService';
+import { utilityIcons, uiIcons } from './icons/SvgIcons';
 
 const GrowthDashboard: React.FC = () => {
     const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(), []);
@@ -113,7 +114,7 @@ const GrowthDashboard: React.FC = () => {
 
             {/* 神經科學導向指標 - Phase 1 */}
             <div className="neuroscience-metrics">
-                <label className="heading-sm">🧠 情緒智能指標</label>
+                <label className="heading-sm"><span className="section-icon">{uiIcons.brain}</span> 情緒智能指標</label>
                 <div className="metrics-grid">
                     {/* 情緒粒度分數 */}
                     <div className="metric-card granularity-card">
@@ -129,10 +130,11 @@ const GrowthDashboard: React.FC = () => {
                             <p className="metric-desc">你已辨識 <strong>{granularity.uniqueEmotions.length}</strong> 種不同情緒</p>
                             <div className="metric-level">
                                 <span className={`level-badge ${granularity.level}`}>
-                                    {granularity.level === 'beginner' && '🌱 萌芽期'}
-                                    {granularity.level === 'growing' && '🌿 成長中'}
-                                    {granularity.level === 'rich' && '🌳 豐富'}
-                                    {granularity.level === 'expert' && '✨ 專家'}
+                                    <span className="badge-icon">{granularity.level === 'beginner' && uiIcons.seedling}{granularity.level === 'growing' && uiIcons.branch}{granularity.level === 'rich' && uiIcons.tree}{granularity.level === 'expert' && uiIcons.sparkle}</span>
+                                    {granularity.level === 'beginner' && '萌芽期'}
+                                    {granularity.level === 'growing' && '成長中'}
+                                    {granularity.level === 'rich' && '豐富'}
+                                    {granularity.level === 'expert' && '專家'}
                                 </span>
                             </div>
                         </div>
@@ -142,7 +144,7 @@ const GrowthDashboard: React.FC = () => {
                     <div className="metric-card diversity-card">
                         <div className="metric-visual">
                             <div className="toolbox-icon">
-                                <span className="toolbox-emoji">🧰</span>
+                                <span className="toolbox-svg">{utilityIcons.toolbox}</span>
                                 <span className="tool-count">{diversity.usedStrategies.length}</span>
                             </div>
                         </div>
@@ -151,10 +153,11 @@ const GrowthDashboard: React.FC = () => {
                             <p className="metric-desc">已掌握 <strong>{diversity.usedStrategies.length}/{diversity.totalPossible}</strong> 種策略</p>
                             <div className="metric-level">
                                 <span className={`level-badge ${diversity.level}`}>
-                                    {diversity.level === 'starter' && '🔧 初始'}
-                                    {diversity.level === 'developing' && '🛠️ 發展中'}
-                                    {diversity.level === 'diverse' && '⚙️ 多元'}
-                                    {diversity.level === 'master' && '🏆 大師'}
+                                    <span className="badge-icon">{diversity.level === 'starter' && uiIcons.wrench}{diversity.level === 'developing' && uiIcons.hammer}{diversity.level === 'diverse' && uiIcons.gear}{diversity.level === 'master' && uiIcons.trophy}</span>
+                                    {diversity.level === 'starter' && '初始'}
+                                    {diversity.level === 'developing' && '發展中'}
+                                    {diversity.level === 'diverse' && '多元'}
+                                    {diversity.level === 'master' && '大師'}
                                 </span>
                             </div>
                         </div>
@@ -164,14 +167,14 @@ const GrowthDashboard: React.FC = () => {
 
             <div className="insights-grid">
                 <div className="insight-item">
-                    <span className="icon">🌱</span>
+                    <span className="icon">{uiIcons.seedling}</span>
                     <div className="item-content">
                         <label>主要情緒</label>
                         <p>{data[data.length - 1]?.dominantEmotion || '無數據'}</p>
                     </div>
                 </div>
                 <div className="insight-item">
-                    <span className="icon">🛡️</span>
+                    <span className="icon">{uiIcons.shield}</span>
                     <div className="item-content">
                         <label>情緒防禦力</label>
                         <p>{overallScore > 70 ? '穩健' : (overallScore > 40 ? '成長中' : '重建中')}</p>
@@ -234,7 +237,7 @@ const GrowthDashboard: React.FC = () => {
                 }
                 .line-chart { width: 100%; height: auto; margin-top: 0.5rem; overflow: visible; }
                 .empty-chart { height: 80px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.8rem; }
-                .chart-labels { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.65rem; color: var(--text-secondary); opacity: 0.7; }
+                .chart-labels { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
 
                 .charts-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
                 @media (min-width: 600px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
@@ -300,7 +303,13 @@ const GrowthDashboard: React.FC = () => {
                     justify-content: center;
                     position: relative;
                 }
-                .toolbox-emoji { font-size: 1.6rem; filter: saturate(0.7); }
+                .toolbox-svg { 
+                    width: 28px; 
+                    height: 28px; 
+                    color: var(--text-secondary); 
+                    opacity: 0.8;
+                }
+                .toolbox-svg svg { width: 100%; height: 100%; }
                 .tool-count {
                     position: absolute;
                     bottom: -4px;
@@ -322,7 +331,9 @@ const GrowthDashboard: React.FC = () => {
                 .metric-desc strong { color: var(--text-primary); }
 
                 .level-badge {
-                    display: inline-block;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
                     padding: 2px 8px;
                     font-size: 0.65rem;
                     border-radius: 20px;
@@ -330,10 +341,15 @@ const GrowthDashboard: React.FC = () => {
                     color: var(--text-secondary);
                     font-weight: 600;
                 }
+                .badge-icon { width: 12px; height: 12px; display: inline-flex; }
+                .badge-icon svg { width: 100%; height: 100%; }
                 .level-badge.beginner, .level-badge.starter { background: rgba(158,158,158,0.2); }
                 .level-badge.growing, .level-badge.developing { background: rgba(76,175,80,0.2); color: #81C784; }
                 .level-badge.rich, .level-badge.diverse { background: rgba(33,150,243,0.2); color: #64B5F6; }
                 .level-badge.expert, .level-badge.master { background: rgba(255,193,7,0.2); color: #FFD54F; }
+
+                .section-icon { width: 16px; height: 16px; display: inline-flex; vertical-align: middle; margin-right: 4px; }
+                .section-icon svg { width: 100%; height: 100%; }
 
                 .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
                 .insight-item { 
@@ -345,7 +361,8 @@ const GrowthDashboard: React.FC = () => {
                     align-items: center;
                     gap: 0.8rem;
                 }
-                .insight-item .icon { font-size: 1.2rem; }
+                .insight-item .icon { width: 24px; height: 24px; color: var(--text-secondary); opacity: 0.7; }
+                .insight-item .icon svg { width: 100%; height: 100%; }
                 .insight-item label { font-size: 0.7rem; color: var(--text-secondary); display: block; margin-bottom: 2px; }
                 .insight-item p { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin: 0; }
             `}</style>

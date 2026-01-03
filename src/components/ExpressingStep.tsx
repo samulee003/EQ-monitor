@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Emotion } from '../data/emotionData';
 import VoiceRecorder from './VoiceRecorder';
-
+import { expressingIcons } from './icons/SvgIcons';
 import { ExpressingData } from '../types/RulerTypes';
 
 interface ExpressingStepProps {
@@ -11,9 +11,9 @@ interface ExpressingStepProps {
 }
 
 const modes = [
-    { id: 'letter', label: '心情書信', icon: '✉️', desc: '寫一封給自己或他人的私密信件' },
-    { id: 'shredder', label: '情緒碎紙機', icon: '✂️', desc: '寫下想放下的負累，將其視覺化銷毀' },
-    { id: 'free', label: '自由書寫', icon: '✍️', desc: '沒有限制，隨心所欲地記錄' },
+    { id: 'letter', label: '心情書信', icon: expressingIcons.letter, desc: '寫一封給自己或他人的私密信件' },
+    { id: 'shredder', label: '情緒碎紙機', icon: expressingIcons.shredder, desc: '寫下想放下的負累，將其視覺化銷毀' },
+    { id: 'free', label: '自由書寫', icon: expressingIcons.freewrite, desc: '沒有限制，隨心所欲地記錄' },
 ];
 
 const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, onBack }) => {
@@ -169,13 +169,16 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 }
 
                 .mode-icon { 
-                    font-size: 1.5rem; 
-                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
-                    opacity: 0.6;
+                    width: 22px;
+                    height: 22px;
+                    color: var(--text-secondary);
+                    opacity: 0.7;
                     transition: var(--transition-luxe);
                 }
+                .mode-icon svg { width: 100%; height: 100%; }
+                .mode-card:hover .mode-icon { opacity: 0.9; color: var(--text-primary); }
                 .mode-card.active .mode-icon {
-                    filter: brightness(0) invert(1);
+                    color: var(--bg-color);
                     opacity: 1;
                 }
 

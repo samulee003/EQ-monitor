@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Emotion, psychologicalNeeds } from '../data/emotionData';
-
+import { needsIcons } from './icons/SvgIcons';
 import { UnderstandingData } from '../types/RulerTypes';
 
 interface UnderstandingStepProps {
@@ -8,6 +8,17 @@ interface UnderstandingStepProps {
     onComplete: (data: UnderstandingData) => void;
     onBack: () => void;
 }
+
+// Map need IDs to SVG icons
+const needIconMap: Record<string, React.ReactNode> = {
+    respect: needsIcons.respect,
+    safety: needsIcons.safety,
+    connection: needsIcons.connection,
+    autonomy: needsIcons.autonomy,
+    meaning: needsIcons.meaning,
+    rest: needsIcons.rest,
+    growth: needsIcons.growth,
+};
 
 const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComplete, onBack }) => {
     const [trigger, setTrigger] = useState('');
@@ -97,7 +108,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                                 onClick={() => setSelectedNeed(need.label)}
                             >
                                 <div className="need-icon-wrapper">
-                                    <span className="need-icon">{need.icon}</span>
+                                    <span className="need-icon">{needIconMap[need.id] || need.icon}</span>
                                 </div>
                                 <div className="need-info">
                                     <span className="need-label">{need.label}</span>
@@ -221,13 +232,16 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                 }
 
                 .need-icon { 
-                    font-size: 1.5rem; 
-                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
-                    opacity: 0.6;
+                    width: 22px;
+                    height: 22px;
+                    color: var(--text-secondary);
+                    opacity: 0.7;
                     transition: var(--transition-luxe);
                 }
+                .need-icon svg { width: 100%; height: 100%; }
+                .need-card:hover .need-icon { opacity: 0.9; color: var(--text-primary); }
                 .need-card.active .need-icon {
-                    filter: brightness(0) invert(1);
+                    color: var(--bg-color);
                     opacity: 1;
                 }
                 
@@ -245,10 +259,12 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                 .chip-grid { display: flex; flex-wrap: wrap; gap: var(--s-2); }
                 
                 .morandi-chip { 
-                    padding: var(--s-2) var(--s-5); border-radius: 30px; 
+                    padding: var(--s-3) var(--s-5); border-radius: 30px; 
                     background: var(--glass-bg); border: 1px solid var(--glass-border); 
                     color: var(--text-secondary); cursor: pointer; transition: var(--transition-luxe); 
                     font-size: 0.9rem; font-weight: 500;
+                    min-height: 44px;  /* Touch-friendly minimum */
+                    display: inline-flex; align-items: center; justify-content: center;
                 }
                 .morandi-chip:hover { border-color: hsla(0, 0%, 100%, 0.2); color: var(--text-primary); }
                 .morandi-chip.active { background: var(--text-primary); color: var(--bg-color); border-color: var(--text-primary); font-weight: 700; box-shadow: var(--shadow-sm); }
@@ -261,7 +277,20 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                     transition: var(--transition-luxe);
                 }
 
-                .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
+                .morandi-main-btn:disabled { 
+                    opacity: 0.4; 
+                    filter: grayscale(0.5); 
+                    transform: none; 
+                    cursor: not-allowed;
+                }
+                .morandi-main-btn:disabled::after {
+                    content: '👈 請先完成上方選項';
+                    display: block;
+                    font-size: 0.7rem;
+                    font-weight: 400;
+                    opacity: 0.7;
+                    margin-top: 4px;
+                }
             `}</style>
         </div>
     );
