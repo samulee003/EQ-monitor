@@ -25,6 +25,28 @@ export interface IntensityData {
     value: number;
 }
 
+export interface GranularityData {
+    uniqueEmotions: string[];
+    totalPossible: number;
+    score: number;
+    level: 'beginner' | 'growing' | 'rich' | 'expert';
+}
+
+export interface StrategyDiversityData {
+    usedStrategies: string[];
+    totalPossible: number;
+    score: number;
+    level: 'starter' | 'developing' | 'diverse' | 'master';
+}
+
+// All available strategies across all quadrants
+const ALL_STRATEGIES = [
+    '引導式深呼吸', '5-4-3-2-1 接地法', '強效宣洩', '冰水刺激',
+    '感恩清單', '傳遞喜悅', '目標設定', '慶祝舞動',
+    '暖心儀式', '微小掌控', '自我慈悲', '觀察植物',
+    '三分鐘靜坐', '慢讀時刻', '隨意塗鴉', '數位離線'
+];
+
 class ResilienceService {
     /**
      * calculateResilience
@@ -121,6 +143,70 @@ class ResilienceService {
             label: new Date(log.timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' }),
             value: log.intensity || 5
         })).reverse();
+    }
+
+    /**
+     * getEmotionalGranularity
+     * Calculates the diversity of emotions the user has identified.
+     * Higher granularity = better emotional awareness (Lisa Feldman Barrett's research)
+     */
+    getEmotionalGranularity(): GranularityData {
+        const logs: RulerLogEntry[] = storageService.getLogs();
+        const uniqueEmotions = new Set<string>();
+
+        logs.forEach((log: RulerLogEntry) => {
+            if (log.emotion?.name) {
+                uniqueEmotions.add(log.emotion.name);
+            }
+        });
+
+        const uniqueList = Array.from(uniqueEmotions);
+        const totalPossible = 100; // Total emotions in emotionData.ts
+        const score = Math.round((uniqueList.length / totalPossible) * 100);
+
+        let level: GranularityData['level'] = 'beginner';
+        if (score >= 30) level = 'expert';
+        else if (score >= 15) level = 'rich';
+        else if (score >= 5) level = 'growing';
+
+        return {
+            uniqueEmotions: uniqueList,
+            totalPossible,
+            score,
+            level
+        };
+    }
+
+    /**
+     * getStrategyDiversity
+     * Calculates the variety of regulation strategies the user has practiced.
+     * More diverse strategies = better emotional flexibility
+     */
+    getStrategyDiversity(): StrategyDiversityData {
+        const logs: RulerLogEntry[] = storageService.getLogs();
+        const usedStrategies = new Set<string>();
+
+        logs.forEach((log: RulerLogEntry) => {
+            if (log.regulating?.selectedStrategies) {
+                log.regulating.selectedStrategies.forEach((s: string) => usedStrategies.add(s));
+            }
+        });
+
+        const usedList = Array.from(usedStrategies);
+        const totalPossible = ALL_STRATEGIES.length;
+        const score = Math.round((usedList.length / totalPossible) * 100);
+
+        let level: StrategyDiversityData['level'] = 'starter';
+        if (score >= 75) level = 'master';
+        else if (score >= 50) level = 'diverse';
+        else if (score >= 25) level = 'developing';
+
+        return {
+            usedStrategies: usedList,
+            totalPossible,
+            score,
+            level
+        };
     }
 }
 
