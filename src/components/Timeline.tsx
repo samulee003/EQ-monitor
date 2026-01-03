@@ -4,6 +4,7 @@ const Timeline: React.FC = () => {
     const [logs, setLogs] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     useEffect(() => {
         loadLogs();
@@ -14,13 +15,22 @@ const Timeline: React.FC = () => {
         setLogs(data);
     };
 
-    const handleDelete = (timestamp: string) => {
-        if (window.confirm('確定要刪除這筆記錄嗎？這項操作無法復原。')) {
+    const handleDeleteClick = (timestamp: string) => {
+        setDeleteConfirmId(timestamp);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (deleteConfirmId) {
             const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-            const updated = existing.filter((log: any) => log.timestamp !== timestamp);
+            const updated = existing.filter((log: any) => log.timestamp !== deleteConfirmId);
             localStorage.setItem('feelings_logs', JSON.stringify(updated));
             setLogs(updated);
+            setDeleteConfirmId(null);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirmId(null);
     };
 
     const handleEditStart = (log: any) => {
@@ -103,7 +113,7 @@ const Timeline: React.FC = () => {
                                 {editingId !== log.timestamp && (
                                     <>
                                         <button className="edit-btn" onClick={() => handleEditStart(log)}>✎</button>
-                                        <button className="delete-btn" onClick={() => handleDelete(log.timestamp)}>✕</button>
+                                        <button className="delete-btn" onClick={() => handleDeleteClick(log.timestamp)}>✕</button>
                                     </>
                                 )}
                             </div>
@@ -240,7 +250,71 @@ const Timeline: React.FC = () => {
 
                 .empty-state { text-align: center; padding: 5rem 2rem; color: var(--text-secondary); }
                 .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+                .delete-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.6);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    animation: fadeIn 0.2s ease;
+                }
+                .delete-modal {
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-md);
+                    padding: 2rem;
+                    max-width: 360px;
+                    text-align: center;
+                    animation: scaleIn 0.2s ease;
+                }
+                .delete-modal-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+                .delete-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+                .delete-modal p { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 1.5rem 0; }
+                .delete-modal-actions { display: flex; gap: 12px; justify-content: center; }
+                .delete-confirm-btn, .delete-cancel-btn {
+                    padding: 10px 24px;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: var(--transition);
+                    border: none;
+                }
+                .delete-confirm-btn {
+                    background: var(--color-red);
+                    color: white;
+                }
+                .delete-confirm-btn:hover { filter: brightness(1.1); }
+                .delete-cancel-btn {
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+                    color: var(--text-secondary);
+                }
+                .delete-cancel-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+
+                @keyframes scaleIn {
+                    from { transform: scale(0.9); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
             `}</style>
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmId && (
+                <div className="delete-modal-overlay" onClick={handleDeleteCancel}>
+                    <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="delete-modal-icon">🗑️</div>
+                        <h3>確定要刪除嗎？</h3>
+                        <p>這項操作無法復原，記錄將永久移除。</p>
+                        <div className="delete-modal-actions">
+                            <button className="delete-cancel-btn" onClick={handleDeleteCancel}>取消</button>
+                            <button className="delete-confirm-btn" onClick={handleDeleteConfirm}>確認刪除</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

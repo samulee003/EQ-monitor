@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Emotion, psychologicalNeeds } from '../data/emotionData';
 
+import { UnderstandingData } from '../types/RulerTypes';
+
 interface UnderstandingStepProps {
     emotion: Emotion;
-    onComplete: (data: { trigger: string; message: string; what: string; who: string; where: string; need: string | null }) => void;
+    onComplete: (data: UnderstandingData) => void;
     onBack: () => void;
 }
 
@@ -14,6 +16,11 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     const [what, setWhat] = useState('');
     const [who, setWho] = useState('');
     const [where, setWhere] = useState('');
+
+    // Update aura color on mount
+    React.useEffect(() => {
+        document.documentElement.style.setProperty('--aura-color', `hsla(var(--h-${emotion.quadrant}), var(--s-${emotion.quadrant}), var(--l-${emotion.quadrant}), 0.2)`);
+    }, [emotion.quadrant]);
 
     const [customWhat, setCustomWhat] = useState<string[]>([]);
     const [customWho, setCustomWho] = useState<string[]>([]);
@@ -89,7 +96,9 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                                 className={`need-card ${selectedNeed === need.label ? 'active' : ''}`}
                                 onClick={() => setSelectedNeed(need.label)}
                             >
-                                <span className="need-icon">{need.icon}</span>
+                                <div className="need-icon-wrapper">
+                                    <span className="need-icon">{need.icon}</span>
+                                </div>
                                 <div className="need-info">
                                     <span className="need-label">{need.label}</span>
                                     <span className="need-desc">{need.desc}</span>
@@ -154,45 +163,105 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
             </button>
 
             <style>{`
-                .understanding-step { display: flex; flex-direction: column; gap: 2rem; }
+                .understanding-step { display: flex; flex-direction: column; gap: var(--s-8); }
                 .step-header { display: flex; justify-content: space-between; align-items: center; }
-                .step-label-container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.4rem 0.8rem; border-radius: 20px; }
-                .dot { width: 8px; height: 8px; border-radius: 50%; }
-                .section-intro h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-                .section-intro p { color: var(--text-secondary); font-size: 0.9rem; }
+                .step-label-container { 
+                    display: flex; align-items: center; gap: var(--s-2); 
+                    font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;
+                    color: var(--text-secondary); background: var(--glass-bg); 
+                    padding: var(--s-1) var(--s-4); border-radius: 30px;
+                    border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur);
+                    text-transform: uppercase;
+                }
+                .dot { width: 8px; height: 8px; border-radius: 50%; opacity: 0.6; }
                 
-                .input-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; gap: 2rem; }
-                .field-desc { font-size: 0.8rem; color: var(--text-secondary); margin: -0.5rem 0 1rem 0; }
+                .section-intro h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: var(--s-2); letter-spacing: -0.5px; }
+                .section-intro p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
                 
-                .morandi-textarea { width: 100%; min-height: 80px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 1rem; color: var(--text-primary); font-family: inherit; resize: vertical; outline: none; transition: var(--transition); }
-                .morandi-textarea:focus { border-color: var(--text-secondary); }
+                .input-card { 
+                    background: var(--bg-secondary); border-radius: var(--radius-luxe); 
+                    padding: var(--s-8) var(--s-6); display: flex; flex-direction: column; gap: var(--s-8);
+                    border: 1px solid var(--glass-border); box-shadow: var(--shadow-luxe);
+                }
+                .field-desc { font-size: 0.8rem; color: var(--text-secondary); margin: calc(-1 * var(--s-2)) 0 var(--s-4) 0; opacity: 0.7; }
+                
+                .morandi-textarea { 
+                    width: 100%; min-height: 100px; background: hsla(0, 0%, 0%, 0.2); 
+                    border: 1px solid var(--glass-border); border-radius: var(--radius-md); 
+                    padding: var(--s-4); color: var(--text-primary); font-family: inherit; 
+                    resize: vertical; outline: none; transition: var(--transition-luxe);
+                    font-size: 0.95rem; line-height: 1.6;
+                }
+                .morandi-textarea:focus { border-color: var(--text-secondary); background: hsla(0, 0%, 0%, 0.3); }
 
-                .needs-grid { display: flex; flex-direction: column; gap: 10px; }
+                .needs-grid { display: flex; flex-direction: column; gap: var(--s-3); }
                 .need-card { 
-                    display: flex; align-items: center; gap: 1rem; padding: 1rem; 
+                    display: flex; align-items: center; gap: var(--s-5); padding: var(--s-4) var(--s-5); 
                     background: var(--glass-bg); border: 1px solid var(--glass-border); 
                     border-radius: var(--radius-md); cursor: pointer; text-align: left;
-                    transition: var(--transition);
+                    transition: var(--transition-luxe);
                 }
-                .need-card:hover { border-color: var(--text-secondary); }
-                .need-card.active { background: var(--text-primary); border-color: var(--text-primary); }
-                .need-card.active .need-label, .need-card.active .need-desc { color: var(--bg-color); }
-                .need-icon { font-size: 1.5rem; }
+                .need-card:hover { border-color: hsla(0, 0%, 100%, 0.2); background: var(--glass-border); transform: translateX(4px); }
+                .need-card.active { background: hsla(0, 0%, 100%, 0.05); border-color: var(--text-primary); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                
+                .need-icon-wrapper {
+                    width: 48px;
+                    height: 48px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: hsla(0, 0%, 100%, 0.03);
+                    border-radius: 14px;
+                    border: 1px solid var(--glass-border);
+                    transition: var(--transition-luxe);
+                }
+                .need-card.active .need-icon-wrapper {
+                    background: var(--text-primary);
+                    border-color: var(--text-primary);
+                }
+
+                .need-icon { 
+                    font-size: 1.5rem; 
+                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
+                    opacity: 0.6;
+                    transition: var(--transition-luxe);
+                }
+                .need-card.active .need-icon {
+                    filter: brightness(0) invert(1);
+                    opacity: 1;
+                }
+                
                 .need-info { display: flex; flex-direction: column; }
-                .need-label { font-weight: 600; font-size: 0.95rem; }
-                .need-desc { font-size: 0.75rem; color: var(--text-secondary); }
+                .need-label { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+                .need-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
                 
-                .context-sections { background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-md); }
-                .context-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-                .sub-group span { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; }
-                .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-                .morandi-chip { padding: 0.5rem 1rem; border-radius: 20px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.9rem; }
-                .morandi-chip.active { background: var(--text-primary); color: var(--bg-color); border-color: var(--text-primary); }
-                .morandi-chip.add { border-style: dashed; color: var(--text-secondary); }
-                .morandi-input { background: var(--glass-bg); border: 1px solid var(--text-secondary); border-radius: 20px; padding: 0.5rem 1rem; color: var(--text-primary); font-family: inherit; outline: none; width: 80px; font-size: 0.9rem; }
+                .context-sections { 
+                    background: var(--bg-secondary); padding: var(--s-6); 
+                    border-radius: var(--radius-luxe); border: 1px solid var(--glass-border);
+                    box-shadow: var(--shadow-luxe);
+                }
+                .context-grid { display: flex; flex-direction: column; gap: var(--s-6); }
+                .sub-group span { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: var(--s-2); text-transform: uppercase; letter-spacing: 1px; }
+                .chip-grid { display: flex; flex-wrap: wrap; gap: var(--s-2); }
                 
-                .morandi-main-btn { width: 100%; padding: 1.25rem; background: var(--text-primary); color: var(--bg-color); font-weight: 700; font-size: 1.1rem; border: none; border-radius: var(--radius-md); margin-top: 1rem; cursor: pointer; transition: var(--transition); }
-                .morandi-main-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+                .morandi-chip { 
+                    padding: var(--s-2) var(--s-5); border-radius: 30px; 
+                    background: var(--glass-bg); border: 1px solid var(--glass-border); 
+                    color: var(--text-secondary); cursor: pointer; transition: var(--transition-luxe); 
+                    font-size: 0.9rem; font-weight: 500;
+                }
+                .morandi-chip:hover { border-color: hsla(0, 0%, 100%, 0.2); color: var(--text-primary); }
+                .morandi-chip.active { background: var(--text-primary); color: var(--bg-color); border-color: var(--text-primary); font-weight: 700; box-shadow: var(--shadow-sm); }
+                .morandi-chip.add { border-style: dashed; opacity: 0.6; }
+                
+                .morandi-input { 
+                    background: var(--glass-bg); border: 1px solid var(--text-secondary); 
+                    border-radius: 30px; padding: var(--s-2) var(--s-5); color: var(--text-primary); 
+                    font-family: inherit; outline: none; width: 100px; font-size: 0.9rem; 
+                    transition: var(--transition-luxe);
+                }
+
+                .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
             `}</style>
         </div>
     );

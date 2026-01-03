@@ -48,9 +48,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           position: sticky;
           top: 0;
           z-index: 100;
-          background: rgba(26, 26, 26, 0.85);
-          backdrop-filter: blur(12px);
+          background: hsla(0, 0%, 10%, 0.8);
+          backdrop-filter: var(--glass-blur);
           border-bottom: 1px solid var(--glass-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--s-4) var(--s-6);
         }
 
         .logo-section {
@@ -60,14 +64,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .logo-text {
-          font-size: 1.5rem;
-          font-weight: 800;
-          letter-spacing: 2px;
+          font-size: 1.6rem;
+          font-weight: 900;
+          letter-spacing: 3px;
           background: linear-gradient(135deg, var(--color-red) 0%, var(--color-yellow) 50%, var(--color-green) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          text-shadow: 0 0 30px rgba(197, 139, 138, 0.3);
+          filter: drop-shadow(0 0 20px rgba(197, 139, 138, 0.2));
+        }
+
+        nav {
+          display: flex;
+          gap: var(--s-6);
         }
       `}</style>
         </div>

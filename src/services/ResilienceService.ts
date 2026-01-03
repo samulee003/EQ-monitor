@@ -3,6 +3,8 @@
  * Logic to calculate emotional resilience and prepare data for the Growth Dashboard.
  */
 import { Quadrant } from '../data/emotionData';
+import { RulerLogEntry } from '../types/RulerTypes';
+import { storageService } from './StorageService';
 
 export interface DailyResilience {
     date: string;
@@ -30,13 +32,13 @@ class ResilienceService {
      * and reports a positive shift in the 'neuroCheck'.
      */
     getDashboardData(): DailyResilience[] {
-        const logs = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
+        const logs: RulerLogEntry[] = storageService.getLogs();
 
         // Group by date and calculate average resilience
         const days: Record<string, { total: number, count: number, emotion: string }> = {};
 
         // Process last 7 days for the chart
-        logs.forEach((entry: any) => {
+        logs.forEach((entry: RulerLogEntry) => {
             const date = new Date(entry.timestamp).toLocaleDateString();
             if (!days[date]) {
                 days[date] = { total: 0, count: 0, emotion: entry.emotion?.name || '未知' };
@@ -76,7 +78,7 @@ class ResilienceService {
      * Returns data for the last 30 days for heatmap visualization.
      */
     getHeatmapData(): HeatmapDay[] {
-        const logs = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
+        const logs: RulerLogEntry[] = storageService.getLogs();
         const today = new Date();
         const heatmap: HeatmapDay[] = [];
 
@@ -85,7 +87,7 @@ class ResilienceService {
             date.setDate(today.getDate() - i);
             const dateStr = date.toLocaleDateString();
 
-            const dayLogs = logs.filter((log: any) =>
+            const dayLogs = logs.filter((log: RulerLogEntry) =>
                 new Date(log.timestamp).toLocaleDateString() === dateStr
             );
 
@@ -114,8 +116,8 @@ class ResilienceService {
      * Returns last 7 logs with intensity values for bar chart.
      */
     getIntensityData(): IntensityData[] {
-        const logs = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-        return logs.slice(0, 7).map((log: any) => ({
+        const logs: RulerLogEntry[] = storageService.getLogs();
+        return logs.slice(0, 7).map((log: RulerLogEntry) => ({
             label: new Date(log.timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' }),
             value: log.intensity || 5
         })).reverse();

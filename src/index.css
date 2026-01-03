@@ -25,16 +25,38 @@
   --grad-green: radial-gradient(circle at center, #A1A892 0%, rgba(161, 168, 146, 0.1) 70%);
 
   /* UI Tokens */
+  --radius-luxe: 32px;
   --radius-lg: 24px;
   --radius-md: 16px;
   --radius-sm: 12px;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --glass-bg: hsla(0, 0%, 100%, 0.025);
+  --glass-border: hsla(0, 0%, 100%, 0.08);
+  --glass-blur: blur(24px);
+
+  --shadow-luxe:
+    0 4px 24px -1px rgba(0, 0, 0, 0.2),
+    0 10px 40px -5px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px hsla(0, 0%, 100%, 0.05);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  --transition-luxe: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition: all 0.4s ease;
+
+  /* Semantic Spacing Scale (4px base) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
   --aura-opacity: 0.12;
   --aura-color: transparent;
-  --intensity-factor: 0.5;
-  /* Dynamic: 0 to 1 */
 }
 
 * {

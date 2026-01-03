@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Emotion, Quadrant } from '../data/emotionData';
 
+import { RegulatingData } from '../types/RulerTypes';
+
 interface RegulatingStepProps {
     emotion: Emotion;
-    onComplete: (data: { selectedStrategies: string[] }) => void;
+    onComplete: (data: RegulatingData) => void;
     onBack: () => void;
 }
 
@@ -39,8 +41,15 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
     const [activeInteractive, setActiveInteractive] = useState<string | null>(null);
     const [breatheStage, setBreatheStage] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
     const [groundingStep, setGroundingStep] = useState(0);
+    const [isReflecting, setIsReflecting] = useState(false);
+    const [reflectionText, setReflectionText] = useState('');
 
     const strategies = strategiesByQuadrant[emotion.quadrant];
+
+    // Update aura color on mount
+    useEffect(() => {
+        document.documentElement.style.setProperty('--aura-color', `hsla(var(--h-${emotion.quadrant}), var(--s-${emotion.quadrant}), var(--l-${emotion.quadrant}), 0.2)`);
+    }, [emotion.quadrant]);
 
     // Breathing Pacer Logic
     useEffect(() => {
@@ -71,9 +80,15 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
         );
     };
 
-    const handleInteractiveComplete = (title: string) => {
-        setSelectedStrategies(prev => Array.from(new Set([...prev, title])));
+    const handleInteractiveComplete = () => {
+        setIsReflecting(true);
+    };
+
+    const finishReflection = () => {
+        setSelectedStrategies(prev => Array.from(new Set([...prev, activeInteractive!])));
         setActiveInteractive(null);
+        setIsReflecting(false);
+        setReflectionText('');
     };
 
     const groundingTasks = [
@@ -97,7 +112,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                 </div>
                             </div>
                             <p className="breathing-desc">放鬆肩膀，跟隨圓圈的節奏</p>
-                            <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete('引導式深呼吸')}>我感覺好多了</button>
+                            <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>我感覺好多了</button>
                         </div>
                     )}
                     {activeInteractive === '5-4-3-2-1 接地法' && (
@@ -114,8 +129,25 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                             {groundingStep < 4 ? (
                                 <button className="next-task-btn" onClick={() => setGroundingStep(s => s + 1)}>完成這項</button>
                             ) : (
-                                <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete('5-4-3-2-1 接地法')}>回到現下</button>
+                                <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>回到現下</button>
                             )}
+                        </div>
+                    )}
+
+                    {isReflecting && (
+                        <div className="reflection-overlay fade-in">
+                            <div className="reflection-card">
+                                <h3>此刻的感覺？</h3>
+                                <p>在練習之後，試著捕捉這一刻內在的微小轉變...</p>
+                                <textarea
+                                    className="morandi-textarea"
+                                    placeholder="我感覺到..."
+                                    value={reflectionText}
+                                    onChange={(e) => setReflectionText(e.target.value)}
+                                    autoFocus
+                                />
+                                <button className="confirm-pacer-btn" onClick={finishReflection}>完成紀錄</button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -141,7 +173,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                 className={`strategy-item ${s.type === 'interactive' ? 'interactive' : ''} ${selectedStrategies.includes(s.title) ? 'active' : ''}`}
                                 onClick={() => toggleStrategy(s.title, s.type)}
                             >
-                                <div className="strategy-icon">{s.icon}</div>
+                                <div className="strategy-icon-wrapper">
+                                    <div className="strategy-icon">{s.icon}</div>
+                                </div>
                                 <div className="strategy-meta">
                                     <h3>{s.title}</h3>
                                     <p>{s.desc}</p>
@@ -158,64 +192,146 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
             )}
 
             <style>{`
-                .regulating-step { display: flex; flex-direction: column; gap: 2rem; min-height: 500px; }
+                .regulating-step { display: flex; flex-direction: column; gap: var(--s-8); min-height: 500px; }
                 .step-header { display: flex; justify-content: space-between; align-items: center; }
-                .step-label-container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.4rem 0.8rem; border-radius: 20px; }
-                .dot { width: 8px; height: 8px; border-radius: 50%; }
-                .section-intro h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-                .section-intro p { color: var(--text-secondary); font-size: 0.9rem; }
+                .step-label-container { 
+                    display: flex; align-items: center; gap: var(--s-2); 
+                    font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;
+                    color: var(--text-secondary); background: var(--glass-bg); 
+                    padding: var(--s-1) var(--s-4); border-radius: 30px;
+                    border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur);
+                    text-transform: uppercase;
+                }
+                .dot { width: 8px; height: 8px; border-radius: 50%; opacity: 0.6; }
+                .section-intro h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: var(--s-2); letter-spacing: -0.5px; }
+                .section-intro p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
                 
-                .strategies-grid { display: flex; flex-direction: column; gap: 12px; }
-                .strategy-item { display: flex; align-items: center; gap: 1.2rem; padding: 1.25rem; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); position: relative; }
+                .strategies-grid { display: flex; flex-direction: column; gap: var(--s-3); }
+                .strategy-item { 
+                    display: flex; align-items: center; gap: var(--s-5); padding: var(--s-5); 
+                    background: var(--bg-secondary); border: 1px solid var(--glass-border); 
+                    border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-luxe); 
+                    position: relative; overflow: hidden;
+                }
+                .strategy-item:hover { border-color: hsla(0,0%,100%,0.2); background: var(--glass-border); transform: translateX(4px); }
                 .strategy-item.interactive { border-left: 4px solid var(--text-primary); }
-                .strategy-item.active { border-color: var(--text-primary); background: rgba(255,255,255,0.05); }
-                .strategy-icon { font-size: 1.8rem; }
-                .strategy-meta h3 { margin: 0 0 0.25rem 0; font-size: 1.05rem; }
-                .strategy-meta p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
-                .checked-mark { position: absolute; right: 1.5rem; color: var(--text-primary); font-weight: 800; }
+                .strategy-item.active { border-color: var(--text-primary); background: hsla(0,0%,100%,0.05); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                
+                .strategy-icon-wrapper {
+                    width: 52px;
+                    height: 52px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: hsla(0,0%,100%,0.03);
+                    border-radius: 16px;
+                    border: 1px solid var(--glass-border);
+                    transition: var(--transition-luxe);
+                    flex-shrink: 0;
+                }
+                .strategy-item.active .strategy-icon-wrapper {
+                    background: var(--text-primary);
+                    border-color: var(--text-primary);
+                }
+
+                .strategy-icon { 
+                    font-size: 1.6rem; 
+                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
+                    opacity: 0.6;
+                    transition: var(--transition-luxe); 
+                }
+                .strategy-item.active .strategy-icon { 
+                    filter: brightness(0) invert(1);
+                    opacity: 1;
+                    transform: scale(1.1); 
+                }
+                
+                .strategy-meta h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
+                .strategy-meta p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+                .checked-mark { position: absolute; right: var(--s-6); color: var(--text-primary); font-weight: 900; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); opacity: 0.8; }
+                .strategy-item.active .checked-mark { color: #fff; }
                 
                 /* Interactive Overlays */
                 .interactive-overlay { 
                     position: fixed; inset: 0; background: var(--bg-color); 
-                    z-index: 100; padding: 2rem; display: flex; flex-direction: column;
+                    z-index: 1000; padding: var(--s-12) var(--s-6); display: flex; flex-direction: column;
                     align-items: center; justify-content: center;
+                    background-image: radial-gradient(circle at center, hsla(0,0%,100%,0.03) 0%, transparent 70%);
                 }
-                .close-overlay { position: absolute; top: 2rem; right: 2rem; background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; }
+                .close-overlay { position: absolute; top: var(--s-8); right: var(--s-8); background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-luxe); backdrop-filter: var(--glass-blur); }
+                .close-overlay:hover { background: var(--glass-border); transform: rotate(90deg); }
 
                 /* Breathing Pacer */
-                .breathing-session { display: flex; flex-direction: column; align-items: center; gap: 3rem; }
+                .breathing-session { display: flex; flex-direction: column; align-items: center; gap: var(--s-12); width: 100%; }
                 .pacer-circle { 
-                    width: 240px; height: 240px; border-radius: 50%; 
+                    width: 260px; height: 260px; border-radius: 50%; 
                     background: var(--text-primary); display: flex; 
                     align-items: center; justify-content: center;
-                    transition: all 4s ease-in-out; opacity: 0.4;
+                    transition: all 4s cubic-bezier(0.4, 0, 0.2, 1); 
+                    box-shadow: 0 0 80px hsla(0, 0%, 100%, 0.1);
                 }
-                .pacer-circle.inhale { transform: scale(1.5); opacity: 0.8; transition-duration: 4s; }
-                .pacer-circle.hold { transform: scale(1.5); opacity: 0.8; transition-duration: 4s; }
-                .pacer-circle.exhale { transform: scale(0.6); opacity: 0.2; transition-duration: 6s; }
-                .pacer-text { color: var(--bg-color); font-weight: 700; font-size: 1.5rem; }
+                .pacer-circle::after { content: ''; position: absolute; inset: -20px; border: 1px solid hsla(0, 0%, 100%, 0.1); border-radius: 50%; animation: pulseAura 4s infinite; }
+                
+                @keyframes pulseAura {
+                    from { transform: scale(1); opacity: 0.5; }
+                    to { transform: scale(1.3); opacity: 0; }
+                }
+
+                .pacer-circle.inhale { transform: scale(1.4); filter: brightness(1.2); transition-duration: 4s; }
+                .pacer-circle.hold { transform: scale(1.4); transition-duration: 4s; }
+                .pacer-circle.exhale { transform: scale(0.6); filter: brightness(0.8); transition-duration: 6s; }
+                .pacer-text { color: var(--bg-color); font-weight: 800; font-size: 1.6rem; letter-spacing: 2px; }
+                .breathing-desc { color: var(--text-secondary); font-size: 1rem; font-weight: 500; opacity: 0.8; }
 
                 /* Grounding */
-                .grounding-session { display: flex; flex-direction: column; align-items: center; gap: 2rem; width: 100%; max-width: 400px; }
-                .task-card { background: var(--bg-secondary); padding: 3rem 2rem; border-radius: var(--radius-md); text-align: center; width: 100%; border: 1px solid var(--glass-border); }
-                .task-count { font-size: 4rem; font-weight: 900; color: var(--text-primary); display: block; margin-bottom: 1rem; }
-                .task-text { font-size: 1.25rem; font-weight: 600; }
-                .task-progress { display: flex; gap: 10px; opacity: 0.3; }
-                .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
-                .progress-dot.active { background: var(--text-primary); opacity: 1; }
+                .grounding-session { display: flex; flex-direction: column; align-items: center; gap: var(--s-8); width: 100%; max-width: 400px; }
+                .task-card { 
+                    background: var(--bg-secondary); padding: var(--s-12) var(--s-6); 
+                    border-radius: var(--radius-luxe); text-align: center; width: 100%; 
+                    border: 1px solid var(--glass-border); box-shadow: var(--shadow-luxe);
+                    position: relative; overflow: hidden;
+                }
+                .task-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--text-primary); opacity: 0.2; }
+                .task-count { font-size: 5rem; font-weight: 900; color: var(--text-primary); display: block; margin-bottom: var(--s-4); line-height: 1; }
+                .task-text { font-size: 1.3rem; font-weight: 700; color: var(--text-primary); }
+                .task-progress { display: flex; gap: var(--s-3); margin-top: var(--s-4); }
+                .progress-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.2; transition: var(--transition-luxe); }
+                .progress-dot.active { background: var(--text-primary); opacity: 0.8; transform: scale(1.2); }
 
                 .next-task-btn, .confirm-pacer-btn { 
-                    width: 100%; padding: 1.25rem; background: var(--text-primary); 
-                    color: var(--bg-color); font-weight: 700; border: none; 
-                    border-radius: var(--radius-md); cursor: pointer;
+                    width: 100%; padding: var(--s-4); background: var(--text-primary); 
+                    color: var(--bg-color); font-weight: 800; border: none; 
+                    border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-luxe);
+                    font-size: 1.05rem; letter-spacing: 1px;
                 }
+                .next-task-btn:hover, .confirm-pacer-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-luxe); filter: brightness(1.1); }
 
-                .morandi-main-btn { 
-                    width: 100%; padding: 1.25rem; background: var(--text-primary); 
-                    color: var(--bg-color); font-weight: 700; border: none; 
-                    border-radius: var(--radius-md); margin-top: 1rem; cursor: pointer; transition: var(--transition);
+                /* Reflection Overlay */
+                .reflection-overlay {
+                    position: absolute; inset: 0; background: hsla(0, 0%, 10%, 0.95);
+                    display: flex; align-items: center; justify-content: center; z-index: 1100;
+                    padding: var(--s-6); backdrop-filter: var(--glass-blur);
                 }
-                .morandi-main-btn:disabled { opacity: 0.3; }
+                .reflection-card {
+                    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+                    padding: var(--s-8) var(--s-6); border-radius: var(--radius-luxe); 
+                    width: 100%; max-width: 360px;
+                    display: flex; flex-direction: column; gap: var(--s-4); text-align: center;
+                    box-shadow: var(--shadow-luxe);
+                }
+                .reflection-card h3 { font-size: 1.5rem; font-weight: 800; margin: 0; }
+                .reflection-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--s-2); line-height: 1.6; }
+                
+                .reflection-card .morandi-textarea {
+                    width: 100%; min-height: 100px; background: hsla(0,0%,0%,0.3);
+                    border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+                    padding: var(--s-4); color: var(--text-primary); font-family: inherit;
+                    resize: none; outline: none; transition: var(--transition-luxe);
+                    font-size: 1rem;
+                }
+                .reflection-card .morandi-textarea:focus { border-color: var(--text-secondary); }
+
+                .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
             `}</style>
         </div>
     );

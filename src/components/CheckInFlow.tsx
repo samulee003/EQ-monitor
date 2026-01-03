@@ -1,157 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import MoodMeter from './MoodMeter';
 import EmotionGrid from './EmotionGrid';
 import BodyScan from './BodyScan';
 import UnderstandingStep from './UnderstandingStep';
 import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
-import { Quadrant, Emotion } from '../data/emotionData';
-
-type Step = 'recognizing' | 'bodyScan' | 'labeling' | 'understanding' | 'expressing' | 'regulating' | 'neuroCheck' | 'summary';
-
-const steps: { key: Step; label: string; letter: string }[] = [
-    { key: 'recognizing', label: '辨別', letter: 'R' },
-    { key: 'labeling', label: '標記', letter: 'L' },
-    { key: 'understanding', label: '理解', letter: 'U' },
-    { key: 'expressing', label: '表達', letter: 'E' },
-    { key: 'regulating', label: '調節', letter: 'R' },
-];
+import { useRulerFlow, steps } from '../hooks/useRulerFlow';
 
 const CheckInFlow: React.FC = () => {
-    const [step, setStep] = useState<Step>('recognizing');
-    const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null);
-    const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
-    const [emotionIntensity, setEmotionIntensity] = useState(5);
-    const [bodyScanData, setBodyScanData] = useState<{ location: string; sensation: string } | null>(null);
-    const [understandingData, setUnderstandingData] = useState<any>(null);
-    const [expressingData, setExpressingData] = useState<any>(null);
-    const [regulatingData, setRegulatingData] = useState<any>(null);
-    const [isFullFlow, setIsFullFlow] = useState(false);
-    const [postRegulationMood, setPostRegulationMood] = useState<string>('');
-
-    const currentStepIndex = steps.findIndex(s => s.key === step);
-
-    // Load Draft on Mount
-    React.useEffect(() => {
-        const savedDraft = localStorage.getItem('ruler_draft');
-        if (savedDraft) {
-            try {
-                const draft = JSON.parse(savedDraft);
-                setStep(draft.step || 'recognizing');
-                setSelectedQuadrant(draft.selectedQuadrant || null);
-                setSelectedEmotion(draft.selectedEmotion || null);
-                setEmotionIntensity(draft.emotionIntensity || 5);
-                setBodyScanData(draft.bodyScanData || null);
-                setUnderstandingData(draft.understandingData || null);
-                setExpressingData(draft.expressingData || null);
-                setRegulatingData(draft.regulatingData || null);
-                setIsFullFlow(draft.isFullFlow || false);
-                setPostRegulationMood(draft.postRegulationMood || '');
-            } catch (e) {
-                console.error("Failed to load RULER draft", e);
-            }
-        }
-    }, []);
-
-    // Save Draft on Change
-    React.useEffect(() => {
-        if (step === 'summary') {
-            localStorage.removeItem('ruler_draft');
-        } else {
-            const draft = {
-                step,
-                selectedQuadrant,
-                selectedEmotion,
-                emotionIntensity,
-                bodyScanData,
-                understandingData,
-                expressingData,
-                regulatingData,
-                isFullFlow,
-                postRegulationMood
-            };
-            localStorage.setItem('ruler_draft', JSON.stringify(draft));
-        }
-    }, [step, selectedQuadrant, selectedEmotion, emotionIntensity, understandingData, expressingData, regulatingData, isFullFlow, postRegulationMood]);
-
-    React.useEffect(() => {
-        if (selectedQuadrant) {
-            const colors: Record<Quadrant, string> = { red: '#C58B8A', yellow: '#D5C1A5', blue: '#97A6B4', green: '#AAB09B' };
-            document.documentElement.style.setProperty('--aura-color', `${colors[selectedQuadrant]}44`);
-        } else {
-            document.documentElement.style.setProperty('--aura-color', 'transparent');
-        }
-    }, [selectedQuadrant]);
-
-    const handleMoodComplete = (quadrant: Quadrant, intensity: number) => {
-        setSelectedQuadrant(quadrant);
-        setEmotionIntensity(intensity);
-        setStep('bodyScan');
-    };
-
-    const handleBodyScanComplete = (data: { location: string; sensation: string }) => {
-        setBodyScanData(data);
-        setStep('labeling');
-    };
-
-    const handleEmotionSelect = (e: Emotion) => {
-        setSelectedEmotion(e);
-        if (isFullFlow) {
-            setStep('understanding');
-        } else {
-            setStep('summary');
-            saveData(e, null, null, null, '', emotionIntensity);
-        }
-    };
-
-    const saveData = (emotion: Emotion | null, u: any, e: any, r: any, p: string = '', intensity: number = 5) => {
-        const fullData = {
-            emotion: emotion || selectedEmotion,
-            intensity: intensity || emotionIntensity,
-            bodyScan: bodyScanData,
-            understanding: u || understandingData,
-            expressing: e || expressingData,
-            regulating: r || regulatingData,
-            postMood: p || postRegulationMood,
-            timestamp: new Date().toISOString(),
-        };
-
-        const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-        localStorage.setItem('feelings_logs', JSON.stringify([fullData, ...existing]));
-        localStorage.removeItem('ruler_draft');
-    };
-
-    const handleUnderstandingComplete = (data: any) => {
-        setUnderstandingData(data);
-        setStep('expressing');
-    };
-
-    const handleExpressingComplete = (data: any) => {
-        setExpressingData(data);
-        setStep('regulating');
-    };
-
-    const handleRegulatingComplete = (data: any) => {
-        setRegulatingData(data);
-        setStep('neuroCheck');
-    };
-
-    const handleNeuroCheckComplete = () => {
-        saveData(null, null, null, regulatingData, postRegulationMood);
-        setStep('summary');
-    };
-
-    const resetFlow = () => {
-        localStorage.removeItem('ruler_draft');
-        setStep('recognizing');
-        setSelectedQuadrant(null);
-        setSelectedEmotion(null);
-        setUnderstandingData(null);
-        setExpressingData(null);
-        setRegulatingData(null);
-        setPostRegulationMood('');
-        setIsFullFlow(false);
-    };
+    const {
+        step,
+        selectedQuadrant,
+        selectedEmotion,
+        showResumePrompt,
+        isFullFlow,
+        postRegulationMood,
+        currentStepIndex,
+        setStep,
+        setIsFullFlow,
+        setPostRegulationMood,
+        setShowResumePrompt,
+        resumeDraft,
+        resetFlow,
+        handleMoodComplete,
+        handleBodyScanComplete,
+        handleEmotionSelect,
+        handleUnderstandingComplete,
+        handleExpressingComplete,
+        handleRegulatingComplete,
+        handleNeuroCheckComplete
+    } = useRulerFlow();
 
     return (
         <div className="check-in-flow fade-in">
@@ -169,10 +47,31 @@ const CheckInFlow: React.FC = () => {
             )}
 
             <div key={step} className="flow-content-wrapper fade-slide-in">
+                {showResumePrompt && (
+                    <div className="resume-prompt-overlay fade-in">
+                        <div className="resume-card">
+                            <h3>繼續之前的旅程？</h3>
+                            <p>我們為你保留了上一次的覺察進度。</p>
+                            <div className="resume-actions">
+                                <button className="morandi-main-btn" onClick={resumeDraft}>繼續</button>
+                                <button className="morandi-outline-btn" onClick={() => { setShowResumePrompt(false); resetFlow(); }}>重新開始</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {step === 'recognizing' && (
                     <MoodMeter
                         onSelectQuadrant={(q) => handleMoodComplete(q, 5)}
                     />
+                )}
+
+                {step === 'centering' && selectedQuadrant && (
+                    <div className="centering-state">
+                        <div className="centering-circle" style={{ backgroundColor: `var(--color-${selectedQuadrant})` }}></div>
+                        <h2>沉靜，並感受...</h2>
+                        <p>閉上雙眼，深呼吸一次。<br />捕捉身體當下的細微信號。</p>
+                    </div>
                 )}
 
                 {step === 'bodyScan' && selectedQuadrant && (
@@ -294,43 +193,99 @@ const CheckInFlow: React.FC = () => {
             <style>{`
                 .check-in-flow { width: 100%; position: relative; }
                 
-                .progress-container { display: flex; justify-content: space-between; position: relative; margin-bottom: 2rem; }
-                .progress-point { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; z-index: 2; opacity: 0.3; transition: 0.3s; }
+                .progress-container { display: flex; justify-content: space-between; position: relative; margin-bottom: var(--s-12); }
+                .progress-point { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); z-index: 2; opacity: 0.3; transition: var(--transition-luxe); }
                 .progress-point.active { opacity: 1; }
-                .point-circle { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-secondary); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
-                .progress-point.current .point-circle { background: var(--text-primary); color: var(--bg-color); transform: scale(1.1); }
-                .point-label { font-size: 0.65rem; color: var(--text-secondary); }
+                .point-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-secondary); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; backdrop-filter: var(--glass-blur); }
+                .progress-point.current .point-circle { background: var(--text-primary); color: var(--bg-color); transform: scale(1.2); box-shadow: var(--shadow-luxe); }
+                .point-label { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; }
                 
-                .progress-line-bg { position: absolute; top: 15px; left: 0; right: 0; height: 1px; background: var(--glass-border); z-index: 1; }
-                .progress-line-active { position: absolute; top: 15px; left: 0; height: 1px; background: var(--text-secondary); z-index: 1; transition: 0.6s ease; }
+                .progress-line-bg { position: absolute; top: 16px; left: 0; right: 0; height: 1px; background: var(--glass-border); z-index: 1; }
+                .progress-line-active { position: absolute; top: 16px; left: 0; height: 1px; background: var(--text-secondary); z-index: 1; transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
 
-                .flow-content-wrapper { position: relative; min-height: 400px; }
-                .fade-slide-in { animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                .flow-content-wrapper { position: relative; min-height: 450px; }
+                .fade-slide-in { animation: fadeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
                 @keyframes fadeSlideIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
+                    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
                 }
 
-                .summary-card, .neuro-check-card { text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--glass-border); }
-                .summary-icon { font-size: 3rem; margin-bottom: 1rem; }
-                .summary-desc { color: var(--text-secondary); margin-bottom: 2rem; }
+                .summary-card, .neuro-check-card { 
+                    text-align: center; padding: var(--s-12) var(--s-8); 
+                    background: var(--bg-secondary); border-radius: var(--radius-luxe); 
+                    border: 1px solid var(--glass-border); box-shadow: var(--shadow-luxe); 
+                    position: relative; overflow: hidden;
+                }
+                .summary-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top right, hsla(0,0%,100%,0.03), transparent); pointer-events: none; }
+                .summary-icon { font-size: 4rem; margin-bottom: var(--s-4); filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); }
+                .summary-desc { color: var(--text-secondary); margin-bottom: var(--s-10); font-size: 1.05rem; line-height: 1.6; }
 
-                .ruler-checklist { text-align: left; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2rem; }
-                .checklist-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem; }
-                .step-tag { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: #1a1a1a; }
+                .ruler-checklist { text-align: left; display: flex; flex-direction: column; gap: var(--s-4); margin-bottom: var(--s-10); }
+                .checklist-item { display: flex; align-items: center; gap: var(--s-4); font-size: 0.95rem; font-weight: 500; }
+                .step-tag { 
+                    width: 28px; height: 28px; border-radius: 50%; display: flex; 
+                    align-items: center; justify-content: center; font-size: 0.75rem; 
+                    font-weight: 800; color: #1a1a1a; flex-shrink: 0;
+                }
                 .step-tag.r { background: var(--color-red); }
                 .step-tag.l { background: var(--color-yellow); }
                 .step-tag.u { background: var(--color-blue); }
                 .step-tag.e { background: var(--color-yellow); }
                 .step-tag.r2 { background: var(--color-green); }
 
-                .mood-shift-options { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; }
-                .option-chip { padding: 0.6rem 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; color: var(--text-primary); cursor: pointer; }
-                .option-chip.active { background: var(--text-primary); color: var(--bg-color); }
+                .mood-shift-options { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; margin-bottom: var(--s-10); }
+                .option-chip { 
+                    padding: var(--s-2) var(--s-5); background: var(--glass-bg); 
+                    border: 1px solid var(--glass-border); border-radius: 30px; 
+                    color: var(--text-secondary); cursor: pointer; transition: var(--transition-luxe);
+                    font-size: 0.9rem; font-weight: 500;
+                }
+                .option-chip:hover { border-color: hsla(0,0%,100%,0.2); color: var(--text-primary); }
+                .option-chip.active { background: var(--text-primary); color: var(--bg-color); font-weight: 700; box-shadow: var(--shadow-sm); }
 
-                .morandi-main-btn { width: 100%; padding: 1rem; background: var(--text-primary); color: var(--bg-color); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
-                .morandi-outline-btn { background: transparent; border: 1px solid var(--text-primary); color: var(--text-primary); padding: 0.6rem 1.2rem; border-radius: 20px; cursor: pointer; margin-bottom: 1rem; }
+                .morandi-main-btn { 
+                    width: 100%; padding: var(--s-4); background: var(--text-primary); 
+                    color: var(--bg-color); border: none; border-radius: var(--radius-md); 
+                    font-weight: 800; cursor: pointer; transition: var(--transition-luxe);
+                    letter-spacing: 1px;
+                }
+                .morandi-main-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-luxe); filter: brightness(1.1); }
+                .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); }
+
+                .morandi-outline-btn { 
+                    background: transparent; border: 1px solid var(--glass-border); 
+                    color: var(--text-secondary); padding: var(--s-2) var(--s-6); 
+                    border-radius: 30px; cursor: pointer; margin-bottom: var(--s-4);
+                    transition: var(--transition-luxe); font-size: 0.9rem; font-weight: 600;
+                }
+                .morandi-outline-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+                /* Resume Prompt */
+                .resume-prompt-overlay { position: absolute; inset: 0; background: hsla(0, 0%, 10%, 0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: var(--s-6); backdrop-filter: var(--glass-blur); }
+                .resume-card { 
+                    background: var(--bg-secondary); border: 1px solid var(--glass-border); 
+                    padding: var(--s-10) var(--s-8); border-radius: var(--radius-luxe); 
+                    text-align: center; width: 100%; max-width: 360px;
+                    box-shadow: var(--shadow-luxe);
+                }
+                .resume-card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: var(--s-2); }
+                .resume-card p { color: var(--text-secondary); margin-bottom: var(--s-8); font-size: 0.95rem; line-height: 1.5; }
+                .resume-actions { display: flex; flex-direction: column; gap: var(--s-3); }
+ 
+                /* Centering State */
+                .centering-state { height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s-8); }
+                .centering-circle { 
+                    width: 100px; height: 100px; border-radius: 50%; 
+                    filter: blur(30px); opacity: 0.5; 
+                    animation: breatheLuxe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
+                }
+                @keyframes breatheLuxe {
+                    0%, 100% { transform: scale(1); opacity: 0.3; }
+                    50% { transform: scale(1.8); opacity: 0.7; }
+                }
+                .centering-state h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; opacity: 0.9; }
+                .centering-state p { color: var(--text-secondary); font-size: 1rem; line-height: 1.8; opacity: 0.7; }
             `}</style>
         </div>
     );

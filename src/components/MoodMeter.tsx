@@ -46,9 +46,11 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
             onMouseEnter={() => updateAura(getHexColor(q.id))}
             onMouseLeave={() => updateAura(null)}
           >
-            <div className="sphere">
-              <div className="sphere-inner"></div>
-              <div className="sphere-glow"></div>
+            <div className="sphere-orbital">
+              <div className="sphere">
+                <div className="sphere-inner"></div>
+                <div className="sphere-glow"></div>
+              </div>
             </div>
             <div className="sphere-info">
               <span className="sphere-label">{q.label}</span>
@@ -63,57 +65,66 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 3rem;
+          gap: 4rem;
+          min-height: 60vh;
+          justify-content: center;
         }
 
         .mood-meter-header {
           text-align: center;
+          max-width: 320px;
         }
 
         .mood-meter-header h1 {
-          font-size: 1.8rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-          background: linear-gradient(135deg, #fff 0%, #aaa 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          font-size: 2rem;
+          font-weight: 800;
+          margin-bottom: 1rem;
+          letter-spacing: -0.5px;
+          line-height: 1.2;
         }
 
         .mood-meter-header p {
           color: var(--text-secondary);
           font-size: 0.95rem;
+          line-height: 1.6;
         }
 
-        /* Spheres Layout - 2x2 Grid */
+        /* Orbital Layout */
         .spheres-layout {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: 1fr 1fr;
-          gap: 2rem;
-          width: 100%;
-          max-width: 400px;
-          margin: 0 auto;
+          position: relative;
+          width: 340px;
+          height: 340px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .sphere-wrapper {
+          position: absolute;
           display: flex;
           flex-direction: column;
           align-items: center;
           cursor: pointer;
-          transition: var(--transition);
-          padding: 1rem;
+          transition: var(--transition-luxe);
+          z-index: 2;
         }
 
-        .sphere-wrapper.red { grid-area: 1 / 1; }
-        .sphere-wrapper.yellow { grid-area: 1 / 2; }
-        .sphere-wrapper.blue { grid-area: 2 / 1; }
-        .sphere-wrapper.green { grid-area: 2 / 2; }
+        /* Staggered Orbital Mapping */
+        .sphere-wrapper.red { transform: translate(-80px, -90px); }
+        .sphere-wrapper.yellow { transform: translate(90px, -70px); }
+        .sphere-wrapper.blue { transform: translate(-95px, 90px); }
+        .sphere-wrapper.green { transform: translate(75px, 85px); }
+
+        .sphere-orbital {
+          padding: 20px;
+          transition: var(--transition-luxe);
+        }
 
         .sphere {
-          width: 120px;
-          height: 120px;
+          width: 85px;
+          height: 85px;
           position: relative;
-          transition: var(--transition);
+          transition: var(--transition-luxe);
         }
 
         .sphere-inner {
@@ -121,41 +132,47 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           inset: 0;
           border-radius: 50%;
           background: currentColor;
-          opacity: 0.85;
-          filter: blur(1px);
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          transition: var(--transition);
+          opacity: 0.9;
+          filter: blur(0.5px);
+          box-shadow: 
+            inset 0 4px 8px hsla(0, 0%, 100%, 0.3),
+            inset 0 -4px 8px rgba(0,0,0,0.2),
+            0 10px 25px -5px rgba(0,0,0,0.3);
+          transition: var(--transition-luxe);
         }
 
         .sphere-glow {
           position: absolute;
-          inset: -10px;
+          inset: -15px;
           border-radius: 50%;
           background: currentColor;
-          opacity: 0.12;
-          filter: blur(10px);
-          transition: var(--transition);
+          opacity: 0.15;
+          filter: blur(20px);
+          transition: var(--transition-luxe);
         }
 
-        /* Color assignments */
         .red { color: var(--color-red); }
         .yellow { color: var(--color-yellow); }
         .blue { color: var(--color-blue); }
         .green { color: var(--color-green); }
 
         .sphere-info {
-          margin-top: 1rem;
+          position: absolute;
+          bottom: -45px;
           text-align: center;
-          opacity: 0.7;
-          transition: var(--transition);
+          opacity: 0;
+          transition: var(--transition-luxe);
+          transform: translateY(10px);
           pointer-events: none;
+          min-width: 140px;
         }
 
         .sphere-label {
           display: block;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 0.9rem;
           margin-bottom: 0.2rem;
+          letter-spacing: 0.5px;
         }
 
         .sphere-desc {
@@ -164,34 +181,43 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           color: var(--text-secondary);
         }
 
-        /* Hover States */
+        /* Hover States - Luxe Magnetic Feel */
         .sphere-wrapper:hover {
-          transform: scale(1.08);
           z-index: 10;
+        }
+
+        .sphere-wrapper:hover .sphere-orbital {
+          transform: translateY(-8px);
+        }
+
+        .sphere-wrapper:hover .sphere {
+          transform: scale(1.15);
         }
 
         .sphere-wrapper:hover .sphere-inner {
           opacity: 1;
-          filter: blur(1px);
-          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 
+            inset 0 4px 12px hsla(0, 0%, 100%, 0.4),
+            inset 0 -6px 12px rgba(0,0,0,0.3),
+            0 15px 35px -5px rgba(0,0,0,0.4);
         }
 
         .sphere-wrapper:hover .sphere-glow {
-          opacity: 0.35;
-          filter: blur(12px);
+          opacity: 0.4;
+          filter: blur(24px);
+          transform: scale(1.2);
         }
 
         .sphere-wrapper:hover .sphere-info {
           opacity: 1;
-          transform: translateY(5px);
+          transform: translateY(0);
         }
 
         @media (max-width: 480px) {
           .spheres-layout {
-            gap: 1.5rem;
-            max-width: 320px;
+            transform: scale(0.85);
           }
-          .sphere { width: 90px; height: 90px; }
+          .mood-meter-header h1 { font-size: 1.75rem; }
         }
       `}</style>
     </div>

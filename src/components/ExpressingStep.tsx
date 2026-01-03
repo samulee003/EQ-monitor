@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Emotion } from '../data/emotionData';
 import VoiceRecorder from './VoiceRecorder';
 
+import { ExpressingData } from '../types/RulerTypes';
+
 interface ExpressingStepProps {
     emotion: Emotion;
-    onComplete: (data: { expression: string; prompt: string; mode: string }) => void;
+    onComplete: (data: ExpressingData) => void;
     onBack: () => void;
 }
 
@@ -68,7 +70,9 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                             setExpression('');
                         }}
                     >
-                        <span className="mode-icon">{m.icon}</span>
+                        <div className="mode-icon-wrapper">
+                            <span className="mode-icon">{m.icon}</span>
+                        </div>
                         <div className="mode-info">
                             <span className="mode-label">{m.label}</span>
                             <span className="mode-desc">{m.desc}</span>
@@ -140,16 +144,44 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
 
                 .mode-selector { display: grid; grid-template-columns: 1fr; gap: 10px; }
                 .mode-card { 
-                    display: flex; align-items: center; gap: 1rem; padding: 1rem; 
+                    display: flex; align-items: center; gap: var(--s-5); padding: var(--s-4) var(--s-5); 
                     background: var(--bg-secondary); border: 1px solid var(--glass-border); 
                     border-radius: var(--radius-md); cursor: pointer; text-align: left;
-                    transition: var(--transition);
+                    transition: var(--transition-luxe);
                 }
-                .mode-card.active { border-color: var(--text-primary); background: rgba(255,255,255,0.05); }
-                .mode-icon { font-size: 1.5rem; }
+                .mode-card.active { border-color: var(--text-primary); background: hsla(0,0%,100%,0.05); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                
+                .mode-icon-wrapper {
+                    width: 48px;
+                    height: 48px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: hsla(0,0%,100%,0.03);
+                    border-radius: 14px;
+                    border: 1px solid var(--glass-border);
+                    transition: var(--transition-luxe);
+                    flex-shrink: 0;
+                }
+                .mode-card.active .mode-icon-wrapper {
+                    background: var(--text-primary);
+                    border-color: var(--text-primary);
+                }
+
+                .mode-icon { 
+                    font-size: 1.5rem; 
+                    filter: sepia(0.3) saturate(0.4) brightness(0.85);
+                    opacity: 0.6;
+                    transition: var(--transition-luxe);
+                }
+                .mode-card.active .mode-icon {
+                    filter: brightness(0) invert(1);
+                    opacity: 1;
+                }
+
                 .mode-info { display: flex; flex-direction: column; }
-                .mode-label { font-weight: 600; font-size: 0.95rem; }
-                .mode-desc { font-size: 0.75rem; color: var(--text-secondary); }
+                .mode-label { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+                .mode-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
 
                 .interaction-area { 
                     background: var(--bg-secondary); border-radius: var(--radius-md); 
