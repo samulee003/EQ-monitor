@@ -87,7 +87,22 @@ body {
 
 .main-content {
   flex: 1;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    padding: 2.5rem 2rem;
+  }
+}
+
+/* Desktop enhancement: Subtle border for the container on large screens */
+@media (min-width: 1200px) {
+  .app-container {
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.4);
+    border-left: 1px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
+  }
 }
 
 header {

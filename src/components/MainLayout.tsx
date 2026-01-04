@@ -92,6 +92,35 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           display: flex;
           gap: var(--s-6);
         }
+
+        @media (max-width: 480px) {
+          .glass-header {
+            padding: var(--s-3) var(--s-4);
+          }
+          .logo-text {
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+          }
+          .logo-image {
+            height: 32px;
+            width: 32px;
+          }
+          nav {
+            gap: var(--s-3);
+          }
+          .nav-link {
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .logo-text {
+            display: none;
+          }
+          nav {
+            gap: var(--s-2);
+          }
+        }
       `}</style>
         </div>
     );

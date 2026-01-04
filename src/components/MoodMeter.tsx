@@ -262,9 +262,24 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
 
         @media (max-width: 480px) {
           .spheres-layout {
-            transform: scale(0.85);
+            transform: scale(0.75);
+            margin: -2rem 0;
           }
-          .mood-meter-header h1 { font-size: 1.75rem; }
+          .mood-meter-header h1 { font-size: 1.6rem; }
+          .mood-meter-header p { font-size: 0.85rem; }
+          .mood-meter-container { gap: 2rem; }
+          
+          .sphere-info {
+            bottom: -55px;
+            transform: translateY(5px) scale(1.15); /* Slightly larger text to compensate for container scale */
+          }
+        }
+        
+        @media (max-height: 670px) {
+          .spheres-layout {
+            transform: scale(0.65);
+          }
+          .mood-meter-container { gap: 1rem; }
         }
       `}</style>
     </div>
