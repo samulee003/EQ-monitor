@@ -9,27 +9,27 @@ interface RegulatingStepProps {
     onBack: () => void;
 }
 
-const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive' }[]> = {
+const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean }[]> = {
     red: [
-        { icon: regulationIcons.breathing, title: '引導式深呼吸', desc: '進入跟隨節奏的呼吸練習', type: 'interactive' },
-        { icon: regulationIcons.grounding, title: '5-4-3-2-1 接地法', desc: '透過感官重新連結當下', type: 'interactive' },
+        { icon: regulationIcons.breathing, title: '引導式深呼吸', desc: '進入跟隨節奏的呼吸練習', type: 'interactive', recommended: true },
+        { icon: regulationIcons.grounding, title: '5-4-3-2-1 接地法', desc: '透過感官重新連結當下', type: 'interactive', recommended: true },
         { icon: regulationIcons.running, title: '強效宣洩', desc: '進行 30 秒的身心快速擺動' },
         { icon: regulationIcons.water, title: '冰水刺激', desc: '利用溫差快速平復情緒' },
     ],
     yellow: [
-        { icon: regulationIcons.gratitude, title: '感恩清單', desc: '寫三件此刻讓你感到美好的事' },
-        { icon: regulationIcons.sparkle, title: '傳遞喜悅', desc: '發送一則讚美訊息給他人' },
+        { icon: regulationIcons.gratitude, title: '感恩清單', desc: '寫三件此刻讓你感到美好的事', recommended: true },
+        { icon: regulationIcons.sparkle, title: '傳遞喜悦', desc: '發送一則讚美訊息給他人' },
         { icon: regulationIcons.target, title: '目標設定', desc: '趁著能量高設定今天的小目標' },
         { icon: regulationIcons.dance, title: '慶祝舞動', desc: '放一首歌，隨意地動一動身體' },
     ],
     blue: [
-        { icon: regulationIcons.coffee, title: '暖心儀式', desc: '為自己準備一杯有溫度的飲品' },
+        { icon: regulationIcons.coffee, title: '暖心儀式', desc: '為自己準備一杯有溫度的飲品', recommended: true },
         { icon: regulationIcons.tidy, title: '微小掌控', desc: '整理三件桌上的雜物' },
         { icon: regulationIcons.selfLove, title: '自我慈悲', desc: '對自己說一句溫柔的鼓勵' },
         { icon: regulationIcons.plant, title: '觀察植物', desc: '凝視一片葉子或窗外的景色' },
     ],
     green: [
-        { icon: regulationIcons.meditate, title: '三分鐘靜坐', desc: '純粹地與當下的平靜同在' },
+        { icon: regulationIcons.meditate, title: '三分鐘靜坐', desc: '純粹地與當下的平靜同在', recommended: true },
         { icon: regulationIcons.book, title: '慢讀時刻', desc: '細讀一段優美的文字' },
         { icon: regulationIcons.doodle, title: '隨意塗鴉', desc: '不帶目的地記錄線條與色彩' },
         { icon: regulationIcons.offline, title: '數位離線', desc: '給自己 10 分鐘的無擾空間' },
@@ -177,7 +177,10 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                     <div className="strategy-icon">{s.icon}</div>
                                 </div>
                                 <div className="strategy-meta">
-                                    <h3>{s.title}</h3>
+                                    <div className="strategy-title-row">
+                                        <h3>{s.title}</h3>
+                                        {s.recommended && <span className="recommend-badge">推薦</span>}
+                                    </div>
                                     <p>{s.desc}</p>
                                 </div>
                                 {selectedStrategies.includes(s.title) && <div className="checked-mark">✓</div>}
@@ -249,7 +252,18 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     transform: scale(1.1); 
                 }
                 
-                .strategy-meta h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
+                .strategy-title-row { display: flex; align-items: center; gap: var(--s-2); margin-bottom: 4px; }
+                .strategy-meta h3 { margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
+                .recommend-badge {
+                    font-size: 0.65rem;
+                    font-weight: 700;
+                    padding: 2px 8px;
+                    background: hsla(45, 60%, 55%, 0.2);
+                    color: #D5C1A5;
+                    border-radius: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
                 .strategy-meta p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
                 .checked-mark { position: absolute; right: var(--s-6); color: var(--text-primary); font-weight: 900; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); opacity: 0.8; }
                 .strategy-item.active .checked-mark { color: #fff; }

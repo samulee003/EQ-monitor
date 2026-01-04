@@ -21,6 +21,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
     const [expression, setExpression] = useState('');
     const [isShredding, setIsShredding] = useState(false);
     const [shredded, setShredded] = useState(false);
+    const shredTimeoutRef = React.useRef<number | null>(null);
 
     const handleTranscription = (text: string) => {
         setExpression(prev => prev ? `${prev}\n${text}` : text);
@@ -29,11 +30,20 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
     const handleShred = () => {
         if (!expression.trim()) return;
         setIsShredding(true);
-        setTimeout(() => {
+        shredTimeoutRef.current = window.setTimeout(() => {
             setIsShredding(false);
             setShredded(true);
             setExpression('');
         }, 2000);
+    };
+
+    const skipShredding = () => {
+        if (shredTimeoutRef.current) {
+            clearTimeout(shredTimeoutRef.current);
+        }
+        setIsShredding(false);
+        setShredded(true);
+        setExpression('');
     };
 
     const handleComplete = () => {
@@ -103,10 +113,11 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                                 disabled={isShredding}
                             />
                             {isShredding && (
-                                <div className="shred-animation">
+                                <div className="shred-animation" onClick={skipShredding} role="button" tabIndex={0}>
                                     <div className="shred-line"></div>
                                     <div className="shred-line"></div>
                                     <div className="shred-line"></div>
+                                    <span className="skip-hint">點擊跳過</span>
                                 </div>
                             )}
                         </div>
@@ -168,6 +179,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                     border-color: var(--text-primary);
                 }
 
+                .mode-icon-wrapper, .mode-info { pointer-events: none; }
                 .mode-icon { 
                     width: 22px;
                     height: 22px;
@@ -209,7 +221,20 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
 
                 .shred-animation {
                     position: absolute; inset: 0; display: flex; flex-direction: column; 
-                    justify-content: space-around; padding: 2rem; pointer-events: none;
+                    justify-content: space-around; padding: 2rem; cursor: pointer;
+                    align-items: center;
+                }
+                .skip-hint {
+                    position: absolute;
+                    bottom: 1rem;
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                    opacity: 0.7;
+                    animation: fadeInOut 1.5s ease-in-out infinite;
+                }
+                @keyframes fadeInOut {
+                    0%, 100% { opacity: 0.4; }
+                    50% { opacity: 0.9; }
                 }
                 .shred-line {
                     height: 2px; background: var(--text-secondary); opacity: 0;
@@ -246,7 +271,20 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                     color: var(--bg-color); font-weight: 700; border: none; 
                     border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);
                 }
-                .morandi-main-btn:disabled { opacity: 0.3; }
+                .morandi-main-btn:disabled { 
+                    opacity: 0.4; 
+                    filter: grayscale(0.5); 
+                    transform: none; 
+                    cursor: not-allowed;
+                }
+                .morandi-main-btn:disabled::after {
+                    content: '👈 請先完成表達內容';
+                    display: block;
+                    font-size: 0.7rem;
+                    font-weight: 400;
+                    opacity: 0.7;
+                    margin-top: 4px;
+                }
             `}</style>
         </div>
     );

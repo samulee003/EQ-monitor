@@ -199,16 +199,17 @@ const Timeline: React.FC = () => {
                     background: none;
                     border: none;
                     color: var(--text-secondary);
-                    font-size: 0.8rem;
+                    font-size: 0.9rem;
                     cursor: pointer;
-                    opacity: 0;
+                    opacity: 0.4;  /* Always visible */
                     transition: var(--transition);
-                    padding: 4px;
+                    padding: 6px;
+                    border-radius: 4px;
                 }
-                .timeline-card:hover .edit-btn, .timeline-card:hover .delete-btn { opacity: 0.6; }
+                .timeline-card:hover .edit-btn, .timeline-card:hover .delete-btn { opacity: 0.7; background: rgba(255,255,255,0.05); }
                 .edit-btn:hover, .delete-btn:hover { opacity: 1 !important; }
-                .delete-btn:hover { color: var(--color-red) !important; }
-                .edit-btn:hover { color: var(--color-yellow) !important; }
+                .delete-btn:hover { color: var(--color-red) !important; background: rgba(180, 138, 137, 0.15) !important; }
+                .edit-btn:hover { color: var(--color-yellow) !important; background: rgba(205, 185, 156, 0.15) !important; }
                 
                 .card-emotion-name { margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600; }
                 
