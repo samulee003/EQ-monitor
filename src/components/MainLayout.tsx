@@ -11,6 +11,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         <div className="app-container">
             <header className="glass-header">
                 <div className="logo-section" onClick={() => onNavigate('checkin')} style={{ cursor: 'pointer' }}>
+                    <img src="/logo.png" alt="今心 Logo" className="logo-image" />
                     <span className="logo-text">今心</span>
                 </div>
                 <nav>
@@ -60,7 +61,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .logo-section {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.8rem;
+        }
+
+        .logo-image {
+          height: 40px;
+          width: 40px;
+          object-fit: contain;
+          border-radius: 8px;
+          filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
+          transition: transform 0.3s ease;
+        }
+
+        .logo-section:hover .logo-image {
+          transform: scale(1.05) rotate(-2deg);
         }
 
         .logo-text {
