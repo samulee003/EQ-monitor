@@ -57,13 +57,64 @@ const Timeline: React.FC = () => {
         setEditingId(null);
     };
 
-    const handleExport = () => {
+    const handleExportCSV = () => {
+        const headers = [
+            '時間 (Time)',
+            '情緒 (Emotion)',
+            '能量區塊 (Quadrant)',
+            '強度 (Intensity)',
+            '身體部位 (Body Location)',
+            '感官感受 (Sensation)',
+            '觸發事件 (Trigger)',
+            '關聯對象 (Who)',
+            '地點 (Where)',
+            '心理需求 (Need)',
+            '表達內容 (Expression)',
+            '調節策略 (Strategies)',
+            '調節後心情 (Post Mood)'
+        ];
+
+        const rows = logs.map(log => [
+            new Date(log.timestamp).toLocaleString('zh-TW'),
+            log.emotion.name,
+            log.emotion.quadrant === 'red' ? '高能量/不愉快' :
+                log.emotion.quadrant === 'yellow' ? '高能量/愉快' :
+                    log.emotion.quadrant === 'blue' ? '低能量/不愉快' : '低能量/愉快',
+            log.intensity,
+            log.bodyScan?.location || '',
+            log.bodyScan?.sensation || '',
+            log.understanding?.trigger || '',
+            log.understanding?.who || '',
+            log.understanding?.where || '',
+            log.understanding?.need || '',
+            log.expressing?.expression || '',
+            log.regulating?.selectedStrategies?.join('; ') || '',
+            log.postMood || ''
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        // Add UTF-8 BOM for Excel compatibility
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `imxin-records-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleExportJSON = () => {
         const data = JSON.stringify(logs, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `imxin-logs-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `imxin-backup-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -95,9 +146,14 @@ const Timeline: React.FC = () => {
                     <h2>數據洞察</h2>
                     <p>回顧你的情緒旅程與成長點滴。</p>
                 </div>
-                <button className="export-btn" onClick={handleExport} title="導出 JSON 數據">
-                    <span className="export-icon">{uiIcons.folder}</span> 導出數據
-                </button>
+                <div className="export-actions-group">
+                    <button className="export-btn primary" onClick={handleExportCSV} title="導出 Excel/CSV 表格">
+                        <span className="export-icon">{uiIcons.folder}</span> 導出 Excel
+                    </button>
+                    <button className="export-btn secondary" onClick={handleExportJSON} title="導出 JSON 備份">
+                        備份
+                    </button>
+                </div>
             </div>
 
             <div className="timeline-list">
@@ -170,6 +226,11 @@ const Timeline: React.FC = () => {
                 .timeline-header h2 { font-size: 1.6rem; margin: 0 0 0.5rem 0; }
                 .timeline-header p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
 
+                .export-actions-group {
+                    display: flex;
+                    gap: 8px;
+                }
+
                 .export-btn {
                     padding: 8px 16px;
                     background: var(--glass-bg);
@@ -183,7 +244,15 @@ const Timeline: React.FC = () => {
                     align-items: center;
                     gap: 8px;
                 }
+                .export-btn.primary {
+                    background: var(--text-primary);
+                    color: var(--bg-color);
+                    border: none;
+                }
                 .export-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: var(--text-secondary); }
+                .export-btn.primary:hover { filter: brightness(0.9); transform: translateY(-1px); }
+                .export-btn.secondary { padding: 8px 12px; opacity: 0.6; }
+                .export-btn.secondary:hover { opacity: 1; }
 
                 .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
