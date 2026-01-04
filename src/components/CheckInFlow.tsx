@@ -5,7 +5,8 @@ import BodyScan from './BodyScan';
 import UnderstandingStep from './UnderstandingStep';
 import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
-import { useRulerFlow, steps } from '../hooks/useRulerFlow';
+import RulerProgress from './RulerProgress';
+import { useRulerFlow } from '../hooks/useRulerFlow';
 import { uiIcons } from './icons/SvgIcons';
 
 const CheckInFlow: React.FC = () => {
@@ -16,7 +17,6 @@ const CheckInFlow: React.FC = () => {
         showResumePrompt,
         isFullFlow,
         postRegulationMood,
-        currentStepIndex,
         setStep,
         setIsFullFlow,
         setPostRegulationMood,
@@ -34,17 +34,12 @@ const CheckInFlow: React.FC = () => {
 
     return (
         <div className="check-in-flow fade-in">
-            {step !== 'summary' && isFullFlow && (
-                <div className="progress-container">
-                    {steps.map((s, i) => (
-                        <div key={s.key} className={`progress-point ${i <= currentStepIndex ? 'active' : ''} ${i === currentStepIndex ? 'current' : ''}`}>
-                            <div className="point-circle">{s.letter}</div>
-                            <span className="point-label">{s.label}</span>
-                        </div>
-                    ))}
-                    <div className="progress-line-bg"></div>
-                    <div className="progress-line-active" style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}></div>
-                </div>
+            {step !== 'summary' && !showResumePrompt && (
+                <RulerProgress
+                    currentStep={step}
+                    isFullFlow={isFullFlow}
+                    selectedQuadrant={selectedQuadrant}
+                />
             )}
 
             <div key={step} className="flow-content-wrapper fade-slide-in">
@@ -144,11 +139,23 @@ const CheckInFlow: React.FC = () => {
 
                 {step === 'summary' && selectedEmotion && (
                     <div className="summary-card">
-                        <div className="summary-icon">{uiIcons.sparkle}</div>
+                        {/* Confetti celebration */}
+                        <div className="confetti-container">
+                            {[...Array(12)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="confetti-piece"
+                                    style={{
+                                        '--delay': `${i * 0.1}s`,
+                                        '--x': `${(Math.random() - 0.5) * 200}px`,
+                                        '--rotation': `${Math.random() * 360}deg`,
+                                        '--color': ['var(--color-red)', 'var(--color-yellow)', 'var(--color-blue)', 'var(--color-green)'][i % 4]
+                                    } as React.CSSProperties}
+                                />
+                            ))}
+                        </div>
+                        <div className="summary-icon celebration-bounce">{uiIcons.sparkle}</div>
                         <h2>覺察之旅完成</h2>
-                        <p className="summary-desc">
-                            感謝你與自己的 <span style={{ color: `var(--color-${selectedEmotion.quadrant})`, fontWeight: 600 }}>{selectedEmotion.name}</span> 對話。
-                        </p>
 
                         <div className="ruler-checklist">
                             <div className="checklist-item done">
@@ -178,9 +185,36 @@ const CheckInFlow: React.FC = () => {
                         </div>
 
                         {!isFullFlow && (
-                            <div className="deep-check-in-promo">
+                            <div className="quick-regulate-section">
+                                <p className="quick-regulate-title">💡 想試試快速調節嗎？</p>
+                                <div className="quick-regulate-chips">
+                                    {selectedEmotion.quadrant === 'red' && (
+                                        <>
+                                            <span className="regulate-chip">🧘 深呼吸練習</span>
+                                            <span className="regulate-chip">🖐️ 五感接地</span>
+                                        </>
+                                    )}
+                                    {selectedEmotion.quadrant === 'yellow' && (
+                                        <>
+                                            <span className="regulate-chip">🙏 感恩清單</span>
+                                            <span className="regulate-chip">💃 放首歌動一動</span>
+                                        </>
+                                    )}
+                                    {selectedEmotion.quadrant === 'blue' && (
+                                        <>
+                                            <span className="regulate-chip">☕ 泡杯熱飲</span>
+                                            <span className="regulate-chip">💕 對自己說句好話</span>
+                                        </>
+                                    )}
+                                    {selectedEmotion.quadrant === 'green' && (
+                                        <>
+                                            <span className="regulate-chip">🧘 三分鐘靜坐</span>
+                                            <span className="regulate-chip">📖 讀一段文字</span>
+                                        </>
+                                    )}
+                                </div>
                                 <button className="morandi-outline-btn" onClick={() => { setIsFullFlow(true); setStep('understanding'); }}>
-                                    開啟更深層 RULER 探索
+                                    開啟完整 RULER 探索
                                 </button>
                             </div>
                         )}
@@ -193,16 +227,6 @@ const CheckInFlow: React.FC = () => {
             <style>{`
                 .check-in-flow { width: 100%; position: relative; }
                 
-                .progress-container { display: flex; justify-content: space-between; position: relative; margin-bottom: var(--s-12); }
-                .progress-point { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); z-index: 2; opacity: 0.3; transition: var(--transition-luxe); }
-                .progress-point.active { opacity: 1; }
-                .point-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-secondary); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; backdrop-filter: var(--glass-blur); }
-                .progress-point.current .point-circle { background: var(--text-primary); color: var(--bg-color); transform: scale(1.2); box-shadow: var(--shadow-luxe); }
-                .point-label { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; }
-                
-                .progress-line-bg { position: absolute; top: 16px; left: 0; right: 0; height: 1px; background: var(--glass-border); z-index: 1; }
-                .progress-line-active { position: absolute; top: 16px; left: 0; height: 1px; background: var(--text-secondary); z-index: 1; transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
-
                 .flow-content-wrapper { position: relative; min-height: 450px; }
                 .fade-slide-in { animation: fadeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -227,6 +251,48 @@ const CheckInFlow: React.FC = () => {
                     filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); 
                 }
                 .summary-icon svg { width: 100%; height: 100%; }
+                .summary-icon.celebration-bounce { animation: celebrationBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+                
+                @keyframes celebrationBounce {
+                    0% { transform: scale(0.5); opacity: 0; }
+                    50% { transform: scale(1.2); }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+
+                /* Confetti celebration */
+                .confetti-container {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 0;
+                    height: 0;
+                    pointer-events: none;
+                    z-index: 10;
+                }
+                .confetti-piece {
+                    position: absolute;
+                    width: 10px;
+                    height: 10px;
+                    background: var(--color);
+                    border-radius: 2px;
+                    animation: confettiBurst 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                    animation-delay: var(--delay);
+                    opacity: 0;
+                }
+                @keyframes confettiBurst {
+                    0% { 
+                        transform: translate(0, 0) rotate(0deg) scale(0); 
+                        opacity: 1; 
+                    }
+                    20% { 
+                        opacity: 1; 
+                        transform: translate(var(--x), -80px) rotate(180deg) scale(1); 
+                    }
+                    100% { 
+                        opacity: 0; 
+                        transform: translate(var(--x), 40px) rotate(var(--rotation)) scale(0.5); 
+                    }
+                }
                 .summary-desc { color: var(--text-secondary); margin-bottom: var(--s-10); font-size: 1.05rem; line-height: 1.6; }
 
                 .ruler-checklist { text-align: left; display: flex; flex-direction: column; gap: var(--s-4); margin-bottom: var(--s-10); }
@@ -268,6 +334,42 @@ const CheckInFlow: React.FC = () => {
                     transition: var(--transition-luxe); font-size: 0.9rem; font-weight: 600;
                 }
                 .morandi-outline-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+                /* Quick Regulate Section */
+                .quick-regulate-section {
+                    margin-top: var(--s-6);
+                    padding: var(--s-6);
+                    background: hsla(0,0%,100%,0.02);
+                    border-radius: var(--radius-md);
+                    border: 1px dashed var(--glass-border);
+                    text-align: center;
+                }
+                .quick-regulate-title {
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                    margin-bottom: var(--s-4);
+                }
+                .quick-regulate-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--s-2);
+                    justify-content: center;
+                    margin-bottom: var(--s-6);
+                }
+                .regulate-chip {
+                    padding: var(--s-2) var(--s-4);
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    color: var(--text-primary);
+                    cursor: default;
+                    transition: var(--transition-luxe);
+                }
+                .regulate-chip:hover {
+                    background: var(--glass-border);
+                    transform: translateY(-2px);
+                }
 
                 /* Resume Prompt */
                 .resume-prompt-overlay { position: absolute; inset: 0; background: hsla(0, 0%, 10%, 0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: var(--s-6); backdrop-filter: var(--glass-blur); }

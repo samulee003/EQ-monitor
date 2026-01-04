@@ -17,16 +17,38 @@ class AIService {
 
     private static MOCK_INSIGHTS: Record<string, AIInsight> = {
         "default": {
-            summary: "（AI 連線未設定）你似乎正在經歷一段情緒波折。這是一個自然的過程，給自己一點空間去感受。",
+            summary: "你正在進行一場重要的內在對話。不論此刻感受如何，覺察本身就是力量。",
             underlyingPatterns: ["情境過載", "尋求認同"],
             suggestedAction: "嘗試將當前的任務分解為細小的步驟，先完成最簡單的一項。",
             empatheticQuote: "「情緒不是障礙，而是內在智慧的信使。」"
         },
         "red": {
-            summary: "（AI 連線未設定）你的能量水平較高且伴隨不適。這通常是『戰或逃』反應的體現。",
-            underlyingPatterns: ["急性壓力", "界限侵犯"],
-            suggestedAction: "進行 5-4-3-2-1 五感接地的練習，將注意力拉回當下。",
-            empatheticQuote: "「在刺激與反應之間，有一個空間；在那個空間裡，我們有選擇權。」"
+            summary: "你正經歷高能量但不舒適的狀態。這種「戰或逃」反應是身體保護你的方式。",
+            underlyingPatterns: ["急性壓力", "界限被侵犯", "未滿足的控制感需求"],
+            suggestedAction: "進行 5-4-3-2-1 五感接地練習，或嘗試深呼吸，讓神經系統逐漸平復。",
+            empatheticQuote: "「在刺激與反應之間，有一個空間；在那個空間裡，我們有選擇權。」— 維克多·弗蘭克",
+            colorTheory: "紅色象限的高喚醒感來自交感神經的活化，這是身體的自然保護機制。"
+        },
+        "yellow": {
+            summary: "你正處於充滿活力與正向的狀態！這種能量是創造與連結的絕佳時機。",
+            underlyingPatterns: ["成就達成", "社交連結", "期待實現"],
+            suggestedAction: "將這份能量傳遞給重要的人，或記錄下此刻的感受，作為未來低潮時的養分。",
+            empatheticQuote: "「快樂不是終點，而是一種旅行的方式。」",
+            colorTheory: "黃色象限代表最佳表現區域，適合創意工作與社交互動。"
+        },
+        "blue": {
+            summary: "低能量與不適感可能讓你覺得沉重。請記得，允許自己在此刻放慢腳步。",
+            underlyingPatterns: ["疲憊累積", "失落感", "連結斷裂"],
+            suggestedAction: "給自己一個柔軟的擁抱，或進行一件微小但滋養自己的事，如泡杯熱茶。",
+            empatheticQuote: "「有些日子你會創造歷史，有些日子你只需要撐過去。」",
+            colorTheory: "藍色象限需要自我慈悲，這不是軟弱的表現，而是復原的起點。"
+        },
+        "green": {
+            summary: "你正處於平靜而滿足的狀態。這份寧靜是內心充電的寶貴時刻。",
+            underlyingPatterns: ["內在平衡", "感恩連結", "安全感滿足"],
+            suggestedAction: "在這個狀態下進行反思或感恩練習，效果會特別好。",
+            empatheticQuote: "「平靜不是沒有風暴，而是在風暴中心安然自處。」",
+            colorTheory: "綠色象限是恢復與整合的狀態，是建立新習慣和深度思考的最佳時機。"
         }
     };
 
