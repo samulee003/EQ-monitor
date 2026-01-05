@@ -53,9 +53,7 @@ class ResilienceService {
      * Logic: Resilience increases when a user completes a Full RULER flow
      * and reports a positive shift in the 'neuroCheck'.
      */
-    getDashboardData(): DailyResilience[] {
-        const logs: RulerLogEntry[] = storageService.getLogs();
-
+    getDashboardData(logs: RulerLogEntry[] = storageService.getLogs()): DailyResilience[] {
         // Group by date and calculate average resilience
         const days: Record<string, { total: number, count: number, emotion: string }> = {};
 
@@ -88,8 +86,8 @@ class ResilienceService {
         })).reverse().slice(-7); // Last 7 days
     }
 
-    getOverallScore(): number {
-        const data = this.getDashboardData();
+    getOverallScore(logs: RulerLogEntry[] = storageService.getLogs()): number {
+        const data = this.getDashboardData(logs);
         if (data.length === 0) return 0;
         const avg = data.reduce((acc, curr) => acc + curr.score, 0) / data.length;
         return Math.round(avg);
@@ -98,20 +96,28 @@ class ResilienceService {
     /**
      * getHeatmapData
      * Returns data for the last 30 days for heatmap visualization.
+     * Optimized: O(N) log processing + O(30) iteration
      */
-    getHeatmapData(): HeatmapDay[] {
-        const logs: RulerLogEntry[] = storageService.getLogs();
+    getHeatmapData(logs: RulerLogEntry[] = storageService.getLogs()): HeatmapDay[] {
         const today = new Date();
         const heatmap: HeatmapDay[] = [];
+
+        // Pre-process logs into a Map for O(1) lookup
+        const logsByDate = new Map<string, RulerLogEntry[]>();
+        logs.forEach(log => {
+            const dateStr = new Date(log.timestamp).toLocaleDateString();
+            if (!logsByDate.has(dateStr)) {
+                logsByDate.set(dateStr, []);
+            }
+            logsByDate.get(dateStr)?.push(log);
+        });
 
         for (let i = 29; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
             const dateStr = date.toLocaleDateString();
 
-            const dayLogs = logs.filter((log: RulerLogEntry) =>
-                new Date(log.timestamp).toLocaleDateString() === dateStr
-            );
+            const dayLogs = logsByDate.get(dateStr) || [];
 
             if (dayLogs.length > 0) {
                 // Use the most frequent quadrant or the last one
@@ -137,8 +143,7 @@ class ResilienceService {
      * getIntensityData
      * Returns last 7 logs with intensity values for bar chart.
      */
-    getIntensityData(): IntensityData[] {
-        const logs: RulerLogEntry[] = storageService.getLogs();
+    getIntensityData(logs: RulerLogEntry[] = storageService.getLogs()): IntensityData[] {
         return logs.slice(0, 7).map((log: RulerLogEntry) => ({
             label: new Date(log.timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' }),
             value: log.intensity || 5
@@ -150,8 +155,7 @@ class ResilienceService {
      * Calculates the diversity of emotions the user has identified.
      * Higher granularity = better emotional awareness (Lisa Feldman Barrett's research)
      */
-    getEmotionalGranularity(): GranularityData {
-        const logs: RulerLogEntry[] = storageService.getLogs();
+    getEmotionalGranularity(logs: RulerLogEntry[] = storageService.getLogs()): GranularityData {
         const uniqueEmotions = new Set<string>();
 
         logs.forEach((log: RulerLogEntry) => {
@@ -182,8 +186,7 @@ class ResilienceService {
      * Calculates the variety of regulation strategies the user has practiced.
      * More diverse strategies = better emotional flexibility
      */
-    getStrategyDiversity(): StrategyDiversityData {
-        const logs: RulerLogEntry[] = storageService.getLogs();
+    getStrategyDiversity(logs: RulerLogEntry[] = storageService.getLogs()): StrategyDiversityData {
         const usedStrategies = new Set<string>();
 
         logs.forEach((log: RulerLogEntry) => {

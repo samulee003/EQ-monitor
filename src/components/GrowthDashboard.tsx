@@ -1,14 +1,18 @@
 import React, { useMemo } from 'react';
 import { resilienceService, DailyResilience, GranularityData, StrategyDiversityData } from '../services/ResilienceService';
+import { storageService } from '../services/StorageService';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 
 const GrowthDashboard: React.FC = () => {
-    const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(), []);
-    const overallScore = useMemo(() => resilienceService.getOverallScore(), []);
-    const heatmapData = useMemo(() => resilienceService.getHeatmapData(), []);
-    const intensityData = useMemo(() => resilienceService.getIntensityData(), []);
-    const granularity: GranularityData = useMemo(() => resilienceService.getEmotionalGranularity(), []);
-    const diversity: StrategyDiversityData = useMemo(() => resilienceService.getStrategyDiversity(), []);
+    // ⚡ Bolt: Fetch logs once to avoid multiple localStorage reads and JSON parses
+    const logs = useMemo(() => storageService.getLogs(), []);
+
+    const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(logs), [logs]);
+    const overallScore = useMemo(() => resilienceService.getOverallScore(logs), [logs]);
+    const heatmapData = useMemo(() => resilienceService.getHeatmapData(logs), [logs]);
+    const intensityData = useMemo(() => resilienceService.getIntensityData(logs), [logs]);
+    const granularity: GranularityData = useMemo(() => resilienceService.getEmotionalGranularity(logs), [logs]);
+    const diversity: StrategyDiversityData = useMemo(() => resilienceService.getStrategyDiversity(logs), [logs]);
 
     // Simple SVG Line Chart logic
     const maxScore = 100;
