@@ -1,50 +1,60 @@
 import React from 'react';
+import { useLanguage } from '../services/LanguageContext';
 
 interface MainLayoutProps {
-    children: React.ReactNode;
-    currentView: 'checkin' | 'history' | 'growth';
-    onNavigate: (view: 'checkin' | 'history' | 'growth') => void;
+  children: React.ReactNode;
+  currentView: 'checkin' | 'history' | 'growth';
+  onNavigate: (view: 'checkin' | 'history' | 'growth') => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
-    return (
-        <div className="app-container">
-            <header className="glass-header">
-                <div className="logo-section" onClick={() => onNavigate('checkin')} style={{ cursor: 'pointer' }}>
-                    <img src="/logo.png" alt="今心 Logo" className="logo-image" />
-                    <span className="logo-text">今心</span>
-                </div>
-                <nav>
-                    <button
-                        className={`nav-link ${currentView === 'checkin' ? 'active' : ''}`}
-                        onClick={() => onNavigate('checkin')}
-                    >
-                        今日心情
-                    </button>
-                    <button
-                        className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
-                        onClick={() => onNavigate('history')}
-                    >
-                        紀錄回顧
-                    </button>
-                    <button
-                        className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
-                        onClick={() => onNavigate('growth')}
-                    >
-                        成長看板
-                    </button>
-                </nav>
-            </header>
+  const { language, toggleLanguage, t } = useLanguage();
 
-            <main className="main-content">
-                {children}
-            </main>
+  return (
+    <div className="app-container">
+      <header className="glass-header">
+        <div className="logo-section" onClick={() => onNavigate('checkin')} style={{ cursor: 'pointer' }}>
+          <img src="/logo.png" alt="今心 Logo" className="logo-image" />
+          <span className="logo-text">{t('今心')}</span>
+        </div>
+        <nav>
+          <button
+            className={`nav-link ${currentView === 'checkin' ? 'active' : ''}`}
+            onClick={() => onNavigate('checkin')}
+          >
+            {t('今日心情')}
+          </button>
+          <button
+            className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
+            onClick={() => onNavigate('history')}
+          >
+            {t('紀錄回顧')}
+          </button>
+          <button
+            className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
+            onClick={() => onNavigate('growth')}
+          >
+            {t('成長看板')}
+          </button>
+        </nav>
+        <button
+          className="language-toggle"
+          onClick={toggleLanguage}
+          title={language === 'zh-TW' ? '切換為簡體中文' : '切换为繁体中文'}
+        >
+          {language === 'zh-TW' ? '简' : '繁'}
+        </button>
+      </header>
 
-            <footer>
-                基於 RULER 模型 • 打造平穩心靈
-            </footer>
+      <main className="main-content">
+        {children}
+      </main>
 
-            <style>{`
+      <footer>
+        {t('基於 RULER 模型 • 打造平穩心靈')}
+      </footer>
+
+      <style>{`
         .glass-header {
           position: sticky;
           top: 0;
@@ -93,6 +103,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           gap: var(--s-6);
         }
 
+        .language-toggle {
+          background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-green) 100%);
+          border: none;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          flex-shrink: 0;
+        }
+
+        .language-toggle:hover {
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .language-toggle:active {
+          transform: scale(0.95);
+        }
+
         @media (max-width: 480px) {
           .glass-header {
             padding: var(--s-3) var(--s-4);
@@ -111,6 +148,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .nav-link {
             font-size: 0.85rem;
           }
+          .language-toggle {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+          }
         }
 
         @media (max-width: 360px) {
@@ -120,10 +162,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           nav {
             gap: var(--s-2);
           }
+          .language-toggle {
+            width: 28px;
+            height: 28px;
+            font-size: 0.75rem;
+          }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default MainLayout;
+
