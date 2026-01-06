@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { uiIcons } from './icons/SvgIcons';
+import TimelineCard from './TimelineCard';
+
 const Timeline: React.FC = () => {
     const [logs, setLogs] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [editText, setEditText] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -15,9 +16,9 @@ const Timeline: React.FC = () => {
         setLogs(data);
     };
 
-    const handleDeleteClick = (timestamp: string) => {
+    const handleDeleteClick = useCallback((timestamp: string) => {
         setDeleteConfirmId(timestamp);
-    };
+    }, []);
 
     const handleDeleteConfirm = () => {
         if (deleteConfirmId) {
@@ -33,12 +34,11 @@ const Timeline: React.FC = () => {
         setDeleteConfirmId(null);
     };
 
-    const handleEditStart = (log: any) => {
+    const handleEditStart = useCallback((log: any) => {
         setEditingId(log.timestamp);
-        setEditText(log.expressing?.expression || '');
-    };
+    }, []);
 
-    const handleEditSave = (timestamp: string) => {
+    const handleEditSave = useCallback((timestamp: string, newText: string) => {
         const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
         const updated = existing.map((log: any) => {
             if (log.timestamp === timestamp) {
@@ -46,7 +46,7 @@ const Timeline: React.FC = () => {
                     ...log,
                     expressing: {
                         ...log.expressing,
-                        expression: editText
+                        expression: newText
                     }
                 };
             }
@@ -55,7 +55,11 @@ const Timeline: React.FC = () => {
         localStorage.setItem('feelings_logs', JSON.stringify(updated));
         setLogs(updated);
         setEditingId(null);
-    };
+    }, []);
+
+    const handleEditCancel = useCallback(() => {
+        setEditingId(null);
+    }, []);
 
     const handleExportCSV = () => {
         const headers = [
@@ -119,7 +123,7 @@ const Timeline: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
-    const formatDate = (isoString: string) => {
+    const formatDate = useCallback((isoString: string) => {
         const date = new Date(isoString);
         return date.toLocaleDateString('zh-TW', {
             month: 'short',
@@ -128,7 +132,7 @@ const Timeline: React.FC = () => {
             hour: '2-digit',
             minute: '2-digit'
         });
-    };
+    }, []);
 
     if (logs.length === 0) {
         return (
@@ -158,66 +162,16 @@ const Timeline: React.FC = () => {
 
             <div className="timeline-list">
                 {logs.map((log, index) => (
-                    <div key={log.timestamp || index} className="timeline-card">
-                        <div className="card-top">
-                            <span className="card-date">{formatDate(log.timestamp)}</span>
-                            <div className="card-actions">
-                                <div
-                                    className="card-emotion-dot"
-                                    style={{ backgroundColor: `var(--color-${log.emotion.quadrant})`, color: `var(--color-${log.emotion.quadrant})` }}
-                                ></div>
-                                {editingId !== log.timestamp && (
-                                    <>
-                                        <button className="edit-btn" onClick={() => handleEditStart(log)}>✎</button>
-                                        <button className="delete-btn" onClick={() => handleDeleteClick(log.timestamp)}>✕</button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="card-body">
-                            <h3 className="card-emotion-name">{log.emotion.name}</h3>
-
-                            <div className="card-context">
-                                {log.understanding && (
-                                    <div className="context-item">
-                                        <span className="context-label">事件：</span>
-                                        <span className="context-value">{log.understanding.trigger || '未填寫'}</span>
-                                    </div>
-                                )}
-                                <div className="card-tags">
-                                    {log.understanding && (
-                                        <>
-                                            <span className="mini-tag">#{log.understanding.what}</span>
-                                            <span className="mini-tag">#{log.understanding.who}</span>
-                                            <span className="mini-tag">#{log.understanding.where}</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {editingId === log.timestamp ? (
-                                <div className="edit-area">
-                                    <textarea
-                                        value={editText}
-                                        onChange={(e) => setEditText(e.target.value)}
-                                        className="edit-textarea"
-                                        placeholder="更新你的感受表達..."
-                                    />
-                                    <div className="edit-actions">
-                                        <button className="save-btn" onClick={() => handleEditSave(log.timestamp)}>儲存</button>
-                                        <button className="cancel-btn" onClick={() => setEditingId(null)}>取消</button>
-                                    </div>
-                                </div>
-                            ) : (
-                                (log.expressing && log.expressing.expression) && (
-                                    <div className="card-note">
-                                        「 {log.expressing.expression} 」
-                                    </div>
-                                )
-                            )}
-                        </div>
-                    </div>
+                    <TimelineCard
+                        key={log.timestamp || index}
+                        log={log}
+                        isEditing={editingId === log.timestamp}
+                        onEditStart={handleEditStart}
+                        onEditSave={handleEditSave}
+                        onEditCancel={handleEditCancel}
+                        onDelete={handleDeleteClick}
+                        formatDate={formatDate}
+                    />
                 ))}
             </div>
 
@@ -255,6 +209,9 @@ const Timeline: React.FC = () => {
                 .export-btn.secondary:hover { opacity: 1; }
 
                 .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
+                /* Styles for TimelineCard are now assumed to be globally available or we should keep them here if they are not encapsulated */
+                /* Keeping original styles as TimelineCard doesn't have its own style file and likely relies on these global/parent styles */
+
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
                 .timeline-card:hover { border-color: var(--glass-border); background: rgba(255,255,255,0.02); }
                 
@@ -407,4 +364,3 @@ const Timeline: React.FC = () => {
 
 
 export default Timeline;
-
