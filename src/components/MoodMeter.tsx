@@ -228,6 +228,42 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           color: var(--text-secondary);
         }
 
+        /* Focus States - Accessible & Consistent */
+        .sphere-wrapper:focus-visible {
+          z-index: 10;
+          outline: none;
+        }
+
+        .sphere-wrapper:focus-visible .sphere-orbital {
+          transform: translateY(-8px);
+        }
+
+        .sphere-wrapper:focus-visible .sphere {
+          transform: scale(1.15);
+          /* High contrast focus ring for keyboard users */
+          box-shadow: 0 0 0 4px var(--bg-color), 0 0 0 7px var(--text-primary);
+          border-radius: 50%;
+        }
+
+        .sphere-wrapper:focus-visible .sphere-inner {
+          opacity: 1;
+          box-shadow:
+            inset 0 4px 12px hsla(0, 0%, 100%, 0.4),
+            inset 0 -6px 12px rgba(0,0,0,0.3),
+            0 15px 35px -5px rgba(0,0,0,0.4);
+        }
+
+        .sphere-wrapper:focus-visible .sphere-glow {
+          opacity: 0.4;
+          filter: blur(24px);
+          transform: scale(1.2);
+        }
+
+        .sphere-wrapper:focus-visible .sphere-info {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
         /* Hover States - Luxe Magnetic Feel */
         .sphere-wrapper:hover {
           z-index: 10;
