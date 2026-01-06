@@ -1,10 +1,12 @@
 import React, { useRef, useEffect } from 'react';
+import { useLanguage } from '../services/LanguageContext';
 
 interface SplashScreenProps {
     onComplete: () => void;
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
+    const { t } = useLanguage();
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -27,11 +29,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 autoPlay
             >
                 <source src="/intro.mp4" type="video/mp4" />
-                您的瀏覽器不支援影片標籤。
+                {t('您的瀏覽器不支援影片標籤。')}
             </video>
 
             <button className="skip-splash-btn" onClick={onComplete}>
-                跳過動畫
+                {t('跳過動畫')}
             </button>
 
             <style>{`

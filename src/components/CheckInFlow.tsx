@@ -7,13 +7,15 @@ import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
 import RulerProgress from './RulerProgress';
 import { useRulerFlow } from '../hooks/useRulerFlow';
+import { useLanguage } from '../services/LanguageContext';
 import { uiIcons } from './icons/SvgIcons';
 
 const CheckInFlow: React.FC = () => {
+    const { t } = useLanguage();
     const {
         step,
-        selectedQuadrant,
-        selectedEmotion,
+        selectedQuadrants,
+        selectedEmotions,
         showResumePrompt,
         isFullFlow,
         postRegulationMood,
@@ -38,7 +40,7 @@ const CheckInFlow: React.FC = () => {
                 <RulerProgress
                     currentStep={step}
                     isFullFlow={isFullFlow}
-                    selectedQuadrant={selectedQuadrant}
+                    selectedQuadrant={selectedQuadrants[0]} // Use first as primary for progress colors
                 />
             )}
 
@@ -46,11 +48,11 @@ const CheckInFlow: React.FC = () => {
                 {showResumePrompt && (
                     <div className="resume-prompt-overlay fade-in">
                         <div className="resume-card">
-                            <h3>繼續之前的旅程？</h3>
-                            <p>我們為你保留了上一次的覺察進度。</p>
+                            <h3>{t('繼續之前的旅程？')}</h3>
+                            <p>{t('我們為你保留了上一次的覺察進度。')}</p>
                             <div className="resume-actions">
-                                <button className="morandi-main-btn" onClick={resumeDraft}>繼續</button>
-                                <button className="morandi-outline-btn" onClick={() => { setShowResumePrompt(false); resetFlow(); }}>重新開始</button>
+                                <button className="morandi-main-btn" onClick={resumeDraft}>{t('繼續')}</button>
+                                <button className="morandi-outline-btn" onClick={() => { setShowResumePrompt(false); resetFlow(); }}>{t('重新開始')}</button>
                             </div>
                         </div>
                     </div>
@@ -58,53 +60,53 @@ const CheckInFlow: React.FC = () => {
 
                 {step === 'recognizing' && (
                     <MoodMeter
-                        onSelectQuadrant={(q) => handleMoodComplete(q, 5)}
+                        onSelectQuadrant={(q) => handleMoodComplete([q], 5)}
                     />
                 )}
 
-                {step === 'centering' && selectedQuadrant && (
+                {step === 'centering' && selectedQuadrants.length > 0 && (
                     <div className="centering-state">
-                        <div className="centering-circle" style={{ backgroundColor: `var(--color-${selectedQuadrant})` }}></div>
-                        <h2>沉靜，並感受...</h2>
-                        <p>閉上雙眼，深呼吸一次。<br />捕捉身體當下的細微信號。</p>
+                        <div className="centering-circle" style={{ backgroundColor: `var(--color-${selectedQuadrants[0]})` }}></div>
+                        <h2>{t('沉靜，並感受...')}</h2>
+                        <p>{t('閉上雙眼，深呼吸一次。')}<br />{t('捕捉身體當下的細微信號。')}</p>
                     </div>
                 )}
 
-                {step === 'bodyScan' && selectedQuadrant && (
+                {step === 'bodyScan' && selectedQuadrants.length > 0 && (
                     <BodyScan
-                        quadrant={selectedQuadrant}
+                        quadrant={selectedQuadrants[0]}
                         onComplete={handleBodyScanComplete}
                         onBack={() => setStep('recognizing')}
                     />
                 )}
 
-                {step === 'labeling' && selectedQuadrant && (
+                {step === 'labeling' && selectedQuadrants.length > 0 && (
                     <EmotionGrid
-                        quadrant={selectedQuadrant}
-                        onSelectEmotion={handleEmotionSelect}
+                        quadrants={selectedQuadrants}
+                        onSelectEmotions={handleEmotionSelect}
                         onBack={() => setStep('bodyScan')}
                     />
                 )}
 
-                {step === 'understanding' && selectedEmotion && (
+                {step === 'understanding' && selectedEmotions.length > 0 && (
                     <UnderstandingStep
-                        emotion={selectedEmotion}
+                        emotion={selectedEmotions[0]}
                         onComplete={handleUnderstandingComplete}
                         onBack={() => setStep('labeling')}
                     />
                 )}
 
-                {step === 'expressing' && selectedEmotion && (
+                {step === 'expressing' && selectedEmotions.length > 0 && (
                     <ExpressingStep
-                        emotion={selectedEmotion}
+                        emotion={selectedEmotions[0]}
                         onComplete={handleExpressingComplete}
                         onBack={() => setStep('understanding')}
                     />
                 )}
 
-                {step === 'regulating' && selectedEmotion && (
+                {step === 'regulating' && selectedEmotions.length > 0 && (
                     <RegulatingStep
-                        emotion={selectedEmotion}
+                        emotion={selectedEmotions[0]}
                         onComplete={handleRegulatingComplete}
                         onBack={() => setStep('expressing')}
                     />
@@ -112,8 +114,8 @@ const CheckInFlow: React.FC = () => {
                 {step === 'neuroCheck' && (
                     <div className="neuro-check-card">
                         <div className="summary-icon">{uiIcons.brain}</div>
-                        <h2>調節後的感覺？</h2>
-                        <p className="summary-desc">觀察一下現在的內在狀態是否有微小的變化？</p>
+                        <h2>{t('調節後的感覺？')}</h2>
+                        <p className="summary-desc">{t('觀察一下現在的內在狀態是否有微小的變化？')}</p>
 
                         <div className="mood-shift-options">
                             {['感覺輕鬆多了', '平靜了一些', '依然差不多', '產生了新思緒'].map(option => (
@@ -122,7 +124,7 @@ const CheckInFlow: React.FC = () => {
                                     className={`option-chip ${postRegulationMood === option ? 'active' : ''}`}
                                     onClick={() => setPostRegulationMood(option)}
                                 >
-                                    {option}
+                                    {t(option)}
                                 </button>
                             ))}
                         </div>
@@ -132,12 +134,12 @@ const CheckInFlow: React.FC = () => {
                             disabled={!postRegulationMood}
                             onClick={handleNeuroCheckComplete}
                         >
-                            完成調節
+                            {t('完成調節')}
                         </button>
                     </div>
                 )}
 
-                {step === 'summary' && selectedEmotion && (
+                {step === 'summary' && selectedEmotions.length > 0 && (
                     <div className="summary-card">
                         {/* Confetti celebration */}
                         <div className="confetti-container">
@@ -155,30 +157,30 @@ const CheckInFlow: React.FC = () => {
                             ))}
                         </div>
                         <div className="summary-icon celebration-bounce">{uiIcons.sparkle}</div>
-                        <h2>覺察之旅完成</h2>
+                        <h2>{t('覺察之旅完成')}</h2>
 
                         <div className="ruler-checklist">
                             <div className="checklist-item done">
                                 <span className="step-tag r">R</span>
-                                <span>成功辨識情緒能量</span>
+                                <span>{t('成功辨識情緒能量')}</span>
                             </div>
                             <div className="checklist-item done">
                                 <span className="step-tag l">L</span>
-                                <span>標記情緒：<b>{selectedEmotion.name}</b></span>
+                                <span>{t('標記情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
                             </div>
                             {isFullFlow && (
                                 <>
                                     <div className="checklist-item done">
                                         <span className="step-tag u">U</span>
-                                        <span>理清觸發因素</span>
+                                        <span>{t('理清觸發因素')}</span>
                                     </div>
                                     <div className="checklist-item done">
                                         <span className="step-tag e">E</span>
-                                        <span>完成情感表達</span>
+                                        <span>{t('完成情感表達')}</span>
                                     </div>
                                     <div className="checklist-item done">
                                         <span className="step-tag r2">R</span>
-                                        <span>執行調節策略</span>
+                                        <span>{t('執行調節策略')}</span>
                                     </div>
                                 </>
                             )}
@@ -186,40 +188,40 @@ const CheckInFlow: React.FC = () => {
 
                         {!isFullFlow && (
                             <div className="quick-regulate-section">
-                                <p className="quick-regulate-title">💡 想試試快速調節嗎？</p>
+                                <p className="quick-regulate-title">{t('💡 想試試快速調節嗎？')}</p>
                                 <div className="quick-regulate-chips">
-                                    {selectedEmotion.quadrant === 'red' && (
+                                    {selectedEmotions[0].quadrant === 'red' && (
                                         <>
-                                            <span className="regulate-chip">🧘 深呼吸練習</span>
-                                            <span className="regulate-chip">🖐️ 五感接地</span>
+                                            <span className="regulate-chip">{t('🧘 深呼吸練習')}</span>
+                                            <span className="regulate-chip">{t('🖐️ 五感接地')}</span>
                                         </>
                                     )}
-                                    {selectedEmotion.quadrant === 'yellow' && (
+                                    {selectedEmotions[0].quadrant === 'yellow' && (
                                         <>
-                                            <span className="regulate-chip">🙏 感恩清單</span>
-                                            <span className="regulate-chip">💃 放首歌動一動</span>
+                                            <span className="regulate-chip">{t('🙏 感恩清單')}</span>
+                                            <span className="regulate-chip">{t('💃 放首歌動一動')}</span>
                                         </>
                                     )}
-                                    {selectedEmotion.quadrant === 'blue' && (
+                                    {selectedEmotions[0].quadrant === 'blue' && (
                                         <>
-                                            <span className="regulate-chip">☕ 泡杯熱飲</span>
-                                            <span className="regulate-chip">💕 對自己說句好話</span>
+                                            <span className="regulate-chip">{t('☕ 泡杯熱飲')}</span>
+                                            <span className="regulate-chip">{t('💕 對自己說句好話')}</span>
                                         </>
                                     )}
-                                    {selectedEmotion.quadrant === 'green' && (
+                                    {selectedEmotions[0].quadrant === 'green' && (
                                         <>
-                                            <span className="regulate-chip">🧘 三分鐘靜坐</span>
-                                            <span className="regulate-chip">📖 讀一段文字</span>
+                                            <span className="regulate-chip">{t('🧘 三分鐘靜坐')}</span>
+                                            <span className="regulate-chip">{t('📖 讀一段文字')}</span>
                                         </>
                                     )}
                                 </div>
                                 <button className="morandi-outline-btn" onClick={() => { setIsFullFlow(true); setStep('understanding'); }}>
-                                    開啟完整 RULER 探索
+                                    {t('開啟完整 RULER 探索')}
                                 </button>
                             </div>
                         )}
 
-                        <button className="morandi-main-btn" onClick={resetFlow}>返回</button>
+                        <button className="morandi-main-btn" onClick={resetFlow}>{t('返回')}</button>
                     </div>
                 )}
             </div>

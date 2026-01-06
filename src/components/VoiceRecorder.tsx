@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { uiIcons } from './icons/SvgIcons';
+import { useLanguage } from '../services/LanguageContext';
 
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void;
 }
 
 const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
+  const { t } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState(0);
   const [simulationState, setSimulationState] = useState<'idle' | 'recording' | 'processing'>('idle');
@@ -41,7 +43,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
 
     // Simulate Transcription
     setTimeout(() => {
-      onTranscription("這是一段模擬的語音輸入內容。我現在感覺身體有些緊繃，但呼吸還算平穩。");
+      onTranscription(t("這是一段模擬的語音輸入內容。我現在感覺身體有些緊繃，但呼吸還算平穩。"));
       setSimulationState('idle');
     }, 2000);
   };
@@ -61,9 +63,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
       </div>
 
       <div className="status-text">
-        {simulationState === 'idle' && "點擊開始語音表達"}
-        {simulationState === 'recording' && `正在聆聽... ${formatTime(timer)}`}
-        {simulationState === 'processing' && "AI 正在轉譯您的聲音..."}
+        {simulationState === 'idle' && t("點擊開始語音表達")}
+        {simulationState === 'recording' && t(`正在聆聽... ${formatTime(timer)}`)}
+        {simulationState === 'processing' && t("AI 正在轉譯您的聲音...")}
       </div>
 
       <style>{`

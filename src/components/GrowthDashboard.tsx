@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { resilienceService, DailyResilience, GranularityData, StrategyDiversityData } from '../services/ResilienceService';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
+import { useLanguage } from '../services/LanguageContext';
 
 const GrowthDashboard: React.FC = () => {
+    const { t } = useLanguage();
     const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(), []);
     const overallScore = useMemo(() => resilienceService.getOverallScore(), []);
     const heatmapData = useMemo(() => resilienceService.getHeatmapData(), []);
@@ -32,13 +34,13 @@ const GrowthDashboard: React.FC = () => {
                     </svg>
                 </div>
                 <div className="header-text">
-                    <h3>情緒韌性積分</h3>
-                    <p>基於您的調節頻率與身心回饋計算</p>
+                    <h3>{t('情緒韌性積分')}</h3>
+                    <p>{t('基於您的調節頻率與身心回饋計算')}</p>
                 </div>
             </div>
 
             <div className="dashboard-section heatmap-section">
-                <label className="heading-sm">情緒熱點圖 (近 30 天)</label>
+                <label className="heading-sm">{t('情緒熱點圖 (近 30 天)')}</label>
                 <div className="heatmap-grid">
                     {heatmapData.map((day: any, i: number) => (
                         <div
@@ -48,25 +50,25 @@ const GrowthDashboard: React.FC = () => {
                                 backgroundColor: `var(--color-${day.quadrant})`,
                                 opacity: 0.3 + (day.intensity / 10) * 0.7
                             } : {}}
-                            title={day.hasData ? `${day.date}: ${day.intensity} 級` : day.date}
+                            title={day.hasData ? `${day.date}: ${day.intensity} ${t('級')}` : day.date}
                         ></div>
                     ))}
                 </div>
                 <div className="heatmap-legend">
-                    <span>低強度</span>
+                    <span>{t('低強度')}</span>
                     <div className="legend-dots">
                         <span style={{ background: 'var(--color-blue)' }}></span>
                         <span style={{ background: 'var(--color-green)' }}></span>
                         <span style={{ background: 'var(--color-yellow)' }}></span>
                         <span style={{ background: 'var(--color-red)' }}></span>
                     </div>
-                    <span>高強度</span>
+                    <span>{t('高強度')}</span>
                 </div>
             </div>
 
             <div className="charts-grid">
                 <div className="chart-container">
-                    <label className="heading-sm">韌性趨勢 (Resilience)</label>
+                    <label className="heading-sm">{t('韌性趨勢 (Resilience)')}</label>
                     {data.length > 1 ? (
                         <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="line-chart">
                             <path
@@ -86,16 +88,16 @@ const GrowthDashboard: React.FC = () => {
                             })}
                         </svg>
                     ) : (
-                        <div className="empty-chart">需要更多記錄來生成趨勢圖</div>
+                        <div className="empty-chart">{t('需要更多記錄來生成趨勢圖')}</div>
                     )}
                     <div className="chart-labels">
-                        <span>過去</span>
-                        <span>現在</span>
+                        <span>{t('過去')}</span>
+                        <span>{t('現在')}</span>
                     </div>
                 </div>
 
                 <div className="chart-container">
-                    <label className="heading-sm">強度波動 (Intensity)</label>
+                    <label className="heading-sm">{t('強度波動 (Intensity)')}</label>
                     <div className="bar-chart">
                         {intensityData.map((d: any, i: number) => (
                             <div key={i} className="bar-wrapper">
@@ -104,17 +106,17 @@ const GrowthDashboard: React.FC = () => {
                                     style={{ height: `${(d.value / 10) * 100}%` }}
                                     title={`${d.label}: ${d.value} 級`}
                                 ></div>
-                                <span className="bar-label">{d.label}</span>
+                                <span className="bar-label">{t(d.label)}</span>
                             </div>
                         ))}
-                        {intensityData.length === 0 && <div className="empty-chart">無數據</div>}
+                        {intensityData.length === 0 && <div className="empty-chart">{t('無數據')}</div>}
                     </div>
                 </div>
             </div>
 
             {/* 神經科學導向指標 - Phase 1 */}
             <div className="neuroscience-metrics">
-                <label className="heading-sm"><span className="section-icon">{uiIcons.brain}</span> 情緒智能指標</label>
+                <label className="heading-sm"><span className="section-icon">{uiIcons.brain}</span> {t('情緒智能指標')}</label>
                 <div className="metrics-grid">
                     {/* 情緒粒度分數 */}
                     <div className="metric-card granularity-card">
@@ -126,15 +128,15 @@ const GrowthDashboard: React.FC = () => {
                             </svg>
                         </div>
                         <div className="metric-info">
-                            <h4>情緒粒度</h4>
-                            <p className="metric-desc">你已辨識 <strong>{granularity.uniqueEmotions.length}</strong> 種不同情緒</p>
+                            <h4>{t('情緒粒度')}</h4>
+                            <p className="metric-desc">{t('你已辨識')} <strong>{granularity.uniqueEmotions.length}</strong> {t('種不同情緒')}</p>
                             <div className="metric-level">
                                 <span className={`level-badge ${granularity.level}`}>
                                     <span className="badge-icon">{granularity.level === 'beginner' && uiIcons.seedling}{granularity.level === 'growing' && uiIcons.branch}{granularity.level === 'rich' && uiIcons.tree}{granularity.level === 'expert' && uiIcons.sparkle}</span>
-                                    {granularity.level === 'beginner' && '萌芽期'}
-                                    {granularity.level === 'growing' && '成長中'}
-                                    {granularity.level === 'rich' && '豐富'}
-                                    {granularity.level === 'expert' && '專家'}
+                                    {granularity.level === 'beginner' && t('萌芽期')}
+                                    {granularity.level === 'growing' && t('成長中')}
+                                    {granularity.level === 'rich' && t('豐富')}
+                                    {granularity.level === 'expert' && t('專家')}
                                 </span>
                             </div>
                         </div>
@@ -149,15 +151,15 @@ const GrowthDashboard: React.FC = () => {
                             </div>
                         </div>
                         <div className="metric-info">
-                            <h4>調節工具箱</h4>
-                            <p className="metric-desc">已掌握 <strong>{diversity.usedStrategies.length}/{diversity.totalPossible}</strong> 種策略</p>
+                            <h4>{t('調節工具箱')}</h4>
+                            <p className="metric-desc">{t('已掌握')} <strong>{diversity.usedStrategies.length}/{diversity.totalPossible}</strong> {t('種策略')}</p>
                             <div className="metric-level">
                                 <span className={`level-badge ${diversity.level}`}>
                                     <span className="badge-icon">{diversity.level === 'starter' && uiIcons.wrench}{diversity.level === 'developing' && uiIcons.hammer}{diversity.level === 'diverse' && uiIcons.gear}{diversity.level === 'master' && uiIcons.trophy}</span>
-                                    {diversity.level === 'starter' && '初始'}
-                                    {diversity.level === 'developing' && '發展中'}
-                                    {diversity.level === 'diverse' && '多元'}
-                                    {diversity.level === 'master' && '大師'}
+                                    {diversity.level === 'starter' && t('初始')}
+                                    {diversity.level === 'developing' && t('發展中')}
+                                    {diversity.level === 'diverse' && t('多元')}
+                                    {diversity.level === 'master' && t('大師')}
                                 </span>
                             </div>
                         </div>
@@ -169,15 +171,15 @@ const GrowthDashboard: React.FC = () => {
                 <div className="insight-item">
                     <span className="icon">{uiIcons.seedling}</span>
                     <div className="item-content">
-                        <label>主要情緒</label>
-                        <p>{data[data.length - 1]?.dominantEmotion || '無數據'}</p>
+                        <label>{t('主要情緒')}</label>
+                        <p>{data[data.length - 1]?.dominantEmotion ? t(data[data.length - 1].dominantEmotion) : t('無數據')}</p>
                     </div>
                 </div>
                 <div className="insight-item">
                     <span className="icon">{uiIcons.shield}</span>
                     <div className="item-content">
-                        <label>情緒防禦力</label>
-                        <p>{overallScore > 70 ? '穩健' : (overallScore > 40 ? '成長中' : '重建中')}</p>
+                        <label>{t('情緒防禦力')}</label>
+                        <p>{overallScore > 70 ? t('穩健') : (overallScore > 40 ? t('成長中') : t('重建中'))}</p>
                     </div>
                 </div>
             </div>

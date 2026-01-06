@@ -13,8 +13,8 @@ export const steps: { key: RulerStep; label: string; letter: string }[] = [
 
 export const useRulerFlow = () => {
     const [step, setStep] = useState<RulerStep>('recognizing');
-    const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null);
-    const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
+    const [selectedQuadrants, setSelectedQuadrants] = useState<Quadrant[]>([]);
+    const [selectedEmotions, setSelectedEmotions] = useState<Emotion[]>([]);
     const [emotionIntensity, setEmotionIntensity] = useState(5);
     const [bodyScanData, setBodyScanData] = useState<BodyScanData | null>(null);
     const [understandingData, setUnderstandingData] = useState<UnderstandingData | null>(null);
@@ -36,15 +36,19 @@ export const useRulerFlow = () => {
         }
     }, []);
 
-    // Effect - Aura Color
+    // Effect - Aura Color (Supports multiple colors via gradient or just the first one)
     useEffect(() => {
-        if (selectedQuadrant) {
+        if (selectedQuadrants.length > 0) {
             const colors: Record<Quadrant, string> = { red: '#C58B8A', yellow: '#D5C1A5', blue: '#97A6B4', green: '#AAB09B' };
-            document.documentElement.style.setProperty('--aura-color', `${colors[selectedQuadrant]}44`);
+            // For now use the first selected or a neutral if mixed
+            const color = selectedQuadrants.length === 1
+                ? colors[selectedQuadrants[0]]
+                : '#D1CECA'; // Neutral Morandi
+            document.documentElement.style.setProperty('--aura-color', `${color}44`);
         } else {
             document.documentElement.style.setProperty('--aura-color', 'transparent');
         }
-    }, [selectedQuadrant]);
+    }, [selectedQuadrants]);
 
     // Effect - Save Draft
     useEffect(() => {
@@ -53,8 +57,8 @@ export const useRulerFlow = () => {
         } else {
             const draft: RulerDraft = {
                 step,
-                selectedQuadrant,
-                selectedEmotion,
+                selectedQuadrants,
+                selectedEmotions,
                 emotionIntensity,
                 bodyScanData,
                 understandingData,
@@ -65,14 +69,14 @@ export const useRulerFlow = () => {
             };
             storageService.saveDraft(draft);
         }
-    }, [step, selectedQuadrant, selectedEmotion, emotionIntensity, understandingData, expressingData, regulatingData, isFullFlow, postRegulationMood]);
+    }, [step, selectedQuadrants, selectedEmotions, emotionIntensity, understandingData, expressingData, regulatingData, isFullFlow, postRegulationMood]);
 
     // Actions
     const resumeDraft = () => {
         if (pendingDraft) {
             setStep(pendingDraft.step);
-            setSelectedQuadrant(pendingDraft.selectedQuadrant);
-            setSelectedEmotion(pendingDraft.selectedEmotion);
+            setSelectedQuadrants(pendingDraft.selectedQuadrants || []);
+            setSelectedEmotions(pendingDraft.selectedEmotions || []);
             setEmotionIntensity(pendingDraft.emotionIntensity);
             setBodyScanData(pendingDraft.bodyScanData);
             setUnderstandingData(pendingDraft.understandingData);
@@ -84,8 +88,14 @@ export const useRulerFlow = () => {
         setShowResumePrompt(false);
     };
 
-    const handleMoodComplete = (quadrant: Quadrant, intensity: number) => {
-        setSelectedQuadrant(quadrant);
+    const toggleQuadrant = (q: Quadrant) => {
+        setSelectedQuadrants(prev =>
+            prev.includes(q) ? prev.filter(item => item !== q) : [...prev, q]
+        );
+    };
+
+    const handleMoodComplete = (quadrants: Quadrant[], intensity: number) => {
+        setSelectedQuadrants(quadrants);
         setEmotionIntensity(intensity);
         setStep('centering');
         setTimeout(() => {
@@ -98,9 +108,9 @@ export const useRulerFlow = () => {
         setStep('labeling');
     };
 
-    const saveData = (emotion: Emotion | null, u: UnderstandingData | null, e: ExpressingData | null, r: RegulatingData | null, p: string = '', intensity: number = 5) => {
+    const saveData = (emotions: Emotion[], u: UnderstandingData | null, e: ExpressingData | null, r: RegulatingData | null, p: string = '', intensity: number = 5) => {
         const fullData: RulerLogEntry = {
-            emotion: emotion || selectedEmotion!,
+            emotions: emotions.length > 0 ? emotions : selectedEmotions,
             intensity: intensity || emotionIntensity,
             bodyScan: bodyScanData,
             understanding: u || understandingData,
@@ -114,13 +124,21 @@ export const useRulerFlow = () => {
         storageService.clearDraft();
     };
 
-    const handleEmotionSelect = (e: Emotion) => {
-        setSelectedEmotion(e);
+    const toggleEmotion = (e: Emotion) => {
+        setSelectedEmotions(prev => {
+            const exists = prev.find(item => item.id === e.id);
+            if (exists) return prev.filter(item => item.id !== e.id);
+            return [...prev, e];
+        });
+    };
+
+    const handleEmotionSelect = (emotions: Emotion[]) => {
+        setSelectedEmotions(emotions);
         if (isFullFlow) {
             setStep('understanding');
         } else {
             setStep('summary');
-            saveData(e, null, null, null, '', emotionIntensity);
+            saveData(emotions, null, null, null, '', emotionIntensity);
         }
     };
 
@@ -140,15 +158,15 @@ export const useRulerFlow = () => {
     };
 
     const handleNeuroCheckComplete = () => {
-        saveData(null, null, null, regulatingData, postRegulationMood);
+        saveData(selectedEmotions, null, null, regulatingData, postRegulationMood);
         setStep('summary');
     };
 
     const resetFlow = () => {
         storageService.clearDraft();
         setStep('recognizing');
-        setSelectedQuadrant(null);
-        setSelectedEmotion(null);
+        setSelectedQuadrants([]);
+        setSelectedEmotions([]);
         setUnderstandingData(null);
         setExpressingData(null);
         setRegulatingData(null);
@@ -159,8 +177,8 @@ export const useRulerFlow = () => {
     return {
         // State
         step,
-        selectedQuadrant,
-        selectedEmotion,
+        selectedQuadrants,
+        selectedEmotions,
         showResumePrompt,
         isFullFlow,
         postRegulationMood,
@@ -169,10 +187,12 @@ export const useRulerFlow = () => {
         // Actions
         setStep,
         setIsFullFlow,
-        setPostRegulationMood, // Alias if needed or used directly
+        setPostRegulationMood,
         setShowResumePrompt,
         resumeDraft,
         resetFlow,
+        toggleQuadrant,
+        toggleEmotion,
         handleMoodComplete,
         handleBodyScanComplete,
         handleEmotionSelect,

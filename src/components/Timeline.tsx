@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { uiIcons } from './icons/SvgIcons';
+import { useLanguage } from '../services/LanguageContext';
 const Timeline: React.FC = () => {
+    const { t } = useLanguage();
     const [logs, setLogs] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
@@ -59,27 +61,27 @@ const Timeline: React.FC = () => {
 
     const handleExportCSV = () => {
         const headers = [
-            '時間 (Time)',
-            '情緒 (Emotion)',
-            '能量區塊 (Quadrant)',
-            '強度 (Intensity)',
-            '身體部位 (Body Location)',
-            '感官感受 (Sensation)',
-            '觸發事件 (Trigger)',
-            '關聯對象 (Who)',
-            '地點 (Where)',
-            '心理需求 (Need)',
-            '表達內容 (Expression)',
-            '調節策略 (Strategies)',
-            '調節後心情 (Post Mood)'
+            t('時間 (Time)'),
+            t('情緒 (Emotion)'),
+            t('能量區塊 (Quadrant)'),
+            t('強度 (Intensity)'),
+            t('身體部位 (Body Location)'),
+            t('感官感受 (Sensation)'),
+            t('觸發事件 (Trigger)'),
+            t('關聯對象 (Who)'),
+            t('地點 (Where)'),
+            t('心理需求 (Need)'),
+            t('表達內容 (Expression)'),
+            t('調節策略 (Strategies)'),
+            t('調節後心情 (Post Mood)')
         ];
 
         const rows = logs.map(log => [
-            new Date(log.timestamp).toLocaleString('zh-TW'),
-            log.emotion.name,
-            log.emotion.quadrant === 'red' ? '高能量/不愉快' :
-                log.emotion.quadrant === 'yellow' ? '高能量/愉快' :
-                    log.emotion.quadrant === 'blue' ? '低能量/不愉快' : '低能量/愉快',
+            new Date(log.timestamp).toLocaleString(t('zh-TW')),
+            t(log.emotion.name),
+            log.emotion.quadrant === 'red' ? t('高能量/不愉快') :
+                log.emotion.quadrant === 'yellow' ? t('高能量/愉快') :
+                    log.emotion.quadrant === 'blue' ? t('低能量/不愉快') : t('低能量/愉快'),
             log.intensity,
             log.bodyScan?.location || '',
             log.bodyScan?.sensation || '',
@@ -121,7 +123,7 @@ const Timeline: React.FC = () => {
 
     const formatDate = (isoString: string) => {
         const date = new Date(isoString);
-        return date.toLocaleDateString('zh-TW', {
+        return date.toLocaleDateString(t('zh-TW'), {
             month: 'short',
             day: 'numeric',
             weekday: 'narrow',
@@ -134,7 +136,7 @@ const Timeline: React.FC = () => {
         return (
             <div className="empty-state">
                 <div className="empty-icon">{uiIcons.leaf}</div>
-                <p>尚無記錄，開始你的第一次情緒觀察吧。</p>
+                <p>{t('尚無記錄，開始你的第一次情緒觀察吧。')}</p>
             </div>
         );
     }
@@ -143,15 +145,15 @@ const Timeline: React.FC = () => {
         <div className="timeline-container fade-in">
             <div className="timeline-header">
                 <div>
-                    <h2>數據洞察</h2>
-                    <p>回顧你的情緒旅程與成長點滴。</p>
+                    <h2>{t('數據洞察')}</h2>
+                    <p>{t('回顧你的情緒旅程與成長點滴。')}</p>
                 </div>
                 <div className="export-actions-group">
-                    <button className="export-btn primary" onClick={handleExportCSV} title="導出 Excel/CSV 表格">
-                        <span className="export-icon">{uiIcons.folder}</span> 導出 Excel
+                    <button className="export-btn primary" onClick={handleExportCSV} title={t('導出 Excel/CSV 表格')}>
+                        <span className="export-icon">{uiIcons.folder}</span> {t('導出 Excel')}
                     </button>
-                    <button className="export-btn secondary" onClick={handleExportJSON} title="導出 JSON 備份">
-                        備份
+                    <button className="export-btn secondary" onClick={handleExportJSON} title={t('導出 JSON 備份')}>
+                        {t('備份')}
                     </button>
                 </div>
             </div>
@@ -176,21 +178,21 @@ const Timeline: React.FC = () => {
                         </div>
 
                         <div className="card-body">
-                            <h3 className="card-emotion-name">{log.emotion.name}</h3>
+                            <h3 className="card-emotion-name">{t(log.emotion.name)}</h3>
 
                             <div className="card-context">
                                 {log.understanding && (
                                     <div className="context-item">
-                                        <span className="context-label">事件：</span>
-                                        <span className="context-value">{log.understanding.trigger || '未填寫'}</span>
+                                        <span className="context-label">{t('事件：')}</span>
+                                        <span className="context-value">{t(log.understanding.trigger || '未填寫')}</span>
                                     </div>
                                 )}
                                 <div className="card-tags">
                                     {log.understanding && (
                                         <>
-                                            <span className="mini-tag">#{log.understanding.what}</span>
-                                            <span className="mini-tag">#{log.understanding.who}</span>
-                                            <span className="mini-tag">#{log.understanding.where}</span>
+                                            <span className="mini-tag">#{t(log.understanding.what)}</span>
+                                            <span className="mini-tag">#{t(log.understanding.who)}</span>
+                                            <span className="mini-tag">#{t(log.understanding.where)}</span>
                                         </>
                                     )}
                                 </div>
@@ -202,17 +204,17 @@ const Timeline: React.FC = () => {
                                         value={editText}
                                         onChange={(e) => setEditText(e.target.value)}
                                         className="edit-textarea"
-                                        placeholder="更新你的感受表達..."
+                                        placeholder={t('更新你的感受表達...')}
                                     />
                                     <div className="edit-actions">
-                                        <button className="save-btn" onClick={() => handleEditSave(log.timestamp)}>儲存</button>
-                                        <button className="cancel-btn" onClick={() => setEditingId(null)}>取消</button>
+                                        <button className="save-btn" onClick={() => handleEditSave(log.timestamp)}>{t('儲存')}</button>
+                                        <button className="cancel-btn" onClick={() => setEditingId(null)}>{t('取消')}</button>
                                     </div>
                                 </div>
                             ) : (
                                 (log.expressing && log.expressing.expression) && (
                                     <div className="card-note">
-                                        「 {log.expressing.expression} 」
+                                        {t('「')} {t(log.expressing.expression)} {t(' 」')}
                                     </div>
                                 )
                             )}
@@ -392,11 +394,11 @@ const Timeline: React.FC = () => {
                 <div className="delete-modal-overlay" onClick={handleDeleteCancel}>
                     <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="delete-modal-icon">{uiIcons.trash}</div>
-                        <h3>確定要刪除嗎？</h3>
-                        <p>這項操作無法復原，記錄將永久移除。</p>
+                        <h3>{t('確定要刪除嗎？')}</h3>
+                        <p>{t('這項操作無法復原，記錄將永久移除。')}</p>
                         <div className="delete-modal-actions">
-                            <button className="delete-cancel-btn" onClick={handleDeleteCancel}>取消</button>
-                            <button className="delete-confirm-btn" onClick={handleDeleteConfirm}>確認刪除</button>
+                            <button className="delete-cancel-btn" onClick={handleDeleteCancel}>{t('取消')}</button>
+                            <button className="delete-confirm-btn" onClick={handleDeleteConfirm}>{t('確認刪除')}</button>
                         </div>
                     </div>
                 </div>

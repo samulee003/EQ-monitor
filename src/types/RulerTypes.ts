@@ -25,7 +25,7 @@ export interface RegulatingData {
 }
 
 export interface RulerLogEntry {
-    emotion: Emotion;
+    emotions: Emotion[];
     intensity: number;
     bodyScan: BodyScanData | null;
     understanding: UnderstandingData | null;
@@ -40,8 +40,8 @@ export type RulerStep = 'recognizing' | 'centering' | 'bodyScan' | 'labeling' | 
 
 export interface RulerDraft {
     step: RulerStep;
-    selectedQuadrant: Quadrant | null;
-    selectedEmotion: Emotion | null;
+    selectedQuadrants: Quadrant[];
+    selectedEmotions: Emotion[];
     emotionIntensity: number;
     bodyScanData: BodyScanData | null;
     understandingData: UnderstandingData | null;

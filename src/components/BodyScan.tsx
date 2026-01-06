@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Quadrant } from '../data/emotionData';
+import { useLanguage } from '../services/LanguageContext';
 
 interface BodyScanProps {
     quadrant: Quadrant;
@@ -187,49 +188,39 @@ const icons = {
     ),
 };
 
-const bodyLocations = [
-    { id: 'head', label: '頭部', icon: icons.head, popular: true },
-    { id: 'throat', label: '喉嚨', icon: icons.throat, popular: false },
-    { id: 'chest', label: '胸口', icon: icons.chest, popular: true },
-    { id: 'stomach', label: '腹部', icon: icons.stomach, popular: false },
-    { id: 'shoulders', label: '肩膀', icon: icons.shoulders, popular: true },
-    { id: 'whole', label: '全身', icon: icons.whole, popular: false },
-];
-
-const sensationsByQuadrant: Record<Quadrant, { id: string; label: string; icon: React.ReactNode }[]> = {
-    red: [
-        { id: 'tension', label: '緊繃', icon: icons.tension },
-        { id: 'heat', label: '灼熱', icon: icons.heat },
-        { id: 'heartbeat', label: '心跳加速', icon: icons.heartbeat },
-        { id: 'breathless', label: '屏息', icon: icons.breathless },
-    ],
-    yellow: [
-        { id: 'light', label: '輕盈', icon: icons.light },
-        { id: 'warm', label: '溫暖', icon: icons.warm },
-        { id: 'energy', label: '充滿能量', icon: icons.energy },
-        { id: 'vibrate', label: '震動', icon: icons.vibrate },
-    ],
-    blue: [
-        { id: 'heavy', label: '沉重', icon: icons.heavy },
-        { id: 'cold', label: '冰冷', icon: icons.cold },
-        { id: 'hollow', label: '空洞', icon: icons.hollow },
-        { id: 'limp', label: '疲軟', icon: icons.limp },
-        { id: 'throatTight', label: '喉嚨緊縮', icon: icons.throatTight },
-        { id: 'chestBlocked', label: '胸口堵塞', icon: icons.chestBlocked },
-    ],
-    green: [
-        { id: 'relaxed', label: '放鬆', icon: icons.relaxed },
-        { id: 'steady', label: '平穩', icon: icons.steady },
-        { id: 'still', label: '沉靜', icon: icons.still },
-        { id: 'flowing', label: '通暢', icon: icons.flowing },
-    ],
-};
-
 const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => {
+    const { t } = useLanguage();
     const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-    const [selectedSensation, setSelectedSensation] = useState<string | null>(null);
+    const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const [audioProgress, setAudioProgress] = useState(0);
 
-    const sensations = sensationsByQuadrant[quadrant];
+    const bodyLocations = useMemo(() => [
+        { id: 'head', label: t('頭部'), icon: icons.head, popular: true },
+        { id: 'throat', label: t('喉嚨'), icon: icons.throat, popular: false },
+        { id: 'chest', label: t('胸口'), icon: icons.chest, popular: true },
+        { id: 'stomach', label: t('腹部'), icon: icons.stomach, popular: false },
+        { id: 'shoulders', label: t('肩膀'), icon: icons.shoulders, popular: true },
+        { id: 'whole', label: t('全身'), icon: icons.whole, popular: false },
+    ], [t]);
+
+    // Combined sensations for mixed states
+    const allSensations = useMemo(() => [
+        { id: 'tension', label: t('緊繃'), icon: icons.tension },
+        { id: 'heat', label: t('灼熱'), icon: icons.heat },
+        { id: 'heartbeat', label: t('心跳感'), icon: icons.heartbeat },
+        { id: 'breathless', label: t('屏息'), icon: icons.breathless },
+        { id: 'light', label: t('輕盈'), icon: icons.light },
+        { id: 'warm', label: t('溫暖'), icon: icons.warm },
+        { id: 'energy', label: t('能量感'), icon: icons.energy },
+        { id: 'vibrate', label: t('震動'), icon: icons.vibrate },
+        { id: 'heavy', label: t('沉重'), icon: icons.heavy },
+        { id: 'cold', label: t('冰冷'), icon: icons.cold },
+        { id: 'hollow', label: t('空洞'), icon: icons.hollow },
+        { id: 'relaxed', label: t('放鬆'), icon: icons.relaxed },
+        { id: 'steady', label: t('平穩'), icon: icons.steady },
+        { id: 'still', label: t('沉靜'), icon: icons.still },
+    ], [t]);
 
     // Color mapping for quadrants
     const quadrantColors: Record<Quadrant, string> = {
@@ -244,24 +235,62 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
         document.documentElement.style.setProperty('--accent-scan', quadrantColors[quadrant]);
     }, [quadrant]);
 
+    // Simulated audio progress
+    React.useEffect(() => {
+        let interval: any;
+        if (isAudioPlaying) {
+            interval = setInterval(() => {
+                setAudioProgress(prev => {
+                    if (prev >= 100) {
+                        setIsAudioPlaying(false);
+                        return 0;
+                    }
+                    return prev + 2;
+                });
+            }, 300);
+        }
+        return () => clearInterval(interval);
+    }, [isAudioPlaying]);
+
+    const toggleSensation = (label: string) => {
+        setSelectedSensations(prev =>
+            prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
+        );
+    };
+
     return (
         <div className="body-scan-step fade-in">
             <div className="step-header">
-                <button className="nav-btn" onClick={onBack}>← 返回</button>
+                <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="step-dot" />
-                    <span className="step-tag">Recognizing</span>
+                    <span className="step-tag">{t('Recognizing')}</span>
+                </div>
+            </div>
+
+            <div className="audio-guide-card">
+                <button
+                    className={`audio-play-btn ${isAudioPlaying ? 'playing' : ''}`}
+                    onClick={() => setIsAudioPlaying(!isAudioPlaying)}
+                >
+                    {isAudioPlaying ? '⏸' : '▶'}
+                </button>
+                <div className="audio-info">
+                    <span className="audio-title">{t('正念身體掃描語音引導')}</span>
+                    <div className="audio-progress-bar">
+                        <div className="audio-progress-fill" style={{ width: `${audioProgress}%` }}></div>
+                    </div>
                 </div>
             </div>
 
             <div className="section-intro">
-                <h2>感受你的身體</h2>
-                <p className="intro-text">情緒通常會先反映在生理上。試著掃描一下，你感覺到了什麼？</p>
+                <h2>{t('感受你的身體')}</h2>
+                <p className="intro-text">{t('情緒通常會先反映在生理上。試著掃描一下，你感覺到了什麼？')}</p>
             </div>
 
             <div className="scan-content">
                 <div className="scan-section">
-                    <label className="heading-sm">1. 感覺最明顯的部位</label>
+                    <label className="heading-sm">{t('1. 感覺最明顯的部位')}</label>
                     <div className="location-grid">
                         {bodyLocations.map(loc => (
                             <button
@@ -281,14 +310,14 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 </div>
 
                 <div className="scan-section">
-                    <label className="heading-sm">2. 那種感覺像是...</label>
+                    <label className="heading-sm">{t('2. 那種感覺像是... (多選)')}</label>
                     <div className="sensation-grid">
-                        {sensations.map(sens => (
+                        {allSensations.map(sens => (
                             <button
                                 key={sens.id}
-                                className={`scan-btn sensation-btn ${selectedSensation === sens.label ? 'active' : ''}`}
-                                onClick={() => setSelectedSensation(sens.label)}
-                                aria-pressed={selectedSensation === sens.label}
+                                className={`scan-btn sensation-btn ${selectedSensations.includes(sens.label) ? 'active' : ''}`}
+                                onClick={() => toggleSensation(sens.label)}
+                                aria-pressed={selectedSensations.includes(sens.label)}
                             >
                                 <div className="icon-wrapper">
                                     <span className="scan-icon">{sens.icon}</span>
@@ -302,10 +331,10 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
 
             <button
                 className="morandi-main-btn"
-                disabled={!selectedLocation || !selectedSensation}
-                onClick={() => onComplete({ location: selectedLocation!, sensation: selectedSensation! })}
+                disabled={!selectedLocation || selectedSensations.length === 0}
+                onClick={() => onComplete({ location: selectedLocation!, sensation: selectedSensations.join(', ') })}
             >
-                進入情緒標記
+                {t('進入情緒標記')}
             </button>
 
             <style>{`
@@ -352,6 +381,25 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                     line-height: 1.7; 
                     opacity: 0.9;  /* Better contrast than default */
                 }
+
+                .audio-guide-card {
+                    display: flex; align-items: center; gap: var(--s-4);
+                    background: var(--glass-bg); padding: var(--s-3) var(--s-5);
+                    border-radius: var(--radius-md); border: 1px solid var(--glass-border);
+                    margin-bottom: var(--s-2);
+                }
+                .audio-play-btn {
+                    width: 40px; height: 40px; border-radius: 50%; border: none;
+                    background: var(--accent-scan); color: var(--bg-color);
+                    display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; transition: var(--transition-luxe);
+                    font-size: 1.2rem;
+                }
+                .audio-play-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--accent-scan); }
+                .audio-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+                .audio-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+                .audio-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+                .audio-progress-fill { height: 100%; background: var(--accent-scan); border-radius: 2px; transition: width 0.3s linear; }
 
                 .scan-content { display: flex; flex-direction: column; gap: var(--s-10); }
                 .scan-section { display: flex; flex-direction: column; gap: var(--s-5); }

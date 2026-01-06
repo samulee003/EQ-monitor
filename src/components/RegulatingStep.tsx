@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Emotion, Quadrant } from '../data/emotionData';
+import { useLanguage } from '../services/LanguageContext';
 import { regulationIcons } from './icons/SvgIcons';
 import { RegulatingData } from '../types/RulerTypes';
 
@@ -9,35 +10,37 @@ interface RegulatingStepProps {
     onBack: () => void;
 }
 
-const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean }[]> = {
-    red: [
-        { icon: regulationIcons.breathing, title: '引導式深呼吸', desc: '進入跟隨節奏的呼吸練習', type: 'interactive', recommended: true },
-        { icon: regulationIcons.grounding, title: '5-4-3-2-1 接地法', desc: '透過感官重新連結當下', type: 'interactive', recommended: true },
-        { icon: regulationIcons.running, title: '強效宣洩', desc: '進行 30 秒的身心快速擺動' },
-        { icon: regulationIcons.water, title: '冰水刺激', desc: '利用溫差快速平復情緒' },
-    ],
-    yellow: [
-        { icon: regulationIcons.gratitude, title: '感恩清單', desc: '寫三件此刻讓你感到美好的事', recommended: true },
-        { icon: regulationIcons.sparkle, title: '傳遞喜悦', desc: '發送一則讚美訊息給他人' },
-        { icon: regulationIcons.target, title: '目標設定', desc: '趁著能量高設定今天的小目標' },
-        { icon: regulationIcons.dance, title: '慶祝舞動', desc: '放一首歌，隨意地動一動身體' },
-    ],
-    blue: [
-        { icon: regulationIcons.coffee, title: '暖心儀式', desc: '為自己準備一杯有溫度的飲品', recommended: true },
-        { icon: regulationIcons.tidy, title: '微小掌控', desc: '整理三件桌上的雜物' },
-        { icon: regulationIcons.selfLove, title: '自我慈悲', desc: '對自己說一句溫柔的鼓勵' },
-        { icon: regulationIcons.plant, title: '觀察植物', desc: '凝視一片葉子或窗外的景色' },
-    ],
-    green: [
-        { icon: regulationIcons.meditate, title: '三分鐘靜坐', desc: '純粹地與當下的平靜同在', recommended: true },
-        { icon: regulationIcons.book, title: '慢讀時刻', desc: '細讀一段優美的文字' },
-        { icon: regulationIcons.doodle, title: '隨意塗鴉', desc: '不帶目的地記錄線條與色彩' },
-        { icon: regulationIcons.offline, title: '數位離線', desc: '給自己 10 分鐘的無擾空間' },
-    ],
-};
-
 const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, onBack }) => {
+    const { t } = useLanguage();
     const [selectedStrategies, setSelectedStrategies] = useState<string[]>([]);
+
+    const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean }[]> = useMemo(() => ({
+        red: [
+            { icon: regulationIcons.breathing, title: t('引導式深呼吸'), desc: t('進入跟隨節奏的呼吸練習'), type: 'interactive', recommended: true },
+            { icon: regulationIcons.grounding, title: t('5-4-3-2-1 接地法'), desc: t('透過感官重新連結當下'), type: 'interactive', recommended: true },
+            { icon: regulationIcons.running, title: t('強效宣洩'), desc: t('進行 30 秒的身心快速擺動') },
+            { icon: regulationIcons.water, title: t('冰水刺激'), desc: t('利用溫差快速平復情緒') },
+        ],
+        yellow: [
+            { icon: regulationIcons.gratitude, title: t('感恩清單'), desc: t('寫三件此刻讓你感到美好的事'), recommended: true },
+            { icon: regulationIcons.sparkle, title: t('傳遞喜悦'), desc: t('發送一則讚美訊息給他人') },
+            { icon: regulationIcons.target, title: t('目標設定'), desc: t('趁著能量高設定今天的小目標') },
+            { icon: regulationIcons.dance, title: t('慶祝舞動'), desc: t('放一首歌，隨意地動一動身體') },
+        ],
+        blue: [
+            { icon: regulationIcons.coffee, title: t('暖心儀式'), desc: t('為自己準備一杯有溫度的飲品'), recommended: true },
+            { icon: regulationIcons.tidy, title: t('微小掌控'), desc: t('整理三件桌上的雜物') },
+            { icon: regulationIcons.selfLove, title: t('自我慈悲'), desc: t('對自己說一句溫柔的鼓勵') },
+            { icon: regulationIcons.plant, title: t('觀察植物'), desc: t('凝視一片葉子或窗外的景色') },
+        ],
+        green: [
+            { icon: regulationIcons.meditate, title: t('三分鐘靜坐'), desc: t('純粹地與當下的平靜同在'), recommended: true },
+            { icon: regulationIcons.book, title: t('慢讀時刻'), desc: t('細讀一段優美的文字') },
+            { icon: regulationIcons.doodle, title: t('隨意塗鴉'), desc: t('不帶目的地記錄線條與色彩') },
+            { icon: regulationIcons.offline, title: t('數位離線'), desc: t('給自己 10 分鐘的無擾空間') },
+        ],
+    }), [t]);
+
     const [activeInteractive, setActiveInteractive] = useState<string | null>(null);
     const [breatheStage, setBreatheStage] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
     const [groundingStep, setGroundingStep] = useState(0);
@@ -53,7 +56,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
 
     // Breathing Pacer Logic
     useEffect(() => {
-        if (activeInteractive === '引導式深呼吸') {
+        if (activeInteractive === t('引導式深呼吸')) {
             let timer: any;
             const cycle = () => {
                 setBreatheStage('inhale');
@@ -92,11 +95,11 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
     };
 
     const groundingTasks = [
-        "觀察 5 個你能看到的物品",
-        "感受 4 個你能觸碰到的質地",
-        "聆聽 3 個你能聽到的聲音",
-        "分辨 2 個你能聞到的氣味",
-        "品味 1 個你能想到的美好滋味"
+        t("觀察 5 個你能看到的物品"),
+        t("感受 4 個你能觸碰到的質地"),
+        t("聆聽 3 個你能聽到的聲音"),
+        t("分辨 2 個你能聞到的氣味"),
+        t("品味 1 個你能想到的美好滋味")
     ];
 
     return (
@@ -108,14 +111,14 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                         <div className="breathing-session">
                             <div className={`pacer-circle ${breatheStage}`}>
                                 <div className="pacer-text">
-                                    {breatheStage === 'inhale' ? '吸氣...' : breatheStage === 'hold' ? '屏息' : '吐氣...'}
+                                    {breatheStage === 'inhale' ? t('吸氣...') : breatheStage === 'hold' ? t('屏息') : t('吐氣...')}
                                 </div>
                             </div>
-                            <p className="breathing-desc">放鬆肩膀，跟隨圓圈的節奏</p>
-                            <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>我感覺好多了</button>
+                            <p className="breathing-desc">{t('放鬆肩膀，跟隨圓圈的節奏')}</p>
+                            <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>{t('我感覺好多了')}</button>
                         </div>
                     )}
-                    {activeInteractive === '5-4-3-2-1 接地法' && (
+                    {activeInteractive === t('5-4-3-2-1 接地法') && (
                         <div className="grounding-session">
                             <div className="task-card">
                                 <span className="task-count">{5 - groundingStep}</span>
@@ -127,9 +130,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                 ))}
                             </div>
                             {groundingStep < 4 ? (
-                                <button className="next-task-btn" onClick={() => setGroundingStep(s => s + 1)}>完成這項</button>
+                                <button className="next-task-btn" onClick={() => setGroundingStep(s => s + 1)}>{t('完成這項')}</button>
                             ) : (
-                                <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>回到現下</button>
+                                <button className="confirm-pacer-btn" onClick={() => handleInteractiveComplete()}>{t('回到現下')}</button>
                             )}
                         </div>
                     )}
@@ -137,16 +140,16 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     {isReflecting && (
                         <div className="reflection-overlay fade-in">
                             <div className="reflection-card">
-                                <h3>此刻的感覺？</h3>
-                                <p>在練習之後，試著捕捉這一刻內在的微小轉變...</p>
+                                <h3>{t('此刻的感覺？')}</h3>
+                                <p>{t('在練習之後，試著捕捉這一刻內在的微小轉變...')}</p>
                                 <textarea
                                     className="morandi-textarea"
-                                    placeholder="我感覺到..."
+                                    placeholder={t("我感覺到...")}
                                     value={reflectionText}
                                     onChange={(e) => setReflectionText(e.target.value)}
                                     autoFocus
                                 />
-                                <button className="confirm-pacer-btn" onClick={finishReflection}>完成紀錄</button>
+                                <button className="confirm-pacer-btn" onClick={finishReflection}>{t('完成紀錄')}</button>
                             </div>
                         </div>
                     )}
@@ -154,16 +157,16 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
             ) : (
                 <>
                     <div className="step-header">
-                        <button className="nav-btn" onClick={onBack}>← 返回</button>
+                        <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                         <div className="step-label-container">
                             <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                            <span className="step-title">Regulating 調節與平衡</span>
+                            <span className="step-title">{t('Regulating 調節與平衡')}</span>
                         </div>
                     </div>
 
                     <div className="section-intro">
-                        <h2>調節你的能量</h2>
-                        <p>選擇一個引導式練習，或幾項簡單的動作來恢復平衡。</p>
+                        <h2>{t('調節你的能量')}</h2>
+                        <p>{t('選擇一個引導式練習，或幾項簡單的動作來恢復平衡。')}</p>
                     </div>
 
                     <div className="strategies-grid">
@@ -179,7 +182,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                 <div className="strategy-meta">
                                     <div className="strategy-title-row">
                                         <h3>{s.title}</h3>
-                                        {s.recommended && <span className="recommend-badge">推薦</span>}
+                                        {s.recommended && <span className="recommend-badge">{t('推薦')}</span>}
                                     </div>
                                     <p>{s.desc}</p>
                                 </div>
@@ -189,7 +192,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     </div>
 
                     <button className="morandi-main-btn" disabled={selectedStrategies.length === 0} onClick={() => onComplete({ selectedStrategies })}>
-                        完成本次練習
+                        {t('完成本次練習')}
                     </button>
                 </>
             )}

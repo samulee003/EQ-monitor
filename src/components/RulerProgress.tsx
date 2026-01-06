@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Quadrant } from '../data/emotionData';
 import { RulerStep } from '../types/RulerTypes';
+import { useLanguage } from '../services/LanguageContext';
 
 interface RulerProgressProps {
     currentStep: RulerStep;
@@ -9,26 +10,26 @@ interface RulerProgressProps {
 }
 
 // Map internal steps to display steps
-const getDisplaySteps = (isFullFlow: boolean) => {
+const getDisplaySteps = (isFullFlow: boolean, t: (s: string) => string) => {
     if (isFullFlow) {
         return [
-            { key: 'recognizing', label: '辨別', letter: 'R', color: 'red' },
-            { key: 'labeling', label: '標記', letter: 'L', color: 'yellow' },
-            { key: 'understanding', label: '理解', letter: 'U', color: 'blue' },
-            { key: 'expressing', label: '表達', letter: 'E', color: 'yellow' },
-            { key: 'regulating', label: '調節', letter: 'R', color: 'green' },
+            { key: 'recognizing', label: t('辨別'), letter: 'R', color: 'red' },
+            { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
+            { key: 'understanding', label: t('理解'), letter: 'U', color: 'blue' },
+            { key: 'expressing', label: t('表達'), letter: 'E', color: 'yellow' },
+            { key: 'regulating', label: t('調節'), letter: 'R', color: 'green' },
         ];
     }
     // Quick mode: only R → L
     return [
-        { key: 'recognizing', label: '辨別', letter: 'R', color: 'red' },
-        { key: 'labeling', label: '標記', letter: 'L', color: 'yellow' },
+        { key: 'recognizing', label: t('辨別'), letter: 'R', color: 'red' },
+        { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
     ];
 };
 
 // Map current internal step to display index
-const getStepIndex = (step: RulerStep, isFullFlow: boolean): number => {
-    const displaySteps = getDisplaySteps(isFullFlow);
+const getStepIndex = (step: RulerStep, isFullFlow: boolean, t: (s: string) => string): number => {
+    const displaySteps = getDisplaySteps(isFullFlow, t);
 
     // Map intermediate steps to their parent display step
     const stepMapping: Record<string, string> = {
@@ -49,8 +50,9 @@ const getStepIndex = (step: RulerStep, isFullFlow: boolean): number => {
 };
 
 const RulerProgress: React.FC<RulerProgressProps> = ({ currentStep, isFullFlow, selectedQuadrant }) => {
-    const displaySteps = getDisplaySteps(isFullFlow);
-    const currentIndex = getStepIndex(currentStep, isFullFlow);
+    const { t } = useLanguage();
+    const displaySteps = useMemo(() => getDisplaySteps(isFullFlow, t), [isFullFlow, t]);
+    const currentIndex = useMemo(() => getStepIndex(currentStep, isFullFlow, t), [currentStep, isFullFlow, t]);
     const progressPercent = displaySteps.length > 1
         ? (currentIndex / (displaySteps.length - 1)) * 100
         : 100;

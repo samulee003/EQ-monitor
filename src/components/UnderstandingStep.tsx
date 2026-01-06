@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Emotion, psychologicalNeeds } from '../data/emotionData';
+import { useLanguage } from '../services/LanguageContext';
 import { needsIcons } from './icons/SvgIcons';
 import { UnderstandingData } from '../types/RulerTypes';
 
@@ -21,6 +22,7 @@ const needIconMap: Record<string, React.ReactNode> = {
 };
 
 const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComplete, onBack }) => {
+    const { t } = useLanguage();
     const [trigger, setTrigger] = useState('');
     const [message, _setMessage] = useState(''); // Kept for type compatibility if needed, but not currently used in UI
     const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
@@ -74,32 +76,32 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     return (
         <div className="understanding-step fade-in">
             <div className="step-header">
-                <button className="nav-btn" onClick={onBack}>← 返回</button>
+                <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                    <span className="step-title">Understanding 理解核心</span>
+                    <span className="step-title">{t('Understanding 理解核心')}</span>
                 </div>
             </div>
 
             <div className="section-intro">
-                <h2>探索你的 <span style={{ color: `var(--color-${emotion.quadrant})` }}>{emotion.name}</span></h2>
-                <p>我們的情緒往往指向內在某些未被滿足的需求。</p>
+                <h2>{t('探索你的')} <span style={{ color: `var(--color-${emotion.quadrant})` }}>{t(emotion.name)}</span></h2>
+                <p>{t('我們的情緒往往指向內在某些未被滿足的需求。')}</p>
             </div>
 
             <div className="input-card">
                 <div className="question-field">
-                    <label className="heading-sm">1. 發生了什麼？ (Trigger)</label>
+                    <label className="heading-sm">{t('1. 發生了什麼？ (Trigger)')}</label>
                     <textarea
                         className="morandi-textarea"
-                        placeholder="簡單描述觸發這個情緒的事件..."
+                        placeholder={t('簡單描述觸發這個情緒的事件...')}
                         value={trigger}
                         onChange={(e) => setTrigger(e.target.value)}
                     />
                 </div>
 
                 <div className="question-field">
-                    <label className="heading-sm">2. 核心需求 (Underlying Need)</label>
-                    <p className="field-desc">在這個場景中，你最渴望得到的是什麼？</p>
+                    <label className="heading-sm">{t('2. 核心需求 (Underlying Need)')}</label>
+                    <p className="field-desc">{t('在這個場景中，你最渴望得到的是什麼？')}</p>
                     <div className="needs-grid">
                         {psychologicalNeeds.map(need => (
                             <button
@@ -111,8 +113,8 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                                     <span className="need-icon">{needIconMap[need.id] || need.icon}</span>
                                 </div>
                                 <div className="need-info">
-                                    <span className="need-label">{need.label}</span>
-                                    <span className="need-desc">{need.desc}</span>
+                                    <span className="need-label">{t(need.label)}</span>
+                                    <span className="need-desc">{t(need.desc)}</span>
                                 </div>
                             </button>
                         ))}
@@ -122,13 +124,13 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
 
             <div className="context-sections">
                 <div className="context-group">
-                    <label className="heading-sm">當下的情境</label>
+                    <label className="heading-sm">{t('當下的情境')}</label>
                     <div className="context-grid">
                         <div className="sub-group">
-                            <span>類型</span>
+                            <span>{t('類型')}</span>
                             <div className="chip-grid">
                                 {[...defaultOptions.what, ...customWhat].map(item => (
-                                    <button key={item} className={`morandi-chip ${what === item ? 'active' : ''}`} onClick={() => setWhat(item)}>{item}</button>
+                                    <button key={item} className={`morandi-chip ${what === item ? 'active' : ''}`} onClick={() => setWhat(item)}>{t(item)}</button>
                                 ))}
                                 {!isAddingWhat ? (
                                     <button className="morandi-chip add" onClick={() => setIsAddingWhat(true)}>+</button>
@@ -139,10 +141,10 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                         </div>
 
                         <div className="sub-group">
-                            <span>對象</span>
+                            <span>{t('對象')}</span>
                             <div className="chip-grid">
                                 {[...defaultOptions.who, ...customWho].map(item => (
-                                    <button key={item} className={`morandi-chip ${who === item ? 'active' : ''}`} onClick={() => setWho(item)}>{item}</button>
+                                    <button key={item} className={`morandi-chip ${who === item ? 'active' : ''}`} onClick={() => setWho(item)}>{t(item)}</button>
                                 ))}
                                 {!isAddingWho ? (
                                     <button className="morandi-chip add" onClick={() => setIsAddingWho(true)}>+</button>
@@ -153,10 +155,10 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                         </div>
 
                         <div className="sub-group">
-                            <span>位置</span>
+                            <span>{t('位置')}</span>
                             <div className="chip-grid">
                                 {[...defaultOptions.where, ...customWhere].map(item => (
-                                    <button key={item} className={`morandi-chip ${where === item ? 'active' : ''}`} onClick={() => setWhere(item)}>{item}</button>
+                                    <button key={item} className={`morandi-chip ${where === item ? 'active' : ''}`} onClick={() => setWhere(item)}>{t(item)}</button>
                                 ))}
                                 {!isAddingWhere ? (
                                     <button className="morandi-chip add" onClick={() => setIsAddingWhere(true)}>+</button>
@@ -170,7 +172,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
             </div>
 
             <button className="morandi-main-btn" disabled={!canProceed} onClick={() => onComplete({ trigger, message, what, who, where, need: selectedNeed })}>
-                下一步：表達宣洩
+                {t('下一步：表達宣洩')}
             </button>
 
             <style>{`

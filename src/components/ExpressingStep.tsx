@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Emotion } from '../data/emotionData';
+import { useLanguage } from '../services/LanguageContext';
 import VoiceRecorder from './VoiceRecorder';
 import { expressingIcons } from './icons/SvgIcons';
 import { ExpressingData } from '../types/RulerTypes';
@@ -10,13 +11,16 @@ interface ExpressingStepProps {
     onBack: () => void;
 }
 
-const modes = [
-    { id: 'letter', label: '心情書信', icon: expressingIcons.letter, desc: '寫一封給自己或他人的私密信件' },
-    { id: 'shredder', label: '情緒碎紙機', icon: expressingIcons.shredder, desc: '寫下想放下的負累，將其視覺化銷毀' },
-    { id: 'free', label: '自由書寫', icon: expressingIcons.freewrite, desc: '沒有限制，隨心所欲地記錄' },
-];
-
 const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, onBack }) => {
+    const { t } = useLanguage();
+
+    // Define localized modes inside component to use t()
+    const modes = [
+        { id: 'letter', label: t('心情書信'), icon: expressingIcons.letter, desc: t('寫一封給自己或他人的私密信件') },
+        { id: 'shredder', label: t('情緒碎紙機'), icon: expressingIcons.shredder, desc: t('寫下想放下的負累，將其視覺化銷毀') },
+        { id: 'free', label: t('自由書寫'), icon: expressingIcons.freewrite, desc: t('沒有限制，隨心所欲地記錄') },
+    ];
+
     const [selectedMode, setSelectedMode] = useState(modes[0]);
     const [expression, setExpression] = useState('');
     const [isShredding, setIsShredding] = useState(false);
@@ -48,7 +52,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
 
     const handleComplete = () => {
         onComplete({
-            expression: shredded ? '(內容已銷毀)' : expression,
+            expression: shredded ? t('(內容已銷毀)') : expression,
             prompt: selectedMode.label,
             mode: selectedMode.id
         });
@@ -57,16 +61,16 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
     return (
         <div className="expressing-step fade-in">
             <div className="step-header">
-                <button className="nav-btn" onClick={onBack}>← 返回</button>
+                <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                    <span className="step-title">Expressing 宣洩與表達</span>
+                    <span className="step-title">{t('Expressing 宣洩與表達')}</span>
                 </div>
             </div>
 
             <div className="section-intro">
-                <h2>為情緒尋找出口</h2>
-                <p>轉化感受為文字，或選擇一個儀式來釋放它們。</p>
+                <h2>{t('為情緒尋找出口')}</h2>
+                <p>{t('轉化感受為文字，或選擇一個儀式來釋放它們。')}</p>
             </div>
 
             <div className="mode-selector">
@@ -95,8 +99,8 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 {selectedMode.id === 'shredder' && shredded ? (
                     <div className="shredded-message fade-in">
                         <span className="success-icon">✨</span>
-                        <p>那些負擔已經隨風而逝了。</p>
-                        <button className="reset-btn" onClick={() => setShredded(false)}>再寫一個</button>
+                        <p>{t('那些負擔已經隨風而逝了。')}</p>
+                        <button className="reset-btn" onClick={() => setShredded(false)}>{t('再寫一個')}</button>
                     </div>
                 ) : (
                     <>
@@ -107,7 +111,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                         <div className="textarea-container">
                             <textarea
                                 className="expression-textarea"
-                                placeholder={selectedMode.id === 'shredder' ? "寫下你想揉碎、丟棄的心情..." : "在這裡自由表達..."}
+                                placeholder={selectedMode.id === 'shredder' ? t("寫下你想揉碎、丟棄的心情...") : t("在這裡自由表達...")}
                                 value={expression}
                                 onChange={(e) => setExpression(e.target.value)}
                                 disabled={isShredding}
@@ -117,7 +121,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                                     <div className="shred-line"></div>
                                     <div className="shred-line"></div>
                                     <div className="shred-line"></div>
-                                    <span className="skip-hint">點擊跳過</span>
+                                    <span className="skip-hint">{t('點擊跳過')}</span>
                                 </div>
                             )}
                         </div>
@@ -132,7 +136,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                         disabled={!expression.trim() || isShredding}
                         onClick={handleShred}
                     >
-                        啟動碎紙機
+                        {t('啟動碎紙機')}
                     </button>
                 ) : (
                     <button
@@ -140,7 +144,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                         disabled={(!expression.trim() && !shredded)}
                         onClick={handleComplete}
                     >
-                        {shredded ? '帶著輕鬆的心前進' : '下一步：調節'}
+                        {shredded ? t('帶著輕鬆的心前進') : t('下一步：調節')}
                     </button>
                 )}
             </div>
@@ -278,7 +282,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                     cursor: not-allowed;
                 }
                 .morandi-main-btn:disabled::after {
-                    content: '👈 請先完成表達內容';
+                    content: '👈 ${t('請先完成表達內容')}';
                     display: block;
                     font-size: 0.7rem;
                     font-weight: 400;

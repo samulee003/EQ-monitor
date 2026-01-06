@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Emotion } from '../data/emotionData';
+import { useLanguage } from '../services/LanguageContext';
 
 interface ContextLoggerProps {
     emotion: Emotion;
@@ -8,6 +9,7 @@ interface ContextLoggerProps {
 }
 
 const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBack }) => {
+    const { t } = useLanguage();
     const [what, setWhat] = useState('');
     const [who, setWho] = useState('');
     const [where, setWhere] = useState('');
@@ -26,11 +28,11 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
     const [isAddingWhere, setIsAddingWhere] = useState(false);
     const [newWhere, setNewWhere] = useState('');
 
-    const defaultOptions = {
-        what: ['工作', '學習', '社交', '放鬆', '運動', '用餐', '通勤', '家務'],
-        who: ['獨自一人', '家人', '朋友', '伴侶', '同事', '陌生人'],
-        where: ['家中', '辦公室', '戶外', '餐廳', '學校', '公共交通'],
-    };
+    const defaultOptions = useMemo(() => ({
+        what: [t('工作'), t('學習'), t('社交'), t('放鬆'), t('運動'), t('用餐'), t('通勤'), t('家務')],
+        who: [t('獨自一人'), t('家人'), t('朋友'), t('伴侶'), t('同事'), t('陌生人')],
+        where: [t('家中'), t('辦公室'), t('戶外'), t('餐廳'), t('學校'), t('公共交通')],
+    }), [t]);
 
     const handleAddCustom = (type: 'what' | 'who' | 'where') => {
         if (type === 'what' && newWhat.trim()) {
@@ -54,14 +56,14 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
     return (
         <div className="context-logger-container">
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem' }}>
-                <button className="nav-btn" onClick={onBack}>← 返回</button>
+                <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <h3 style={{ margin: 0 }}>
-                    你為什麼感到 <span style={{ color: `var(--color-${emotion.quadrant})` }}>{emotion.name}</span>？
+                    {t('你為什麼感到')} <span style={{ color: `var(--color-${emotion.quadrant})` }}>{t(emotion.name)}</span>？
                 </h3>
             </div>
 
             <div className="context-section">
-                <label>你在做什麼？</label>
+                <label>{t('你在做什麼？')}</label>
                 <div className="chip-group">
                     {[...defaultOptions.what, ...customWhat].map(item => (
                         <button
@@ -83,7 +85,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
                                 onChange={(e) => setNewWhat(e.target.value)}
                                 onBlur={() => handleAddCustom('what')}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustom('what')}
-                                placeholder="輸入內容..."
+                                placeholder={t('輸入內容...')}
                             />
                         </div>
                     )}
@@ -91,7 +93,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
             </div>
 
             <div className="context-section">
-                <label>你和誰在一塊？</label>
+                <label>{t('你和誰在一塊？')}</label>
                 <div className="chip-group">
                     {[...defaultOptions.who, ...customWho].map(item => (
                         <button
@@ -113,7 +115,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
                                 onChange={(e) => setNewWho(e.target.value)}
                                 onBlur={() => handleAddCustom('who')}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustom('who')}
-                                placeholder="輸入內容..."
+                                placeholder={t('輸入內容...')}
                             />
                         </div>
                     )}
@@ -121,7 +123,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
             </div>
 
             <div className="context-section">
-                <label>你在哪裡？</label>
+                <label>{t('你在哪裡？')}</label>
                 <div className="chip-group">
                     {[...defaultOptions.where, ...customWhere].map(item => (
                         <button
@@ -143,7 +145,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
                                 onChange={(e) => setNewWhere(e.target.value)}
                                 onBlur={() => handleAddCustom('where')}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddCustom('where')}
-                                placeholder="輸入內容..."
+                                placeholder={t('輸入內容...')}
                             />
                         </div>
                     )}
@@ -151,9 +153,9 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
             </div>
 
             <div className="context-section">
-                <label>寫下更多想法 (選填)</label>
+                <label>{t('寫下更多想法 (選填)')}</label>
                 <textarea
-                    placeholder="心情備註..."
+                    placeholder={t('心情備註...')}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     className="context-textarea"
@@ -165,7 +167,7 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
                 disabled={!what || !who || !where}
                 onClick={() => onComplete({ what, who, where, note })}
             >
-                完成記錄
+                {t('完成記錄')}
             </button>
 
             <style>{`

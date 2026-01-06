@@ -1,19 +1,33 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useLanguage } from '../services/LanguageContext';
 import { Quadrant } from '../data/emotionData';
 
 interface MoodMeterProps {
-  onSelectQuadrant: (q: Quadrant) => void;
+  onSelectQuadrants: (qs: Quadrant[]) => void;
 }
 
-const quadrants: { id: Quadrant; label: string; desc: string }[] = [
-  { id: 'red', label: '高能量 / 不愉快', desc: '焦慮、壓力、憤怒' },
-  { id: 'yellow', label: '高能量 / 愉快', desc: '興奮、喜悅、動力' },
-  { id: 'blue', label: '低能量 / 不愉快', desc: '悲傷、疲憊、抑鬱' },
-  { id: 'green', label: '低能量 / 愉快', desc: '平靜、放鬆、知足' },
-];
+const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
+  const { t } = useLanguage();
+  const [selectedQs, setSelectedQs] = React.useState<Quadrant[]>([]);
 
-const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
+  const quadrants: { id: Quadrant; label: string; desc: string }[] = useMemo(() => [
+    { id: 'red', label: t('高能量 / 不愉快'), desc: t('焦慮、壓力、憤怒') },
+    { id: 'yellow', label: t('高能量 / 愉快'), desc: t('興奮、喜悅、動力') },
+    { id: 'blue', label: t('低能量 / 不愉快'), desc: t('悲傷、疲憊、抑鬱') },
+    { id: 'green', label: t('低能量 / 愉快'), desc: t('平靜、放鬆、知足') },
+  ], [t]);
+
+  const toggleQuadrant = (id: Quadrant) => {
+    setSelectedQs(prev =>
+      prev.includes(id) ? prev.filter(q => q !== id) : [...prev, id]
+    );
+  };
+
   const updateAura = (color: string | null) => {
+    if (selectedQs.length > 0 && !color) {
+      // If something is selected and we're leaving, keep the selection color or a mix
+      return;
+    }
     document.documentElement.style.setProperty(
       '--aura-color',
       color ? `${color}44` : 'transparent'
@@ -33,8 +47,8 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
   return (
     <div className="mood-meter-container fade-in">
       <div className="mood-meter-header">
-        <h1>你現在感覺如何？</h1>
-        <p>選擇一個最貼近你當前能量與心情的色塊</p>
+        <h1>{t('你現在感覺如何？')}</h1>
+        <p>{t('可以選擇多個最貼近你當前能量與心情的色塊')}</p>
       </div>
 
       <div className="spheres-layout">
@@ -43,22 +57,22 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
         <div className="axis-line axis-horizontal" aria-hidden="true" />
 
         {/* 軸標籤 */}
-        <span className="axis-label axis-top">高能量</span>
-        <span className="axis-label axis-bottom">低能量</span>
-        <span className="axis-label axis-left">不愉快</span>
-        <span className="axis-label axis-right">愉快</span>
+        <span className="axis-label axis-top">{t('高能量')}</span>
+        <span className="axis-label axis-bottom">{t('低能量')}</span>
+        <span className="axis-label axis-left">{t('不愉快')}</span>
+        <span className="axis-label axis-right">{t('愉快')}</span>
 
         {quadrants.map((q) => (
           <div
             key={q.id}
-            className={`sphere-wrapper ${q.id}`}
-            onClick={() => onSelectQuadrant(q.id)}
+            className={`sphere-wrapper ${q.id} ${selectedQs.includes(q.id) ? 'active' : ''}`}
+            onClick={() => toggleQuadrant(q.id)}
             onMouseEnter={() => updateAura(getHexColor(q.id))}
             onMouseLeave={() => updateAura(null)}
             role="button"
             tabIndex={0}
             aria-label={`${q.label}: ${q.desc}`}
-            onKeyDown={(e) => e.key === 'Enter' && onSelectQuadrant(q.id)}
+            onKeyDown={(e) => e.key === 'Enter' && toggleQuadrant(q.id)}
           >
             <div className="sphere-orbital">
               <div className="sphere">
@@ -73,6 +87,14 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
           </div>
         ))}
       </div>
+
+      <button
+        className="morandi-main-btn confirm-btn"
+        disabled={selectedQs.length === 0}
+        onClick={() => onSelectQuadrants(selectedQs)}
+      >
+        {t('確認選擇')}
+      </button>
 
       <style>{`
         .mood-meter-container {
@@ -258,6 +280,30 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrant }) => {
         .sphere-wrapper:hover .sphere-info {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        /* Active/Selected State */
+        .sphere-wrapper.active .sphere {
+          transform: scale(1.1);
+        }
+        .sphere-wrapper.active .sphere-inner {
+          box-shadow: 
+            inset 0 4px 12px hsla(0, 0%, 100%, 0.5),
+            0 0 20px currentColor;
+          border: 2px solid #fff;
+        }
+        .sphere-wrapper.active .sphere-glow {
+          opacity: 0.6;
+          filter: blur(30px);
+        }
+        .sphere-wrapper.active .sphere-info {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .confirm-btn {
+          max-width: 200px;
+          margin-top: -1rem;
         }
 
         @media (max-width: 480px) {
