@@ -71,8 +71,9 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
             onMouseLeave={() => updateAura(null)}
             role="button"
             tabIndex={0}
+            aria-pressed={selectedQs.includes(q.id)}
             aria-label={`${q.label}: ${q.desc}`}
-            onKeyDown={(e) => e.key === 'Enter' && toggleQuadrant(q.id)}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleQuadrant(q.id)}
           >
             <div className="sphere-orbital">
               <div className="sphere">

@@ -73,10 +73,12 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 <p>{t('轉化感受為文字，或選擇一個儀式來釋放它們。')}</p>
             </div>
 
-            <div className="mode-selector">
+            <div className="mode-selector" role="radiogroup" aria-label={t('選擇表達方式')}>
                 {modes.map(m => (
                     <button
                         key={m.id}
+                        role="radio"
+                        aria-checked={selectedMode.id === m.id}
                         className={`mode-card ${selectedMode.id === m.id ? 'active' : ''}`}
                         onClick={() => {
                             setSelectedMode(m);
@@ -117,11 +119,18 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                                 disabled={isShredding}
                             />
                             {isShredding && (
-                                <div className="shred-animation" onClick={skipShredding} role="button" tabIndex={0}>
-                                    <div className="shred-line"></div>
-                                    <div className="shred-line"></div>
-                                    <div className="shred-line"></div>
-                                    <span className="skip-hint">{t('點擊跳過')}</span>
+                                <div
+                                    className="shred-animation"
+                                    onClick={skipShredding}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={t('碎紙中... 點擊跳過')}
+                                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && skipShredding()}
+                                >
+                                    <div className="shred-line" aria-hidden="true"></div>
+                                    <div className="shred-line" aria-hidden="true"></div>
+                                    <div className="shred-line" aria-hidden="true"></div>
+                                    <span className="skip-hint" aria-hidden="true">{t('點擊跳過')}</span>
                                 </div>
                             )}
                         </div>
