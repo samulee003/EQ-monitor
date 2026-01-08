@@ -60,7 +60,7 @@ const CheckInFlow: React.FC = () => {
 
                 {step === 'recognizing' && (
                     <MoodMeter
-                        onSelectQuadrant={(q) => handleMoodComplete([q], 5)}
+                        onSelectQuadrants={(qs) => handleMoodComplete(qs, 5)}
                     />
                 )}
 
