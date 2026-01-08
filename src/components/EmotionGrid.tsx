@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { emotions, Quadrant, Emotion } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 
@@ -8,28 +8,56 @@ interface EmotionGridProps {
   onBack: () => void;
 }
 
+const quadrantColors: Record<Quadrant, string> = {
+  red: 'var(--color-red)',
+  yellow: 'var(--color-yellow)',
+  blue: 'var(--color-blue)',
+  green: 'var(--color-green)',
+};
+
+interface EmotionBubbleProps {
+  emotion: Emotion;
+  isSelected: boolean;
+  onToggle: (e: Emotion) => void;
+  t: (text: string) => string;
+  color: string;
+  index: number;
+}
+
+const EmotionBubble = React.memo(({ emotion, isSelected, onToggle, t, color, index }: EmotionBubbleProps) => {
+  return (
+    <button
+      className={`emotion-bubble ${isSelected ? 'active' : ''}`}
+      style={{
+        '--bubble-color': color,
+        animationDelay: `${index * 0.05}s`
+      } as React.CSSProperties}
+      onClick={() => onToggle(emotion)}
+    >
+      {t(emotion.name)}
+    </button>
+  );
+});
+EmotionBubble.displayName = 'EmotionBubble';
+
 const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, onBack }) => {
   const [selectedEmotions, setSelectedEmotions] = useState<Emotion[]>([]);
   const [isIntensityStep, setIsIntensityStep] = useState(false);
   const [intensity, setIntensity] = useState(5);
   const { t } = useLanguage();
 
-  const filteredEmotions = emotions.filter(e => quadrants.includes(e.quadrant));
+  const filteredEmotions = useMemo(() =>
+    emotions.filter(e => quadrants.includes(e.quadrant)),
+    [quadrants]
+  );
 
-  const quadrantColors: Record<Quadrant, string> = {
-    red: 'var(--color-red)',
-    yellow: 'var(--color-yellow)',
-    blue: 'var(--color-blue)',
-    green: 'var(--color-green)',
-  };
-
-  const toggleEmotion = (e: Emotion) => {
+  const toggleEmotion = useCallback((e: Emotion) => {
     setSelectedEmotions(prev => {
       const exists = prev.find(item => item.id === e.id);
       if (exists) return prev.filter(item => item.id !== e.id);
       return [...prev, e];
     });
-  };
+  }, []);
 
   const handleConfirm = () => {
     onSelectEmotions(selectedEmotions);
@@ -142,17 +170,15 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
 
       <div className="bubbles-container">
         {filteredEmotions.map((emotion, index) => (
-          <button
+          <EmotionBubble
             key={emotion.id}
-            className={`emotion-bubble ${selectedEmotions.find(e => e.id === emotion.id) ? 'active' : ''}`}
-            style={{
-              '--bubble-color': quadrantColors[emotion.quadrant],
-              animationDelay: `${index * 0.05}s`
-            } as React.CSSProperties}
-            onClick={() => toggleEmotion(emotion)}
-          >
-            {t(emotion.name)}
-          </button>
+            emotion={emotion}
+            isSelected={!!selectedEmotions.find(e => e.id === emotion.id)}
+            onToggle={toggleEmotion}
+            t={t}
+            color={quadrantColors[emotion.quadrant]}
+            index={index}
+          />
         ))}
       </div>
 
