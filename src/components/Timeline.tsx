@@ -313,7 +313,7 @@ const Timeline: React.FC = () => {
                         </div>
 
                         <div className="card-body">
-                            <h3 className="card-emotion-name">{log.emotions.map(e => t(e.name)).join('、')}</h3>
+                            <h3 className="card-emotion-name">{(log.emotions || []).map(e => t(e.name)).join('、')}</h3>
 
                             <div className="card-context">
                                 {log.understanding && (
