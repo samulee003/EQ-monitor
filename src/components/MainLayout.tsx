@@ -1,14 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../services/LanguageContext';
+import { useTheme } from '../services/ThemeContext';
+import NotificationSettingsPanel from './NotificationSettings';
+import { notificationService } from '../services/NotificationService';
+import AchievementToast from './AchievementToast';
+import OnboardingFlow from './OnboardingFlow';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'checkin' | 'history' | 'growth';
-  onNavigate: (view: 'checkin' | 'history' | 'growth') => void;
+  currentView: 'checkin' | 'history' | 'growth' | 'achievement';
+  onNavigate: (view: 'checkin' | 'history' | 'growth' | 'achievement') => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { language, toggleLanguage, t } = useLanguage();
+  const { theme, actualTheme, toggleTheme } = useTheme();
+  const [showSettings, setShowSettings] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // 主題圖標
+  const themeIcon = {
+    dark: '🌙',
+    light: '☀️',
+    system: '💻'
+  }[theme];
+
+  // Initialize notification service and check onboarding
+  useEffect(() => {
+    notificationService.initialize();
+    
+    const onboardingCompleted = localStorage.getItem('imxin_onboarding_completed');
+    if (!onboardingCompleted) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('imxin_onboarding_completed', 'true');
+    setShowOnboarding(false);
+  };
 
   return (
     <div className="app-container">
@@ -37,22 +67,56 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             {t('成長看板')}
           </button>
         </nav>
-        <button
-          className="language-toggle"
-          onClick={toggleLanguage}
-          title={language === 'zh-TW' ? '切換為簡體中文' : '切换为繁体中文'}
-        >
-          {language === 'zh-TW' ? '简' : '繁'}
-        </button>
+        <div className="header-actions">
+          <button
+            className={`achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
+            onClick={() => onNavigate('achievement')}
+            title={t('我的成就')}
+          >
+            🏅
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
+          >
+            {themeIcon}
+          </button>
+          <button
+            className="settings-btn"
+            onClick={() => setShowSettings(true)}
+            title={t('提醒設定')}
+          >
+            🔔
+          </button>
+          <button
+            className="language-toggle"
+            onClick={toggleLanguage}
+            title={language === 'zh-TW' ? '切換為簡體中文' : '切换为繁体中文'}
+          >
+            {language === 'zh-TW' ? '简' : '繁'}
+          </button>
+        </div>
       </header>
 
       <main className="main-content">
         {children}
       </main>
 
+      <AchievementToast />
+
+      {showOnboarding && (
+        <OnboardingFlow onComplete={handleOnboardingComplete} />
+      )}
+
       <footer>
         {t('基於 RULER 模型 • 打造平穩心靈')}
       </footer>
+
+      {/* Notification Settings Modal */}
+      {showSettings && (
+        <NotificationSettingsPanel onClose={() => setShowSettings(false)} />
+      )}
 
       <style>{`
         .glass-header {
@@ -103,6 +167,79 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           gap: var(--s-6);
         }
 
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: var(--s-3);
+        }
+
+        .achievement-nav-btn {
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .achievement-nav-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.1); }
+        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: rgba(213, 193, 165, 0.2); }
+
+        .settings-btn {
+          background: linear-gradient(135deg, var(--color-yellow) 0%, var(--color-red) 100%);
+          border: none;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          flex-shrink: 0;
+        }
+
+        .settings-btn:hover {
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .settings-btn:active {
+          transform: scale(0.95);
+        }
+
+        .theme-toggle {
+          background: linear-gradient(135deg, var(--color-yellow) 0%, var(--color-red) 100%);
+          border: none;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+          transform: scale(1.1) rotate(15deg);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle:active {
+          transform: scale(0.95);
+        }
+
         .language-toggle {
           background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-green) 100%);
           border: none;
@@ -148,6 +285,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .nav-link {
             font-size: 0.85rem;
           }
+          .header-actions {
+            gap: var(--s-2);
+          }
+          .settings-btn,
+          .achievement-nav-btn,
+          .theme-toggle,
           .language-toggle {
             width: 32px;
             height: 32px;
@@ -162,6 +305,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           nav {
             gap: var(--s-2);
           }
+          .settings-btn,
+          .achievement-nav-btn,
+          .theme-toggle,
           .language-toggle {
             width: 28px;
             height: 28px;
@@ -174,4 +320,3 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 };
 
 export default MainLayout;
-

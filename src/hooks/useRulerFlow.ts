@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { storageService } from '../services/StorageService';
 import { RulerStep, RulerDraft, RulerLogEntry, BodyScanData, UnderstandingData, ExpressingData, RegulatingData } from '../types/RulerTypes';
 import { Quadrant, Emotion } from '../data/emotionData';
+import { useHabit } from '../services/HabitContext';
 
 export const steps: { key: RulerStep; label: string; letter: string }[] = [
+
     { key: 'recognizing', label: '辨別', letter: 'R' },
     { key: 'labeling', label: '標記', letter: 'L' },
     { key: 'understanding', label: '理解', letter: 'U' },
@@ -25,7 +27,10 @@ export const useRulerFlow = () => {
     const [showResumePrompt, setShowResumePrompt] = useState(false);
     const [pendingDraft, setPendingDraft] = useState<RulerDraft | null>(null);
 
+    const { refreshProgress } = useHabit();
+
     const currentStepIndex = steps.findIndex(s => s.key === step);
+
 
     // Initialize - Load Draft
     useEffect(() => {
@@ -108,7 +113,15 @@ export const useRulerFlow = () => {
         setStep('labeling');
     };
 
-    const saveData = (emotions: Emotion[], u: UnderstandingData | null, e: ExpressingData | null, r: RegulatingData | null, p: string = '', intensity: number = 5) => {
+    const saveData = (
+        emotions: Emotion[], 
+        u: UnderstandingData | null, 
+        e: ExpressingData | null, 
+        r: RegulatingData | null, 
+        p: string = '', 
+        intensity: number = 5,
+        physical?: { sleepHours: number; activityLevel: number }
+    ) => {
         const fullData: RulerLogEntry = {
             emotions: emotions.length > 0 ? emotions : selectedEmotions,
             intensity: intensity || emotionIntensity,
@@ -116,13 +129,18 @@ export const useRulerFlow = () => {
             understanding: u || understandingData,
             expressing: e || expressingData,
             regulating: r || regulatingData,
+            physicalContext: physical,
             postMood: p || postRegulationMood,
             timestamp: new Date().toISOString(),
+            isFullFlow
         };
 
         storageService.saveLog(fullData);
         storageService.clearDraft();
+        refreshProgress();
     };
+
+
 
     const toggleEmotion = (e: Emotion) => {
         setSelectedEmotions(prev => {
@@ -157,10 +175,11 @@ export const useRulerFlow = () => {
         setStep('neuroCheck');
     };
 
-    const handleNeuroCheckComplete = () => {
-        saveData(selectedEmotions, null, null, regulatingData, postRegulationMood);
+    const handleNeuroCheckComplete = (physical?: { sleepHours: number; activityLevel: number }) => {
+        saveData(selectedEmotions, null, null, regulatingData, postRegulationMood, emotionIntensity, physical);
         setStep('summary');
     };
+
 
     const resetFlow = () => {
         storageService.clearDraft();

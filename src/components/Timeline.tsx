@@ -1,16 +1,35 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
+import { storageService, ImportResult } from '../services/StorageService';
+import { RulerLogEntry } from '../types/RulerTypes';
+import ExportPanel from './ExportPanel';
+
+const ITEMS_PER_PAGE = 10; // 每頁顯示數量
+
 const Timeline: React.FC = () => {
     const { t } = useLanguage();
-    const [logs, setLogs] = useState<any[]>([]);
+    const [logs, setLogs] = useState<RulerLogEntry[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [importResult, setImportResult] = useState<ImportResult | null>(null);
+    const [showExport, setShowExport] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const listTopRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         loadLogs();
     }, []);
+
+    // Auto-hide import result after 5 seconds
+    useEffect(() => {
+        if (importResult) {
+            const timer = setTimeout(() => setImportResult(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [importResult]);
 
     const loadLogs = () => {
         const data = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
@@ -24,7 +43,7 @@ const Timeline: React.FC = () => {
     const handleDeleteConfirm = () => {
         if (deleteConfirmId) {
             const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-            const updated = existing.filter((log: any) => log.timestamp !== deleteConfirmId);
+            const updated = existing.filter((log: RulerLogEntry) => log.timestamp !== deleteConfirmId);
             localStorage.setItem('feelings_logs', JSON.stringify(updated));
             setLogs(updated);
             setDeleteConfirmId(null);
@@ -35,14 +54,14 @@ const Timeline: React.FC = () => {
         setDeleteConfirmId(null);
     };
 
-    const handleEditStart = (log: any) => {
+    const handleEditStart = (log: RulerLogEntry) => {
         setEditingId(log.timestamp);
         setEditText(log.expressing?.expression || '');
     };
 
     const handleEditSave = (timestamp: string) => {
         const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-        const updated = existing.map((log: any) => {
+        const updated = existing.map((log: RulerLogEntry) => {
             if (log.timestamp === timestamp) {
                 return {
                     ...log,
@@ -76,23 +95,26 @@ const Timeline: React.FC = () => {
             t('調節後心情 (Post Mood)')
         ];
 
-        const rows = logs.map(log => [
-            new Date(log.timestamp).toLocaleString(t('zh-TW')),
-            t(log.emotion.name),
-            log.emotion.quadrant === 'red' ? t('高能量/不愉快') :
-                log.emotion.quadrant === 'yellow' ? t('高能量/愉快') :
-                    log.emotion.quadrant === 'blue' ? t('低能量/不愉快') : t('低能量/愉快'),
-            log.intensity,
-            log.bodyScan?.location || '',
-            log.bodyScan?.sensation || '',
-            log.understanding?.trigger || '',
-            log.understanding?.who || '',
-            log.understanding?.where || '',
-            log.understanding?.need || '',
-            log.expressing?.expression || '',
-            log.regulating?.selectedStrategies?.join('; ') || '',
-            log.postMood || ''
-        ]);
+        const rows = logs.map(log => {
+            const emotion = log.emotions?.[0];
+            return [
+                new Date(log.timestamp).toLocaleString('zh-TW'),
+                emotion ? t(emotion.name) : '',
+                emotion?.quadrant === 'red' ? t('高能量/不愉快') :
+                    emotion?.quadrant === 'yellow' ? t('高能量/愉快') :
+                        emotion?.quadrant === 'blue' ? t('低能量/不愉快') : t('低能量/愉快'),
+                log.intensity,
+                log.bodyScan?.location || '',
+                log.bodyScan?.sensation || '',
+                log.understanding?.trigger || '',
+                log.understanding?.who || '',
+                log.understanding?.where || '',
+                log.understanding?.need || '',
+                log.expressing?.expression || '',
+                log.regulating?.selectedStrategies?.join('; ') || '',
+                log.postMood || ''
+            ];
+        });
 
         const csvContent = [
             headers.join(','),
@@ -121,9 +143,41 @@ const Timeline: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+            const result = storageService.importLogs(content);
+            setImportResult(result);
+
+            if (result.success && result.imported > 0) {
+                loadLogs(); // Refresh the list
+            }
+        };
+        reader.onerror = () => {
+            setImportResult({
+                success: false,
+                imported: 0,
+                skipped: 0,
+                message: t('無法讀取檔案')
+            });
+        };
+        reader.readAsText(file);
+
+        // Reset file input so same file can be selected again
+        event.target.value = '';
+    };
+
     const formatDate = (isoString: string) => {
         const date = new Date(isoString);
-        return date.toLocaleDateString(t('zh-TW'), {
+        return date.toLocaleDateString('zh-TW', {
             month: 'short',
             day: 'numeric',
             weekday: 'narrow',
@@ -132,41 +186,122 @@ const Timeline: React.FC = () => {
         });
     };
 
+    // 分頁邏輯
+    const totalPages = Math.ceil(logs.length / ITEMS_PER_PAGE);
+    const paginatedLogs = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return logs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [logs, currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        // 滾動到列表頂部
+        listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     if (logs.length === 0) {
         return (
             <div className="empty-state">
                 <div className="empty-icon">{uiIcons.leaf}</div>
                 <p>{t('尚無記錄，開始你的第一次情緒觀察吧。')}</p>
+                <div className="import-empty-action">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept=".json"
+                        onChange={handleImportJSON}
+                        style={{ display: 'none' }}
+                    />
+                    <button className="import-btn-empty" onClick={handleImportClick}>
+                        📥 {t('匯入備份檔案')}
+                    </button>
+                </div>
+                {importResult && (
+                    <div className={`import-toast ${importResult.success ? 'success' : 'error'}`}>
+                        {t(importResult.message)}
+                    </div>
+                )}
+                <style>{`
+                    .import-empty-action { margin-top: 1.5rem; }
+                    .import-btn-empty {
+                        background: var(--glass-bg);
+                        border: 1px dashed var(--glass-border);
+                        border-radius: var(--radius-sm);
+                        padding: 12px 24px;
+                        color: var(--text-secondary);
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: var(--transition);
+                    }
+                    .import-btn-empty:hover {
+                        background: rgba(255,255,255,0.05);
+                        color: var(--text-primary);
+                        border-color: var(--text-secondary);
+                    }
+                    .import-toast {
+                        position: fixed;
+                        bottom: 24px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        padding: 12px 24px;
+                        border-radius: var(--radius-sm);
+                        font-size: 0.9rem;
+                        animation: slideUp 0.3s ease;
+                        z-index: 1000;
+                    }
+                    .import-toast.success { background: var(--color-green); color: white; }
+                    .import-toast.error { background: var(--color-red); color: white; }
+                    @keyframes slideUp {
+                        from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    }
+                `}</style>
             </div>
         );
     }
 
     return (
         <div className="timeline-container fade-in">
+            {/* Hidden file input for import */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                accept=".json"
+                onChange={handleImportJSON}
+                style={{ display: 'none' }}
+            />
+
             <div className="timeline-header">
                 <div>
                     <h2>{t('數據洞察')}</h2>
                     <p>{t('回顧你的情緒旅程與成長點滴。')}</p>
                 </div>
                 <div className="export-actions-group">
-                    <button className="export-btn primary" onClick={handleExportCSV} title={t('導出 Excel/CSV 表格')}>
-                        <span className="export-icon">{uiIcons.folder}</span> {t('導出 Excel')}
+                    <button className="export-btn import" onClick={handleImportClick} title={t('匯入 JSON 備份')}>
+                        📥 {t('匯入')}
                     </button>
-                    <button className="export-btn secondary" onClick={handleExportJSON} title={t('導出 JSON 備份')}>
-                        {t('備份')}
+                    <button className="export-btn primary" onClick={() => setShowExport(true)} title={t('導出記錄')}>
+                        <span className="export-icon">{uiIcons.folder}</span> {t('導出')}
                     </button>
                 </div>
             </div>
 
-            <div className="timeline-list">
-                {logs.map((log, index) => (
+            {/* Import Result Toast */}
+            {importResult && (
+                <div className={`import-toast ${importResult.success ? 'success' : 'error'}`}>
+                    {t(importResult.message)}
+                </div>
+            )}
+
+            <div ref={listTopRef} className="timeline-list">
+                {paginatedLogs.map((log, index) => (
                     <div key={log.timestamp || index} className="timeline-card">
                         <div className="card-top">
                             <span className="card-date">{formatDate(log.timestamp)}</span>
                             <div className="card-actions">
                                 <div
                                     className="card-emotion-dot"
-                                    style={{ backgroundColor: `var(--color-${log.emotion.quadrant})`, color: `var(--color-${log.emotion.quadrant})` }}
+                                    style={{ backgroundColor: `var(--color-${log.emotions[0]?.quadrant || 'gray'})`, color: `var(--color-${log.emotions[0]?.quadrant || 'gray'})` }}
                                 ></div>
                                 {editingId !== log.timestamp && (
                                     <>
@@ -178,7 +313,7 @@ const Timeline: React.FC = () => {
                         </div>
 
                         <div className="card-body">
-                            <h3 className="card-emotion-name">{t(log.emotion.name)}</h3>
+                            <h3 className="card-emotion-name">{log.emotions.map(e => t(e.name)).join('、')}</h3>
 
                             <div className="card-context">
                                 {log.understanding && (
@@ -223,6 +358,29 @@ const Timeline: React.FC = () => {
                 ))}
             </div>
 
+            {/* 分頁控制 */}
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button 
+                        className="page-btn"
+                        disabled={currentPage === 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                    >
+                        ← {t('上一頁')}
+                    </button>
+                    <span className="page-info">
+                        {currentPage} / {totalPages}
+                    </span>
+                    <button 
+                        className="page-btn"
+                        disabled={currentPage === totalPages}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                    >
+                        {t('下一頁')} →
+                    </button>
+                </div>
+            )}
+
             <style>{`
                 .timeline-header { margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
                 .timeline-header h2 { font-size: 1.6rem; margin: 0 0 0.5rem 0; }
@@ -255,6 +413,34 @@ const Timeline: React.FC = () => {
                 .export-btn.primary:hover { filter: brightness(0.9); transform: translateY(-1px); }
                 .export-btn.secondary { padding: 8px 12px; opacity: 0.6; }
                 .export-btn.secondary:hover { opacity: 1; }
+                .export-btn.import { 
+                    border-style: dashed; 
+                    background: transparent;
+                }
+                .export-btn.import:hover { 
+                    background: rgba(167,183,160,0.15); 
+                    border-color: var(--color-green);
+                    color: var(--color-green);
+                }
+
+                .import-toast {
+                    position: fixed;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    padding: 12px 24px;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.9rem;
+                    animation: slideUp 0.3s ease;
+                    z-index: 1000;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+                .import-toast.success { background: var(--color-green); color: white; }
+                .import-toast.error { background: var(--color-red); color: white; }
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
 
                 .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
@@ -387,6 +573,40 @@ const Timeline: React.FC = () => {
                     from { transform: scale(0.9); opacity: 0; }
                     to { transform: scale(1); opacity: 1; }
                 }
+
+                /* 分頁樣式 */
+                .pagination {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-top: 2rem;
+                    padding: 1rem;
+                }
+                .page-btn {
+                    padding: 0.5rem 1rem;
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-sm);
+                    color: var(--text-primary);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: var(--transition);
+                }
+                .page-btn:hover:not(:disabled) {
+                    background: rgba(255,255,255,0.05);
+                    border-color: var(--text-secondary);
+                }
+                .page-btn:disabled {
+                    opacity: 0.3;
+                    cursor: not-allowed;
+                }
+                .page-info {
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                    min-width: 60px;
+                    text-align: center;
+                }
             `}</style>
 
             {/* Delete Confirmation Modal */}
@@ -402,6 +622,11 @@ const Timeline: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Export Panel */}
+            {showExport && (
+                <ExportPanel logs={logs} onClose={() => setShowExport(false)} />
             )}
         </div>
     );

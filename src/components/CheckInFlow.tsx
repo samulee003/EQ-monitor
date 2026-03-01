@@ -6,9 +6,11 @@ import UnderstandingStep from './UnderstandingStep';
 import ExpressingStep from './ExpressingStep';
 import RegulatingStep from './RegulatingStep';
 import RulerProgress from './RulerProgress';
+import SummaryStep from './steps/SummaryStep';
+import NeuroCheckStep from './steps/NeuroCheckStep';
+import CenteringStep from './steps/CenteringStep';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
-import { uiIcons } from './icons/SvgIcons';
 
 const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
@@ -34,13 +36,18 @@ const CheckInFlow: React.FC = () => {
         handleNeuroCheckComplete
     } = useRulerFlow();
 
+    const handleContinueFullFlow = () => {
+        setIsFullFlow(true);
+        setStep('understanding');
+    };
+
     return (
         <div className="check-in-flow fade-in">
             {step !== 'summary' && !showResumePrompt && (
                 <RulerProgress
                     currentStep={step}
                     isFullFlow={isFullFlow}
-                    selectedQuadrant={selectedQuadrants[0]} // Use first as primary for progress colors
+                    selectedQuadrant={selectedQuadrants[0]}
                 />
             )}
 
@@ -65,11 +72,7 @@ const CheckInFlow: React.FC = () => {
                 )}
 
                 {step === 'centering' && selectedQuadrants.length > 0 && (
-                    <div className="centering-state">
-                        <div className="centering-circle" style={{ backgroundColor: `var(--color-${selectedQuadrants[0]})` }}></div>
-                        <h2>{t('沉靜，並感受...')}</h2>
-                        <p>{t('閉上雙眼，深呼吸一次。')}<br />{t('捕捉身體當下的細微信號。')}</p>
-                    </div>
+                    <CenteringStep quadrant={selectedQuadrants[0]} />
                 )}
 
                 {step === 'bodyScan' && selectedQuadrants.length > 0 && (
@@ -111,118 +114,22 @@ const CheckInFlow: React.FC = () => {
                         onBack={() => setStep('expressing')}
                     />
                 )}
+
                 {step === 'neuroCheck' && (
-                    <div className="neuro-check-card">
-                        <div className="summary-icon">{uiIcons.brain}</div>
-                        <h2>{t('調節後的感覺？')}</h2>
-                        <p className="summary-desc">{t('觀察一下現在的內在狀態是否有微小的變化？')}</p>
-
-                        <div className="mood-shift-options">
-                            {['感覺輕鬆多了', '平靜了一些', '依然差不多', '產生了新思緒'].map(option => (
-                                <button
-                                    key={option}
-                                    className={`option-chip ${postRegulationMood === option ? 'active' : ''}`}
-                                    onClick={() => setPostRegulationMood(option)}
-                                >
-                                    {t(option)}
-                                </button>
-                            ))}
-                        </div>
-
-                        <button
-                            className="morandi-main-btn"
-                            disabled={!postRegulationMood}
-                            onClick={handleNeuroCheckComplete}
-                        >
-                            {t('完成調節')}
-                        </button>
-                    </div>
+                    <NeuroCheckStep
+                        onComplete={({ sleepHours, activityLevel }) => 
+                            handleNeuroCheckComplete({ sleepHours, activityLevel })
+                        }
+                    />
                 )}
 
                 {step === 'summary' && selectedEmotions.length > 0 && (
-                    <div className="summary-card">
-                        {/* Confetti celebration */}
-                        <div className="confetti-container">
-                            {[...Array(12)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="confetti-piece"
-                                    style={{
-                                        '--delay': `${i * 0.1}s`,
-                                        '--x': `${(Math.random() - 0.5) * 200}px`,
-                                        '--rotation': `${Math.random() * 360}deg`,
-                                        '--color': ['var(--color-red)', 'var(--color-yellow)', 'var(--color-blue)', 'var(--color-green)'][i % 4]
-                                    } as React.CSSProperties}
-                                />
-                            ))}
-                        </div>
-                        <div className="summary-icon celebration-bounce">{uiIcons.sparkle}</div>
-                        <h2>{t('覺察之旅完成')}</h2>
-
-                        <div className="ruler-checklist">
-                            <div className="checklist-item done">
-                                <span className="step-tag r">R</span>
-                                <span>{t('成功辨識情緒能量')}</span>
-                            </div>
-                            <div className="checklist-item done">
-                                <span className="step-tag l">L</span>
-                                <span>{t('標記情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
-                            </div>
-                            {isFullFlow && (
-                                <>
-                                    <div className="checklist-item done">
-                                        <span className="step-tag u">U</span>
-                                        <span>{t('理清觸發因素')}</span>
-                                    </div>
-                                    <div className="checklist-item done">
-                                        <span className="step-tag e">E</span>
-                                        <span>{t('完成情感表達')}</span>
-                                    </div>
-                                    <div className="checklist-item done">
-                                        <span className="step-tag r2">R</span>
-                                        <span>{t('執行調節策略')}</span>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        {!isFullFlow && (
-                            <div className="quick-regulate-section">
-                                <p className="quick-regulate-title">{t('💡 想試試快速調節嗎？')}</p>
-                                <div className="quick-regulate-chips">
-                                    {selectedEmotions[0].quadrant === 'red' && (
-                                        <>
-                                            <span className="regulate-chip">{t('🧘 深呼吸練習')}</span>
-                                            <span className="regulate-chip">{t('🖐️ 五感接地')}</span>
-                                        </>
-                                    )}
-                                    {selectedEmotions[0].quadrant === 'yellow' && (
-                                        <>
-                                            <span className="regulate-chip">{t('🙏 感恩清單')}</span>
-                                            <span className="regulate-chip">{t('💃 放首歌動一動')}</span>
-                                        </>
-                                    )}
-                                    {selectedEmotions[0].quadrant === 'blue' && (
-                                        <>
-                                            <span className="regulate-chip">{t('☕ 泡杯熱飲')}</span>
-                                            <span className="regulate-chip">{t('💕 對自己說句好話')}</span>
-                                        </>
-                                    )}
-                                    {selectedEmotions[0].quadrant === 'green' && (
-                                        <>
-                                            <span className="regulate-chip">{t('🧘 三分鐘靜坐')}</span>
-                                            <span className="regulate-chip">{t('📖 讀一段文字')}</span>
-                                        </>
-                                    )}
-                                </div>
-                                <button className="morandi-outline-btn" onClick={() => { setIsFullFlow(true); setStep('understanding'); }}>
-                                    {t('開啟完整 RULER 探索')}
-                                </button>
-                            </div>
-                        )}
-
-                        <button className="morandi-main-btn" onClick={resetFlow}>{t('返回')}</button>
-                    </div>
+                    <SummaryStep
+                        selectedEmotions={selectedEmotions}
+                        isFullFlow={isFullFlow}
+                        onReset={resetFlow}
+                        onContinueFullFlow={!isFullFlow ? handleContinueFullFlow : undefined}
+                    />
                 )}
             </div>
 
@@ -319,6 +226,19 @@ const CheckInFlow: React.FC = () => {
                 }
                 .option-chip:hover { border-color: hsla(0,0%,100%,0.2); color: var(--text-primary); }
                 .option-chip.active { background: var(--text-primary); color: var(--bg-color); font-weight: 700; box-shadow: var(--shadow-sm); }
+
+                .physical-context-collect {
+                    margin: var(--s-8) 0;
+                    padding: var(--s-4);
+                    background: rgba(0,0,0,0.1);
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--s-4);
+                }
+                .collect-item { text-align: left; }
+                .collect-item label { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+                .collect-item input[type=range] { width: 100%; accent-color: var(--color-yellow); }
 
                 .morandi-main-btn { 
                     width: 100%; padding: var(--s-4); background: var(--text-primary); 

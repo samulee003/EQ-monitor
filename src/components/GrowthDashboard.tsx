@@ -1,15 +1,36 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { resilienceService, DailyResilience, GranularityData, StrategyDiversityData } from '../services/ResilienceService';
 import { storageService } from '../services/StorageService';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
+import { aiService, AIInsight } from '../services/AIService';
 
 const GrowthDashboard: React.FC = () => {
     const { t } = useLanguage();
-    // ⚡ Bolt: Fetch logs once to avoid multiple localStorage reads and JSON parses
     const logs = useMemo(() => storageService.getLogs(), []);
+    
+    const [weeklyInsight, setWeeklyInsight] = useState<AIInsight | null>(null);
+    const [loadingInsight, setLoadingInsight] = useState(false);
+
+    useEffect(() => {
+        const fetchInsight = async () => {
+            if (logs.length >= 3) { // Only fetch if we have enough data
+                setLoadingInsight(true);
+                try {
+                    const insight = await aiService.generateWeeklyInsight(logs);
+                    setWeeklyInsight(insight);
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    setLoadingInsight(false);
+                }
+            }
+        };
+        fetchInsight();
+    }, [logs]);
 
     const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(logs), [logs]);
+
     const overallScore = useMemo(() => resilienceService.getOverallScore(logs), [logs]);
     const heatmapData = useMemo(() => resilienceService.getHeatmapData(logs), [logs]);
     const intensityData = useMemo(() => resilienceService.getIntensityData(logs), [logs]);
@@ -43,7 +64,77 @@ const GrowthDashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* AI Weekly Insight Section */}
+            {(loadingInsight || weeklyInsight) && (
+                <div className="dashboard-section ai-insight-section fade-in">
+                    <div className="ai-insight-header">
+                        <div className="ai-title">
+                            <span className="ai-icon">{uiIcons.sparkle}</span>
+                            <h4>{t('今心每週洞察')}</h4>
+                        </div>
+                        {!loadingInsight && weeklyInsight && (
+                            <button 
+                                className="regenerate-btn-sm" 
+                                onClick={async () => {
+                                    setLoadingInsight(true);
+                                    try {
+                                        const insight = await aiService.generateWeeklyInsight(logs);
+                                        setWeeklyInsight(insight);
+                                    } finally {
+                                        setLoadingInsight(false);
+                                    }
+                                }}
+                            >
+                                {uiIcons.refresh}
+                            </button>
+                        )}
+                    </div>
+                    {loadingInsight ? (
+                        <div className="ai-loading">
+                            <div className="loading-dots"><span></span><span></span><span></span></div>
+                            <p>{t('正在分析你的情緒軌跡...')}</p>
+                        </div>
+                    ) : weeklyInsight && (
+                        <div className="ai-insight-content">
+                            <div className="insight-main">
+                                <p className="insight-summary">{t(weeklyInsight.summary)}</p>
+                            </div>
+                            
+                            {weeklyInsight.colorTheory && (
+                                <div className="color-theory-banner">
+                                    <span className="color-icon">🎨</span>
+                                    <p>{t(weeklyInsight.colorTheory)}</p>
+                                </div>
+                            )}
+                            
+                            <div className="insight-details">
+                                <div className="detail-card patterns-card">
+                                    <label>{t('觀察到的模式')}</label>
+                                    <div className="pattern-tags">
+                                        {weeklyInsight.underlyingPatterns.map(p => (
+                                            <span key={p} className="pattern-tag">{t(p)}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="detail-card action-card">
+                                    <label>{t('本週練習')}</label>
+                                    <p className="suggested-action">{t(weeklyInsight.suggestedAction)}</p>
+                                </div>
+                            </div>
+                            
+                            <blockquote className="insight-quote">
+                                <span className="quote-mark">「</span>
+                                {t(weeklyInsight.empatheticQuote)}
+                                <span className="quote-mark">」</span>
+                            </blockquote>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className="dashboard-section heatmap-section">
+
                 <label className="heading-sm">{t('情緒熱點圖 (近 30 天)')}</label>
                 <div className="heatmap-grid">
                     {heatmapData.map((day: any, i: number) => (
@@ -371,6 +462,196 @@ const GrowthDashboard: React.FC = () => {
                 .insight-item .icon svg { width: 100%; height: 100%; }
                 .insight-item label { font-size: 0.7rem; color: var(--text-secondary); display: block; margin-bottom: 2px; }
                 .insight-item p { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+
+                /* AI Insight Section Styles */
+                .ai-insight-section {
+                    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-lg);
+                    padding: 1.25rem;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .ai-insight-section::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: linear-gradient(90deg, var(--color-yellow), var(--color-green));
+                    opacity: 0.6;
+                }
+                .ai-insight-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 1rem;
+                }
+                .ai-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                .ai-icon {
+                    width: 24px;
+                    height: 24px;
+                    color: var(--color-yellow);
+                    animation: sparkle 2s ease-in-out infinite;
+                }
+                .ai-icon svg { width: 100%; height: 100%; }
+                .ai-insight-header h4 {
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin: 0;
+                }
+                .regenerate-btn-sm {
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 8px;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    padding: 0;
+                }
+                .regenerate-btn-sm:hover {
+                    border-color: var(--text-secondary);
+                    color: var(--text-primary);
+                    transform: rotate(180deg);
+                }
+                .regenerate-btn-sm svg {
+                    width: 16px;
+                    height: 16px;
+                }
+                @keyframes sparkle {
+                    0%, 100% { opacity: 0.7; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.1); }
+                }
+                .ai-loading {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 2rem;
+                    color: var(--text-secondary);
+                }
+                .loading-dots {
+                    display: flex;
+                    gap: 6px;
+                }
+                .loading-dots span {
+                    width: 8px;
+                    height: 8px;
+                    background: var(--text-secondary);
+                    border-radius: 50%;
+                    animation: loadingBounce 1.4s ease-in-out infinite both;
+                }
+                .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+                .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+                @keyframes loadingBounce {
+                    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+                    40% { transform: scale(1); opacity: 1; }
+                }
+                .ai-insight-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                .insight-main {
+                    padding: 1rem;
+                    background: rgba(0,0,0,0.15);
+                    border-radius: var(--radius-md);
+                    border-left: 3px solid var(--color-yellow);
+                }
+                .insight-summary {
+                    font-size: 1rem;
+                    line-height: 1.7;
+                    color: var(--text-primary);
+                    margin: 0;
+                }
+                .color-theory-banner {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    padding: 0.75rem 1rem;
+                    background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent);
+                    border-radius: var(--radius-md);
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                }
+                .color-icon {
+                    font-size: 1.2rem;
+                    flex-shrink: 0;
+                }
+                .color-theory-banner p {
+                    margin: 0;
+                    font-style: italic;
+                }
+                .insight-details {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.75rem;
+                }
+                @media (max-width: 500px) {
+                    .insight-details { grid-template-columns: 1fr; }
+                }
+                .detail-card {
+                    padding: 1rem;
+                    background: var(--glass-bg);
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--glass-border);
+                }
+                .detail-card label {
+                    font-size: 0.7rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: var(--text-secondary);
+                    display: block;
+                    margin-bottom: 0.5rem;
+                }
+                .pattern-tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                }
+                .pattern-tag {
+                    padding: 4px 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 16px;
+                    font-size: 0.8rem;
+                    color: var(--text-primary);
+                }
+                .action-card .suggested-action {
+                    font-size: 0.9rem;
+                    line-height: 1.6;
+                    color: var(--text-primary);
+                    margin: 0;
+                }
+                .insight-quote {
+                    margin: 0.5rem 0 0;
+                    padding: 1rem 1.25rem;
+                    background: rgba(0,0,0,0.1);
+                    border-radius: var(--radius-md);
+                    border-left: 2px solid var(--color-green);
+                    font-style: italic;
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                    line-height: 1.6;
+                    position: relative;
+                }
+                .quote-mark {
+                    color: var(--color-green);
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    opacity: 0.6;
+                }
             `}</style>
         </div>
     );
