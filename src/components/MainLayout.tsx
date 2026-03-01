@@ -123,7 +123,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           position: sticky;
           top: 0;
           z-index: 100;
-          background: hsla(0, 0%, 10%, 0.8);
+          background: var(--glass-bg);
           backdrop-filter: var(--glass-blur);
           border-bottom: 1px solid var(--glass-border);
           display: flex;
@@ -165,6 +165,38 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         nav {
           display: flex;
           gap: var(--s-6);
+        }
+
+        .nav-link {
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          padding: var(--s-2) var(--s-2);
+          position: relative;
+          transition: var(--transition);
+        }
+
+        .nav-link:hover {
+          color: var(--text-primary);
+        }
+
+        .nav-link.active {
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+
+        .nav-link.active::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background: var(--color-yellow);
+          border-radius: 2px;
         }
 
         .header-actions {
