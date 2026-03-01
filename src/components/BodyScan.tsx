@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Quadrant } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
+import { voiceGuideService, bodyScanScript } from '../services/VoiceGuideService';
 
 interface BodyScanProps {
     quadrant: Quadrant;
@@ -194,6 +195,8 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
     const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const [audioProgress, setAudioProgress] = useState(0);
+    const [currentSection, setCurrentSection] = useState(0);
+    const [isSupported, setIsSupported] = useState(true);
 
     const bodyLocations = useMemo(() => [
         { id: 'head', label: t('頭部'), icon: icons.head, popular: true },
@@ -230,26 +233,32 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
         green: '#AAB09B'
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         document.documentElement.style.setProperty('--aura-color', `${quadrantColors[quadrant]}33`);
         document.documentElement.style.setProperty('--accent-scan', quadrantColors[quadrant]);
+        
+        // 檢查語音支持
+        setIsSupported(voiceGuideService.isSupported());
+        
+        // 清理函數
+        return () => {
+            voiceGuideService.stop();
+        };
     }, [quadrant]);
 
-    // Simulated audio progress
-    React.useEffect(() => {
-        let interval: any;
+    // 更新進度條
+    useEffect(() => {
         if (isAudioPlaying) {
-            interval = setInterval(() => {
-                setAudioProgress(prev => {
-                    if (prev >= 100) {
-                        setIsAudioPlaying(false);
-                        return 0;
-                    }
-                    return prev + 2;
-                });
-            }, 300);
+            const interval = setInterval(() => {
+                const status = voiceGuideService.getStatus();
+                const progress = status.totalSections > 0 
+                    ? (status.currentSection / status.totalSections) * 100 
+                    : 0;
+                setAudioProgress(progress);
+                setCurrentSection(status.currentSection);
+            }, 500);
+            return () => clearInterval(interval);
         }
-        return () => clearInterval(interval);
     }, [isAudioPlaying]);
 
     const toggleSensation = (label: string) => {
@@ -257,6 +266,30 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
             prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
         );
     };
+
+    // 控制語音引導
+    const toggleAudio = useCallback(async () => {
+        if (isAudioPlaying) {
+            voiceGuideService.stop();
+            setIsAudioPlaying(false);
+            setAudioProgress(0);
+            setCurrentSection(0);
+        } else {
+            setIsAudioPlaying(true);
+            await voiceGuideService.play(
+                bodyScanScript,
+                (section, total) => {
+                    setCurrentSection(section);
+                    setAudioProgress((section / total) * 100);
+                },
+                () => {
+                    // 完成
+                    setIsAudioPlaying(false);
+                    setAudioProgress(100);
+                }
+            );
+        }
+    }, [isAudioPlaying]);
 
     return (
         <div className="body-scan-step fade-in">
@@ -271,15 +304,26 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
             <div className="audio-guide-card">
                 <button
                     className={`audio-play-btn ${isAudioPlaying ? 'playing' : ''}`}
-                    onClick={() => setIsAudioPlaying(!isAudioPlaying)}
+                    onClick={toggleAudio}
+                    disabled={!isSupported}
                 >
                     {isAudioPlaying ? '⏸' : '▶'}
                 </button>
                 <div className="audio-info">
-                    <span className="audio-title">{t('正念身體掃描語音引導')}</span>
+                    <span className="audio-title">
+                        {isSupported 
+                            ? t('正念身體掃描語音引導 (3分鐘)')
+                            : t('您的瀏覽器不支持語音功能')
+                        }
+                    </span>
                     <div className="audio-progress-bar">
                         <div className="audio-progress-fill" style={{ width: `${audioProgress}%` }}></div>
                     </div>
+                    {isAudioPlaying && (
+                        <span className="audio-section">
+                            {currentSection + 1} / {bodyScanScript.sections.length}
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -398,8 +442,10 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 .audio-play-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--accent-scan); }
                 .audio-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
                 .audio-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+                .audio-section { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
                 .audio-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
                 .audio-progress-fill { height: 100%; background: var(--accent-scan); border-radius: 2px; transition: width 0.3s linear; }
+                .audio-play-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
                 .scan-content { display: flex; flex-direction: column; gap: var(--s-10); }
                 .scan-section { display: flex; flex-direction: column; gap: var(--s-5); }

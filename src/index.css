@@ -1,12 +1,11 @@
 :root {
-  /* Morandi Color Palette */
+  /* Morandi Color Palette - Dark Theme (Default) */
   --bg-color: #1a1a1a;
   --bg-secondary: #242424;
   --text-primary: #e8e8e8;
   --text-secondary: #b8b8b8;
 
   /* Mood Quadrant Colors (Luminous Morandi 2.1) */
-  /* Base (Intensity 5) */
   --color-red: #C58B8A;
   --color-yellow: #D5C1A5;
   --color-blue: #97A6B4;
@@ -59,6 +58,37 @@
   --aura-color: transparent;
 }
 
+/* Light Theme */
+[data-theme="light"] {
+  --bg-color: #f5f3ef;
+  --bg-secondary: #ebe7e0;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6b6b6b;
+
+  /* Mood Quadrant Colors - slightly adjusted for light bg */
+  --color-red: #b87a79;
+  --color-yellow: #c4b08f;
+  --color-blue: #8495a3;
+  --color-green: #95a08a;
+
+  /* Gradients - adjusted opacity for light theme */
+  --grad-red: radial-gradient(circle at center, #c99a99 0%, rgba(184, 122, 121, 0.15) 70%);
+  --grad-yellow: radial-gradient(circle at center, #d4c4a8 0%, rgba(196, 176, 143, 0.15) 70%);
+  --grad-blue: radial-gradient(circle at center, #9dabb7 0%, rgba(132, 149, 163, 0.15) 70%);
+  --grad-green: radial-gradient(circle at center, #a8b29d 0%, rgba(149, 160, 138, 0.15) 70%);
+
+  /* UI Tokens - Light Theme */
+  --glass-bg: hsla(0, 0%, 0%, 0.025);
+  --glass-border: hsla(0, 0%, 0%, 0.08);
+
+  --shadow-luxe:
+    0 4px 24px -1px rgba(0, 0, 0, 0.08),
+    0 10px 40px -5px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px hsla(0, 0%, 0%, 0.03);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -73,7 +103,12 @@ body {
   font-family: 'Inter', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  transition: background-image 0.8s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Smooth theme transition for all elements */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 /* Base Layout */

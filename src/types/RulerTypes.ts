@@ -31,10 +31,15 @@ export interface RulerLogEntry {
     understanding: UnderstandingData | null;
     expressing: ExpressingData | null;
     regulating: RegulatingData | null;
+    physicalContext?: {
+        sleepHours: number;
+        activityLevel: number; // 1-5
+    };
     postMood: string;
     timestamp: string;
     isFullFlow?: boolean;
 }
+
 
 export type RulerStep = 'recognizing' | 'centering' | 'bodyScan' | 'labeling' | 'understanding' | 'expressing' | 'regulating' | 'neuroCheck' | 'summary';
 
