@@ -47,7 +47,7 @@ const CheckInFlow: React.FC = () => {
                 <RulerProgress
                     currentStep={step}
                     isFullFlow={isFullFlow}
-                    selectedQuadrant={selectedQuadrants[0]}
+                    selectedQuadrant={selectedQuadrants[0] || undefined}
                 />
             )}
 

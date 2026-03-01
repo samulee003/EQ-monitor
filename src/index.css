@@ -65,17 +65,17 @@
   --text-primary: #2d2d2d;
   --text-secondary: #6b6b6b;
 
-  /* Mood Quadrant Colors - slightly adjusted for light bg */
-  --color-red: #b87a79;
-  --color-yellow: #c4b08f;
-  --color-blue: #8495a3;
-  --color-green: #95a08a;
+  /* Mood Quadrant Colors - enhanced contrast for light bg */
+  --color-red: #d67373;
+  --color-yellow: #d4b87a;
+  --color-blue: #6b8fa8;
+  --color-green: #8dae7f;
 
-  /* Gradients - adjusted opacity for light theme */
-  --grad-red: radial-gradient(circle at center, #c99a99 0%, rgba(184, 122, 121, 0.15) 70%);
-  --grad-yellow: radial-gradient(circle at center, #d4c4a8 0%, rgba(196, 176, 143, 0.15) 70%);
-  --grad-blue: radial-gradient(circle at center, #9dabb7 0%, rgba(132, 149, 163, 0.15) 70%);
-  --grad-green: radial-gradient(circle at center, #a8b29d 0%, rgba(149, 160, 138, 0.15) 70%);
+  /* Gradients - enhanced for light theme */
+  --grad-red: radial-gradient(circle at center, #e08585 0%, rgba(214, 115, 115, 0.2) 70%);
+  --grad-yellow: radial-gradient(circle at center, #dcc68a 0%, rgba(212, 184, 122, 0.2) 70%);
+  --grad-blue: radial-gradient(circle at center, #7ba3c2 0%, rgba(107, 143, 168, 0.2) 70%);
+  --grad-green: radial-gradient(circle at center, #9bc48d 0%, rgba(141, 174, 127, 0.2) 70%);
 
   /* UI Tokens - Light Theme */
   --glass-bg: hsla(0, 0%, 0%, 0.025);
