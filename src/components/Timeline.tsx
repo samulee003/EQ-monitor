@@ -301,7 +301,7 @@ const Timeline: React.FC = () => {
                             <div className="card-actions">
                                 <div
                                     className="card-emotion-dot"
-                                    style={{ backgroundColor: `var(--color-${log.emotions[0]?.quadrant || 'gray'})`, color: `var(--color-${log.emotions[0]?.quadrant || 'gray'})` }}
+                                    style={{ backgroundColor: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})`, color: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})` }}
                                 ></div>
                                 {editingId !== log.timestamp && (
                                     <>
