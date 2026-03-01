@@ -6,7 +6,7 @@ import { useLanguage } from '../services/LanguageContext';
 interface RulerProgressProps {
     currentStep: RulerStep;
     isFullFlow: boolean;
-    selectedQuadrant: Quadrant | null;
+    selectedQuadrant: Quadrant | null | undefined;
 }
 
 // Map internal steps to display steps
