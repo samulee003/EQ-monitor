@@ -105,7 +105,7 @@ export const useRulerFlow = () => {
         setStep('centering');
         setTimeout(() => {
             setStep('bodyScan');
-        }, 1500);
+        }, 3000);
     };
 
     const handleBodyScanComplete = (data: BodyScanData) => {
