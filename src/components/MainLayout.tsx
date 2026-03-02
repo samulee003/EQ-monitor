@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../services/LanguageContext';
 import { useTheme } from '../services/ThemeContext';
+import { useAuth } from '../services/AuthContext';
+import { storageService } from '../services/StorageService';
 import NotificationSettingsPanel from './NotificationSettings';
 import { notificationService } from '../services/NotificationService';
 import AchievementToast from './AchievementToast';
 import OnboardingFlow from './OnboardingFlow';
+import AuthModal from './AuthModal';
+import UserProfile from './UserProfile';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -15,8 +19,12 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const { theme, actualTheme, toggleTheme } = useTheme();
+  const { user, isAuthenticated } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // 主題圖標
   const themeIcon = {
@@ -35,9 +43,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     }
   }, []);
 
+  // Sync user with storage service
+  useEffect(() => {
+    if (user) {
+      storageService.setUserId(user.id);
+    } else {
+      storageService.setUserId(null);
+    }
+  }, [user]);
+
   const handleOnboardingComplete = () => {
     localStorage.setItem('imxin_onboarding_completed', 'true');
     setShowOnboarding(false);
+  };
+
+  const openLogin = () => {
+    setAuthMode('login');
+    setShowAuthModal(true);
+  };
+
+  const getInitials = (name: string) => {
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -96,6 +122,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           >
             {language === 'zh-TW' ? '简' : '繁'}
           </button>
+          
+          {/* User Avatar / Login Button */}
+          {isAuthenticated && user ? (
+            <button
+              className="user-avatar-btn"
+              onClick={() => setShowUserProfile(true)}
+              title={user.displayName}
+            >
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.displayName} />
+              ) : (
+                <span className="avatar-initials">{getInitials(user.displayName)}</span>
+              )}
+            </button>
+          ) : (
+            <button
+              className="login-btn"
+              onClick={openLogin}
+              title={t('登錄 / 註冊')}
+            >
+              👤
+            </button>
+          )}
         </div>
       </header>
 
@@ -111,7 +160,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
       <footer>
         {t('基於 RULER 模型 • 打造平穩心靈')}
+        {isAuthenticated && user && (
+          <span className="user-greeting"> • {t('歡迎')}, {user.displayName}</span>
+        )}
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultMode={authMode}
+      />
+
+      {/* User Profile */}
+      {showUserProfile && (
+        <UserProfile onClose={() => setShowUserProfile(false)} />
+      )}
 
       {/* Notification Settings Modal */}
       {showSettings && (
@@ -303,6 +367,77 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           transform: scale(0.95);
         }
 
+        /* User Avatar Button */
+        .user-avatar-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 2px solid var(--glass-border);
+          background: var(--glass-bg);
+          cursor: pointer;
+          padding: 0;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+        }
+
+        .user-avatar-btn:hover {
+          transform: scale(1.1);
+          border-color: var(--color-yellow);
+          box-shadow: 0 0 10px var(--color-yellow);
+        }
+
+        .user-avatar-btn img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .avatar-initials {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          background: linear-gradient(135deg, var(--color-yellow), var(--color-red));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        /* Login Button */
+        .login-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 2px dashed var(--glass-border);
+          background: var(--glass-bg);
+          cursor: pointer;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+        }
+
+        .login-btn:hover {
+          border-color: var(--color-yellow);
+          background: hsla(43, 40%, 70%, 0.1);
+          transform: scale(1.1);
+        }
+
+        footer {
+          padding: 2rem;
+          text-align: center;
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+          opacity: 0.6;
+        }
+
+        .user-greeting {
+          color: var(--color-yellow);
+        }
+
         @media (max-width: 480px) {
           .glass-header {
             padding: var(--s-3) var(--s-4);
@@ -327,10 +462,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle,
-          .language-toggle {
+          .language-toggle,
+          .user-avatar-btn,
+          .login-btn {
             width: 32px;
             height: 32px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
           }
         }
 
@@ -344,10 +481,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle,
-          .language-toggle {
+          .language-toggle,
+          .user-avatar-btn,
+          .login-btn {
             width: 28px;
             height: 28px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
           }
         }
       `}</style>
