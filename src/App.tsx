@@ -10,6 +10,7 @@ import A11yAnnouncer from './components/A11yAnnouncer';
 import { LanguageProvider } from './services/LanguageContext';
 import { HabitProvider } from './services/HabitContext';
 import { ThemeProvider } from './services/ThemeContext';
+import { AuthProvider } from './services/AuthContext';
 import { useFocusVisible } from './hooks/useA11y';
 import './index.css';
 
@@ -33,27 +34,32 @@ function AppContent() {
 
   if (showSplash) {
     return (
-      <LanguageProvider>
-        <HabitProvider>
-          <SplashScreen onComplete={() => setShowSplash(false)} />
-        </HabitProvider>
-      </LanguageProvider>
+      <AuthProvider>
+        <LanguageProvider>
+          <HabitProvider>
+            <SplashScreen onComplete={() => setShowSplash(false)} />
+          </HabitProvider>
+        </LanguageProvider>
+      </AuthProvider>
     );
   }
 
   if (isLocked) {
     return (
-      <LanguageProvider>
-        <HabitProvider>
-          <PrivacyLock onUnlock={() => setIsLocked(false)} />
-        </HabitProvider>
-      </LanguageProvider>
+      <AuthProvider>
+        <LanguageProvider>
+          <HabitProvider>
+            <PrivacyLock onUnlock={() => setIsLocked(false)} />
+          </HabitProvider>
+        </LanguageProvider>
+      </AuthProvider>
     );
   }
 
   return (
     <>
       <SkipLink />
+      <AuthProvider>
       <ThemeProvider>
         <LanguageProvider>
           <HabitProvider>
@@ -70,6 +76,7 @@ function AppContent() {
           </HabitProvider>
         </LanguageProvider>
       </ThemeProvider>
+      </AuthProvider>
       <A11yAnnouncer />
     </>
   );

@@ -8,6 +8,25 @@ export interface ImportResult {
 }
 
 class StorageService {
+    private userId: string | null = null;
+
+    /**
+     * Set current user ID for data isolation
+     */
+    setUserId(userId: string | null): void {
+        this.userId = userId;
+    }
+
+    /**
+     * Get storage key with user prefix
+     */
+    private getKey(baseKey: string): string {
+        if (this.userId) {
+            return `${baseKey}_${this.userId}`;
+        }
+        return baseKey;
+    }
+
     private readonly KEYS = {
         LOGS: 'feelings_logs',
         DRAFT: 'ruler_draft',
@@ -18,14 +37,14 @@ class StorageService {
      * Save user progress (streak, achievements)
      */
     saveProgress(progress: any): void {
-        localStorage.setItem(this.KEYS.PROGRESS, JSON.stringify(progress));
+        localStorage.setItem(this.getKey(this.KEYS.PROGRESS), JSON.stringify(progress));
     }
 
     /**
      * Get user progress
      */
     getProgress(): any {
-        const stored = localStorage.getItem(this.KEYS.PROGRESS);
+        const stored = localStorage.getItem(this.getKey(this.KEYS.PROGRESS));
         return stored ? JSON.parse(stored) : null;
     }
 
@@ -36,14 +55,14 @@ class StorageService {
     saveLog(entry: RulerLogEntry): void {
         const logs = this.getLogs();
         const newLogs = [entry, ...logs];
-        localStorage.setItem(this.KEYS.LOGS, JSON.stringify(newLogs));
+        localStorage.setItem(this.getKey(this.KEYS.LOGS), JSON.stringify(newLogs));
     }
 
     /**
      * Retrieve all historical logs
      */
     getLogs(): RulerLogEntry[] {
-        const stored = localStorage.getItem(this.KEYS.LOGS);
+        const stored = localStorage.getItem(this.getKey(this.KEYS.LOGS));
         return stored ? JSON.parse(stored) : [];
     }
 
@@ -104,7 +123,7 @@ class StorageService {
                 new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             );
 
-            localStorage.setItem(this.KEYS.LOGS, JSON.stringify(mergedLogs));
+            localStorage.setItem(this.getKey(this.KEYS.LOGS), JSON.stringify(mergedLogs));
 
             return {
                 success: true,
@@ -127,7 +146,7 @@ class StorageService {
      * Save a draft of the current flow
      */
     saveDraft(draft: RulerDraft): void {
-        localStorage.setItem(this.KEYS.DRAFT, JSON.stringify(draft));
+        localStorage.setItem(this.getKey(this.KEYS.DRAFT), JSON.stringify(draft));
     }
 
     /**
@@ -142,7 +161,7 @@ class StorageService {
      * Clear the current draft
      */
     clearDraft(): void {
-        localStorage.removeItem(this.KEYS.DRAFT);
+        localStorage.removeItem(this.getKey(this.KEYS.DRAFT));
     }
 }
 
