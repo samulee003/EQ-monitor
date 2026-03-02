@@ -160,6 +160,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           -webkit-text-fill-color: transparent;
           background-clip: text;
           filter: drop-shadow(0 0 20px rgba(197, 139, 138, 0.2));
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         nav {
@@ -177,6 +179,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           padding: var(--s-2) var(--s-2);
           position: relative;
           transition: var(--transition);
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .nav-link:hover {
