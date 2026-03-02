@@ -8,8 +8,13 @@ interface SplashScreenProps {
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const { t } = useLanguage();
     const videoRef = useRef<HTMLVideoElement>(null);
+    const hasPlayedRef = useRef(false);
 
     useEffect(() => {
+        // Prevent double execution in StrictMode
+        if (hasPlayedRef.current) return;
+        hasPlayedRef.current = true;
+
         // Ensure video starts playing
         if (videoRef.current) {
             videoRef.current.play().catch(error => {
