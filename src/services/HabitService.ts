@@ -26,7 +26,7 @@ class HabitService {
         
         // Check Achievements
         const newlyUnlocked: string[] = [];
-        const uniqueEmotions = new Set(logs.flatMap(log => log.emotions.map(e => e.id)));
+        const uniqueEmotions = new Set(logs.flatMap(log => log.emotions?.map(e => e.id).filter(Boolean) || []));
         const fullFlowCount = logs.filter(log => log.isFullFlow).length;
 
         ACHIEVEMENTS.forEach(achievement => {

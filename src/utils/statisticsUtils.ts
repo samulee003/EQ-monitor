@@ -39,9 +39,13 @@ export function calculateEmotionStats(logs: RulerLogEntry[]): EmotionStats {
     let totalIntensity = 0;
 
     logs.forEach(log => {
-        log.emotions.forEach(emotion => {
-            quadrantCount[emotion.quadrant]++;
-            emotionCount[emotion.name] = (emotionCount[emotion.name] || 0) + 1;
+        log.emotions?.forEach(emotion => {
+            if (emotion?.quadrant) {
+                quadrantCount[emotion.quadrant]++;
+            }
+            if (emotion?.name) {
+                emotionCount[emotion.name] = (emotionCount[emotion.name] || 0) + 1;
+            }
         });
         totalIntensity += log.intensity;
     });
@@ -221,9 +225,13 @@ export function calculateDiversityIndex(logs: RulerLogEntry[]): number {
     const uniqueQuadrants = new Set<Quadrant>();
 
     logs.forEach(log => {
-        log.emotions.forEach(emotion => {
-            uniqueEmotions.add(emotion.id);
-            uniqueQuadrants.add(emotion.quadrant);
+        log.emotions?.forEach(emotion => {
+            if (emotion?.id) {
+                uniqueEmotions.add(emotion.id);
+            }
+            if (emotion?.quadrant) {
+                uniqueQuadrants.add(emotion.quadrant);
+            }
         });
     });
 
