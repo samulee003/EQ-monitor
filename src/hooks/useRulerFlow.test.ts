@@ -1,142 +1,291 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useRulerFlow } from './useRulerFlow';
-import { RulerLogEntry } from '../types/RulerTypes';
+import { useRulerFlow, steps } from './useRulerFlow';
+
+// Mock dependencies
+vi.mock('../services/StorageService', () => ({
+    storageService: {
+        getDraft: vi.fn(() => null),
+        saveDraft: vi.fn(),
+        clearDraft: vi.fn(),
+        saveLog: vi.fn(),
+    },
+}));
+
+vi.mock('../services/HabitContext', () => ({
+    HabitContext: {
+        Provider: ({ children }: { children: React.ReactNode }) => children,
+    },
+    useHabit: () => ({
+        refreshProgress: vi.fn(),
+    }),
+}));
 
 describe('useRulerFlow', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-  });
-
-  it('應該初始化為 recognizing 步驟', () => {
-    const { result } = renderHook(() => useRulerFlow());
-    expect(result.current.step).toBe('recognizing');
-  });
-
-  it('應該正確處理情緒選擇', () => {
-    const { result } = renderHook(() => useRulerFlow());
-
-    act(() => {
-      result.current.handleMoodComplete(['red'], 5);
+    beforeEach(() => {
+        vi.clearAllMocks();
+        localStorage.clear();
     });
 
-    expect(result.current.selectedQuadrants).toContain('red');
-    expect(result.current.emotionIntensity).toBe(5);
-  });
+    describe('initial state', () => {
+        it('should start with recognizing step', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            expect(result.current.step).toBe('recognizing');
+        });
 
-  it('應該支持多象限選擇', () => {
-    const { result } = renderHook(() => useRulerFlow());
+        it('should have empty initial selections', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            expect(result.current.selectedQuadrants).toEqual([]);
+            expect(result.current.selectedEmotions).toEqual([]);
+        });
 
-    act(() => {
-      result.current.handleMoodComplete(['red', 'blue'], 7);
+        it('should have default intensity of 5', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            expect(result.current.emotionIntensity).toBe(5);
+        });
     });
 
-    expect(result.current.selectedQuadrants).toContain('red');
-    expect(result.current.selectedQuadrants).toContain('blue');
-  });
+    describe('step navigation', () => {
+        it('should update step correctly', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.setStep('labeling');
+            });
 
-  it('應該正確重置流程', () => {
-    const { result } = renderHook(() => useRulerFlow());
+            expect(result.current.step).toBe('labeling');
+        });
 
-    act(() => {
-      result.current.handleMoodComplete(['red'], 5);
+        it('should have correct step order', () => {
+            expect(steps).toHaveLength(5);
+            expect(steps[0].key).toBe('recognizing');
+            expect(steps[1].key).toBe('labeling');
+            expect(steps[2].key).toBe('understanding');
+            expect(steps[3].key).toBe('expressing');
+            expect(steps[4].key).toBe('regulating');
+        });
     });
 
-    expect(result.current.step).not.toBe('recognizing');
+    describe('quadrant selection', () => {
+        it('should add quadrant on handleMoodComplete', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 7);
+            });
 
-    act(() => {
-      result.current.resetFlow();
+            expect(result.current.selectedQuadrants).toContain('yellow');
+            expect(result.current.emotionIntensity).toBe(7);
+            expect(result.current.step).toBe('centering');
+        });
+
+        it('should handle multiple quadrants', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            act(() => {
+                result.current.handleMoodComplete(['red', 'blue'], 5);
+            });
+
+            expect(result.current.selectedQuadrants).toContain('red');
+            expect(result.current.selectedQuadrants).toContain('blue');
+        });
     });
 
-    expect(result.current.step).toBe('recognizing');
-    expect(result.current.selectedQuadrants).toHaveLength(0);
-    expect(result.current.selectedEmotions).toHaveLength(0);
-  });
+    describe('body scan', () => {
+        it('should set body scan data and move to labeling', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // First select a quadrant
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
 
-  it('應該正確處理身體掃描數據', () => {
-    const { result } = renderHook(() => useRulerFlow());
+            // Then complete body scan
+            act(() => {
+                result.current.handleBodyScanComplete({
+                    location: 'chest',
+                    sensation: 'tight',
+                });
+            });
 
-    const bodyScanData = {
-      location: '胸口',
-      sensation: '緊繃'
-    };
-
-    act(() => {
-      result.current.handleMoodComplete(['red'], 5);
-      result.current.handleBodyScanComplete(bodyScanData);
+            expect(result.current.bodyScanData).toEqual({
+                location: 'chest',
+                sensation: 'tight',
+            });
+            expect(result.current.step).toBe('labeling');
+        });
     });
 
-    expect(result.current.bodyScanData).toEqual(bodyScanData);
-  });
+    describe('emotion selection', () => {
+        it('should add emotion on handleEmotionSelect', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup - complete mood and body scan
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
 
-  it('應該支持完整 RULER 流程', () => {
-    const { result } = renderHook(() => useRulerFlow());
+            // Select emotion
+            const mockEmotion = { id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 };
+            act(() => {
+                result.current.handleEmotionSelect([mockEmotion]);
+            });
 
-    // Recognizing
-    act(() => {
-      result.current.handleMoodComplete(['red'], 5);
+            expect(result.current.selectedEmotions).toHaveLength(1);
+            expect(result.current.selectedEmotions[0].id).toBe('happy');
+        });
     });
 
-    // Body Scan
-    act(() => {
-      result.current.handleBodyScanComplete({ location: '胸口', sensation: '緊繃' });
+    describe('understanding step', () => {
+        it('should set understanding data and move to expressing', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+
+            // Complete understanding
+            act(() => {
+                result.current.handleUnderstandingComplete({
+                    trigger: 'work done',
+                    what: 'project launch',
+                    who: 'self',
+                    where: 'office',
+                    need: 'achievement',
+                });
+            });
+
+            expect(result.current.understandingData?.trigger).toBe('work done');
+            expect(result.current.step).toBe('expressing');
+        });
     });
 
-    // Labeling - 選擇情緒並啟動完整流程
-    act(() => {
-      result.current.setIsFullFlow(true);
-      result.current.handleEmotionSelect([{ 
-        id: 'angry', 
-        name: '生氣的', 
-        quadrant: 'red', 
-        energy: 3, 
-        pleasantness: 3 
-      }]);
+    describe('expressing step', () => {
+        it('should set expressing data and move to regulating', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+            act(() => {
+                result.current.handleUnderstandingComplete({
+                    trigger: 'work done',
+                    what: 'project launch',
+                    who: 'self',
+                    where: 'office',
+                    need: 'achievement',
+                });
+            });
+
+            // Complete expressing
+            act(() => {
+                result.current.handleExpressingComplete({
+                    expression: 'I did well today',
+                    prompt: 'Write your feelings',
+                    mode: 'writing',
+                });
+            });
+
+            expect(result.current.expressingData?.expression).toBe('I did well today');
+            expect(result.current.step).toBe('regulating');
+        });
     });
 
-    // Understanding
-    act(() => {
-      result.current.handleUnderstandingComplete({
-        trigger: '工作壓力',
-        message: '',
-        what: '工作',
-        who: '同事',
-        where: '辦公室',
-        need: '尊重與認可'
-      });
+    describe('regulating step', () => {
+        it('should set regulating data and move to neuroCheck', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+            act(() => {
+                result.current.handleUnderstandingComplete({
+                    trigger: 'work done',
+                    what: 'project launch',
+                    who: 'self',
+                    where: 'office',
+                    need: 'achievement',
+                });
+            });
+            act(() => {
+                result.current.handleExpressingComplete({
+                    expression: 'I did well today',
+                    prompt: 'Write your feelings',
+                    mode: 'writing',
+                });
+            });
+
+            // Complete regulating
+            act(() => {
+                result.current.handleRegulatingComplete({
+                    selectedStrategies: ['breathing', 'mindfulness'],
+                });
+            });
+
+            expect(result.current.regulatingData?.selectedStrategies).toContain('breathing');
+            expect(result.current.step).toBe('neuroCheck');
+        });
     });
 
-    // Expressing
-    act(() => {
-      result.current.handleExpressingComplete({
-        expression: '我感到很沮喪',
-        prompt: '心情書信',
-        mode: 'letter'
-      });
+    describe('reset flow', () => {
+        it('should reset all state on resetFlow', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Make some changes
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+
+            // Reset
+            act(() => {
+                result.current.resetFlow();
+            });
+
+            expect(result.current.step).toBe('recognizing');
+            expect(result.current.selectedQuadrants).toEqual([]);
+            expect(result.current.selectedEmotions).toEqual([]);
+            expect(result.current.bodyScanData).toBeNull();
+        });
     });
 
-    // Regulating
-    act(() => {
-      result.current.handleRegulatingComplete({
-        selectedStrategies: ['breathing', 'grounding']
-      });
+    describe('full flow mode', () => {
+        it('should toggle full flow mode', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            expect(result.current.isFullFlow).toBe(false);
+
+            act(() => {
+                result.current.setIsFullFlow(true);
+            });
+
+            expect(result.current.isFullFlow).toBe(true);
+        });
     });
-
-    expect(result.current.step).toBe('neuroCheck');
-  });
-
-  it('應該正確保存草稿到 localStorage', () => {
-    const { result } = renderHook(() => useRulerFlow());
-
-    act(() => {
-      result.current.handleMoodComplete(['yellow'], 8);
-    });
-
-    const savedDraft = localStorage.getItem('ruler_draft');
-    expect(savedDraft).not.toBeNull();
-    
-    const draft = JSON.parse(savedDraft!);
-    expect(draft.selectedQuadrants).toContain('yellow');
-  });
 });

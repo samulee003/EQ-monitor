@@ -1,118 +1,260 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { storageService } from './StorageService';
-import { RulerLogEntry } from '../types/RulerTypes';
+import { storageService, ImportResult } from './StorageService';
+
+// Mock localStorage
+const localStorageMock = (() => {
+    let store: Record<string, string> = {};
+    return {
+        getItem: vi.fn((key: string) => store[key] || null),
+        setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+        removeItem: vi.fn((key: string) => { delete store[key]; }),
+        clear: vi.fn(() => { store = {}; }),
+    };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 describe('StorageService', () => {
     beforeEach(() => {
-        // 重置 localStorage mock
-        vi.clearAllMocks();
         localStorage.clear();
+        vi.clearAllMocks();
     });
 
-    describe('getLogs', () => {
-        it('應該返回空數組當沒有記錄時', () => {
-            vi.spyOn(localStorage, 'getItem').mockReturnValue(null);
-            const logs = storageService.getLogs();
-            expect(logs).toEqual([]);
-        });
-
-        it('應該正確解析記錄', () => {
-            const mockLogs: RulerLogEntry[] = [
-                {
-                    emotions: [{ id: 'happy', name: '快樂的', quadrant: 'yellow', energy: 3, pleasantness: 4 }],
-                    intensity: 7,
-                    bodyScan: { location: '胸口', sensation: '溫暖' },
-                    understanding: { trigger: '收到好消息', message: '', what: '工作', who: '同事', where: '辦公室', need: '成就' },
-                    expressing: { expression: '很開心！', prompt: '自由書寫', mode: 'free' },
-                    regulating: { selectedStrategies: ['breathing'] },
-                    postMood: '感覺輕鬆多了',
-                    timestamp: '2026-01-01T00:00:00.000Z',
-                }
-            ];
-            vi.spyOn(localStorage, 'getItem').mockReturnValue(JSON.stringify(mockLogs));
-            
-            const logs = storageService.getLogs();
-            expect(logs).toHaveLength(1);
-            expect(logs[0].emotions[0].name).toBe('快樂的');
-        });
-    });
-
-    describe('saveLog', () => {
-        it('應該將新記錄添加到列表開頭', () => {
-            const existingLogs: RulerLogEntry[] = [
-                {
-                    emotions: [{ id: 'old', name: '舊的', quadrant: 'blue', energy: 2, pleasantness: 2 }],
-                    intensity: 5,
-                    bodyScan: null,
-                    understanding: null,
-                    expressing: null,
-                    regulating: null,
-                    postMood: '',
-                    timestamp: '2026-01-01T00:00:00.000Z',
-                }
-            ];
-            vi.spyOn(localStorage, 'getItem').mockReturnValue(JSON.stringify(existingLogs));
-
-            const newLog: RulerLogEntry = {
-                emotions: [{ id: 'new', name: '新的', quadrant: 'green', energy: 3, pleasantness: 4 }],
-                intensity: 8,
+    describe('saveLog & getLogs', () => {
+        it('should save and retrieve logs', () => {
+            const mockLog = {
+                emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
+                intensity: 7,
                 bodyScan: null,
                 understanding: null,
                 expressing: null,
                 regulating: null,
-                postMood: '',
-                timestamp: '2026-01-02T00:00:00.000Z',
+                postMood: 'better',
+                timestamp: '2024-01-01T00:00:00.000Z',
             };
 
-            storageService.saveLog(newLog);
+            storageService.saveLog(mockLog);
+            const logs = storageService.getLogs();
 
-            const setItemCalls = vi.mocked(localStorage.setItem).mock.calls;
-            expect(setItemCalls).toHaveLength(1);
-            
-            const savedData = JSON.parse(setItemCalls[0][1]);
-            expect(savedData).toHaveLength(2);
-            expect(savedData[0].emotions[0].name).toBe('新的'); // 新記錄在開頭
+            expect(logs).toHaveLength(1);
+            expect(logs[0].emotions[0].name).toBe('開心的');
+        });
+
+        it('should prepend new logs to existing logs', () => {
+            const log1 = {
+                emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
+                intensity: 5,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: 'same',
+                timestamp: '2024-01-01T00:00:00.000Z',
+            };
+
+            const log2 = {
+                emotions: [{ id: 'sad', name: '難過的', quadrant: 'blue' as const, energy: 2, pleasantness: 2 }],
+                intensity: 6,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: 'better',
+                timestamp: '2024-01-02T00:00:00.000Z',
+            };
+
+            storageService.saveLog(log1);
+            storageService.saveLog(log2);
+            const logs = storageService.getLogs();
+
+            expect(logs).toHaveLength(2);
+            expect(logs[0].timestamp).toBe('2024-01-02T00:00:00.000Z');
+        });
+    });
+
+    describe('saveDraft & getDraft', () => {
+        it('should save and retrieve draft', () => {
+            const draft = {
+                step: 'recognizing' as const,
+                selectedQuadrants: ['yellow' as const],
+                selectedEmotions: [],
+                emotionIntensity: 5,
+                bodyScanData: null,
+                understandingData: null,
+                expressingData: null,
+                regulatingData: null,
+                isFullFlow: false,
+                postRegulationMood: '',
+            };
+
+            storageService.saveDraft(draft);
+            const retrieved = storageService.getDraft();
+
+            expect(retrieved).toEqual(draft);
+        });
+
+        it('should return null when no draft exists', () => {
+            const draft = storageService.getDraft();
+            expect(draft).toBeNull();
+        });
+
+        it('should clear draft', () => {
+            const draft = {
+                step: 'recognizing' as const,
+                selectedQuadrants: [],
+                selectedEmotions: [],
+                emotionIntensity: 0,
+                bodyScanData: null,
+                understandingData: null,
+                expressingData: null,
+                regulatingData: null,
+                isFullFlow: false,
+                postRegulationMood: '',
+            };
+
+            storageService.saveDraft(draft);
+            storageService.clearDraft();
+            const retrieved = storageService.getDraft();
+
+            expect(retrieved).toBeNull();
         });
     });
 
     describe('importLogs', () => {
-        it('應該成功導入有效數據', () => {
-            vi.spyOn(localStorage, 'getItem').mockReturnValue('[]');
-            
-            const importData = JSON.stringify([
+        it('should import valid JSON array', () => {
+            const validData = JSON.stringify([
                 {
-                    emotion: { id: 'test', name: '測試', quadrant: 'red', energy: 4, pleasantness: 2 },
-                    intensity: 6,
-                    timestamp: '2026-01-01T00:00:00.000Z',
-                }
+                    timestamp: '2024-01-01T00:00:00.000Z',
+                    emotion: { id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 },
+                },
             ]);
 
-            const result = storageService.importLogs(importData);
-            
+            const result = storageService.importLogs(validData);
+
             expect(result.success).toBe(true);
             expect(result.imported).toBe(1);
         });
 
-        it('應該跳過重複記錄', () => {
-            const existingLog = {
-                emotion: { id: 'test', name: '測試', quadrant: 'red', energy: 4, pleasantness: 2 },
-                intensity: 6,
-                timestamp: '2026-01-01T00:00:00.000Z',
-            };
-            vi.spyOn(localStorage, 'getItem').mockReturnValue(JSON.stringify([existingLog]));
+        it('should reject invalid JSON', () => {
+            const invalidData = 'not valid json';
+            const result = storageService.importLogs(invalidData);
 
-            const result = storageService.importLogs(JSON.stringify([existingLog]));
-            
+            expect(result.success).toBe(false);
+        });
+
+        it('should reject non-array JSON', () => {
+            const nonArrayData = JSON.stringify({ key: 'value' });
+            const result = storageService.importLogs(nonArrayData);
+
+            expect(result.success).toBe(false);
+            expect(result.message).toContain('陣列格式');
+        });
+
+        it('should skip entries without required fields', () => {
+            const dataWithInvalid = JSON.stringify([
+                { timestamp: '2024-01-01T00:00:00.000Z' }, // missing emotion
+                { emotion: { id: 'happy', name: '開心' } }, // missing timestamp
+            ]);
+
+            const result = storageService.importLogs(dataWithInvalid);
+
+            expect(result.success).toBe(true);
+            expect(result.imported).toBe(0);
+            expect(result.skipped).toBe(2);
+        });
+
+        it('should skip duplicate entries', () => {
+            const existingLog = {
+                emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
+                intensity: 5,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: 'same',
+                timestamp: '2024-01-01T00:00:00.000Z',
+            };
+
+            storageService.saveLog(existingLog);
+
+            const duplicateData = JSON.stringify([
+                {
+                    timestamp: '2024-01-01T00:00:00.000Z',
+                    emotion: { id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 },
+                },
+            ]);
+
+            const result = storageService.importLogs(duplicateData);
+
             expect(result.success).toBe(true);
             expect(result.imported).toBe(0);
             expect(result.skipped).toBe(1);
         });
+    });
 
-        it('應該處理無效 JSON', () => {
-            const result = storageService.importLogs('invalid json');
-            
-            expect(result.success).toBe(false);
-            expect(result.imported).toBe(0);
+    describe('saveProgress & getProgress', () => {
+        it('should save and retrieve progress', () => {
+            const progress = {
+                streak: 5,
+                totalEntries: 10,
+                achievements: ['first_entry', 'streak_3'],
+            };
+
+            storageService.saveProgress(progress);
+            const retrieved = storageService.getProgress();
+
+            expect(retrieved).toEqual(progress);
+        });
+
+        it('should return null when no progress exists', () => {
+            const progress = storageService.getProgress();
+            expect(progress).toBeNull();
+        });
+    });
+
+    describe('user isolation', () => {
+        it('should use user-specific keys when userId is set', () => {
+            storageService.setUserId('user123');
+
+            const mockLog = {
+                emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
+                intensity: 5,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: 'same',
+                timestamp: '2024-01-01T00:00:00.000Z',
+            };
+
+            storageService.saveLog(mockLog);
+
+            expect(localStorage.setItem).toHaveBeenCalledWith(
+                'feelings_logs_user123',
+                expect.any(String)
+            );
+        });
+
+        it('should use default keys when userId is null', () => {
+            storageService.setUserId(null);
+
+            const mockLog = {
+                emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
+                intensity: 5,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: 'same',
+                timestamp: '2024-01-01T00:00:00.000Z',
+            };
+
+            storageService.saveLog(mockLog);
+
+            expect(localStorage.setItem).toHaveBeenCalledWith(
+                'feelings_logs',
+                expect.any(String)
+            );
         });
     });
 });

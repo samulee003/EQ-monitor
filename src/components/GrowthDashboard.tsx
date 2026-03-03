@@ -4,13 +4,22 @@ import { storageService } from '../services/StorageService';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
 import { aiService, AIInsight } from '../services/AIService';
+import Skeleton from './Skeleton';
 
 const GrowthDashboard: React.FC = () => {
     const { t } = useLanguage();
     const logs = useMemo(() => storageService.getLogs(), []);
-    
+    const [isLoading, setIsLoading] = useState(true);
+
     const [weeklyInsight, setWeeklyInsight] = useState<AIInsight | null>(null);
     const [loadingInsight, setLoadingInsight] = useState(false);
+
+    useEffect(() => {
+        // Simulate loading for smoother UX
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 400);
+    }, []);
 
     useEffect(() => {
         const fetchInsight = async () => {
@@ -36,6 +45,162 @@ const GrowthDashboard: React.FC = () => {
     const intensityData = useMemo(() => resilienceService.getIntensityData(logs), [logs]);
     const granularity: GranularityData = useMemo(() => resilienceService.getEmotionalGranularity(logs), [logs]);
     const diversity: StrategyDiversityData = useMemo(() => resilienceService.getStrategyDiversity(logs), [logs]);
+
+    // Empty state check
+    const hasData = logs.length > 0;
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="growth-dashboard fade-in">
+                <div className="resilience-header">
+                    <Skeleton type="circle" />
+                    <div className="header-text">
+                        <Skeleton type="text" />
+                        <Skeleton type="text" className="short" />
+                    </div>
+                </div>
+                <div className="dashboard-section">
+                    <Skeleton type="heatmap" />
+                </div>
+                <div className="charts-grid">
+                    <Skeleton type="chart" />
+                    <Skeleton type="chart" />
+                </div>
+                <style>{`
+                    .resilience-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+                    .header-text { flex: 1; }
+                    .dashboard-section { margin-bottom: 1.5rem; }
+                    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                `}</style>
+            </div>
+        );
+    }
+
+    // Empty state
+    if (!hasData) {
+        return (
+            <div className="growth-dashboard-empty fade-in">
+                <div className="empty-illustration">
+                    <div className="chart-mock">
+                        <div className="mock-line"></div>
+                        <div className="mock-dot"></div>
+                    </div>
+                </div>
+                <h2>{t('累積你的情緒數據')}</h2>
+                <p>{t('開始記錄情緒後，你將能看到你的情緒趨勢、韌性成長與個人洞察。')}</p>
+                
+                <div className="insight-preview">
+                    <div className="preview-item">
+                        <span className="preview-icon">📈</span>
+                        <span>{t('情緒趨勢分析')}</span>
+                    </div>
+                    <div className="preview-item">
+                        <span className="preview-icon">🎯</span>
+                        <span>{t('韌性積分')}</span>
+                    </div>
+                    <div className="preview-item">
+                        <span className="preview-icon">🧠</span>
+                        <span>{t('情緒智能指標')}</span>
+                    </div>
+                </div>
+
+                <div className="encouragement">
+                    <p>✨ {t('每一次覺察都是成長的開始')}</p>
+                </div>
+
+                <style>{`
+                    .growth-dashboard-empty {
+                        padding: 3rem 2rem;
+                        text-align: center;
+                        background: var(--bg-secondary);
+                        border-radius: var(--radius-lg);
+                        border: 1px solid var(--glass-border);
+                    }
+                    .empty-illustration {
+                        width: 140px;
+                        height: 100px;
+                        margin: 0 auto 2rem;
+                        position: relative;
+                    }
+                    .chart-mock {
+                        width: 100%;
+                        height: 100%;
+                        position: relative;
+                        border: 1px dashed var(--glass-border);
+                        border-radius: var(--radius-md);
+                        overflow: hidden;
+                    }
+                    .mock-line {
+                        position: absolute;
+                        bottom: 20px;
+                        left: 10px;
+                        right: 10px;
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, var(--color-green), var(--color-yellow), transparent);
+                        opacity: 0.3;
+                    }
+                    .mock-dot {
+                        position: absolute;
+                        bottom: 40px;
+                        left: 50%;
+                        width: 8px;
+                        height: 8px;
+                        background: var(--color-yellow);
+                        border-radius: 50%;
+                        opacity: 0.5;
+                        animation: pulse 2s ease-in-out infinite;
+                    }
+                    @keyframes pulse {
+                        0%, 100% { transform: scale(1); opacity: 0.5; }
+                        50% { transform: scale(1.3); opacity: 0.8; }
+                    }
+                    .growth-dashboard-empty h2 {
+                        font-size: 1.4rem;
+                        color: var(--text-primary);
+                        margin-bottom: 0.5rem;
+                    }
+                    .growth-dashboard-empty p {
+                        color: var(--text-secondary);
+                        font-size: 0.9rem;
+                        line-height: 1.6;
+                        max-width: 300px;
+                        margin: 0 auto 2rem;
+                    }
+                    .insight-preview {
+                        display: flex;
+                        justify-content: center;
+                        gap: 1.5rem;
+                        margin-bottom: 2rem;
+                        flex-wrap: wrap;
+                    }
+                    .preview-item {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 0.5rem;
+                        font-size: 0.8rem;
+                        color: var(--text-secondary);
+                    }
+                    .preview-icon {
+                        font-size: 1.8rem;
+                        opacity: 0.7;
+                    }
+                    .encouragement {
+                        padding: 1rem;
+                        background: linear-gradient(135deg, rgba(213, 193, 165, 0.1), rgba(170, 176, 155, 0.1));
+                        border-radius: var(--radius-md);
+                        border: 1px solid var(--glass-border);
+                    }
+                    .encouragement p {
+                        color: var(--color-yellow);
+                        font-size: 0.95rem;
+                        margin: 0;
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     // Simple SVG Line Chart logic
     const maxScore = 100;
