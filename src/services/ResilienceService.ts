@@ -61,7 +61,7 @@ class ResilienceService {
         logs.forEach((entry: RulerLogEntry) => {
             const date = new Date(entry.timestamp).toLocaleDateString();
             if (!days[date]) {
-                days[date] = { total: 0, count: 0, emotion: entry.emotion?.name || '未知' };
+                days[date] = { total: 0, count: 0, emotion: entry.emotions?.[0]?.name || '未知' };
             }
 
             let entryScore = 50; // Base score
@@ -125,7 +125,7 @@ class ResilienceService {
                 heatmap.push({
                     date: dateStr,
                     intensity: latest.intensity || 5,
-                    quadrant: latest.emotion?.quadrant || 'gray',
+                    quadrant: latest.emotions?.[0]?.quadrant || 'gray',
                     count: dayLogs.length,
                     hasData: true
                 });
@@ -159,9 +159,11 @@ class ResilienceService {
         const uniqueEmotions = new Set<string>();
 
         logs.forEach((log: RulerLogEntry) => {
-            if (log.emotion?.name) {
-                uniqueEmotions.add(log.emotion.name);
-            }
+            log.emotions?.forEach(emotion => {
+                if (emotion?.name) {
+                    uniqueEmotions.add(emotion.name);
+                }
+            });
         });
 
         const uniqueList = Array.from(uniqueEmotions);
