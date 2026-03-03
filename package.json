@@ -1,8 +1,28 @@
 {
-  "name": "ecliptic-meteorite",
-  "private": true,
-  "version": "0.0.0",
+  "name": "imxin-app",
+  "private": false,
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "author": "今心團隊",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samulee003/EQ-monitor.git"
+  },
+  "homepage": "https://github.com/samulee003/EQ-monitor#readme",
+  "bugs": {
+    "url": "https://github.com/samulee003/EQ-monitor/issues"
+  },
+  "keywords": [
+    "emotion",
+    "mental-health",
+    "ruler",
+    "mindfulness",
+    "react",
+    "pwa",
+    "typescript",
+    "繁體中文"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

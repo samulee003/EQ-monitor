@@ -9,6 +9,7 @@ import RulerProgress from './RulerProgress';
 import SummaryStep from './steps/SummaryStep';
 import NeuroCheckStep from './steps/NeuroCheckStep';
 import CenteringStep from './steps/CenteringStep';
+import QuickStats from './QuickStats';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 
@@ -43,6 +44,11 @@ const CheckInFlow: React.FC = () => {
 
     return (
         <div className="check-in-flow fade-in">
+            {/* Show QuickStats on home screen */}
+            {step === 'recognizing' && !showResumePrompt && (
+                <QuickStats />
+            )}
+
             {step !== 'summary' && !showResumePrompt && (
                 <RulerProgress
                     currentStep={step}

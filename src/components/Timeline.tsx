@@ -4,12 +4,14 @@ import { useLanguage } from '../services/LanguageContext';
 import { storageService, ImportResult } from '../services/StorageService';
 import { RulerLogEntry } from '../types/RulerTypes';
 import ExportPanel from './ExportPanel';
+import Skeleton from './Skeleton';
 
 const ITEMS_PER_PAGE = 10; // 每頁顯示數量
 
 const Timeline: React.FC = () => {
     const { t } = useLanguage();
     const [logs, setLogs] = useState<RulerLogEntry[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
@@ -20,7 +22,11 @@ const Timeline: React.FC = () => {
     const listTopRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        loadLogs();
+        // Simulate loading for smoother UX
+        setTimeout(() => {
+            loadLogs();
+            setIsLoading(false);
+        }, 300);
     }, []);
 
     // Auto-hide import result after 5 seconds
@@ -199,11 +205,56 @@ const Timeline: React.FC = () => {
         listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="timeline-container fade-in">
+                <div className="timeline-header">
+                    <Skeleton type="text" />
+                    <Skeleton type="text" className="short" />
+                </div>
+                <div className="timeline-list">
+                    <Skeleton type="card" />
+                    <Skeleton type="card" />
+                </div>
+                <style>{`
+                    .timeline-header { margin-bottom: 2.5rem; }
+                    .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
+                `}</style>
+            </div>
+        );
+    }
+
     if (logs.length === 0) {
         return (
-            <div className="empty-state">
-                <div className="empty-icon">{uiIcons.leaf}</div>
-                <p>{t('尚無記錄，開始你的第一次情緒觀察吧。')}</p>
+            <div className="empty-state fade-in">
+                <div className="empty-illustration">
+                    <div className="floating-leaf leaf-1">{uiIcons.leaf}</div>
+                    <div className="floating-leaf leaf-2">{uiIcons.leaf}</div>
+                    <div className="empty-circle-outer">
+                        <div className="empty-circle-inner">
+                            <span className="empty-emoji">🌱</span>
+                        </div>
+                    </div>
+                </div>
+                <h2>{t('開始你的情緒覺察之旅')}</h2>
+                <p>{t('記錄你的第一個情緒，邁向自我成長的第一步。')}</p>
+                
+                <div className="empty-features">
+                    <div className="feature-item">
+                        <span className="feature-icon">📊</span>
+                        <span>{t('追蹤情緒趨勢')}</span>
+                    </div>
+                    <div className="feature-item">
+                        <span className="feature-icon">🧘</span>
+                        <span>{t('學習情緒調節')}</span>
+                    </div>
+                    <div className="feature-item">
+                        <span className="feature-icon">💡</span>
+                        <span>{t('獲得個人洞察')}</span>
+                    </div>
+                </div>
+
                 <div className="import-empty-action">
                     <input
                         type="file"
@@ -222,6 +273,95 @@ const Timeline: React.FC = () => {
                     </div>
                 )}
                 <style>{`
+                    .empty-state { 
+                        text-align: center; 
+                        padding: 4rem 2rem; 
+                        color: var(--text-secondary);
+                        max-width: 400px;
+                        margin: 0 auto;
+                    }
+                    .empty-illustration {
+                        position: relative;
+                        width: 160px;
+                        height: 160px;
+                        margin: 0 auto 2rem;
+                    }
+                    .empty-circle-outer {
+                        width: 120px;
+                        height: 120px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, var(--color-green) 0%, var(--color-blue) 100%);
+                        opacity: 0.2;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto;
+                        animation: pulse 3s ease-in-out infinite;
+                    }
+                    .empty-circle-inner {
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, var(--color-green) 0%, var(--color-blue) 100%);
+                        opacity: 0.4;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .empty-emoji {
+                        font-size: 2.5rem;
+                        animation: float 3s ease-in-out infinite;
+                    }
+                    .floating-leaf {
+                        position: absolute;
+                        width: 32px;
+                        height: 32px;
+                        opacity: 0.4;
+                        animation: floatLeaf 4s ease-in-out infinite;
+                    }
+                    .leaf-1 { top: 0; right: 10px; animation-delay: 0s; }
+                    .leaf-2 { bottom: 20px; left: 0; animation-delay: 2s; }
+                    @keyframes pulse {
+                        0%, 100% { transform: scale(1); opacity: 0.2; }
+                        50% { transform: scale(1.05); opacity: 0.3; }
+                    }
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-8px); }
+                    }
+                    @keyframes floatLeaf {
+                        0%, 100% { transform: translateY(0) rotate(0deg); }
+                        50% { transform: translateY(-10px) rotate(10deg); }
+                    }
+                    .empty-state h2 {
+                        font-size: 1.5rem;
+                        color: var(--text-primary);
+                        margin-bottom: 0.5rem;
+                        font-weight: 700;
+                    }
+                    .empty-state p {
+                        font-size: 0.95rem;
+                        line-height: 1.6;
+                        margin-bottom: 2rem;
+                    }
+                    .empty-features {
+                        display: flex;
+                        justify-content: center;
+                        gap: 1.5rem;
+                        margin-bottom: 2rem;
+                        flex-wrap: wrap;
+                    }
+                    .feature-item {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 0.5rem;
+                        font-size: 0.8rem;
+                        color: var(--text-secondary);
+                    }
+                    .feature-icon {
+                        font-size: 1.5rem;
+                    }
                     .import-empty-action { margin-top: 1.5rem; }
                     .import-btn-empty {
                         background: var(--glass-bg);
