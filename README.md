@@ -8,6 +8,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-purple.svg)](https://vitejs.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Supported-green.svg)](https://web.dev/progressive-web-apps/)
+[![Deployed on Zeabur](https://img.shields.io/badge/Deployed%20on-Zeabur-6D28D9.svg)](https://zeabur.com/)
+
+---
+
+## 🌐 線上體驗
+
+**立即試用：** [https://today-mood.zeabur.app/](https://today-mood.zeabur.app/)
 
 ---
 
