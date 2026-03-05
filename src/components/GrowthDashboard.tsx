@@ -88,7 +88,7 @@ const GrowthDashboard: React.FC = () => {
                     </div>
                 </div>
                 <h2>{t('累積你的情緒數據')}</h2>
-                <p>{t('開始記錄情緒後，你將能看到你的情緒趨勢、韌性成長與個人洞察。')}</p>
+                <p>{t('開始記錄情緒後，你將能看到你的情緒趨勢、參與度成長與個人洞察。')}</p>
                 
                 <div className="insight-preview">
                     <div className="preview-item">
@@ -97,7 +97,7 @@ const GrowthDashboard: React.FC = () => {
                     </div>
                     <div className="preview-item">
                         <span className="preview-icon">🎯</span>
-                        <span>{t('韌性積分')}</span>
+                        <span>{t('參與度積分')}</span>
                     </div>
                     <div className="preview-item">
                         <span className="preview-icon">🧠</span>
@@ -224,10 +224,12 @@ const GrowthDashboard: React.FC = () => {
                     </svg>
                 </div>
                 <div className="header-text">
-                    <h3>{t('情緒韌性積分')}</h3>
-                    <p>{t('基於您的調節頻率與身心回饋計算')}</p>
+                    <h3>{t('情緒參與度積分')}</h3>
+                    <p>{t('反映您的記錄參與程度，非臨床韌性評估')}</p>
                 </div>
             </div>
+
+            <p className="engagement-disclaimer">{t('⚠️ 此分數為參與激勵指標，不反映您的心理健康狀態，亦非任何臨床評估結果。')}</p>
 
             {/* AI Weekly Insight Section */}
             {(loadingInsight || weeklyInsight) && (
@@ -328,7 +330,7 @@ const GrowthDashboard: React.FC = () => {
 
             <div className="charts-grid">
                 <div className="chart-container">
-                    <label className="heading-sm">{t('韌性趨勢 (Resilience)')}</label>
+                    <label className="heading-sm">{t('參與度趨勢 (Engagement)')}</label>
                     {data.length > 1 ? (
                         <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="line-chart">
                             <path
@@ -458,6 +460,14 @@ const GrowthDashboard: React.FC = () => {
                 .resilience-header { display: flex; align-items: center; gap: 1rem; }
                 .score-circle { width: 60px; height: 60px; }
                 .circular-chart { display: block; max-width: 100%; max-height: 100%; }
+
+                .engagement-disclaimer {
+                    font-size: 0.72rem;
+                    color: var(--text-secondary);
+                    opacity: 0.7;
+                    margin: 0.5rem 0 1.5rem;
+                    line-height: 1.4;
+                }
                 .circle-bg { fill: none; stroke: var(--glass-border); stroke-width: 2.5; }
                 .circle { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke: var(--color-yellow); transition: stroke-dasharray 0.3s ease; }
                 .percentage { fill: var(--text-primary); font-family: inherit; font-size: 0.6em; text-anchor: middle; font-weight: 700; dominant-baseline: middle; }

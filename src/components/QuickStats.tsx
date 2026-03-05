@@ -40,7 +40,7 @@ const QuickStats: React.FC = () => {
             <div className="stats-grid">
                 <div className="stat-item">
                     <span className="stat-value">{stats.streakDays}</span>
-                    <span className="stat-label">{t('連續天數')}</span>
+                    <span className="stat-label">{t('近期連續')}</span>
                 </div>
                 <div className="stat-item">
                     <span className="stat-value">{stats.totalEntries}</span>
