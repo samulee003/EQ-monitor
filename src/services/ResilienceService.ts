@@ -1,6 +1,10 @@
 /**
  * ResilienceService.ts
- * Logic to calculate emotional resilience and prepare data for the Growth Dashboard.
+ * Logic to calculate emotional engagement metrics and prepare data for the Growth Dashboard.
+ *
+ * ⚠️ 重要聲明：此處的「參與度指標」（原名「韌性分數」）反映使用者的記錄參與程度，
+ * 並非臨床心理韌性評估。它不對應任何標準化心理量表（如 Connor-Davidson Resilience Scale），
+ * 不應用於評估個人心理健康狀態。
  */
 import { Quadrant } from '../data/emotionData';
 import { RulerLogEntry } from '../types/RulerTypes';
@@ -49,9 +53,9 @@ const ALL_STRATEGIES = [
 
 class ResilienceService {
     /**
-     * calculateResilience
-     * Logic: Resilience increases when a user completes a Full RULER flow
-     * and reports a positive shift in the 'neuroCheck'.
+     * getDashboardData
+     * 計算每日「參與度指標」——反映使用者完成 RULER 流程的深度與主觀回饋。
+     * 注意：此分數為參與激勵指標，非臨床韌性評估工具。
      */
     getDashboardData(logs: RulerLogEntry[] = storageService.getLogs()): DailyResilience[] {
         // Group by date and calculate average resilience
