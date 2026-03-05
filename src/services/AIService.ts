@@ -6,7 +6,7 @@ export interface PhysicalData {
     heartRate?: number;
     heartRateVariability?: number;
 }
-import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT } from './prompts';
+import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
 
 export interface AIInsight {
     summary: string;
@@ -73,6 +73,10 @@ class AIService {
 
         try {
             const userPrompt = this.constructUserPrompt(data, history, physical);
+            const isParentingContext = this.detectParentingContext(data);
+            const systemPrompt = isParentingContext
+                ? RULER_COACH_SYSTEM_PROMPT + '\n' + PARENTING_CONTEXT_ADDON
+                : RULER_COACH_SYSTEM_PROMPT;
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: {
@@ -81,7 +85,7 @@ class AIService {
                 },
                 body: JSON.stringify({
                     messages: [
-                        { role: "system", content: RULER_COACH_SYSTEM_PROMPT },
+                        { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
                     ],
                     model: "gpt-4o", // Or the specific model alias provided by Zeabur
@@ -102,6 +106,15 @@ class AIService {
             console.error("AI Service Failed:", error);
             return this.getMockFallback(data.emotion?.quadrant);
         }
+    }
+
+    private detectParentingContext(data: any): boolean {
+        const parentingKeywords = ['育兒', '管教', '孩子', '小孩', '寶寶', '兒子', '女兒', '吼', '哭鬧'];
+        const trigger = data.understanding?.trigger || data.understanding?.what || '';
+        const who = data.understanding?.who || '';
+        const note = data.note || '';
+        const combined = `${trigger} ${who} ${note}`;
+        return parentingKeywords.some(kw => combined.includes(kw));
     }
 
     private constructUserPrompt(data: any, history: any[], physical?: PhysicalData): string {
