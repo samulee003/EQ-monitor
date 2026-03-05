@@ -5,6 +5,12 @@ export interface BodyScanData {
     sensation: string;
 }
 
+export interface InteractionCycle {
+    myReaction: string;
+    childReaction: string;
+    reflection: string;
+}
+
 export interface UnderstandingData {
     trigger: string;
     message: string; // Kept for compatibility
@@ -12,6 +18,7 @@ export interface UnderstandingData {
     who: string;
     where: string;
     need: string | null;
+    interactionCycle?: InteractionCycle;
 }
 
 export interface ExpressingData {

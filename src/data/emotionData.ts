@@ -6,6 +6,7 @@ export interface Emotion {
     quadrant: Quadrant;
     energy: number; // 1-5 (Grid position vertically)
     pleasantness: number; // 1-5 (Grid position horizontally)
+    isParenting?: boolean; // Parenting-specific emotion
 }
 
 export interface PsychologicalNeed {
@@ -43,6 +44,12 @@ export const emotions: Emotion[] = [
     { id: 'uneasy', name: '忐忑不安的', quadrant: 'red', energy: 1, pleasantness: 4 },
     { id: 'displeased', name: '不太高興的', quadrant: 'red', energy: 1, pleasantness: 5 },
 
+    // --- RED: Parenting-specific ---
+    { id: 'want_to_flee', name: '想逃離的', quadrant: 'red', energy: 3, pleasantness: 1, isParenting: true },
+    { id: 'going_crazy', name: '抓狂的', quadrant: 'red', energy: 4, pleasantness: 1, isParenting: true },
+    { id: 'suffocated', name: '窒息感的', quadrant: 'red', energy: 3, pleasantness: 2, isParenting: true },
+    { id: 'parental_guilt', name: '愧疚自責的', quadrant: 'red', energy: 2, pleasantness: 2, isParenting: true },
+
     // --- YELLOW: High Energy, High Pleasantness (Top Right 5x5) ---
     { id: 'surprised_joy', name: '驚喜的', quadrant: 'yellow', energy: 5, pleasantness: 1 },
     { id: 'uplifted', name: '振奮的', quadrant: 'yellow', energy: 5, pleasantness: 2 },
@@ -69,6 +76,12 @@ export const emotions: Emotion[] = [
     { id: 'hopeful', name: '有希望的', quadrant: 'yellow', energy: 1, pleasantness: 3 },
     { id: 'playful', name: '好玩的', quadrant: 'yellow', energy: 1, pleasantness: 4 },
     { id: 'blissful', name: '幸福的', quadrant: 'yellow', energy: 1, pleasantness: 5 },
+
+    // --- YELLOW: Parenting-specific ---
+    { id: 'proud_of_child', name: '以孩子為榮的', quadrant: 'yellow', energy: 3, pleasantness: 4, isParenting: true },
+    { id: 'feeling_needed', name: '被需要的', quadrant: 'yellow', energy: 2, pleasantness: 3, isParenting: true },
+    { id: 'parental_love', name: '充滿親情的', quadrant: 'yellow', energy: 2, pleasantness: 5, isParenting: true },
+    { id: 'child_milestone', name: '見證成長的', quadrant: 'yellow', energy: 4, pleasantness: 4, isParenting: true },
 
     // --- BLUE: Low Energy, Low Pleasantness (Bottom Left 5x5) ---
     { id: 'disgusted', name: '厭惡的', quadrant: 'blue', energy: 5, pleasantness: 1 },
@@ -97,6 +110,13 @@ export const emotions: Emotion[] = [
     { id: 'spent', name: '疲憊不堪的', quadrant: 'blue', energy: 1, pleasantness: 4 },
     { id: 'drained', name: '被榨乾的', quadrant: 'blue', energy: 1, pleasantness: 5 },
 
+    // --- BLUE: Parenting-specific ---
+    { id: 'not_good_enough', name: '不夠好的', quadrant: 'blue', energy: 2, pleasantness: 1, isParenting: true },
+    { id: 'lost_self', name: '失去自我的', quadrant: 'blue', energy: 2, pleasantness: 2, isParenting: true },
+    { id: 'heartache', name: '心疼的', quadrant: 'blue', energy: 3, pleasantness: 3, isParenting: true },
+    { id: 'parental_burnout', name: '育兒倦怠的', quadrant: 'blue', energy: 1, pleasantness: 3, isParenting: true },
+    { id: 'here_we_go_again', name: '又來了的', quadrant: 'blue', energy: 2, pleasantness: 4, isParenting: true },
+
     // --- GREEN: Low Energy, High Pleasantness (Bottom Right 5x5) ---
     { id: 'at_ease', name: '自在的', quadrant: 'green', energy: 5, pleasantness: 1 },
     { id: 'easygoing', name: '隨和的', quadrant: 'green', energy: 5, pleasantness: 2 },
@@ -123,6 +143,12 @@ export const emotions: Emotion[] = [
     { id: 'serene', name: '平靜的', quadrant: 'green', energy: 1, pleasantness: 3 },
     { id: 'cozy', name: '舒適的', quadrant: 'green', energy: 1, pleasantness: 4 },
     { id: 'placid', name: '安詳的', quadrant: 'green', energy: 1, pleasantness: 5 },
+
+    // --- GREEN: Parenting-specific ---
+    { id: 'healed_by_child', name: '被孩子療癒的', quadrant: 'green', energy: 3, pleasantness: 4, isParenting: true },
+    { id: 'quality_time', name: '享受親子時光的', quadrant: 'green', energy: 2, pleasantness: 5, isParenting: true },
+    { id: 'grounded_parent', name: '踏實的', quadrant: 'green', energy: 2, pleasantness: 2, isParenting: true },
+    { id: 'family_warmth', name: '家的溫暖的', quadrant: 'green', energy: 1, pleasantness: 4, isParenting: true },
 ];
 
 export const psychologicalNeeds: PsychologicalNeed[] = [
@@ -134,4 +160,6 @@ export const psychologicalNeeds: PsychologicalNeed[] = [
     { id: 'rest', label: '休息與放鬆', icon: '🛌', desc: '需要空間來恢復體力或精神能量' },
     { id: 'respite', label: '喘息空間', icon: '🌬️', desc: '渴望片刻屬於自己、不被打擾的時間' },
     { id: 'growth', label: '挑戰與成長', icon: '🌱', desc: '渴望學習新事物或突破自我' },
+    { id: 'competence', label: '勝任感', icon: '💪', desc: '希望感到自己是稱職的父母' },
+    { id: 'understood', label: '被理解', icon: '🫂', desc: '渴望有人理解身為父母的辛苦與壓力' },
 ];

@@ -48,8 +48,8 @@ describe('EmotionData', () => {
     });
 
     describe('psychologicalNeeds', () => {
-        it('應該包含 8 種心理需求', () => {
-            expect(psychologicalNeeds.length).toBe(8);
+        it('應該包含 10 種心理需求', () => {
+            expect(psychologicalNeeds.length).toBe(10);
         });
 
         it('每種需求都應該有必需的屬性', () => {

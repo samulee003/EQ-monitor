@@ -18,6 +18,8 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
         red: [
             { icon: regulationIcons.breathing, title: t('引導式深呼吸'), desc: t('進入跟隨節奏的呼吸練習'), type: 'interactive', recommended: true },
             { icon: regulationIcons.grounding, title: t('5-4-3-2-1 接地法'), desc: t('透過感官重新連結當下'), type: 'interactive', recommended: true },
+            { icon: regulationIcons.pauseCard, title: t('暫停卡'), desc: t('安全離開現場 30 秒，告訴孩子「媽媽/爸爸需要冷靜一下」'), recommended: true },
+            { icon: regulationIcons.repair, title: t('修復對話'), desc: t('吼完孩子後的重新連結：蹲下、道歉、擁抱') },
             { icon: regulationIcons.running, title: t('強效宣洩'), desc: t('進行 30 秒的身心快速擺動') },
             { icon: regulationIcons.water, title: t('冰水刺激'), desc: t('利用溫差快速平復情緒') },
         ],
@@ -29,12 +31,15 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
         ],
         blue: [
             { icon: regulationIcons.coffee, title: t('暖心儀式'), desc: t('為自己準備一杯有溫度的飲品'), recommended: true },
+            { icon: regulationIcons.selfCompassion, title: t('自我慈悲三步驟'), desc: t('承認痛苦 → 記住你不孤單 → 對自己說溫柔的話'), recommended: true },
+            { icon: regulationIcons.imperfectParent, title: t('不完美宣言'), desc: t('「我不需要是完美的父母，我只需要是在場的父母」') },
             { icon: regulationIcons.tidy, title: t('微小掌控'), desc: t('整理三件桌上的雜物') },
             { icon: regulationIcons.selfLove, title: t('自我慈悲'), desc: t('對自己說一句溫柔的鼓勵') },
             { icon: regulationIcons.plant, title: t('觀察植物'), desc: t('凝視一片葉子或窗外的景色') },
         ],
         green: [
             { icon: regulationIcons.meditate, title: t('三分鐘靜坐'), desc: t('純粹地與當下的平靜同在'), recommended: true },
+            { icon: regulationIcons.parentMindful, title: t('親子正念遊戲'), desc: t('和孩子一起深呼吸三次，比比看誰吹的泡泡更大') },
             { icon: regulationIcons.book, title: t('慢讀時刻'), desc: t('細讀一段優美的文字') },
             { icon: regulationIcons.doodle, title: t('隨意塗鴉'), desc: t('不帶目的地記錄線條與色彩') },
             { icon: regulationIcons.offline, title: t('數位離線'), desc: t('給自己 10 分鐘的無擾空間') },
