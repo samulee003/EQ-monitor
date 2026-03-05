@@ -132,5 +132,6 @@ export const psychologicalNeeds: PsychologicalNeed[] = [
     { id: 'autonomy', label: '自主與自由', icon: '🕊️', desc: '渴望自己做決定、掌控生活節奏' },
     { id: 'meaning', label: '意義與價值', icon: '✨', desc: '希望感到自己有貢獻或生命有意義' },
     { id: 'rest', label: '休息與放鬆', icon: '🛌', desc: '需要空間來恢復體力或精神能量' },
+    { id: 'respite', label: '喘息空間', icon: '🌬️', desc: '渴望片刻屬於自己、不被打擾的時間' },
     { id: 'growth', label: '挑戰與成長', icon: '🌱', desc: '渴望學習新事物或突破自我' },
 ];
