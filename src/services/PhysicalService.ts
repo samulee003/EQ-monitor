@@ -33,10 +33,10 @@ class PhysicalService {
      */
     analyzeCorrelation(data: PhysicalData): string | null {
         if (data.sleepHours < 6) {
-            return "昨晚睡眠不足 6 小時，這可能會降低你的情緒調節能力及抗壓力。";
+            return "昨晚睡眠較少，睡眠與情緒調節相互影響。如有持續睡眠困擾，建議諮詢醫師。";
         }
         if (data.steps < 3000) {
-            return "今日體力活動較少，適度的運動或許能幫助改善低落或焦慮感。";
+            return "今日活動量較少，身體活動與情緒狀態存在關聯。請依照自己的狀態調整。";
         }
         return null;
     }

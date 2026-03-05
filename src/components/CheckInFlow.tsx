@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MoodMeter from './MoodMeter';
 import EmotionGrid from './EmotionGrid';
 import BodyScan from './BodyScan';
@@ -12,9 +12,18 @@ import CenteringStep from './steps/CenteringStep';
 import QuickStats from './QuickStats';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
+import { Emotion } from '../data/emotionData';
+
+// 高風險情緒 ID：選擇時提供安全資源
+const HIGH_RISK_EMOTION_IDS = new Set([
+    'hopeless', 'helpless', 'desolate',     // 絕望的、無望的、孤寂的
+    'miserable', 'despondent', 'depressed',  // 悲慘的、消沈的、抑鬱的
+    'enraged', 'furious', 'panicked',        // 憤怒的、暴怒的、驚惶失措的
+]);
 
 const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
+    const [showCrisisModal, setShowCrisisModal] = useState(false);
     const {
         step,
         selectedQuadrants,
@@ -36,6 +45,14 @@ const CheckInFlow: React.FC = () => {
         handleRegulatingComplete,
         handleNeuroCheckComplete
     } = useRulerFlow();
+
+    const handleEmotionSelectWithCrisisCheck = (emotions: Emotion[]) => {
+        handleEmotionSelect(emotions);
+        const hasHighRisk = emotions.some(e => HIGH_RISK_EMOTION_IDS.has(e.id));
+        if (hasHighRisk) {
+            setShowCrisisModal(true);
+        }
+    };
 
     const handleContinueFullFlow = () => {
         setIsFullFlow(true);
@@ -92,7 +109,7 @@ const CheckInFlow: React.FC = () => {
                 {step === 'labeling' && selectedQuadrants.length > 0 && (
                     <EmotionGrid
                         quadrants={selectedQuadrants}
-                        onSelectEmotions={handleEmotionSelect}
+                        onSelectEmotions={handleEmotionSelectWithCrisisCheck}
                         onBack={() => setStep('bodyScan')}
                     />
                 )}
@@ -138,6 +155,33 @@ const CheckInFlow: React.FC = () => {
                     />
                 )}
             </div>
+
+            {/* 危機介入彈窗 */}
+            {showCrisisModal && (
+                <div className="crisis-modal-overlay fade-in" role="dialog" aria-modal="true" aria-label={t('心理支持資源')}>
+                    <div className="crisis-modal">
+                        <div className="crisis-icon">🤝</div>
+                        <h3>{t('你不需要獨自面對')}</h3>
+                        <p>{t('你剛才選擇了一個很沉重的情緒。今心陪伴你覺察，但如果你正在經歷嚴重的痛苦，專業的支持更能幫助你。')}</p>
+                        <div className="crisis-hotlines">
+                            <a href="tel:1925" className="crisis-hotline-btn">
+                                📞 {t('安心專線')} <strong>1925</strong>
+                                <span>{t('24小時免費')}</span>
+                            </a>
+                            <a href="tel:1909" className="crisis-hotline-btn">
+                                📞 {t('生命線')} <strong>1909</strong>
+                                <span>{t('24小時免費')}</span>
+                            </a>
+                        </div>
+                        <button
+                            className="crisis-continue-btn"
+                            onClick={() => setShowCrisisModal(false)}
+                        >
+                            {t('我知道了，繼續覺察')}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .check-in-flow { width: 100%; position: relative; }
@@ -311,6 +355,85 @@ const CheckInFlow: React.FC = () => {
                 .resume-card p { color: var(--text-secondary); margin-bottom: var(--s-8); font-size: 0.95rem; line-height: 1.5; }
                 .resume-actions { display: flex; flex-direction: column; gap: var(--s-3); }
  
+                /* Crisis Modal */
+                .crisis-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: hsla(0, 0%, 5%, 0.88);
+                    backdrop-filter: blur(12px);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: var(--s-6);
+                }
+                .crisis-modal {
+                    background: var(--bg-secondary);
+                    border: 1px solid hsla(30, 50%, 60%, 0.3);
+                    border-radius: var(--radius-luxe);
+                    padding: var(--s-8) var(--s-6);
+                    max-width: 380px;
+                    width: 100%;
+                    text-align: center;
+                    box-shadow: 0 0 60px hsla(30, 50%, 60%, 0.1);
+                }
+                .crisis-icon { font-size: 3rem; margin-bottom: var(--s-4); }
+                .crisis-modal h3 {
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                    margin-bottom: var(--s-3);
+                }
+                .crisis-modal p {
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                    line-height: 1.7;
+                    margin-bottom: var(--s-6);
+                }
+                .crisis-hotlines {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--s-3);
+                    margin-bottom: var(--s-6);
+                }
+                .crisis-hotline-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: var(--s-4) var(--s-5);
+                    background: hsla(30, 50%, 60%, 0.1);
+                    border: 1px solid hsla(30, 50%, 60%, 0.25);
+                    border-radius: var(--radius-md);
+                    text-decoration: none;
+                    color: var(--text-primary);
+                    font-size: 1rem;
+                    font-weight: 600;
+                    transition: var(--transition);
+                }
+                .crisis-hotline-btn:hover {
+                    background: hsla(30, 50%, 60%, 0.2);
+                    transform: translateY(-2px);
+                }
+                .crisis-hotline-btn span {
+                    font-size: 0.75rem;
+                    color: var(--text-secondary);
+                    font-weight: 400;
+                }
+                .crisis-continue-btn {
+                    width: 100%;
+                    padding: var(--s-3);
+                    background: transparent;
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-md);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    transition: var(--transition);
+                }
+                .crisis-continue-btn:hover {
+                    color: var(--text-primary);
+                    border-color: var(--text-secondary);
+                }
+
                 /* Centering State */
                 .centering-state { height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s-8); }
                 .centering-circle { 
