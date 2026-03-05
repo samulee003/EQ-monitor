@@ -94,7 +94,7 @@ class StorageService {
 
             if (validEntries.length === 0) {
                 return {
-                    success: false,
+                    success: true,
                     imported: 0,
                     skipped: parsed.length,
                     message: '沒有找到有效的記錄'

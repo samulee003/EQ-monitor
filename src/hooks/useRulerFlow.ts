@@ -186,6 +186,7 @@ export const useRulerFlow = () => {
         setStep('recognizing');
         setSelectedQuadrants([]);
         setSelectedEmotions([]);
+        setBodyScanData(null);
         setUnderstandingData(null);
         setExpressingData(null);
         setRegulatingData(null);
@@ -198,6 +199,11 @@ export const useRulerFlow = () => {
         step,
         selectedQuadrants,
         selectedEmotions,
+        emotionIntensity,
+        bodyScanData,
+        understandingData,
+        expressingData,
+        regulatingData,
         showResumePrompt,
         isFullFlow,
         postRegulationMood,
