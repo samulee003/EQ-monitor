@@ -159,10 +159,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
       )}
 
       <footer>
-        {t('基於 RULER 模型 • 打造平穩心靈')}
-        {isAuthenticated && user && (
-          <span className="user-greeting"> • {t('歡迎')}, {user.displayName}</span>
-        )}
+        <div className="footer-main">
+          {t('基於 RULER 模型 • 打造平穩心靈')}
+          {isAuthenticated && user && (
+            <span className="user-greeting"> • {t('歡迎')}, {user.displayName}</span>
+          )}
+        </div>
+        <div className="footer-disclaimer">
+          {t('本工具非醫療器材，不能取代專業心理治療。')}
+          <span className="footer-hotline">
+            {t('如需協助：安心專線')} <strong>1925</strong> · {t('生命線')} <strong>1909</strong>
+          </span>
+        </div>
       </footer>
 
       {/* Auth Modal */}
@@ -427,11 +435,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         footer {
-          padding: 2rem;
+          padding: 1.5rem 2rem 1rem;
           text-align: center;
           font-size: 0.8rem;
           color: var(--text-secondary);
           opacity: 0.6;
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .footer-main {
+          opacity: 1;
+        }
+
+        .footer-disclaimer {
+          font-size: 0.72rem;
+          opacity: 0.8;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .footer-hotline {
+          color: var(--color-yellow);
+          opacity: 0.9;
         }
 
         .user-greeting {

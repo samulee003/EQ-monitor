@@ -52,8 +52,13 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
                         <p>{t('這裡是你的情緒避風港。我們會用耶魯大學的 RULER 方法，陪你覺察、理解、調節每一個情緒。')}</p>
+                        <div className="disclaimer-box">
+                            <p className="disclaimer-title">⚠️ {t('使用須知')}</p>
+                            <p className="disclaimer-text">{t('今心是情緒覺察輔助工具，非醫療器材，無法取代專業心理治療。如果您正在經歷嚴重情緒困擾或有自傷念頭，請立即聯繫專業人員。')}</p>
+                            <p className="disclaimer-hotline">{t('台灣安心專線')} <strong>1925</strong>｜{t('生命線')} <strong>1909</strong></p>
+                        </div>
                         <div className="step-actions">
-                            <button className="morandi-main-btn" onClick={handleNext}>{t('開始導覽')}</button>
+                            <button className="morandi-main-btn" onClick={handleNext}>{t('我了解，開始導覽')}</button>
                             <button className="skip-link" onClick={handleSkip}>{t('跳過導覽')}</button>
                         </div>
                     </div>
@@ -517,6 +522,33 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 
+                /* Disclaimer Box */
+                .disclaimer-box {
+                    background: hsla(30, 50%, 50%, 0.08);
+                    border: 1px solid hsla(30, 50%, 60%, 0.25);
+                    border-radius: var(--radius-md);
+                    padding: var(--s-4);
+                    margin-bottom: var(--s-4);
+                    text-align: left;
+                }
+                .disclaimer-title {
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin: 0 0 var(--s-2) 0;
+                }
+                .disclaimer-text {
+                    font-size: 0.78rem;
+                    color: var(--text-secondary);
+                    line-height: 1.5;
+                    margin: 0 0 var(--s-2) 0;
+                }
+                .disclaimer-hotline {
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                    margin: 0;
+                }
+
                 /* Responsive */
                 @media (max-width: 400px) {
                     .onboarding-card {
