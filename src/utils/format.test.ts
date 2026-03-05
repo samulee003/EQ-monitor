@@ -25,7 +25,7 @@ export function formatTime(date: Date, locale: string = 'zh-TW'): string {
 // 截斷文本
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
+  return text.slice(0, maxLength - 1) + '...';
 }
 
 // 格式化持續時間
