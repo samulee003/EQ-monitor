@@ -221,6 +221,13 @@ export const needsIcons: Record<string, IconComponent> = {
             <path d="M12 8c3 0 5-2 5-5-3 0-5 2-5 5z" />
         </svg>
     ),
+    respite: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M12 2a5 5 0 015 5c0 3-2 5-5 7-3-2-5-4-5-7a5 5 0 015-5z" />
+            <path d="M8 20h8" />
+            <path d="M12 14v6" />
+        </svg>
+    ),
 };
 
 // ===== UTILITY ICONS =====
