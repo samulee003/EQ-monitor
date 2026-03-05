@@ -18,6 +18,7 @@ const needIconMap: Record<string, React.ReactNode> = {
     autonomy: needsIcons.autonomy,
     meaning: needsIcons.meaning,
     rest: needsIcons.rest,
+    respite: needsIcons.respite,
     growth: needsIcons.growth,
 };
 
@@ -47,8 +48,8 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     const [newWhere, setNewWhere] = useState('');
 
     const defaultOptions = {
-        what: ['工作', '學習', '社交', '放鬆', '運動', '用餐', '通勤', '家務'],
-        who: ['獨自一人', '家人', '朋友', '伴侶', '同事', '陌生人'],
+        what: ['育兒', '管教衝突', '工作', '學習', '社交', '放鬆', '運動', '用餐', '通勤', '家務'],
+        who: ['孩子', '獨自一人', '家人', '朋友', '伴侶', '同事', '陌生人'],
         where: ['家中', '辦公室', '戶外', '餐廳', '學校', '公共交通'],
     };
 

@@ -56,13 +56,13 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
     const primaryEmotion = selectedEmotions[0];
     const quadrant = primaryEmotion?.quadrant;
 
-    // 快速調節建議
+    // 快速調節建議（適合父母情境）
     const getQuickRegulateChips = () => {
         const chips: Record<string, string[]> = {
-            red: ['🧘 深呼吸練習', '🖐️ 五感接地'],
+            red: ['🧘 深呼吸三次', '🚪 暫時離開現場一分鐘', '🖐️ 五感接地'],
             yellow: ['🙏 感恩清單', '💃 放首歌動一動'],
-            blue: ['☕ 泡杯熱飲', '💕 對自己說句好話'],
-            green: ['🧘 三分鐘靜坐', '📖 讀一段文字']
+            blue: ['☕ 泡杯熱飲', '💕 對自己說句好話', '🤝 請伴侶或家人換班', '📱 讓孩子暫時看影片沒關係'],
+            green: ['🌸 三次深呼吸', '📖 讀一段文字']
         };
         return chips[quadrant] || chips.green;
     };
