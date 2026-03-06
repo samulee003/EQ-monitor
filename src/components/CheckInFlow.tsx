@@ -29,6 +29,7 @@ const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
     const [showCrisisModal, setShowCrisisModal] = useState(false);
     const [quickMode, setQuickMode] = useState<QuickMode>(null);
+    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
     const {
         step,
         selectedQuadrants,
@@ -89,13 +90,15 @@ const CheckInFlow: React.FC = () => {
                                 <span className="qe-desc">{t('< 60 秒完成')}</span>
                             </div>
                         </button>
-                        <button className="quick-entry-btn parent-entry" onClick={() => setQuickMode('parent')}>
-                            <span className="qe-icon">&#128588;</span>
-                            <div className="qe-text">
-                                <span className="qe-title">{t('親職支援')}</span>
-                                <span className="qe-desc">{t('即時行動指引')}</span>
-                            </div>
-                        </button>
+                        {isParentRole && (
+                            <button className="quick-entry-btn parent-entry" onClick={() => setQuickMode('parent')}>
+                                <span className="qe-icon">&#128588;</span>
+                                <div className="qe-text">
+                                    <span className="qe-title">{t('親職支援')}</span>
+                                    <span className="qe-desc">{t('即時行動指引')}</span>
+                                </div>
+                            </button>
+                        )}
                     </div>
                 </>
             )}
@@ -222,7 +225,7 @@ const CheckInFlow: React.FC = () => {
 
                 .quick-entry-buttons {
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
+                    grid-template-columns: ${isParentRole ? '1fr 1fr' : '1fr'};
                     gap: var(--s-3);
                     margin-bottom: var(--s-6);
                 }
