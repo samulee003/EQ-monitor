@@ -64,7 +64,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                    <span className="step-title">{t('Expressing 宣洩與表達')}</span>
+                    <span className="step-title">{t('需要 — 我需要什麼？')}</span>
                 </div>
             </div>
 
