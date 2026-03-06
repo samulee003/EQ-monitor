@@ -1,7 +1,7 @@
 {
     "name": "今心 ImXin",
     "short_name": "今心",
-    "description": "你的情緒素養與 RULER 教練",
+    "description": "你的每日情緒覺察夥伴",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#fdfaf3",

@@ -1,6 +1,6 @@
 /**
  * SVG Icon Library for 今心 APP
- * Morandi-compatible monochrome icons for all RULER steps
+ * Morandi-compatible monochrome icons for all check-in steps
  */
 import React from 'react';
 

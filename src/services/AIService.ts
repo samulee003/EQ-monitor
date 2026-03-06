@@ -61,7 +61,7 @@ class AIService {
 
     /**
      * analyzeFeeling
-     * Analyzes the RULER data, history, and physical context using LLM.
+     * Analyzes the check-in data, history, and physical context using LLM.
      */
     async analyzeFeeling(data: any, history: any[] = [], physical?: PhysicalData): Promise<AIInsight> {
         console.log("[AIService] Analyzing data with Zeabur AI Hub...");

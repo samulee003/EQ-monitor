@@ -54,7 +54,7 @@ const ALL_STRATEGIES = [
 class ResilienceService {
     /**
      * getDashboardData
-     * 計算每日「參與度指標」——反映使用者完成 RULER 流程的深度與主觀回饋。
+     * 計算每日「參與度指標」——反映使用者完成覺察流程的深度與主觀回饋。
      * 注意：此分數為參與激勵指標，非臨床韌性評估工具。
      */
     getDashboardData(logs: RulerLogEntry[] = storageService.getLogs()): DailyResilience[] {
@@ -70,7 +70,7 @@ class ResilienceService {
 
             let entryScore = 50; // Base score
 
-            // Bonus for completing full RULER flow
+            // Bonus for completing full check-in flow
             if (entry.understanding && entry.expressing && entry.regulating) {
                 entryScore += 20;
             }

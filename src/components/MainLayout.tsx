@@ -104,7 +104,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
       <footer>
         <div className="footer-main">
-          {t('基於 RULER 模型 • 打造平穩心靈')}
+          {t('每日情緒覺察 • 打造平穩心靈')}
         </div>
         <div className="footer-disclaimer">
           {t('本工具非醫療器材，不能取代專業心理治療。')}
