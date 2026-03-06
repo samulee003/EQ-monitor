@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Emotion, psychologicalNeeds } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 import { needsIcons } from './icons/SvgIcons';
-import { UnderstandingData } from '../types/RulerTypes';
+import { UnderstandingData, InteractionCycle } from '../types/RulerTypes';
 
 interface UnderstandingStepProps {
     emotion: Emotion;
@@ -46,6 +46,10 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     const [newWho, setNewWho] = useState('');
     const [isAddingWhere, setIsAddingWhere] = useState(false);
     const [newWhere, setNewWhere] = useState('');
+    const [showInteractionCycle, setShowInteractionCycle] = useState(false);
+    const [interactionCycle, setInteractionCycle] = useState<InteractionCycle>({ myReaction: '', childReaction: '', reflection: '' });
+
+    const isParentingContext = (what === '育兒' || what === '管教衝突') && who === '孩子';
 
     const defaultOptions = {
         what: ['育兒', '管教衝突', '工作', '學習', '社交', '放鬆', '運動', '用餐', '通勤', '家務'],
@@ -172,7 +176,52 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                 </div>
             </div>
 
-            <button className="morandi-main-btn" disabled={!canProceed} onClick={() => onComplete({ trigger, message, what, who, where, need: selectedNeed })}>
+            {isParentingContext && !showInteractionCycle && (
+                <button className="interaction-cycle-toggle" onClick={() => setShowInteractionCycle(true)}>
+                    {t('+ 記錄親子互動循環（選填）')}
+                </button>
+            )}
+
+            {showInteractionCycle && (
+                <div className="interaction-cycle-card fade-in">
+                    <h3 className="cycle-title">{t('親子互動循環')}</h3>
+                    <p className="cycle-desc">{t('記錄互動模式，幫助你看見循環、打破循環')}</p>
+                    <div className="cycle-fields">
+                        <div className="cycle-field">
+                            <label>{t('我的反應是什麼？')}</label>
+                            <input
+                                className="morandi-input"
+                                placeholder={t('例：我提高了音量')}
+                                value={interactionCycle.myReaction}
+                                onChange={(e) => setInteractionCycle(prev => ({ ...prev, myReaction: e.target.value }))}
+                            />
+                        </div>
+                        <div className="cycle-field">
+                            <label>{t('孩子的反應是什麼？')}</label>
+                            <input
+                                className="morandi-input"
+                                placeholder={t('例：孩子哭了 / 更抗拒了')}
+                                value={interactionCycle.childReaction}
+                                onChange={(e) => setInteractionCycle(prev => ({ ...prev, childReaction: e.target.value }))}
+                            />
+                        </div>
+                        <div className="cycle-field">
+                            <label>{t('事後回想，我希望怎麼做？')}</label>
+                            <input
+                                className="morandi-input"
+                                placeholder={t('例：先深呼吸再回應')}
+                                value={interactionCycle.reflection}
+                                onChange={(e) => setInteractionCycle(prev => ({ ...prev, reflection: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <button className="morandi-main-btn" disabled={!canProceed} onClick={() => onComplete({
+                trigger, message, what, who, where, need: selectedNeed,
+                interactionCycle: showInteractionCycle && interactionCycle.myReaction ? interactionCycle : undefined
+            })}>
                 {t('下一步：表達宣洩')}
             </button>
 
@@ -293,6 +342,50 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                     font-weight: 400;
                     opacity: 0.7;
                     margin-top: 4px;
+                }
+                .interaction-cycle-toggle {
+                    width: 100%;
+                    padding: var(--s-3);
+                    background: transparent;
+                    border: 1px dashed var(--glass-border);
+                    border-radius: var(--radius-md);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    transition: var(--transition-luxe);
+                }
+                .interaction-cycle-toggle:hover {
+                    border-color: var(--text-secondary);
+                    color: var(--text-primary);
+                }
+                .interaction-cycle-card {
+                    background: var(--bg-secondary);
+                    border: 1px solid hsla(0, 50%, 55%, 0.2);
+                    border-radius: var(--radius-md);
+                    padding: var(--s-5);
+                }
+                .cycle-title {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    margin: 0 0 var(--s-1) 0;
+                }
+                .cycle-desc {
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                    margin: 0 0 var(--s-4) 0;
+                }
+                .cycle-fields {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--s-3);
+                }
+                .cycle-field label {
+                    display: block;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    margin-bottom: var(--s-1);
                 }
             `}</style>
         </div>

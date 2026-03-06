@@ -10,6 +10,8 @@ import SummaryStep from './steps/SummaryStep';
 import NeuroCheckStep from './steps/NeuroCheckStep';
 import CenteringStep from './steps/CenteringStep';
 import QuickStats from './QuickStats';
+import QuickCheckIn from './QuickCheckIn';
+import ParentScenarios from './ParentScenarios';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 import { Emotion } from '../data/emotionData';
@@ -21,9 +23,12 @@ const HIGH_RISK_EMOTION_IDS = new Set([
     'enraged', 'furious', 'panicked',        // 憤怒的、暴怒的、驚惶失措的
 ]);
 
+type QuickMode = null | 'quick' | 'parent';
+
 const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
     const [showCrisisModal, setShowCrisisModal] = useState(false);
+    const [quickMode, setQuickMode] = useState<QuickMode>(null);
     const {
         step,
         selectedQuadrants,
@@ -61,12 +66,41 @@ const CheckInFlow: React.FC = () => {
 
     return (
         <div className="check-in-flow fade-in">
-            {/* Show QuickStats on home screen */}
-            {step === 'recognizing' && !showResumePrompt && (
-                <QuickStats />
+            {/* Quick mode views */}
+            {quickMode === 'quick' && (
+                <QuickCheckIn
+                    onComplete={() => { setQuickMode(null); resetFlow(); }}
+                    onCancel={() => setQuickMode(null)}
+                />
+            )}
+            {quickMode === 'parent' && (
+                <ParentScenarios onDismiss={() => setQuickMode(null)} />
             )}
 
-            {step !== 'summary' && !showResumePrompt && (
+            {/* Show QuickStats + Quick Entry Buttons on home screen */}
+            {!quickMode && step === 'recognizing' && !showResumePrompt && (
+                <>
+                    <QuickStats />
+                    <div className="quick-entry-buttons">
+                        <button className="quick-entry-btn" onClick={() => setQuickMode('quick')}>
+                            <span className="qe-icon">&#9889;</span>
+                            <div className="qe-text">
+                                <span className="qe-title">{t('快速記錄')}</span>
+                                <span className="qe-desc">{t('< 60 秒完成')}</span>
+                            </div>
+                        </button>
+                        <button className="quick-entry-btn parent-entry" onClick={() => setQuickMode('parent')}>
+                            <span className="qe-icon">&#128588;</span>
+                            <div className="qe-text">
+                                <span className="qe-title">{t('親職支援')}</span>
+                                <span className="qe-desc">{t('即時行動指引')}</span>
+                            </div>
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {!quickMode && step !== 'summary' && !showResumePrompt && (
                 <RulerProgress
                     currentStep={step}
                     isFullFlow={isFullFlow}
@@ -74,7 +108,7 @@ const CheckInFlow: React.FC = () => {
                 />
             )}
 
-            <div key={step} className="flow-content-wrapper fade-slide-in">
+            {!quickMode && <div key={step} className="flow-content-wrapper fade-slide-in">
                 {showResumePrompt && (
                     <div className="resume-prompt-overlay fade-in">
                         <div className="resume-card">
@@ -154,7 +188,7 @@ const CheckInFlow: React.FC = () => {
                         onContinueFullFlow={!isFullFlow ? handleContinueFullFlow : undefined}
                     />
                 )}
-            </div>
+            </div>}
 
             {/* 危機介入彈窗 */}
             {showCrisisModal && (
@@ -185,6 +219,53 @@ const CheckInFlow: React.FC = () => {
 
             <style>{`
                 .check-in-flow { width: 100%; position: relative; }
+
+                .quick-entry-buttons {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: var(--s-3);
+                    margin-bottom: var(--s-6);
+                }
+                .quick-entry-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--s-3);
+                    padding: var(--s-4);
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-md);
+                    cursor: pointer;
+                    transition: var(--transition-luxe);
+                    text-align: left;
+                }
+                .quick-entry-btn:hover {
+                    border-color: hsla(0,0%,100%,0.2);
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow-sm);
+                }
+                .quick-entry-btn.parent-entry {
+                    border-color: hsla(0, 50%, 60%, 0.2);
+                }
+                .quick-entry-btn.parent-entry:hover {
+                    border-color: hsla(0, 50%, 60%, 0.4);
+                }
+                .qe-icon {
+                    font-size: 1.4rem;
+                    flex-shrink: 0;
+                }
+                .qe-text {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .qe-title {
+                    font-weight: 700;
+                    font-size: 0.85rem;
+                    color: var(--text-primary);
+                }
+                .qe-desc {
+                    font-size: 0.7rem;
+                    color: var(--text-secondary);
+                }
                 
                 .flow-content-wrapper { position: relative; min-height: 450px; }
                 .fade-slide-in { animation: fadeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
