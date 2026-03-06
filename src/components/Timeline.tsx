@@ -583,6 +583,9 @@ const Timeline: React.FC = () => {
                 }
 
                 .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
+                @media (min-width: 768px) {
+                    .timeline-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+                }
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
                 .timeline-card:hover { border-color: var(--glass-border); background: rgba(255,255,255,0.02); }
                 

@@ -776,6 +776,11 @@ const GrowthDashboard: React.FC = () => {
                 @media (max-width: 500px) {
                     .insight-details { grid-template-columns: 1fr; }
                 }
+                @media (min-width: 768px) {
+                    .charts-grid { grid-template-columns: 1fr 1fr; }
+                    .metrics-grid { grid-template-columns: 1fr 1fr; }
+                    .insight-details { grid-template-columns: 1fr 1fr; }
+                }
                 .detail-card {
                     padding: 1rem;
                     background: var(--glass-bg);

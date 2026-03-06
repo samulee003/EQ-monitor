@@ -605,11 +605,44 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 }
 
                 .morandi-main-btn { margin-top: var(--s-4); }
-                .morandi-main-btn:disabled { 
-                    opacity: 0.2; 
-                    cursor: not-allowed; 
+                .morandi-main-btn:disabled {
+                    opacity: 0.2;
+                    cursor: not-allowed;
                     filter: grayscale(1);
                     transform: none;
+                }
+
+                @media (max-width: 480px) {
+                    .location-grid, .sensation-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: var(--s-2);
+                    }
+                    .scan-btn {
+                        padding: var(--s-3) var(--s-3);
+                        gap: var(--s-3);
+                    }
+                    .icon-wrapper {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 10px;
+                    }
+                    .scan-icon { width: 18px; height: 18px; }
+                    .scan-label { font-size: 0.85rem; }
+                    .section-intro h2 { font-size: 1.4rem; }
+                    .audio-guide-card { padding: var(--s-3) var(--s-4); }
+                }
+
+                @media (max-width: 360px) {
+                    .location-grid { grid-template-columns: repeat(2, 1fr); }
+                    .sensation-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-2); }
+                    .scan-btn { padding: var(--s-2); gap: var(--s-2); }
+                    .icon-wrapper { width: 32px; height: 32px; }
+                    .scan-label { font-size: 0.8rem; }
+                }
+
+                @media (min-width: 768px) {
+                    .location-grid { grid-template-columns: repeat(3, 1fr); }
+                    .sensation-grid { grid-template-columns: repeat(3, 1fr); }
                 }
             `}</style>
         </div>
