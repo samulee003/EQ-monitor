@@ -214,8 +214,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--glass-bg);
           border: 1px solid var(--glass-border);
           border-radius: 50%;
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           font-size: 1.1rem;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -224,54 +224,57 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           justify-content: center;
           flex-shrink: 0;
         }
-        .achievement-nav-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.1); }
-        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: rgba(213, 193, 165, 0.2); }
+        .achievement-nav-btn:hover { transform: scale(1.1); background: var(--glass-border); }
+        .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: hsla(43, 40%, 70%, 0.15); }
 
         .settings-btn {
-          background: linear-gradient(135deg, var(--color-yellow) 0%, var(--color-red) 100%);
-          border: none;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
           border-radius: 50%;
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           flex-shrink: 0;
         }
 
         .settings-btn:hover {
           transform: scale(1.1);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          background: var(--glass-border);
         }
+
+        .settings-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 
         .settings-btn:active {
           transform: scale(0.95);
         }
 
         .theme-toggle {
-          background: linear-gradient(135deg, var(--color-yellow) 0%, var(--color-red) 100%);
-          border: none;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
           border-radius: 50%;
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           flex-shrink: 0;
         }
 
         .theme-toggle:hover {
           transform: scale(1.1) rotate(15deg);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          background: var(--glass-border);
         }
+
+        .theme-toggle:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 
         .theme-toggle:active {
           transform: scale(0.95);
@@ -306,6 +309,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           opacity: 0.9;
         }
 
+        .nav-link:focus-visible {
+          outline: 2px solid var(--color-yellow);
+          outline-offset: 4px;
+          border-radius: 4px;
+        }
+
         @media (max-width: 480px) {
           .glass-header {
             padding: var(--s-3) var(--s-4);
@@ -325,14 +334,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             font-size: 0.85rem;
           }
           .header-actions {
-            gap: var(--s-2);
+            gap: var(--s-1);
           }
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            width: 32px;
-            height: 32px;
-            font-size: 0.9rem;
+            width: 40px;
+            height: 40px;
+            font-size: 0.95rem;
           }
         }
 
@@ -346,9 +355,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            width: 28px;
-            height: 28px;
-            font-size: 0.8rem;
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
           }
         }
       `}</style>

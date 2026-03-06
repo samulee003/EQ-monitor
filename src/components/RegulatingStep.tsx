@@ -123,7 +123,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
             {activeInteractive ? (
                 <div className="interactive-overlay fade-in">
                     <button className="close-overlay" onClick={() => setActiveInteractive(null)}>✕</button>
-                    {activeInteractive === '引導式深呼吸' && (
+                    {activeInteractive === t('引導式深呼吸') && (
                         <div className="breathing-session">
                             <div className={`pacer-circle ${breatheStage}`}>
                                 <div className="pacer-text">
@@ -344,7 +344,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
 
                 /* Reflection Overlay */
                 .reflection-overlay {
-                    position: absolute; inset: 0; background: hsla(0, 0%, 10%, 0.95);
+                    position: absolute; inset: 0; background: var(--bg-color);
                     display: flex; align-items: center; justify-content: center; z-index: 1100;
                     padding: var(--s-6); backdrop-filter: var(--glass-blur);
                 }
@@ -359,13 +359,13 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                 .reflection-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--s-2); line-height: 1.6; }
                 
                 .reflection-card .morandi-textarea {
-                    width: 100%; min-height: 100px; background: hsla(0,0%,0%,0.3);
+                    width: 100%; min-height: 100px; background: var(--bg-secondary);
                     border: 1px solid var(--glass-border); border-radius: var(--radius-md);
                     padding: var(--s-4); color: var(--text-primary); font-family: inherit;
                     resize: none; outline: none; transition: var(--transition-luxe);
                     font-size: 1rem;
                 }
-                .reflection-card .morandi-textarea:focus { border-color: var(--text-secondary); }
+                .reflection-card .morandi-textarea:focus { border-color: var(--color-yellow); box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1); }
 
                 .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
 

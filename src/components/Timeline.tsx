@@ -565,7 +565,8 @@ const Timeline: React.FC = () => {
 
                 .import-toast {
                     position: fixed;
-                    bottom: 24px;
+                    bottom: env(safe-area-inset-bottom, 80px);
+                    bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
                     left: 50%;
                     transform: translateX(-50%);
                     padding: 12px 24px;
@@ -573,10 +574,11 @@ const Timeline: React.FC = () => {
                     font-size: 0.9rem;
                     animation: slideUp 0.3s ease;
                     z-index: 1000;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    box-shadow: var(--shadow-luxe);
+                    white-space: nowrap;
                 }
-                .import-toast.success { background: var(--color-green); color: white; }
-                .import-toast.error { background: var(--color-red); color: white; }
+                .import-toast.success { background: var(--color-green); color: #fff; }
+                .import-toast.error { background: var(--color-red); color: #fff; }
                 @keyframes slideUp {
                     from { opacity: 0; transform: translateX(-50%) translateY(10px); }
                     to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -587,7 +589,7 @@ const Timeline: React.FC = () => {
                     .timeline-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
                 }
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
-                .timeline-card:hover { border-color: var(--glass-border); background: rgba(255,255,255,0.02); }
+                .timeline-card:hover { border-color: hsla(0,0%,100%,0.15); background: var(--glass-bg); }
                 
                 .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
                 .card-date { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -599,17 +601,22 @@ const Timeline: React.FC = () => {
                     background: none;
                     border: none;
                     color: var(--text-secondary);
-                    font-size: 0.9rem;
+                    font-size: 1rem;
                     cursor: pointer;
-                    opacity: 0.4;  /* Always visible */
+                    opacity: 0.5;
                     transition: var(--transition);
-                    padding: 6px;
-                    border-radius: 4px;
+                    padding: 8px;
+                    border-radius: 6px;
+                    min-width: 36px;
+                    min-height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
-                .timeline-card:hover .edit-btn, .timeline-card:hover .delete-btn { opacity: 0.7; background: rgba(255,255,255,0.05); }
+                .timeline-card:hover .edit-btn, .timeline-card:hover .delete-btn { opacity: 0.75; background: var(--glass-bg); }
                 .edit-btn:hover, .delete-btn:hover { opacity: 1 !important; }
-                .delete-btn:hover { color: var(--color-red) !important; background: rgba(180, 138, 137, 0.15) !important; }
-                .edit-btn:hover { color: var(--color-yellow) !important; background: rgba(205, 185, 156, 0.15) !important; }
+                .delete-btn:hover { color: var(--color-red) !important; background: hsla(0, 40%, 65%, 0.12) !important; }
+                .edit-btn:hover { color: var(--color-yellow) !important; background: hsla(43, 40%, 70%, 0.12) !important; }
                 
                 .card-emotion-name { margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600; }
                 
@@ -619,15 +626,15 @@ const Timeline: React.FC = () => {
                 .context-value { color: var(--text-primary); }
                 
                 .card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-                .mini-tag { font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; }
-                
-                .card-note { font-size: 0.9rem; color: var(--text-primary); font-style: italic; opacity: 0.9; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); border-left: 2px solid var(--text-secondary); position: relative; }
-                
+                .mini-tag { font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--glass-border); }
+
+                .card-note { font-size: 0.9rem; color: var(--text-primary); font-style: italic; opacity: 0.9; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); border-left: 2px solid var(--text-secondary); position: relative; }
+
                 .edit-area { display: flex; flex-direction: column; gap: 10px; }
                 .edit-textarea {
                     width: 100%;
                     min-height: 80px;
-                    background: rgba(0,0,0,0.3);
+                    background: var(--bg-secondary);
                     border: 1px solid var(--glass-border);
                     border-radius: var(--radius-sm);
                     color: var(--text-primary);
@@ -635,14 +642,18 @@ const Timeline: React.FC = () => {
                     font-family: inherit;
                     font-size: 0.9rem;
                     resize: vertical;
+                    outline: none;
+                    transition: border-color 0.2s ease;
                 }
+                .edit-textarea:focus { border-color: var(--color-yellow); box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1); }
                 .edit-actions { display: flex; gap: 10px; justify-content: flex-end; }
                 .save-btn, .cancel-btn {
-                    padding: 4px 12px;
-                    border-radius: 4px;
-                    font-size: 0.8rem;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-size: 0.85rem;
                     cursor: pointer;
                     transition: var(--transition);
+                    min-height: 36px;
                 }
                 .save-btn { background: var(--text-primary); color: var(--bg-color); border: none; }
                 .cancel-btn { background: transparent; border: 1px solid var(--glass-border); color: var(--text-secondary); }
@@ -693,16 +704,17 @@ const Timeline: React.FC = () => {
                 .delete-modal p { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 1.5rem 0; }
                 .delete-modal-actions { display: flex; gap: 12px; justify-content: center; }
                 .delete-confirm-btn, .delete-cancel-btn {
-                    padding: 10px 24px;
+                    padding: 12px 28px;
                     border-radius: var(--radius-sm);
                     font-size: 0.9rem;
                     cursor: pointer;
                     transition: var(--transition);
                     border: none;
+                    min-height: 44px;
                 }
                 .delete-confirm-btn {
                     background: var(--color-red);
-                    color: white;
+                    color: #fff;
                 }
                 .delete-confirm-btn:hover { filter: brightness(1.1); }
                 .delete-cancel-btn {
@@ -710,7 +722,7 @@ const Timeline: React.FC = () => {
                     border: 1px solid var(--glass-border);
                     color: var(--text-secondary);
                 }
-                .delete-cancel-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+                .delete-cancel-btn:hover { background: var(--glass-border); color: var(--text-primary); }
 
                 @keyframes scaleIn {
                     from { transform: scale(0.9); opacity: 0; }
@@ -727,7 +739,7 @@ const Timeline: React.FC = () => {
                     padding: 1rem;
                 }
                 .page-btn {
-                    padding: 0.5rem 1rem;
+                    padding: 0.75rem 1.25rem;
                     background: var(--glass-bg);
                     border: 1px solid var(--glass-border);
                     border-radius: var(--radius-sm);
@@ -735,9 +747,10 @@ const Timeline: React.FC = () => {
                     font-size: 0.9rem;
                     cursor: pointer;
                     transition: var(--transition);
+                    min-height: 44px;
                 }
                 .page-btn:hover:not(:disabled) {
-                    background: rgba(255,255,255,0.05);
+                    background: var(--glass-border);
                     border-color: var(--text-secondary);
                 }
                 .page-btn:disabled {
