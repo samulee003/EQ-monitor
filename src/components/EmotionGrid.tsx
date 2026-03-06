@@ -46,9 +46,14 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
   const [intensity, setIntensity] = useState(5);
   const { t } = useLanguage();
 
+  const isParentRole = useMemo(() =>
+    localStorage.getItem('imxin_user_role') === 'parent',
+    []
+  );
+
   const filteredEmotions = useMemo(() =>
-    emotions.filter(e => quadrants.includes(e.quadrant)),
-    [quadrants]
+    emotions.filter(e => quadrants.includes(e.quadrant) && (!e.isParenting || isParentRole)),
+    [quadrants, isParentRole]
   );
 
   const toggleEmotion = useCallback((e: Emotion) => {

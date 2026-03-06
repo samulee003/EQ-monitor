@@ -49,7 +49,8 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     const [showInteractionCycle, setShowInteractionCycle] = useState(false);
     const [interactionCycle, setInteractionCycle] = useState<InteractionCycle>({ myReaction: '', childReaction: '', reflection: '' });
 
-    const isParentingContext = (what === '育兒' || what === '管教衝突') && who === '孩子';
+    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
+    const isParentingContext = isParentRole && (what === '育兒' || what === '管教衝突') && who === '孩子';
 
     const defaultOptions = {
         what: ['育兒', '管教衝突', '工作', '學習', '社交', '放鬆', '運動', '用餐', '通勤', '家務'],

@@ -126,14 +126,26 @@ body {
 }
 
 @media (min-width: 768px) {
+  .app-container {
+    max-width: 720px;
+  }
   .main-content {
     padding: 2.5rem 2rem;
   }
 }
 
-/* Desktop enhancement: Subtle border for the container on large screens */
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 860px;
+  }
+  .main-content {
+    padding: 3rem 2.5rem;
+  }
+}
+
 @media (min-width: 1200px) {
   .app-container {
+    max-width: 960px;
     box-shadow: 0 0 100px rgba(0, 0, 0, 0.4);
     border-left: 1px solid var(--glass-border);
     border-right: 1px solid var(--glass-border);
