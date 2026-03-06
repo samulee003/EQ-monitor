@@ -221,8 +221,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                 .auth-modal-overlay {
                     position: fixed;
                     inset: 0;
-                    background: hsla(0, 0%, 10%, 0.85);
+                    background: hsla(0, 0%, 5%, 0.75);
                     backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
                     z-index: 10000;
                     display: flex;
                     align-items: center;
@@ -269,18 +270,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                     color: var(--text-secondary);
                     font-size: 1.5rem;
                     cursor: pointer;
-                    width: 32px;
-                    height: 32px;
+                    width: 44px;
+                    height: 44px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     border-radius: 50%;
                     transition: all 0.3s ease;
+                    flex-shrink: 0;
                 }
 
                 .close-btn:hover {
                     background: var(--glass-bg);
                     color: var(--text-primary);
+                }
+
+                .close-btn:focus-visible {
+                    outline: 2px solid var(--color-yellow);
+                    outline-offset: 2px;
                 }
 
                 .auth-mode-toggle {
@@ -337,6 +344,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                     color: var(--text-primary);
                     font-size: 0.95rem;
                     transition: all 0.3s ease;
+                    min-height: 48px;
+                    width: 100%;
+                    box-sizing: border-box;
                 }
 
                 .form-group input:focus {
