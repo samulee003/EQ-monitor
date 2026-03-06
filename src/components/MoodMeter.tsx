@@ -288,10 +288,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
           transform: scale(1.1);
         }
         .sphere-wrapper.active .sphere-inner {
-          box-shadow: 
+          box-shadow:
             inset 0 4px 12px hsla(0, 0%, 100%, 0.5),
             0 0 20px currentColor;
-          border: 2px solid #fff;
+          border: 2px solid var(--text-primary);
         }
         .sphere-wrapper.active .sphere-glow {
           opacity: 0.6;

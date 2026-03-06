@@ -76,14 +76,14 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
           gap: 1rem;
           margin: 1.5rem 0;
           padding: 1.5rem;
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--glass-bg);
           border-radius: var(--radius-md);
           border: 1px solid var(--glass-border);
         }
 
         .record-btn {
-          width: 56px;
-          height: 56px;
+          width: 64px;
+          height: 64px;
           border-radius: 50%;
           background: var(--bg-secondary);
           display: flex;
@@ -97,12 +97,16 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
 
         .record-btn.idle:hover {
           transform: scale(1.1);
-          background: var(--glass-bg);
-          box-shadow: 0 0 20px rgba(255,255,255,0.05);
+          background: var(--glass-border);
+        }
+
+        .record-btn:focus-visible {
+          outline: 2px solid var(--color-red);
+          outline-offset: 3px;
         }
 
         .record-btn.recording {
-          background: rgba(180, 138, 137, 0.2);
+          background: hsla(0, 40%, 65%, 0.15);
           border-color: var(--color-red);
           animation: pulse 1.5s infinite;
         }
@@ -111,21 +115,22 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
           font-size: 0.85rem;
           color: var(--text-secondary);
           letter-spacing: 0.5px;
+          text-align: center;
         }
 
         .loader {
           width: 24px;
           height: 24px;
-          border: 2px solid var(--text-secondary);
-          border-top-color: transparent;
+          border: 2px solid var(--glass-border);
+          border-top-color: var(--text-primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
 
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(180, 138, 137, 0.4); }
-          70% { box-shadow: 0 0 0 15px rgba(180, 138, 137, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(180, 138, 137, 0); }
+          0% { box-shadow: 0 0 0 0 hsla(0, 40%, 65%, 0.4); }
+          70% { box-shadow: 0 0 0 15px hsla(0, 40%, 65%, 0); }
+          100% { box-shadow: 0 0 0 0 hsla(0, 40%, 65%, 0); }
         }
 
         @keyframes spin {

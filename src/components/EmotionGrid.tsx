@@ -124,13 +124,13 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
         </button>
 
         <style>{`
-            .emotions-cloud { 
-                position: relative; z-index: 2; display: flex; flex-wrap: wrap; 
+            .emotions-cloud {
+                position: relative; z-index: 2; display: flex; flex-wrap: wrap;
                 justify-content: center; gap: 8px; padding: 1rem; max-width: 250px;
             }
-            .emotion-name-tag { 
-                font-size: 1rem; font-weight: 700; color: #fff; 
-                text-shadow: 0 2px 10px rgba(0,0,0,0.5); background: rgba(0,0,0,0.1);
+            .emotion-name-tag {
+                font-size: 1rem; font-weight: 700; color: var(--bg-color);
+                text-shadow: 0 1px 4px rgba(0,0,0,0.3); background: rgba(0,0,0,0.15);
                 padding: 4px 12px; border-radius: 20px;
             }
         `}</style>
@@ -200,25 +200,30 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
         .context-chip { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.3rem 0.6rem; border-radius: 20px; }
         .emotion-bubble.active {
             background: var(--bubble-color);
-            color: #1a1a1a;
-            border-color: #fff;
-            transform: scale(1.1);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            color: var(--bg-color);
+            border-color: var(--bubble-color);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            font-weight: 600;
         }
 
         .emotion-selection-container { display: flex; flex-direction: column; gap: 2rem; }
-        .selection-header { display: flex; justify-content: space-between; align-items: center; }
+        .selection-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
         .current-context { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.4rem 0.8rem; border-radius: 20px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
         .selection-title h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
         .selection-title p { color: var(--text-secondary); font-size: 0.9rem; }
         .bubbles-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 1rem 0; }
-        .emotion-bubble { padding: 0.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--text-primary); font-size: 0.95rem; cursor: pointer; transition: var(--transition); animation: float 4s ease-in-out infinite; animation-fill-mode: both; }
-        .emotion-bubble:hover { background: var(--bubble-color); color: #1a1a1a; border-color: var(--bubble-color); transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .emotion-bubble:nth-child(2n) { animation-duration: 4.5s; }
-        .emotion-bubble:nth-child(3n) { animation-duration: 3.8s; }
-        .emotion-bubble:nth-child(5n) { animation-duration: 5s; }
+        .emotion-bubble {
+            padding: 0.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 30px; color: var(--text-primary); font-size: 0.95rem; cursor: pointer;
+            transition: var(--transition); min-height: 44px; display: inline-flex; align-items: center;
+        }
+        .emotion-bubble:hover {
+            background: var(--bubble-color); color: var(--bg-color); border-color: var(--bubble-color);
+            transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+        .emotion-bubble:focus-visible { outline: 2px solid var(--bubble-color); outline-offset: 2px; }
       `}</style>
     </div>
   );
