@@ -145,6 +145,43 @@ export const regulationIcons: Record<string, IconComponent> = {
             <path d="M4 4l16 16" />
         </svg>
     ),
+    // Parenting-specific strategy icons
+    pauseCard: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <rect x="4" y="4" width="16" height="16" rx="3" />
+            <path d="M10 9v6" />
+            <path d="M14 9v6" />
+        </svg>
+    ),
+    repair: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+            <path d="M8 13l2 2 4-4" />
+        </svg>
+    ),
+    selfCompassion: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M12 21c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
+            <path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" />
+        </svg>
+    ),
+    imperfectParent: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <path d="M9.5 9.5l.01 0" />
+            <path d="M14.5 9.5l.01 0" />
+            <path d="M16 5l-2 2" />
+        </svg>
+    ),
+    parentMindful: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <circle cx="9" cy="8" r="3" />
+            <circle cx="16" cy="10" r="2" />
+            <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+            <path d="M16 14a3 3 0 0 1 3 3v4" />
+        </svg>
+    ),
 };
 
 // ===== EXPRESSING MODE ICONS =====
