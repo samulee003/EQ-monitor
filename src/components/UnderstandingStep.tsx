@@ -85,7 +85,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                 <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                    <span className="step-title">{t('Understanding 理解核心')}</span>
+                    <span className="step-title">{t('定位 — 發生了什麼？')}</span>
                 </div>
             </div>
 

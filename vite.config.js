@@ -14,9 +14,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'vite.svg'],
       manifest: {
-        name: '今心 ImXin - 你的情緒素養與 RULER 教練',
+        name: '今心 ImXin - 你的每日情緒覺察夥伴',
         short_name: '今心',
-        description: '基於耶魯 RULER 框架的情緒覺察工具。透過標記、理解與調節，助你找回內在的平靜。',
+        description: '引導式情緒覺察工具。透過覺察、命名與選擇回應，助你找回內在的平靜。',
         theme_color: '#fdfaf3',
         background_color: '#fdfaf3',
         display: 'standalone',

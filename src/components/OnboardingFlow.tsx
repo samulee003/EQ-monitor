@@ -55,7 +55,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
-                        <p>{t('這裡是你的情緒避風港。我們會用耶魯大學的 RULER 方法，陪你覺察、理解、調節每一個情緒。')}</p>
+                        <p>{t('這裡是你的情緒避風港。透過簡單的覺察練習，陪你注意、命名、選擇回應每一個情緒。')}</p>
                         <div className="disclaimer-box">
                             <p className="disclaimer-title">⚠️ {t('使用須知')}</p>
                             <p className="disclaimer-text">{t('今心是情緒覺察輔助工具，非醫療器材，無法取代專業心理治療。如果您正在經歷嚴重情緒困擾或有自傷念頭，請立即聯繫專業人員。')}</p>
@@ -103,10 +103,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 3 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-quadrants">
-                            <div className="q-box red">R</div>
-                            <div className="q-box yellow">U</div>
-                            <div className="q-box blue">L</div>
-                            <div className="q-box green">E</div>
+                            <div className="q-box red"></div>
+                            <div className="q-box yellow"></div>
+                            <div className="q-box blue"></div>
+                            <div className="q-box green"></div>
                         </div>
                         <h2>{t('情緒的四種色彩')}</h2>
                         <p>{t('每種顏色代表不同的能量與愉悅程度。紅色是焦慮憤怒，黃色是興奮快樂，藍色是憂鬱疲憊，綠色是平靜滿足。沒有「好」或「壞」的情緒，只有需要被看見的感受。')}</p>
@@ -117,31 +117,31 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     </div>
                 )}
 
-                {/* Step 4: RULER Steps */}
+                {/* Step 4: Pause Flow Steps */}
                 {step === 4 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon breathe">{uiIcons.seedling}</div>
-                        <h2>{t('RULER 五步法')}</h2>
+                        <h2>{t('覺察五步練習')}</h2>
                         <div className="ruler-steps-list">
                             <div className="ruler-step-item">
-                                <span className="ruler-letter r">R</span>
-                                <span>{t('Recognizing - 辨別當下的情緒能量')}</span>
+                                <span className="ruler-letter r">N</span>
+                                <span>{t('覺察 — 我現在有什麼感覺？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter l">L</span>
-                                <span>{t('Labeling - 用精準詞彙標記情緒')}</span>
+                                <span className="ruler-letter l">N</span>
+                                <span>{t('命名 — 這個感覺叫什麼？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter u">U</span>
-                                <span>{t('Understanding - 理解情緒的來源')}</span>
+                                <span className="ruler-letter u">L</span>
+                                <span>{t('定位 — 身體哪裡有感覺？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter e">E</span>
-                                <span>{t('Expressing - 表達與宣洩情緒')}</span>
+                                <span className="ruler-letter e">N</span>
+                                <span>{t('需要 — 此刻我需要什麼？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter r2">R</span>
-                                <span>{t('Regulating - 調節回到平靜')}</span>
+                                <span className="ruler-letter r2">C</span>
+                                <span>{t('選擇 — 我想怎麼回應？')}</span>
                             </div>
                         </div>
                         <div className="step-actions">
@@ -355,7 +355,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     color: var(--text-primary);
                 }
                 
-                /* RULER Steps List */
+                /* Steps List */
                 .ruler-steps-list {
                     text-align: left;
                     margin-bottom: var(--s-6);

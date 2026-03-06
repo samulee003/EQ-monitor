@@ -8,27 +8,24 @@
 
 **本項目為開源學習項目，非商業產品。**
 
-- 靈感來自耶魯大學情緒智能中心的 [How We Feel](https://howwefeel.org/) APP
-- 與耶魯大學無官方合作關係
-- RULER 為耶魯大學註冊商標
 - 本項目採用 MIT License，完全免費開源
-- 推薦使用官方 APP 獲得更專業的情緒支持
+- 本工具為情緒覺察反思工具，非教育課程或臨床治療系統
 
 ---
 
 ## 項目概述
 
-**今心 ImXin** 是一款基於耶魯大學 RULER 情緒智能框架開發的專業級 Web 應用。核心理念為「今心即為念」，旨在陪伴使用者深入覺察、理解並精準調節情緒。
+**今心 ImXin** 是一款開源的情緒覺察 Web 應用。核心理念為「今心即為念」，旨在陪伴使用者深入覺察、命名並選擇回應情緒。
 
-### RULER 框架實現
+### 覺察五步練習
 
 | 步驟 | 功能 | 組件 |
 |------|------|------|
-| **Recognizing** | 情緒辨別 | MoodMeter (象限選擇) + BodyScan (身體掃描) |
-| **Labeling** | 情緒標記 | EmotionGrid (100+ 情緒詞彙) |
-| **Understanding** | 理解需求 | UnderstandingStep (觸發事件追蹤) |
-| **Expressing** | 情緒表達 | ExpressingStep (情緒碎紙機/私密書信) |
-| **Regulating** | 情緒調節 | RegulatingStep (呼吸規律器/5-4-3-2-1 接地法) |
+| **覺察** | 注意當下感受 | MoodMeter (象限選擇) + BodyScan (身體掃描) |
+| **命名** | 精確命名情緒 | EmotionGrid (100+ 情緒詞彙) |
+| **定位** | 探索觸發情境 | UnderstandingStep (觸發事件追蹤) |
+| **需要** | 表達與宣洩 | ExpressingStep (情緒碎紙機/私密書信) |
+| **選擇** | 選擇回應方式 | RegulatingStep (呼吸規律器/5-4-3-2-1 接地法) |
 
 ---
 
@@ -69,8 +66,8 @@ npm run cap:open     # 打開 Android Studio
 ```
 src/
 ├── components/       # React 組件
-│   ├── steps/           # RULER 步驟子組件
-│   ├── CheckInFlow.tsx  # RULER 主流程
+│   ├── steps/           # 覺察步驟子組件
+│   ├── CheckInFlow.tsx  # 情緒覺察主流程
 │   ├── QuickStats.tsx   # 快速統計面板 (新增)
 │   ├── Skeleton.tsx     # 骨架屏組件 (新增)
 │   ├── MoodMeter.tsx    # 情緒象限
@@ -88,7 +85,7 @@ src/
 │   ├── NotificationService.ts # 通知服務
 │   └── ...
 ├── hooks/            # 自定義 Hooks
-│   ├── useRulerFlow.ts  # RULER 流程狀態
+│   ├── useRulerFlow.ts  # 覺察流程狀態
 │   └── useA11y.ts       # 可訪問性 Hooks
 ├── data/             # 靜態數據
 │   └── emotionData.ts   # 100+ 情緒詞彙

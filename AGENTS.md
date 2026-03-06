@@ -9,7 +9,7 @@
 
 ## 項目概述
 
-**今心 ImXin** 是一款基於耶魯大學 RULER 情緒智能框架開發的進階 Web 應用。它是一個專業的心理輔助工具，透過動態交互、身心聯結與儀式化宣洩，引導使用者從「覺察」走向「平衡」。
+**今心 ImXin** 是一款開源的情緒覺察 Web 應用。它是一個日常反思工具，透過動態交互、身心聯結與儀式化宣洩，引導使用者從「覺察」走向「平衡」。
 
 **核心理念**: 「今心」即為「念」，旨在陪伴使用者深入覺察、理解並精準調節情緒的數字避風港。
 
@@ -37,11 +37,11 @@
 ```
 src/
 ├── components/          # React 組件
-│   ├── steps/               # RULER 步驟子組件
+│   ├── steps/               # 覺察步驟子組件
 │   │   ├── SummaryStep.tsx      # 完成摘要
 │   │   ├── NeuroCheckStep.tsx   # 調節後檢查
 │   │   └── CenteringStep.tsx    # 沉靜步驟
-│   ├── CheckInFlow.tsx      # RULER 情緒記錄主流程
+│   ├── CheckInFlow.tsx      # 情緒覺察主流程
 │   ├── MoodMeter.tsx        # 情緒象限選擇器
 │   ├── EmotionGrid.tsx      # 情緒詞彙網格
 │   ├── BodyScan.tsx         # 身體掃描組件 (含語音引導)
@@ -73,14 +73,14 @@ src/
 │   ├── PhysicalService.ts   # 生理數據服務
 │   └── prompts.ts           # AI System Prompts
 ├── hooks/               # 自定義 React Hooks
-│   ├── useRulerFlow.ts      # RULER 流程狀態管理
+│   ├── useRulerFlow.ts      # 覺察流程狀態管理
 │   └── useA11y.ts           # 可訪問性輔助 Hooks
 ├── utils/               # 工具函數
 │   └── format.test.ts       # 格式化工具 + 測試
 ├── data/                # 靜態數據
 │   └── emotionData.ts       # 100+ 情緒詞彙定義
 ├── types/               # TypeScript 類型定義
-│   ├── RulerTypes.ts        # RULER 相關類型
+│   ├── RulerTypes.ts        # 覺察流程相關類型
 │   ├── HabitTypes.ts        # 習慣/連續記錄類型
 │   └── AchievementTypes.ts  # 成就系統類型
 ├── test/                # 測試配置
@@ -92,15 +92,15 @@ src/
 
 ---
 
-## RULER 框架流程
+## 覺察五步練習
 
-應用遵循耶魯大學 RULER 情緒智能框架：
+應用引導使用者完成五步情緒覺察練習：
 
-1. **Recognizing (辨別)** - Mood Meter 象限選擇 + Body Scan 身體掃描
-2. **Labeling (標記)** - 從 100+ 情緒詞彙中精確選擇
-3. **Understanding (理解)** - 追踪觸發事件，挖掘底層心理需求
-4. **Expressing (表達)** - 情緒碎紙機儀式或私密書信
-5. **Regulating (調節)** - 呼吸規律器、5-4-3-2-1 接地法等
+1. **覺察 (Notice)** - 情緒象限選擇 + Body Scan 身體掃描
+2. **命名 (Name)** - 從 100+ 情緒詞彙中精確選擇
+3. **定位 (Locate)** - 追踪觸發事件，挖掘底層心理需求
+4. **需要 (Need)** - 情緒碎紙機儀式或私密書信
+5. **選擇 (Choose)** - 呼吸規律器、5-4-3-2-1 接地法等
 
 ---
 
@@ -327,7 +327,7 @@ Vite 配置包含代碼分割：
 
 ## 常用組件開發模式
 
-### 創建新的 RULER 步驟組件
+### 創建新的覺察步驟組件
 
 ```typescript
 import React from 'react';
@@ -431,7 +431,7 @@ const MyModal = ({ isOpen, onClose }) => {
 - ✅ Bundle 優化 (Terser)
 
 ### v1.0 (初始版本)
-- RULER 五步法
+- 覺察五步練習
 - 100+ 情緒詞彙
 - AI 洞察分析
 - 成就系統
