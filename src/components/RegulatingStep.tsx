@@ -368,6 +368,27 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                 .reflection-card .morandi-textarea:focus { border-color: var(--text-secondary); }
 
                 .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
+
+                @media (max-width: 480px) {
+                    .pacer-circle { width: 200px; height: 200px; }
+                    .pacer-text { font-size: 1.2rem; }
+                    .breathing-desc { font-size: 0.85rem; }
+                    .task-count { font-size: 3.5rem; }
+                    .task-text { font-size: 1.1rem; }
+                    .task-card { padding: var(--s-8) var(--s-4); }
+                    .interactive-overlay { padding: var(--s-8) var(--s-4); }
+                    .close-overlay { top: var(--s-4); right: var(--s-4); width: 36px; height: 36px; }
+                }
+
+                @media (max-width: 360px) {
+                    .pacer-circle { width: 160px; height: 160px; }
+                    .pacer-text { font-size: 1rem; }
+                }
+
+                @media (min-width: 768px) {
+                    .strategies-grid { gap: var(--s-4); }
+                    .strategy-item { padding: var(--s-6); }
+                }
             `}</style>
         </div>
     );
