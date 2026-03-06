@@ -190,19 +190,28 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
         }
 
         .chip {
-          padding: 0.5rem 1.25rem;
+          padding: 0.6rem 1.25rem;
           border-radius: 20px;
-          background: #1a1a1a;
-          border: 1px solid #333;
-          color: white;
+          background: var(--bg-secondary);
+          border: 1px solid var(--glass-border);
+          color: var(--text-primary);
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .chip:hover {
+          border-color: var(--text-secondary);
+          transform: translateY(-1px);
         }
 
         .chip.active {
-          background: white;
-          color: black;
-          border-color: white;
+          background: var(--text-primary);
+          color: var(--bg-color);
+          border-color: var(--text-primary);
+          font-weight: 600;
         }
 
         .add-chip {
@@ -212,6 +221,12 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
           color: var(--text-secondary);
           width: auto;
           min-width: 44px;
+          justify-content: center;
+        }
+
+        .add-chip:hover {
+          color: var(--text-primary);
+          border-color: var(--text-primary);
         }
 
         .add-input-container {
@@ -219,37 +234,60 @@ const ContextLogger: React.FC<ContextLoggerProps> = ({ emotion, onComplete, onBa
         }
 
         .add-input {
-          background: #1a1a1a;
-          border: 1px solid #666;
+          background: var(--bg-secondary);
+          border: 1px solid var(--text-secondary);
           border-radius: 20px;
-          padding: 0.5rem 1rem;
-          color: white;
+          padding: 0.6rem 1rem;
+          color: var(--text-primary);
           font-family: inherit;
           font-size: 0.9rem;
           outline: none;
+          min-height: 44px;
+          transition: border-color 0.2s ease;
+        }
+
+        .add-input:focus {
+          border-color: var(--color-yellow);
+          box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1);
         }
 
         .context-textarea {
           width: 100%;
           min-height: 100px;
-          background: #1a1a1a;
-          border: 1px solid #333;
+          background: var(--bg-secondary);
+          border: 1px solid var(--glass-border);
           border-radius: 12px;
           padding: 1rem;
-          color: white;
+          color: var(--text-primary);
           font-family: inherit;
           resize: vertical;
+          transition: border-color 0.2s ease;
+        }
+
+        .context-textarea:focus {
+          outline: none;
+          border-color: var(--color-yellow);
+          box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1);
         }
 
         .submit-btn {
           width: 100%;
           padding: 1.25rem;
-          background: white;
-          color: black;
+          background: var(--text-primary);
+          color: var(--bg-color);
           font-weight: 700;
           font-size: 1.1rem;
           border: none;
+          border-radius: var(--radius-md);
           margin-top: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-luxe);
+          filter: brightness(1.1);
         }
 
         .submit-btn:disabled {

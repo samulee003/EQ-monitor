@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useLanguage } from '../services/LanguageContext';
 
 interface SplashScreenProps {
@@ -9,6 +9,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const { t } = useLanguage();
     const videoRef = useRef<HTMLVideoElement>(null);
     const hasPlayedRef = useRef(false);
+    const [videoError, setVideoError] = useState(false);
 
     useEffect(() => {
         // Prevent double execution in StrictMode
@@ -17,11 +18,20 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
         // Ensure video starts playing
         if (videoRef.current) {
-            videoRef.current.play().catch(error => {
-                console.log("Autoplay was prevented:", error);
+            videoRef.current.play().catch(() => {
+                // Autoplay blocked - skip splash immediately
+                onComplete();
             });
         }
-    }, []);
+    }, [onComplete]);
+
+    // If video fails to load, skip splash
+    const handleVideoError = () => {
+        setVideoError(true);
+        onComplete();
+    };
+
+    if (videoError) return null;
 
     return (
         <div className="splash-screen">
@@ -29,15 +39,15 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 ref={videoRef}
                 className="splash-video"
                 onEnded={onComplete}
+                onError={handleVideoError}
                 muted
                 playsInline
                 autoPlay
             >
                 <source src="/intro.mp4" type="video/mp4" />
-                {t('您的瀏覽器不支援影片標籤。')}
             </video>
 
-            <button className="skip-splash-btn" onClick={onComplete}>
+            <button className="skip-splash-btn" onClick={onComplete} aria-label={t('跳過動畫')}>
                 {t('跳過動畫')}
             </button>
 
@@ -48,7 +58,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                     left: 0;
                     width: 100vw;
                     height: 100vh;
-                    background: #1a1a1a;
+                    background: var(--bg-color, #1a1a1a);
                     z-index: 1000;
                     display: flex;
                     justify-content: center;
@@ -59,29 +69,37 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 .splash-video {
                     width: 100%;
                     height: 100%;
-                    object-fit: contain;
+                    object-fit: cover;
                 }
 
                 .skip-splash-btn {
                     position: absolute;
-                    bottom: 2rem;
-                    right: 2rem;
-                    background: rgba(255, 255, 255, 0.1);
+                    bottom: 2.5rem;
+                    right: 1.5rem;
+                    background: var(--glass-bg, rgba(255, 255, 255, 0.1));
                     backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    color: rgba(255, 255, 255, 0.6);
-                    padding: 0.6rem 1.2rem;
+                    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+                    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+                    padding: 0.75rem 1.4rem;
                     border-radius: 2rem;
                     font-size: 0.9rem;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     z-index: 1001;
+                    min-height: 44px;
+                    display: flex;
+                    align-items: center;
                 }
 
                 .skip-splash-btn:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                    color: #fff;
+                    background: var(--glass-border, rgba(255, 255, 255, 0.2));
+                    color: var(--text-primary, #fff);
                     transform: translateY(-2px);
+                }
+
+                .skip-splash-btn:focus-visible {
+                    outline: 2px solid rgba(255, 255, 255, 0.6);
+                    outline-offset: 2px;
                 }
             `}</style>
         </div>
