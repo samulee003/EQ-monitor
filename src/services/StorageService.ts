@@ -50,7 +50,7 @@ class StorageService {
 
 
     /**
-     * Save a completed RULER flow entry
+     * Save a completed check-in flow entry
      */
     saveLog(entry: RulerLogEntry): void {
         const logs = this.getLogs();
