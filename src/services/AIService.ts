@@ -227,4 +227,109 @@ class AIService {
 }
 
 
+    /**
+     * chatWithAssistant
+     * Real-time chat with AI assistant for emotional support and guidance.
+     */
+    async chatWithAssistant(userMessage: string, history: any[] = []): Promise<string> {
+        if (!this.apiKey || !this.apiUrl) {
+            return this.getMockChatResponse(userMessage);
+        }
+
+        try {
+            const context = history.map(log => ({
+                date: new Date(log.timestamp).toLocaleDateString('zh-TW'),
+                emotion: log.emotions?.[0]?.name,
+                quadrant: log.emotions?.[0]?.quadrant,
+                intensity: log.intensity
+            }));
+
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    messages: [
+                        { 
+                            role: "system", 
+                            content: `你是一位專業的情緒智能教練，專注於幫助用戶理解和調節情緒。
+
+指導原則：
+1. 以溫暖、同理心的方式回應
+2. 使用繁體中文（台灣用語）
+3. 回答簡潔但深入（100-200字）
+4. 適時引用心理學概念（如 RULER 框架）
+5. 提供具體可行的建議
+6. 避免過度醫療化或診斷
+
+用戶歷史情緒記錄：${JSON.stringify(context)}` 
+                        },
+                        { role: "user", content: userMessage }
+                    ],
+                    model: "gpt-4o",
+                    temperature: 0.8,
+                    max_tokens: 500
+                })
+            });
+
+            if (!response.ok) throw new Error("API failed");
+            
+            const result = await response.json();
+            return result.choices?.[0]?.message?.content || this.getMockChatResponse(userMessage);
+        } catch (error) {
+            console.error("Chat failed:", error);
+            return this.getMockChatResponse(userMessage);
+        }
+    }
+
+    private getMockChatResponse(message: string): string {
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('ruler') || lowerMessage.includes('框架')) {
+            return `RULER 是耶魯大學情緒智能中心開發的框架，包含五個步驟：
+
+**R**ecognizing（辨別）：覺察當下的情緒信號
+**U**nderstanding（理解）：探索情緒的成因和影響
+**L**abeling（標記）：用精準的詞彙命名情緒
+**E**xpressing（表達）：找到健康的方式表達情緒
+**R**egulating（調節）：使用策略管理情緒反應
+
+這個框架幫助我們從「被情緒控制」轉向「與情緒合作」。`;
+        }
+        
+        if (lowerMessage.includes('建議') || lowerMessage.includes('怎麼辦')) {
+            return `當情緒來襲時，試試「RAIN」技巧：
+
+**R**ecognize（認知）：承認「我現在感到焦慮/生氣/難過」
+**A**llow（允許）：不評判地接納這個感受，告訴自己「這很正常」
+**I**nvestigate（探索）：身體哪裡有感覺？這個情緒想告訴我什麼？
+**N**urture（滋養）：問自己「此刻我需要什麼？」可能是深呼吸、喝水、或找人聊聊
+
+記得，情緒就像天氣，會來也會走。你的任務不是阻止它，而是學會在雨中撐傘。☔️`;
+        }
+        
+        if (lowerMessage.includes('記錄') || lowerMessage.includes('為什麼')) {
+            return `記錄情緒就像給心靈寫日記，有三個強大好處：
+
+1. **提升情緒粒度**：研究顯示，能精確命名情緒的人，調節能力更強
+2. **發現模式**：你可能會發現「週一早上總是焦慮」或「運動後心情變好」
+3. **創造距離**：把情緒寫下來，能幫你從「我是憤怒」轉為「我注意到憤怒的存在」
+
+這不是為了「修正」自己，而是為了更溫柔地理解自己。🌱`;
+        }
+
+        return `謝謝你分享這些。作為你的情緒智能助手，我想讓你知道：
+
+無論你此刻感受到什麼，那都是真實且重要的。情緒不是敵人，而是內在智慧傳遞訊息的方式。
+
+如果你想深入探索，可以：
+• 問我關於 RULER 框架的問題
+• 請我分析你最近的情緒模式
+• 聊聊具體的調節策略
+
+我在這裡陪伴你。💚`;
+    }
+
 export const aiService = new AIService();
