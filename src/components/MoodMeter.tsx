@@ -288,10 +288,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
           transform: scale(1.1);
         }
         .sphere-wrapper.active .sphere-inner {
-          box-shadow: 
+          box-shadow:
             inset 0 4px 12px hsla(0, 0%, 100%, 0.5),
             0 0 20px currentColor;
-          border: 2px solid #fff;
+          border: 2px solid var(--text-primary);
         }
         .sphere-wrapper.active .sphere-glow {
           opacity: 0.6;
@@ -327,6 +327,23 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
             transform: scale(0.65);
           }
           .mood-meter-container { gap: 1rem; }
+        }
+
+        @media (min-width: 768px) {
+          .spheres-layout {
+            width: 420px;
+            height: 420px;
+          }
+          .mood-meter-header h1 { font-size: 2.2rem; }
+          .mood-meter-header { max-width: 400px; }
+        }
+
+        @media (min-width: 1024px) {
+          .spheres-layout {
+            width: 480px;
+            height: 480px;
+          }
+          .mood-meter-header h1 { font-size: 2.4rem; }
         }
       `}</style>
     </div>

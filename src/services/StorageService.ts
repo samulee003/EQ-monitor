@@ -50,7 +50,7 @@ class StorageService {
 
 
     /**
-     * Save a completed RULER flow entry
+     * Save a completed check-in flow entry
      */
     saveLog(entry: RulerLogEntry): void {
         const logs = this.getLogs();
@@ -94,7 +94,7 @@ class StorageService {
 
             if (validEntries.length === 0) {
                 return {
-                    success: false,
+                    success: true,
                     imported: 0,
                     skipped: parsed.length,
                     message: '沒有找到有效的記錄'

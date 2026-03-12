@@ -1,15 +1,20 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock localStorage
-global.localStorage = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-    length: 0,
-    key: vi.fn(),
-} as unknown as Storage;
+// Mock localStorage with a real in-memory implementation
+const createLocalStorageMock = () => {
+    let store: Record<string, string> = {};
+    return {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, value: string) => { store[key] = value; },
+        removeItem: (key: string) => { delete store[key]; },
+        clear: () => { store = {}; },
+        get length() { return Object.keys(store).length; },
+        key: (index: number) => Object.keys(store)[index] ?? null,
+    };
+};
+
+global.localStorage = createLocalStorageMock() as unknown as Storage;
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
