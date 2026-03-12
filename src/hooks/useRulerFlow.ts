@@ -6,11 +6,11 @@ import { useHabit } from '../services/HabitContext';
 
 export const steps: { key: RulerStep; label: string; letter: string }[] = [
 
-    { key: 'recognizing', label: '辨別', letter: 'R' },
-    { key: 'labeling', label: '標記', letter: 'L' },
-    { key: 'understanding', label: '理解', letter: 'U' },
-    { key: 'expressing', label: '表達', letter: 'E' },
-    { key: 'regulating', label: '調節', letter: 'R' },
+    { key: 'recognizing', label: '覺察', letter: 'N' },
+    { key: 'labeling', label: '命名', letter: 'N' },
+    { key: 'understanding', label: '定位', letter: 'L' },
+    { key: 'expressing', label: '需要', letter: 'N' },
+    { key: 'regulating', label: '選擇', letter: 'C' },
 ];
 
 export const useRulerFlow = () => {
@@ -186,6 +186,7 @@ export const useRulerFlow = () => {
         setStep('recognizing');
         setSelectedQuadrants([]);
         setSelectedEmotions([]);
+        setBodyScanData(null);
         setUnderstandingData(null);
         setExpressingData(null);
         setRegulatingData(null);
@@ -198,6 +199,11 @@ export const useRulerFlow = () => {
         step,
         selectedQuadrants,
         selectedEmotions,
+        emotionIntensity,
+        bodyScanData,
+        understandingData,
+        expressingData,
+        regulatingData,
         showResumePrompt,
         isFullFlow,
         postRegulationMood,

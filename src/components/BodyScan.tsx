@@ -197,6 +197,7 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
     const [audioProgress, setAudioProgress] = useState(0);
     const [currentSection, setCurrentSection] = useState(0);
     const [isSupported, setIsSupported] = useState(true);
+    const [warningDismissed, setWarningDismissed] = useState(false);
 
     const bodyLocations = useMemo(() => [
         { id: 'head', label: t('頭部'), icon: icons.head, popular: true },
@@ -301,6 +302,17 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 </div>
             </div>
 
+            {!warningDismissed && (
+                <div className="body-scan-warning" role="note">
+                    <p className="body-scan-warning-text">
+                        ⚠️ {t('身體掃描需要將注意力引導至身體內部。若您有創傷、解離症狀、驚恐發作或飲食障礙的歷史，建議先諮詢心理師再使用語音引導功能。')}
+                    </p>
+                    <button className="body-scan-warning-dismiss" onClick={() => setWarningDismissed(true)}>
+                        {t('我了解，繼續')}
+                    </button>
+                </div>
+            )}
+
             <div className="audio-guide-card">
                 <button
                     className={`audio-play-btn ${isAudioPlaying ? 'playing' : ''}`}
@@ -383,6 +395,37 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
 
             <style>{`
                 .body-scan-step { display: flex; flex-direction: column; gap: var(--s-8); }
+
+                .body-scan-warning {
+                    background: hsla(30, 50%, 50%, 0.08);
+                    border: 1px solid hsla(30, 50%, 60%, 0.25);
+                    border-radius: var(--radius-md);
+                    padding: var(--s-4);
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--s-3);
+                }
+                .body-scan-warning-text {
+                    font-size: 0.82rem;
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                    margin: 0;
+                }
+                .body-scan-warning-dismiss {
+                    align-self: flex-end;
+                    background: transparent;
+                    border: 1px solid var(--glass-border);
+                    border-radius: 20px;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                    padding: var(--s-1) var(--s-4);
+                    cursor: pointer;
+                    transition: var(--transition);
+                }
+                .body-scan-warning-dismiss:hover {
+                    color: var(--text-primary);
+                    border-color: var(--text-secondary);
+                }
                 
                 .step-header { display: flex; justify-content: space-between; align-items: center; }
                 .step-label-container { 
@@ -562,11 +605,44 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 }
 
                 .morandi-main-btn { margin-top: var(--s-4); }
-                .morandi-main-btn:disabled { 
-                    opacity: 0.2; 
-                    cursor: not-allowed; 
+                .morandi-main-btn:disabled {
+                    opacity: 0.2;
+                    cursor: not-allowed;
                     filter: grayscale(1);
                     transform: none;
+                }
+
+                @media (max-width: 480px) {
+                    .location-grid, .sensation-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: var(--s-2);
+                    }
+                    .scan-btn {
+                        padding: var(--s-3) var(--s-3);
+                        gap: var(--s-3);
+                    }
+                    .icon-wrapper {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 10px;
+                    }
+                    .scan-icon { width: 18px; height: 18px; }
+                    .scan-label { font-size: 0.85rem; }
+                    .section-intro h2 { font-size: 1.4rem; }
+                    .audio-guide-card { padding: var(--s-3) var(--s-4); }
+                }
+
+                @media (max-width: 360px) {
+                    .location-grid { grid-template-columns: repeat(2, 1fr); }
+                    .sensation-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-2); }
+                    .scan-btn { padding: var(--s-2); gap: var(--s-2); }
+                    .icon-wrapper { width: 32px; height: 32px; }
+                    .scan-label { font-size: 0.8rem; }
+                }
+
+                @media (min-width: 768px) {
+                    .location-grid { grid-template-columns: repeat(3, 1fr); }
+                    .sensation-grid { grid-template-columns: repeat(3, 1fr); }
                 }
             `}</style>
         </div>

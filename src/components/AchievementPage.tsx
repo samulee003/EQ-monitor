@@ -7,16 +7,19 @@ import { uiIcons } from './icons/SvgIcons';
 const AchievementPage: React.FC = () => {
     const { progress } = useHabit();
     const { t } = useLanguage();
+    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
+    const visibleAchievements = ACHIEVEMENTS.filter(a => a.category !== 'parenting' || isParentRole);
 
     return (
         <div className="achievement-page fade-in">
             <div className="achievement-header">
                 <h2>{t('榮耀勳章')}</h2>
-                <p>{t('記錄你的心靈成長足跡，已解鎖')} {progress.unlockedAchievements.length} / {ACHIEVEMENTS.length}</p>
+                <p>{t('記錄你的心靈成長足跡，已解鎖')} {progress.unlockedAchievements.length} / {visibleAchievements.length}</p>
+                <p className="achievement-disclaimer">{t('成就系統為參與激勵工具，不反映心理健康狀態或臨床評估結果。')}</p>
             </div>
 
             <div className="achievement-grid">
-                {ACHIEVEMENTS.map(achievement => {
+                {visibleAchievements.map(achievement => {
                     const isUnlocked = progress.unlockedAchievements.includes(achievement.id);
                     return (
                         <div key={achievement.id} className={`achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`}>
@@ -39,6 +42,7 @@ const AchievementPage: React.FC = () => {
                 .achievement-header { text-align: center; margin-bottom: 2.5rem; }
                 .achievement-header h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
                 .achievement-header p { color: var(--text-secondary); font-size: 0.9rem; }
+                .achievement-disclaimer { font-size: 0.72rem !important; opacity: 0.7; margin-top: 0.5rem; }
 
                 .achievement-grid {
                     display: grid;

@@ -13,33 +13,49 @@ interface RegulatingStepProps {
 const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, onBack }) => {
     const { t } = useLanguage();
     const [selectedStrategies, setSelectedStrategies] = useState<string[]>([]);
+    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
 
-    const strategiesByQuadrant: Record<Quadrant, { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean }[]> = useMemo(() => ({
-        red: [
-            { icon: regulationIcons.breathing, title: t('引導式深呼吸'), desc: t('進入跟隨節奏的呼吸練習'), type: 'interactive', recommended: true },
-            { icon: regulationIcons.grounding, title: t('5-4-3-2-1 接地法'), desc: t('透過感官重新連結當下'), type: 'interactive', recommended: true },
-            { icon: regulationIcons.running, title: t('強效宣洩'), desc: t('進行 30 秒的身心快速擺動') },
-            { icon: regulationIcons.water, title: t('冰水刺激'), desc: t('利用溫差快速平復情緒') },
-        ],
-        yellow: [
-            { icon: regulationIcons.gratitude, title: t('感恩清單'), desc: t('寫三件此刻讓你感到美好的事'), recommended: true },
-            { icon: regulationIcons.sparkle, title: t('傳遞喜悦'), desc: t('發送一則讚美訊息給他人') },
-            { icon: regulationIcons.target, title: t('目標設定'), desc: t('趁著能量高設定今天的小目標') },
-            { icon: regulationIcons.dance, title: t('慶祝舞動'), desc: t('放一首歌，隨意地動一動身體') },
-        ],
-        blue: [
-            { icon: regulationIcons.coffee, title: t('暖心儀式'), desc: t('為自己準備一杯有溫度的飲品'), recommended: true },
-            { icon: regulationIcons.tidy, title: t('微小掌控'), desc: t('整理三件桌上的雜物') },
-            { icon: regulationIcons.selfLove, title: t('自我慈悲'), desc: t('對自己說一句溫柔的鼓勵') },
-            { icon: regulationIcons.plant, title: t('觀察植物'), desc: t('凝視一片葉子或窗外的景色') },
-        ],
-        green: [
-            { icon: regulationIcons.meditate, title: t('三分鐘靜坐'), desc: t('純粹地與當下的平靜同在'), recommended: true },
-            { icon: regulationIcons.book, title: t('慢讀時刻'), desc: t('細讀一段優美的文字') },
-            { icon: regulationIcons.doodle, title: t('隨意塗鴉'), desc: t('不帶目的地記錄線條與色彩') },
-            { icon: regulationIcons.offline, title: t('數位離線'), desc: t('給自己 10 分鐘的無擾空間') },
-        ],
-    }), [t]);
+    type StrategyItem = { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean; parentOnly?: boolean };
+    const strategiesByQuadrant: Record<Quadrant, StrategyItem[]> = useMemo(() => {
+        const all: Record<Quadrant, StrategyItem[]> = {
+            red: [
+                { icon: regulationIcons.breathing, title: t('引導式深呼吸'), desc: t('進入跟隨節奏的呼吸練習'), type: 'interactive', recommended: true },
+                { icon: regulationIcons.grounding, title: t('5-4-3-2-1 接地法'), desc: t('透過感官重新連結當下'), type: 'interactive', recommended: true },
+                { icon: regulationIcons.pauseCard, title: t('暫停卡'), desc: t('安全離開現場 30 秒，告訴孩子「媽媽/爸爸需要冷靜一下」'), recommended: true, parentOnly: true },
+                { icon: regulationIcons.repair, title: t('修復對話'), desc: t('吼完孩子後的重新連結：蹲下、道歉、擁抱'), parentOnly: true },
+                { icon: regulationIcons.running, title: t('強效宣洩'), desc: t('進行 30 秒的身心快速擺動') },
+                { icon: regulationIcons.water, title: t('冰水刺激'), desc: t('利用溫差快速平復情緒') },
+            ],
+            yellow: [
+                { icon: regulationIcons.gratitude, title: t('感恩清單'), desc: t('寫三件此刻讓你感到美好的事'), recommended: true },
+                { icon: regulationIcons.sparkle, title: t('傳遞喜悦'), desc: t('發送一則讚美訊息給他人') },
+                { icon: regulationIcons.target, title: t('目標設定'), desc: t('趁著能量高設定今天的小目標') },
+                { icon: regulationIcons.dance, title: t('慶祝舞動'), desc: t('放一首歌，隨意地動一動身體') },
+            ],
+            blue: [
+                { icon: regulationIcons.coffee, title: t('暖心儀式'), desc: t('為自己準備一杯有溫度的飲品'), recommended: true },
+                { icon: regulationIcons.selfCompassion, title: t('自我慈悲三步驟'), desc: t('承認痛苦 → 記住你不孤單 → 對自己說溫柔的話'), recommended: true, parentOnly: true },
+                { icon: regulationIcons.imperfectParent, title: t('不完美宣言'), desc: t('「我不需要是完美的父母，我只需要是在場的父母」'), parentOnly: true },
+                { icon: regulationIcons.tidy, title: t('微小掌控'), desc: t('整理三件桌上的雜物') },
+                { icon: regulationIcons.selfLove, title: t('自我慈悲'), desc: t('對自己說一句溫柔的鼓勵') },
+                { icon: regulationIcons.plant, title: t('觀察植物'), desc: t('凝視一片葉子或窗外的景色') },
+            ],
+            green: [
+                { icon: regulationIcons.meditate, title: t('三分鐘靜坐'), desc: t('純粹地與當下的平靜同在'), recommended: true },
+                { icon: regulationIcons.parentMindful, title: t('親子正念遊戲'), desc: t('和孩子一起深呼吸三次，比比看誰吹的泡泡更大'), parentOnly: true },
+                { icon: regulationIcons.book, title: t('慢讀時刻'), desc: t('細讀一段優美的文字') },
+                { icon: regulationIcons.doodle, title: t('隨意塗鴉'), desc: t('不帶目的地記錄線條與色彩') },
+                { icon: regulationIcons.offline, title: t('數位離線'), desc: t('給自己 10 分鐘的無擾空間') },
+            ],
+        };
+        // Filter out parent-only strategies for non-parent users
+        if (!isParentRole) {
+            for (const q of Object.keys(all) as Quadrant[]) {
+                all[q] = all[q].filter(s => !s.parentOnly);
+            }
+        }
+        return all;
+    }, [t, isParentRole]);
 
     const [activeInteractive, setActiveInteractive] = useState<string | null>(null);
     const [breatheStage, setBreatheStage] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
@@ -107,7 +123,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
             {activeInteractive ? (
                 <div className="interactive-overlay fade-in">
                     <button className="close-overlay" onClick={() => setActiveInteractive(null)}>✕</button>
-                    {activeInteractive === '引導式深呼吸' && (
+                    {activeInteractive === t('引導式深呼吸') && (
                         <div className="breathing-session">
                             <div className={`pacer-circle ${breatheStage}`}>
                                 <div className="pacer-text">
@@ -160,12 +176,12 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                         <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                         <div className="step-label-container">
                             <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                            <span className="step-title">{t('Regulating 調節與平衡')}</span>
+                            <span className="step-title">{t('選擇 — 我想如何回應？')}</span>
                         </div>
                     </div>
 
                     <div className="section-intro">
-                        <h2>{t('調節你的能量')}</h2>
+                        <h2>{t('選擇你的回應方式')}</h2>
                         <p>{t('選擇一個引導式練習，或幾項簡單的動作來恢復平衡。')}</p>
                     </div>
 
@@ -328,7 +344,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
 
                 /* Reflection Overlay */
                 .reflection-overlay {
-                    position: absolute; inset: 0; background: hsla(0, 0%, 10%, 0.95);
+                    position: absolute; inset: 0; background: var(--bg-color);
                     display: flex; align-items: center; justify-content: center; z-index: 1100;
                     padding: var(--s-6); backdrop-filter: var(--glass-blur);
                 }
@@ -343,15 +359,36 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                 .reflection-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--s-2); line-height: 1.6; }
                 
                 .reflection-card .morandi-textarea {
-                    width: 100%; min-height: 100px; background: hsla(0,0%,0%,0.3);
+                    width: 100%; min-height: 100px; background: var(--bg-secondary);
                     border: 1px solid var(--glass-border); border-radius: var(--radius-md);
                     padding: var(--s-4); color: var(--text-primary); font-family: inherit;
                     resize: none; outline: none; transition: var(--transition-luxe);
                     font-size: 1rem;
                 }
-                .reflection-card .morandi-textarea:focus { border-color: var(--text-secondary); }
+                .reflection-card .morandi-textarea:focus { border-color: var(--color-yellow); box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1); }
 
                 .morandi-main-btn:disabled { opacity: 0.15; filter: grayscale(1); transform: none; }
+
+                @media (max-width: 480px) {
+                    .pacer-circle { width: 200px; height: 200px; }
+                    .pacer-text { font-size: 1.2rem; }
+                    .breathing-desc { font-size: 0.85rem; }
+                    .task-count { font-size: 3.5rem; }
+                    .task-text { font-size: 1.1rem; }
+                    .task-card { padding: var(--s-8) var(--s-4); }
+                    .interactive-overlay { padding: var(--s-8) var(--s-4); }
+                    .close-overlay { top: var(--s-4); right: var(--s-4); width: 36px; height: 36px; }
+                }
+
+                @media (max-width: 360px) {
+                    .pacer-circle { width: 160px; height: 160px; }
+                    .pacer-text { font-size: 1rem; }
+                }
+
+                @media (min-width: 768px) {
+                    .strategies-grid { gap: var(--s-4); }
+                    .strategy-item { padding: var(--s-6); }
+                }
             `}</style>
         </div>
     );

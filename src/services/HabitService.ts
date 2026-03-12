@@ -29,6 +29,25 @@ class HabitService {
         const uniqueEmotions = new Set(logs.flatMap(log => log.emotions?.map(e => e.id).filter(Boolean) || []));
         const fullFlowCount = logs.filter(log => log.isFullFlow).length;
 
+        // Parenting achievement counters
+        const repairStrategies = ['暫停卡', '修復對話'];
+        const selfCompassionStrategies = ['自我慈悲三步驟', '不完美宣言', '自我慈悲'];
+        const pauseStrategyNames = ['暫停卡'];
+
+        const repairCount = logs.filter(log =>
+            log.regulating?.selectedStrategies?.some(s => repairStrategies.includes(s))
+        ).length;
+
+        const selfCompassionCount = logs.filter(log =>
+            log.regulating?.selectedStrategies?.some(s => selfCompassionStrategies.includes(s))
+        ).length;
+
+        // Count times user chose "暫停" in high-energy negative emotions (red quadrant)
+        const gentleAwarenessCount = logs.filter(log =>
+            log.emotions?.some(e => e.quadrant === 'red') &&
+            log.regulating?.selectedStrategies?.some(s => pauseStrategyNames.includes(s))
+        ).length;
+
         ACHIEVEMENTS.forEach(achievement => {
             if (currentProgress.unlockedAchievements.includes(achievement.id)) return;
 
@@ -51,6 +70,15 @@ class HabitService {
                     break;
                 case 'full_ruler_5':
                     isUnlocked = fullFlowCount >= 5;
+                    break;
+                case 'repair_master':
+                    isUnlocked = repairCount >= 3;
+                    break;
+                case 'gentle_awareness':
+                    isUnlocked = gentleAwarenessCount >= 5;
+                    break;
+                case 'self_compassion':
+                    isUnlocked = selfCompassionCount >= 10;
                     break;
             }
 

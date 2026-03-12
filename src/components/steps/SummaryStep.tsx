@@ -56,13 +56,13 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
     const primaryEmotion = selectedEmotions[0];
     const quadrant = primaryEmotion?.quadrant;
 
-    // 快速調節建議
+    // 快速調節建議（適合父母情境）
     const getQuickRegulateChips = () => {
         const chips: Record<string, string[]> = {
-            red: ['🧘 深呼吸練習', '🖐️ 五感接地'],
+            red: ['🧘 深呼吸三次', '🚪 暫時離開現場一分鐘', '🖐️ 五感接地'],
             yellow: ['🙏 感恩清單', '💃 放首歌動一動'],
-            blue: ['☕ 泡杯熱飲', '💕 對自己說句好話'],
-            green: ['🧘 三分鐘靜坐', '📖 讀一段文字']
+            blue: ['☕ 泡杯熱飲', '💕 對自己說句好話', '🤝 請伴侶或家人換班', '📱 讓孩子暫時看影片沒關係'],
+            green: ['🌸 三次深呼吸', '📖 讀一段文字']
         };
         return chips[quadrant] || chips.green;
     };
@@ -89,26 +89,26 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
 
             <div className="ruler-checklist">
                 <div className="checklist-item done">
-                    <span className="step-tag r">R</span>
-                    <span>{t('成功辨識情緒能量')}</span>
+                    <span className="step-tag r">N</span>
+                    <span>{t('覺察當下的感受')}</span>
                 </div>
                 <div className="checklist-item done">
-                    <span className="step-tag l">L</span>
-                    <span>{t('標記情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
+                    <span className="step-tag l">N</span>
+                    <span>{t('命名情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
                 </div>
                 {isFullFlow && (
                     <>
                         <div className="checklist-item done">
-                            <span className="step-tag u">U</span>
-                            <span>{t('理清觸發因素')}</span>
+                            <span className="step-tag u">L</span>
+                            <span>{t('定位觸發因素')}</span>
                         </div>
                         <div className="checklist-item done">
-                            <span className="step-tag e">E</span>
-                            <span>{t('完成情感表達')}</span>
+                            <span className="step-tag e">N</span>
+                            <span>{t('表達內在需求')}</span>
                         </div>
                         <div className="checklist-item done">
-                            <span className="step-tag r2">R</span>
-                            <span>{t('執行調節策略')}</span>
+                            <span className="step-tag r2">C</span>
+                            <span>{t('選擇回應方式')}</span>
                         </div>
                     </>
                 )}
@@ -131,7 +131,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                         ))}
                     </div>
                     <button className="morandi-outline-btn" onClick={onContinueFullFlow}>
-                        {t('開啟完整 RULER 探索')}
+                        {t('開啟完整覺察練習')}
                     </button>
                 </div>
             )}
