@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../services/LanguageContext';
-import { regulationIcons } from './icons/SvgIcons';
+
 
 interface ParentScenariosProps {
     onDismiss: () => void;

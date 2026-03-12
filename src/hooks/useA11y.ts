@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 /**
  * useA11y - 可訪問性輔助 Hook
@@ -64,7 +64,7 @@ export const useKeyboardShortcut = (
 
 // 減少動畫偏好檢測
 export const usePrefersReducedMotion = (): boolean => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');

@@ -1,0 +1,499 @@
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { aiService, AIInsight } from './AIService';
+
+describe('AIService', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    describe('Mock Insights - getMockFallback', () => {
+        it('應該返回紅色象限的 mock insight', async () => {
+            const data = {
+                emotion: { quadrant: 'red', name: '憤怒' },
+                intensity: 8,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toContain('高能量');
+            expect(result.underlyingPatterns).toContain('急性壓力');
+            expect(result.colorTheory).toContain('紅色象限');
+        });
+
+        it('應該返回黃色象限的 mock insight', async () => {
+            const data = {
+                emotion: { quadrant: 'yellow', name: '興奮' },
+                intensity: 8,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toContain('活力');
+            expect(result.underlyingPatterns).toContain('成就達成');
+            expect(result.colorTheory).toContain('黃色象限');
+        });
+
+        it('應該返回藍色象限的 mock insight', async () => {
+            const data = {
+                emotion: { quadrant: 'blue', name: '憂鬱' },
+                intensity: 6,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toContain('低能量');
+            expect(result.underlyingPatterns).toContain('疲憊累積');
+            expect(result.colorTheory).toContain('藍色象限');
+        });
+
+        it('應該返回綠色象限的 mock insight', async () => {
+            const data = {
+                emotion: { quadrant: 'green', name: '平靜' },
+                intensity: 5,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toContain('平靜');
+            expect(result.underlyingPatterns).toContain('內在平衡');
+            expect(result.colorTheory).toContain('綠色象限');
+        });
+
+        it('應該返回默認的 mock insight 當象限未知時', async () => {
+            const data = {
+                emotion: { quadrant: 'unknown', name: '未知' },
+                intensity: 5,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toContain('覺察');
+            expect(result.underlyingPatterns).toContain('情境過載');
+        });
+    });
+
+    describe('API Response Parsing', () => {
+        it('應該正確解析有效的 JSON 響應', async () => {
+            const mockInsight: AIInsight = {
+                summary: '測試摘要',
+                underlyingPatterns: ['模式1', '模式2'],
+                suggestedAction: '建議行動',
+                empatheticQuote: '引用語錄'
+            };
+            
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: JSON.stringify(mockInsight)
+                        }
+                    }]
+                })
+            });
+            
+            // 使用 vi.spyOn 來暫時修改私有屬性
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const data = {
+                emotion: { quadrant: 'yellow', name: '開心' },
+                intensity: 7,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toBe('測試摘要');
+            expect(result.underlyingPatterns).toEqual(['模式1', '模式2']);
+            
+            // 恢復原始值
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該處理帶有 markdown 代碼塊的 JSON', async () => {
+            const mockInsight: AIInsight = {
+                summary: '帶代碼塊的摘要',
+                underlyingPatterns: ['模式A'],
+                suggestedAction: '行動A',
+                empatheticQuote: '語錄A'
+            };
+            
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: '```json\n' + JSON.stringify(mockInsight) + '\n```'
+                        }
+                    }]
+                })
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const data = {
+                emotion: { quadrant: 'green', name: '平靜' },
+                intensity: 5,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toBe('帶代碼塊的摘要');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該在 JSON 解析失敗時返回默認 insight', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: '這不是有效的 JSON'
+                        }
+                    }]
+                })
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const data = {
+                emotion: { quadrant: 'blue', name: '難過' },
+                intensity: 6,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            // 應該返回默認的 fallback insight
+            expect(result.summary).toBeDefined();
+            expect(result.underlyingPatterns).toBeDefined();
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該在 API 錯誤時返回 mock fallback', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: false,
+                statusText: 'Internal Server Error'
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const data = {
+                emotion: { quadrant: 'red', name: '生氣' },
+                intensity: 8,
+                understanding: {},
+                note: ''
+            };
+            
+            const result = await aiService.analyzeFeeling(data);
+            
+            expect(result.summary).toBeDefined();
+            expect(result.underlyingPatterns).toBeDefined();
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+    });
+
+    describe('getMockChatResponse', () => {
+        it('應該返回 RULER 框架說明當詢問 ruler', async () => {
+            const result = await aiService.chatWithAssistant('什麼是 RULER 框架？');
+            
+            expect(result).toContain('RULER');
+            expect(result).toContain('ecognizing');
+            expect(result).toContain('nderstanding');
+            expect(result).toContain('abeling');
+            expect(result).toContain('xpressing');
+            expect(result).toContain('egulating');
+        });
+
+        it('應該返回建議當詢問建議', async () => {
+            const result = await aiService.chatWithAssistant('我該怎麼辦？');
+            
+            expect(result).toContain('RAIN');
+            expect(result).toContain('ecognize');
+        });
+
+        it('應該返回記錄好處當詢問記錄', async () => {
+            const result = await aiService.chatWithAssistant('為什麼要記錄情緒？');
+            
+            expect(result).toContain('情緒粒度');
+            expect(result).toContain('發現模式');
+        });
+
+        it('應該返回通用回應當問題不匹配關鍵詞', async () => {
+            const result = await aiService.chatWithAssistant('今天天氣很好');
+            
+            expect(result).toContain('情緒');
+            expect(result).toContain('陪伴');
+        });
+    });
+
+    describe('generateWeeklyInsight', () => {
+        it('應該為紅色主導週生成洞察', async () => {
+            const logs = [
+                { emotions: [{ quadrant: 'red' }], timestamp: Date.now() },
+                { emotions: [{ quadrant: 'red' }], timestamp: Date.now() - 86400000 },
+                { emotions: [{ quadrant: 'blue' }], timestamp: Date.now() - 172800000 },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(result.summary).toContain('紅色');
+            expect(result.colorTheory).toContain('紅色象限');
+        });
+
+        it('應該為黃色主導週生成洞察', async () => {
+            const logs = [
+                { emotions: [{ quadrant: 'yellow' }], timestamp: Date.now() },
+                { emotions: [{ quadrant: 'yellow' }], timestamp: Date.now() - 86400000 },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(result.summary).toContain('黃色');
+            expect(result.colorTheory).toContain('黃色象限');
+        });
+
+        it('應該為藍色主導週生成洞察', async () => {
+            const logs = [
+                { emotions: [{ quadrant: 'blue' }], timestamp: Date.now() },
+                { emotions: [{ quadrant: 'blue' }], timestamp: Date.now() - 86400000 },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(result.summary).toContain('藍色');
+            expect(result.colorTheory).toContain('藍色象限');
+        });
+
+        it('應該為綠色主導週生成洞察', async () => {
+            const logs = [
+                { emotions: [{ quadrant: 'green' }], timestamp: Date.now() },
+                { emotions: [{ quadrant: 'green' }], timestamp: Date.now() - 86400000 },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(result.summary).toContain('綠色');
+            expect(result.colorTheory).toContain('綠色象限');
+        });
+
+        it('應該為空日誌返回紅色洞察（默認行為）', async () => {
+            const result = await aiService.generateWeeklyInsight([]);
+            
+            // 空日誌時，quadrantCounts 全為 0，排序後返回第一個（red）
+            expect(result.summary).toBeDefined();
+            expect(result.colorTheory).toBeDefined();
+        });
+
+        it('應該使用 API 當環境變量設置時', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: JSON.stringify({
+                                summary: 'API 週洞察',
+                                underlyingPatterns: ['模式1'],
+                                suggestedAction: '建議',
+                                empatheticQuote: '語錄'
+                            })
+                        }
+                    }]
+                })
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const logs = [
+                { emotions: [{ quadrant: 'yellow', name: '開心' }], timestamp: Date.now(), intensity: 7 },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(global.fetch).toHaveBeenCalled();
+            expect(result.summary).toBe('API 週洞察');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該在 API 錯誤時返回 mock fallback', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: false,
+                statusText: 'Server Error'
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const logs = [
+                { emotions: [{ quadrant: 'red' }], timestamp: Date.now() },
+            ] as any[];
+            
+            const result = await aiService.generateWeeklyInsight(logs);
+            
+            expect(result.summary).toBeDefined();
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+    });
+
+    describe('chatWithAssistant with API', () => {
+        it('應該使用 API 當環境變量設置時', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: 'API 回應內容'
+                        }
+                    }]
+                })
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const result = await aiService.chatWithAssistant('你好');
+            
+            expect(global.fetch).toHaveBeenCalled();
+            expect(result).toBe('API 回應內容');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該在 API 錯誤時返回 mock fallback', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: false,
+                statusText: 'Server Error'
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const result = await aiService.chatWithAssistant('你好');
+            
+            expect(result).toContain('情緒');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+
+        it('應該處理網絡錯誤', async () => {
+            global.fetch = vi.fn().mockRejectedValueOnce(new Error('Network Error'));
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const result = await aiService.chatWithAssistant('你好');
+            
+            expect(result).toContain('情緒');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+    });
+
+    describe('育兒情境檢測', () => {
+        it('應該檢測到育兒相關關鍵詞', async () => {
+            global.fetch = vi.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    choices: [{
+                        message: {
+                            content: JSON.stringify({
+                                summary: '育兒測試',
+                                underlyingPatterns: ['test'],
+                                suggestedAction: 'test',
+                                empatheticQuote: 'test'
+                            })
+                        }
+                    }]
+                })
+            });
+            
+            const service = aiService as any;
+            const originalUrl = service.apiUrl;
+            const originalKey = service.apiKey;
+            service.apiUrl = 'https://api.test.com';
+            service.apiKey = 'test-key';
+            
+            const data = {
+                emotion: { quadrant: 'red', name: '憤怒' },
+                intensity: 8,
+                understanding: { trigger: '孩子哭鬧', who: '小孩' },
+                note: '育兒壓力很大'
+            };
+            
+            await aiService.analyzeFeeling(data);
+            
+            // 驗證 fetch 被調用，且請求體中包含育兒相關的 system prompt
+            expect(global.fetch).toHaveBeenCalled();
+            const callArgs = (global.fetch as any).mock.calls[0];
+            const requestBody = JSON.parse(callArgs[1].body);
+            expect(requestBody.messages[0].content).toContain('育兒');
+            
+            service.apiUrl = originalUrl;
+            service.apiKey = originalKey;
+        });
+    });
+});

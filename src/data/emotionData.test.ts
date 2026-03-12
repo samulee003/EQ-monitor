@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { emotions, psychologicalNeeds, Quadrant } from './emotionData';
+import { emotions, psychologicalNeeds } from './emotionData';
 
 describe('EmotionData', () => {
     describe('emotions', () => {

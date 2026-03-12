@@ -73,7 +73,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
     // Breathing Pacer Logic
     useEffect(() => {
         if (activeInteractive === t('引導式深呼吸')) {
-            let timer: any;
+            let timer: ReturnType<typeof setTimeout> | undefined;
             const cycle = () => {
                 setBreatheStage('inhale');
                 timer = setTimeout(() => {
@@ -85,7 +85,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                 }, 4000);
             };
             cycle();
-            return () => clearTimeout(timer);
+            return () => {
+                if (timer) clearTimeout(timer);
+            };
         }
     }, [activeInteractive]);
 

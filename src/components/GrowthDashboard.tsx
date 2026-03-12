@@ -4,6 +4,7 @@ import { storageService } from '../services/StorageService';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
 import { aiService, AIInsight } from '../services/AIService';
+import { HeatmapDay, IntensityData } from '../services/ResilienceService';
 import Skeleton from './Skeleton';
 
 const GrowthDashboard: React.FC = () => {
@@ -304,13 +305,13 @@ const GrowthDashboard: React.FC = () => {
 
                 <label className="heading-sm">{t('情緒熱點圖 (近 30 天)')}</label>
                 <div className="heatmap-grid">
-                    {heatmapData.map((day: any, i: number) => (
+                    {heatmapData.map((day: HeatmapDay, i: number) => (
                         <div
                             key={i}
                             className={`heatmap-cell ${day.hasData ? 'active' : ''}`}
                             style={day.hasData ? {
                                 backgroundColor: `var(--color-${day.quadrant})`,
-                                opacity: 0.3 + (day.intensity / 10) * 0.7
+                                opacity: 0.3 + ((day.intensity ?? 5) / 10) * 0.7
                             } : {}}
                             title={day.hasData ? `${day.date}: ${day.intensity} ${t('級')}` : day.date}
                         ></div>
@@ -361,7 +362,7 @@ const GrowthDashboard: React.FC = () => {
                 <div className="chart-container">
                     <label className="heading-sm">{t('強度波動 (Intensity)')}</label>
                     <div className="bar-chart">
-                        {intensityData.map((d: any, i: number) => (
+                        {intensityData.map((d: IntensityData, i: number) => (
                             <div key={i} className="bar-wrapper">
                                 <div
                                     className="bar"
