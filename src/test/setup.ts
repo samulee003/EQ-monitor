@@ -14,6 +14,7 @@ const createLocalStorageMock = () => {
     };
 };
 
+declare const global: typeof globalThis;
 global.localStorage = createLocalStorageMock() as unknown as Storage;
 
 // Mock matchMedia

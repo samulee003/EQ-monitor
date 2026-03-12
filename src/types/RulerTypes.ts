@@ -5,6 +5,39 @@ export interface BodyScanData {
     sensation: string;
 }
 
+// Heatmap data point for dashboard
+export interface HeatmapDataPoint {
+    date: string;
+    hasData: boolean;
+    quadrant?: Quadrant;
+    intensity?: number;
+}
+
+// Intensity data for bar chart
+export interface IntensityDataPoint {
+    label: string;
+    value: number;
+}
+
+// AI Analysis input data
+export interface AIAnalysisData {
+    emotion?: Emotion;
+    intensity: number;
+    understanding?: UnderstandingData | {
+        trigger?: string;
+        what?: string;
+        who?: string;
+    } | null;
+    note?: string;
+}
+
+// Chat history entry
+export interface ChatHistoryEntry {
+    timestamp: string;
+    emotions?: Emotion[];
+    intensity?: number;
+}
+
 export interface InteractionCycle {
     myReaction: string;
     childReaction: string;

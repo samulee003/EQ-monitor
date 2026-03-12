@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import MainLayout from './components/MainLayout';
 import CheckInFlow from './components/CheckInFlow';
 import SplashScreen from './components/SplashScreen';

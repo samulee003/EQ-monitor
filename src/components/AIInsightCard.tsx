@@ -1,6 +1,6 @@
 import React from 'react';
-import { AIInsight } from '@/services/AIService';
-import { useLanguage } from '@/services/LanguageContext';
+import { AIInsight } from '../services/AIService';
+import { useLanguage } from '../services/LanguageContext';
 import { uiIcons } from './icons/SvgIcons';
 
 interface AIInsightCardProps {
@@ -95,7 +95,7 @@ export const AIInsightCard: React.FC<AIInsightCardProps> = ({
                     <div className="insight-patterns">
                         <span className="section-label">{t('潛在模式')}</span>
                         <div className="pattern-tags">
-                            {insight.underlyingPatterns.map((pattern, idx) => (
+                            {insight.underlyingPatterns.map((pattern: string, idx: number) => (
                                 <span key={idx} className="pattern-tag">{t(pattern)}</span>
                             ))}
                         </div>

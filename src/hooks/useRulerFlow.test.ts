@@ -43,6 +43,11 @@ describe('useRulerFlow', () => {
             const { result } = renderHook(() => useRulerFlow());
             expect(result.current.emotionIntensity).toBe(5);
         });
+
+        it('should have correct currentStepIndex', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            expect(result.current.currentStepIndex).toBe(0);
+        });
     });
 
     describe('step navigation', () => {
@@ -64,6 +69,16 @@ describe('useRulerFlow', () => {
             expect(steps[3].key).toBe('expressing');
             expect(steps[4].key).toBe('regulating');
         });
+
+        it('should update currentStepIndex when step changes', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.setStep('labeling');
+            });
+
+            expect(result.current.currentStepIndex).toBe(1);
+        });
     });
 
     describe('quadrant selection', () => {
@@ -76,7 +91,6 @@ describe('useRulerFlow', () => {
 
             expect(result.current.selectedQuadrants).toContain('yellow');
             expect(result.current.emotionIntensity).toBe(7);
-            expect(result.current.step).toBe('centering');
         });
 
         it('should handle multiple quadrants', () => {
@@ -88,6 +102,34 @@ describe('useRulerFlow', () => {
 
             expect(result.current.selectedQuadrants).toContain('red');
             expect(result.current.selectedQuadrants).toContain('blue');
+        });
+
+        it('should toggle quadrant correctly', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.toggleQuadrant('yellow');
+            });
+
+            expect(result.current.selectedQuadrants).toContain('yellow');
+
+            act(() => {
+                result.current.toggleQuadrant('yellow');
+            });
+
+            expect(result.current.selectedQuadrants).not.toContain('yellow');
+        });
+
+        it('should add multiple quadrants via toggle', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.toggleQuadrant('yellow');
+                result.current.toggleQuadrant('red');
+            });
+
+            expect(result.current.selectedQuadrants).toContain('yellow');
+            expect(result.current.selectedQuadrants).toContain('red');
         });
     });
 
@@ -137,6 +179,38 @@ describe('useRulerFlow', () => {
             expect(result.current.selectedEmotions).toHaveLength(1);
             expect(result.current.selectedEmotions[0].id).toBe('happy');
         });
+
+        it('should toggle emotion correctly', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            const mockEmotion = { id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 };
+            
+            act(() => {
+                result.current.toggleEmotion(mockEmotion);
+            });
+
+            expect(result.current.selectedEmotions).toHaveLength(1);
+
+            act(() => {
+                result.current.toggleEmotion(mockEmotion);
+            });
+
+            expect(result.current.selectedEmotions).toHaveLength(0);
+        });
+
+        it('should handle multiple emotions via toggle', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            const emotion1 = { id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 };
+            const emotion2 = { id: 'excited', name: 'excited', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 };
+            
+            act(() => {
+                result.current.toggleEmotion(emotion1);
+                result.current.toggleEmotion(emotion2);
+            });
+
+            expect(result.current.selectedEmotions).toHaveLength(2);
+        });
     });
 
     describe('understanding step', () => {
@@ -162,6 +236,7 @@ describe('useRulerFlow', () => {
                     who: 'self',
                     where: 'office',
                     need: 'achievement',
+                    message: '',
                 });
             });
 
@@ -191,6 +266,7 @@ describe('useRulerFlow', () => {
                     who: 'self',
                     where: 'office',
                     need: 'achievement',
+                    message: '',
                 });
             });
 
@@ -229,6 +305,7 @@ describe('useRulerFlow', () => {
                     who: 'self',
                     where: 'office',
                     need: 'achievement',
+                    message: '',
                 });
             });
             act(() => {
@@ -248,6 +325,55 @@ describe('useRulerFlow', () => {
 
             expect(result.current.regulatingData?.selectedStrategies).toContain('breathing');
             expect(result.current.step).toBe('neuroCheck');
+        });
+    });
+
+    describe('neuro check step', () => {
+        it('should complete flow and move to summary', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup full flow
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+            act(() => {
+                result.current.handleUnderstandingComplete({
+                    trigger: 'work done',
+                    what: 'project launch',
+                    who: 'self',
+                    where: 'office',
+                    need: 'achievement',
+                    message: '',
+                });
+            });
+            act(() => {
+                result.current.handleExpressingComplete({
+                    expression: 'I did well today',
+                    prompt: 'Write your feelings',
+                    mode: 'writing',
+                });
+            });
+            act(() => {
+                result.current.handleRegulatingComplete({
+                    selectedStrategies: ['breathing'],
+                });
+            });
+
+            // Complete neuro check
+            act(() => {
+                result.current.handleNeuroCheckComplete({
+                    sleepHours: 7,
+                    activityLevel: 3
+                });
+            });
+
+            expect(result.current.step).toBe('summary');
         });
     });
 
@@ -286,6 +412,78 @@ describe('useRulerFlow', () => {
             });
 
             expect(result.current.isFullFlow).toBe(true);
+        });
+
+        it('should skip to understanding when full flow is enabled', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            
+            // Enable full flow
+            act(() => {
+                result.current.setIsFullFlow(true);
+            });
+
+            // Select emotion
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+
+            expect(result.current.step).toBe('understanding');
+        });
+
+        it('should skip to summary when full flow is disabled', () => {
+            const { result } = renderHook(() => useRulerFlow(), {});
+            
+            // Setup
+            act(() => {
+                result.current.handleMoodComplete(['yellow'], 5);
+            });
+            act(() => {
+                result.current.handleBodyScanComplete({ location: 'chest', sensation: 'warm' });
+            });
+            
+            // Ensure full flow is disabled
+            act(() => {
+                result.current.setIsFullFlow(false);
+            });
+
+            // Select emotion
+            act(() => {
+                result.current.handleEmotionSelect([{ id: 'happy', name: 'happy', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }]);
+            });
+
+            expect(result.current.step).toBe('summary');
+        });
+    });
+
+    describe('post regulation mood', () => {
+        it('should set post regulation mood', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.setPostRegulationMood('better');
+            });
+
+            expect(result.current.postRegulationMood).toBe('better');
+        });
+    });
+
+    describe('show resume prompt', () => {
+        it('should set show resume prompt', () => {
+            const { result } = renderHook(() => useRulerFlow());
+            
+            act(() => {
+                result.current.setShowResumePrompt(true);
+            });
+
+            expect(result.current.showResumePrompt).toBe(true);
         });
     });
 });

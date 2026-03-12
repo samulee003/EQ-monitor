@@ -77,7 +77,7 @@ export function getGreeting(locale: string = 'zh-TW'): string {
         },
     };
 
-    const langGreetings = greetings[locale] || greetings['zh-TW'];
+    const langGreetings = (greetings as Record<string, typeof greetings['zh-TW']>)[locale] || greetings['zh-TW'];
 
     if (hour >= 5 && hour < 12) return langGreetings.morning;
     if (hour >= 12 && hour < 18) return langGreetings.afternoon;

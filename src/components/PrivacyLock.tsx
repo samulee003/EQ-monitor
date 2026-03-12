@@ -8,8 +8,8 @@ interface PrivacyLockProps {
 const PrivacyLock: React.FC<PrivacyLockProps> = ({ onUnlock }) => {
     const { t } = useLanguage();
     const [pin, setPin] = useState('');
-    const [savedPin, setSavedPin] = useState<string | null>(localStorage.getItem('imxin_privacy_pin'));
-    const [isSetting, setIsSetting] = useState(!savedPin);
+    const [savedPin, _setSavedPin] = useState<string | null>(localStorage.getItem('imxin_privacy_pin'));
+    const [isSetting, _setIsSetting] = useState(!savedPin);
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
 

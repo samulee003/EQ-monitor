@@ -1,4 +1,5 @@
 import { RulerLogEntry, RulerDraft } from '../types/RulerTypes';
+import { UserProgress } from '../types/HabitTypes';
 
 export interface ImportResult {
     success: boolean;
@@ -36,14 +37,14 @@ class StorageService {
     /**
      * Save user progress (streak, achievements)
      */
-    saveProgress(progress: any): void {
+    saveProgress(progress: UserProgress): void {
         localStorage.setItem(this.getKey(this.KEYS.PROGRESS), JSON.stringify(progress));
     }
 
     /**
      * Get user progress
      */
-    getProgress(): any {
+    getProgress(): UserProgress | null {
         const stored = localStorage.getItem(this.getKey(this.KEYS.PROGRESS));
         return stored ? JSON.parse(stored) : null;
     }

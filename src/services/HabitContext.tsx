@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { habitService } from './HabitService';
 import { UserProgress } from '../types/HabitTypes';
 import { Achievement, ACHIEVEMENTS } from '../types/AchievementTypes';

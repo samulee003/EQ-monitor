@@ -1,4 +1,4 @@
-import { Achievement } from './AchievementTypes';
+
 
 export interface StreakData {
     currentStreak: number;

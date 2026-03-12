@@ -13,7 +13,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
   const [simulationState, setSimulationState] = useState<'idle' | 'recording' | 'processing'>('idle');
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isRecording) {
       interval = setInterval(() => {
         setTimer((t) => t + 1);
@@ -21,7 +21,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
     } else {
       setTimer(0);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isRecording]);
 
   const toggleRecording = () => {

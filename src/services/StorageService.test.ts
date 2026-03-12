@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { storageService, ImportResult } from './StorageService';
+import { storageService } from './StorageService';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -194,10 +194,14 @@ describe('StorageService', () => {
 
     describe('saveProgress & getProgress', () => {
         it('should save and retrieve progress', () => {
-            const progress = {
-                streak: 5,
-                totalEntries: 10,
-                achievements: ['first_entry', 'streak_3'],
+            const progress: import('../types/HabitTypes').UserProgress = {
+                streak: {
+                    currentStreak: 5,
+                    longestStreak: 7,
+                    lastLogDate: new Date().toISOString().split('T')[0],
+                },
+                totalLogs: 10,
+                unlockedAchievements: ['first_entry', 'streak_3'],
             };
 
             storageService.saveProgress(progress);

@@ -1,3 +1,6 @@
+import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
+import { RulerLogEntry, AIAnalysisData, ChatHistoryEntry } from '../types/RulerTypes';
+
 // PhysicalData 接口定義
 export interface PhysicalData {
     sleepHours: number;
@@ -6,7 +9,6 @@ export interface PhysicalData {
     heartRate?: number;
     heartRateVariability?: number;
 }
-import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
 
 export interface AIInsight {
     summary: string;
@@ -63,7 +65,7 @@ class AIService {
      * analyzeFeeling
      * Analyzes the check-in data, history, and physical context using LLM.
      */
-    async analyzeFeeling(data: any, history: any[] = [], physical?: PhysicalData): Promise<AIInsight> {
+    async analyzeFeeling(data: AIAnalysisData, history: ChatHistoryEntry[] = [], physical?: PhysicalData): Promise<AIInsight> {
         console.log("[AIService] Analyzing data with Zeabur AI Hub...");
 
         if (!this.apiKey || !this.apiUrl) {
@@ -108,7 +110,7 @@ class AIService {
         }
     }
 
-    private detectParentingContext(data: any): boolean {
+    private detectParentingContext(data: AIAnalysisData): boolean {
         const parentingKeywords = ['育兒', '管教', '孩子', '小孩', '寶寶', '兒子', '女兒', '吼', '哭鬧'];
         const trigger = data.understanding?.trigger || data.understanding?.what || '';
         const who = data.understanding?.who || '';
@@ -117,7 +119,7 @@ class AIService {
         return parentingKeywords.some(kw => combined.includes(kw));
     }
 
-    private constructUserPrompt(data: any, history: any[], physical?: PhysicalData): string {
+    private constructUserPrompt(data: AIAnalysisData, history: ChatHistoryEntry[], physical?: PhysicalData): string {
         return JSON.stringify({
             currentMood: {
                 quadrant: data.emotion?.quadrant,
@@ -149,11 +151,11 @@ class AIService {
      * generateWeeklyInsight
      * Analyzes a week of logs to find patterns and provide strategic advice.
      */
-    async generateWeeklyInsight(logs: any[]): Promise<AIInsight> {
+    async generateWeeklyInsight(logs: RulerLogEntry[]): Promise<AIInsight> {
         // Calculate dominant quadrant for mock fallback
         const quadrantCounts: Record<string, number> = { red: 0, yellow: 0, blue: 0, green: 0 };
         logs.forEach(log => {
-            const q = log.emotions?.[0]?.quadrant || log.emotion?.quadrant;
+            const q = log.emotions?.[0]?.quadrant;
             if (q && quadrantCounts[q] !== undefined) {
                 quadrantCounts[q]++;
             }
@@ -198,8 +200,8 @@ class AIService {
         try {
             const historyContext = logs.map(log => ({
                 date: new Date(log.timestamp).toLocaleDateString('zh-TW'),
-                emotion: log.emotions?.[0]?.name || log.emotion?.name,
-                quadrant: log.emotions?.[0]?.quadrant || log.emotion?.quadrant,
+                emotion: log.emotions?.[0]?.name,
+                quadrant: log.emotions?.[0]?.quadrant,
                 intensity: log.intensity,
                 trigger: log.understanding?.trigger,
                 regulation: log.regulating?.selectedStrategies
@@ -237,14 +239,12 @@ class AIService {
             return this.getMockFallback(dominantQuadrant);
         }
     }
-}
-
 
     /**
      * chatWithAssistant
      * Real-time chat with AI assistant for emotional support and guidance.
      */
-    async chatWithAssistant(userMessage: string, history: any[] = []): Promise<string> {
+    async chatWithAssistant(userMessage: string, history: ChatHistoryEntry[] = []): Promise<string> {
         if (!this.apiKey || !this.apiUrl) {
             return this.getMockChatResponse(userMessage);
         }
@@ -344,5 +344,6 @@ class AIService {
 
 我在這裡陪伴你。💚`;
     }
+}
 
 export const aiService = new AIService();
