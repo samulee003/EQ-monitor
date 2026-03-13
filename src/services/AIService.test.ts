@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { aiService, AIInsight } from './AIService';
 
+declare const global: typeof globalThis;
+
 describe('AIService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -13,7 +15,7 @@ describe('AIService', () => {
     describe('Mock Insights - getMockFallback', () => {
         it('應該返回紅色象限的 mock insight', async () => {
             const data = {
-                emotion: { quadrant: 'red', name: '憤怒' },
+                emotion: { id: 'red_angry', quadrant: 'red' as const, name: '憤怒', energy: 4, pleasantness: 2 },
                 intensity: 8,
                 understanding: {},
                 note: ''
@@ -28,7 +30,7 @@ describe('AIService', () => {
 
         it('應該返回黃色象限的 mock insight', async () => {
             const data = {
-                emotion: { quadrant: 'yellow', name: '興奮' },
+                emotion: { id: 'yellow_excited', quadrant: 'yellow' as const, name: '興奮', energy: 5, pleasantness: 4 },
                 intensity: 8,
                 understanding: {},
                 note: ''
@@ -43,7 +45,7 @@ describe('AIService', () => {
 
         it('應該返回藍色象限的 mock insight', async () => {
             const data = {
-                emotion: { quadrant: 'blue', name: '憂鬱' },
+                emotion: { id: 'blue_sad', quadrant: 'blue' as const, name: '憂鬱', energy: 1, pleasantness: 1 },
                 intensity: 6,
                 understanding: {},
                 note: ''
@@ -58,7 +60,7 @@ describe('AIService', () => {
 
         it('應該返回綠色象限的 mock insight', async () => {
             const data = {
-                emotion: { quadrant: 'green', name: '平靜' },
+                emotion: { id: 'green_calm', quadrant: 'green' as const, name: '平靜', energy: 2, pleasantness: 4 },
                 intensity: 5,
                 understanding: {},
                 note: ''
@@ -73,7 +75,7 @@ describe('AIService', () => {
 
         it('應該返回默認的 mock insight 當象限未知時', async () => {
             const data = {
-                emotion: { quadrant: 'unknown', name: '未知' },
+                emotion: { id: 'unknown', quadrant: 'green' as const, name: '未知', energy: 3, pleasantness: 3 },
                 intensity: 5,
                 understanding: {},
                 note: ''
@@ -81,8 +83,8 @@ describe('AIService', () => {
             
             const result = await aiService.analyzeFeeling(data);
             
-            expect(result.summary).toContain('覺察');
-            expect(result.underlyingPatterns).toContain('情境過載');
+            expect(result.summary).toContain('平靜');
+            expect(result.underlyingPatterns).toContain('內在平衡');
         });
     });
 
@@ -114,7 +116,7 @@ describe('AIService', () => {
             service.apiKey = 'test-key';
             
             const data = {
-                emotion: { quadrant: 'yellow', name: '開心' },
+                emotion: { id: 'yellow_happy', quadrant: 'yellow' as const, name: '開心', energy: 4, pleasantness: 4 },
                 intensity: 7,
                 understanding: {},
                 note: ''
@@ -156,7 +158,7 @@ describe('AIService', () => {
             service.apiKey = 'test-key';
             
             const data = {
-                emotion: { quadrant: 'green', name: '平靜' },
+                emotion: { id: 'green_calm', quadrant: 'green' as const, name: '平靜', energy: 2, pleasantness: 4 },
                 intensity: 5,
                 understanding: {},
                 note: ''
@@ -189,7 +191,7 @@ describe('AIService', () => {
             service.apiKey = 'test-key';
             
             const data = {
-                emotion: { quadrant: 'blue', name: '難過' },
+                emotion: { id: 'blue_sad', quadrant: 'blue' as const, name: '難過', energy: 1, pleasantness: 1 },
                 intensity: 6,
                 understanding: {},
                 note: ''
@@ -218,7 +220,7 @@ describe('AIService', () => {
             service.apiKey = 'test-key';
             
             const data = {
-                emotion: { quadrant: 'red', name: '生氣' },
+                emotion: { id: 'red_angry', quadrant: 'red' as const, name: '生氣', energy: 4, pleasantness: 2 },
                 intensity: 8,
                 understanding: {},
                 note: ''
@@ -478,7 +480,7 @@ describe('AIService', () => {
             service.apiKey = 'test-key';
             
             const data = {
-                emotion: { quadrant: 'red', name: '憤怒' },
+                emotion: { id: 'red_angry', quadrant: 'red' as const, name: '憤怒', energy: 4, pleasantness: 2 },
                 intensity: 8,
                 understanding: { trigger: '孩子哭鬧', who: '小孩' },
                 note: '育兒壓力很大'

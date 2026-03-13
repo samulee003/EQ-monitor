@@ -1,6 +1,7 @@
 import { useState, Suspense, lazy } from 'react';
 import MainLayout from './components/MainLayout';
 import CheckInFlow from './components/CheckInFlow';
+import ParentHome from './components/ParentHome';
 import SplashScreen from './components/SplashScreen';
 import PrivacyLock from './components/PrivacyLock';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -24,7 +25,7 @@ function AppContent() {
   // 啟用焦點可見性管理
   useFocusVisible();
   
-  const [view, setView] = useState<'checkin' | 'history' | 'growth' | 'achievement'>('checkin');
+  const [view, setView] = useState<'home' | 'checkin' | 'history' | 'growth' | 'achievement'>('home');
   const [showSplash, setShowSplash] = useState(true);
   const [isLocked, setIsLocked] = useState(() => {
     const hasPin = !!localStorage.getItem('imxin_privacy_pin');
@@ -66,6 +67,7 @@ function AppContent() {
             <ErrorBoundary>
               <MainLayout currentView={view} onNavigate={(v) => setView(v)}>
                 <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
+                  {view === 'home' && <ParentHome />}
                   {view === 'checkin' && <CheckInFlow />}
                   {view === 'history' && <Timeline />}
                   {view === 'growth' && <GrowthDashboard />}

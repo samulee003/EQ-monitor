@@ -8,7 +8,7 @@ import {
     useSkipLink,
     useFocusVisible
 } from './useA11y';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 describe('useA11y', () => {
     beforeEach(() => {
@@ -28,13 +28,13 @@ describe('useA11y', () => {
             `;
             document.body.appendChild(container);
 
-            const { result } = renderHook(() => {
+            renderHook(() => {
                 const ref = useRef<HTMLDivElement>(container as unknown as HTMLDivElement);
                 useFocusTrap(true, ref);
                 return ref;
             });
 
-            const btn1 = container.querySelector('#btn1') as HTMLButtonElement;
+            // const btn1 = container.querySelector('#btn1') as HTMLButtonElement;
             const btn3 = container.querySelector('#btn3') as HTMLButtonElement;
 
             // 模擬焦點在最後一個元素，按 Tab
@@ -54,7 +54,7 @@ describe('useA11y', () => {
             `;
             document.body.appendChild(container);
 
-            const { result } = renderHook(() => {
+            renderHook(() => {
                 const ref = useRef<HTMLDivElement>(container as unknown as HTMLDivElement);
                 useFocusTrap(true, ref);
                 return ref;
@@ -63,7 +63,7 @@ describe('useA11y', () => {
             const btn1 = container.querySelector('#btn1') as HTMLButtonElement;
 
             // 模擬焦點在第一個元素，按 Shift+Tab
-            btn1.focus();
+            btn1?.focus();
             const shiftTabEvent = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true });
             container.dispatchEvent(shiftTabEvent);
 
@@ -75,7 +75,7 @@ describe('useA11y', () => {
             container.innerHTML = '<button>按鈕</button>';
             document.body.appendChild(container);
 
-            const { result } = renderHook(() => {
+            renderHook(() => {
                 const ref = useRef<HTMLDivElement>(container as unknown as HTMLDivElement);
                 useFocusTrap(false, ref);
                 return ref;
@@ -188,7 +188,7 @@ describe('useA11y', () => {
 
             act(() => {
                 const event = new KeyboardEvent('keydown', { key: 's', ctrlKey: true });
-                const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+                // const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
                 window.dispatchEvent(event);
                 // 注意：由於事件已經分發，我們無法驗證 preventDefault 是否被調用
                 // 但我們可以驗證代碼結構正確

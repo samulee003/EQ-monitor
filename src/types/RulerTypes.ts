@@ -21,7 +21,7 @@ export interface IntensityDataPoint {
 
 // AI Analysis input data
 export interface AIAnalysisData {
-    emotion?: Emotion;
+    emotion?: Emotion | { id?: string; name: string; quadrant: Quadrant; energy?: number; pleasantness?: number };
     intensity: number;
     understanding?: UnderstandingData | {
         trigger?: string;
