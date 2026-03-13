@@ -28,7 +28,7 @@ describe('HabitService', () => {
                 { timestamp: twoDaysAgo, emotions: [{ id: 'sad', name: '難過', quadrant: 'blue', energy: 2, pleasantness: 2 }] } as RulerLogEntry,
             ];
             
-            const result = habitService.updateProgress(logs);
+            habitService.updateProgress(logs);
             
             const savedProgress = (storageService.saveProgress as any).mock.calls[0][0];
             expect(savedProgress.streak.currentStreak).toBe(3);

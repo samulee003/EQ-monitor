@@ -1,0 +1,270 @@
+/* 父母首頁樣式 */
+.parent-home {
+    min-height: 100vh;
+    background: var(--bg-color, #1a1a1a);
+    padding: 20px;
+}
+
+.home-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* 頭部問候 */
+.home-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.greeting {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary, #e8e8e8);
+    margin-bottom: 8px;
+}
+
+.sub-greeting {
+    font-size: 15px;
+    color: var(--text-secondary, #b8b8b8);
+    margin-bottom: 12px;
+}
+
+.streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #C58B8A 0%, #D5C1A5 100%);
+    color: #1a1a1a;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+/* 模式選擇 */
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.mode-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.mode-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* SOS 模式 */
+.mode-sos {
+    background: linear-gradient(135deg, rgba(197, 139, 138, 0.15) 0%, rgba(197, 139, 138, 0.05) 100%);
+    border-color: rgba(197, 139, 138, 0.3);
+}
+
+.mode-sos:hover {
+    border-color: #C58B8A;
+    box-shadow: 0 12px 32px rgba(197, 139, 138, 0.2);
+}
+
+/* 快速記錄模式 */
+.mode-quick {
+    background: linear-gradient(135deg, rgba(213, 193, 165, 0.15) 0%, rgba(213, 193, 165, 0.05) 100%);
+    border-color: rgba(213, 193, 165, 0.3);
+}
+
+.mode-quick:hover {
+    border-color: #D5C1A5;
+    box-shadow: 0 12px 32px rgba(213, 193, 165, 0.2);
+}
+
+/* 深度覺察模式 */
+.mode-deep {
+    background: linear-gradient(135deg, rgba(170, 176, 155, 0.15) 0%, rgba(170, 176, 155, 0.05) 100%);
+    border-color: rgba(170, 176, 155, 0.3);
+}
+
+.mode-deep:hover {
+    border-color: #AAB09B;
+    box-shadow: 0 12px 32px rgba(170, 176, 155, 0.2);
+}
+
+.mode-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.mode-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.mode-content h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary, #e8e8e8);
+    margin-bottom: 4px;
+}
+
+.mode-content p {
+    font-size: 13px;
+    color: var(--text-secondary, #b8b8b8);
+    margin-bottom: 8px;
+}
+
+.mode-time {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.mode-arrow {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.mode-card:hover .mode-arrow {
+    transform: translateX(4px);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 底部提示 */
+.home-footer {
+    text-align: center;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.home-footer p {
+    font-size: 14px;
+    color: var(--text-primary, #e8e8e8);
+    margin-bottom: 4px;
+}
+
+.footer-sub {
+    font-size: 12px !important;
+    color: var(--text-secondary, #b8b8b8) !important;
+}
+
+/* 載入中 */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-secondary, #b8b8b8);
+    font-size: 16px;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+    .parent-home {
+        padding: 16px;
+    }
+
+    .home-container {
+        padding-top: 20px;
+    }
+
+    .greeting {
+        font-size: 24px;
+    }
+
+    .mode-card {
+        padding: 20px 16px;
+    }
+
+    .mode-icon {
+        font-size: 32px;
+    }
+
+    .mode-content h2 {
+        font-size: 16px;
+    }
+}
+
+/* 動畫效果 */
+.home-header {
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.mode-selection {
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+.home-footer {
+    animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 無障礙支持 */
+@media (prefers-reduced-motion: reduce) {
+    .home-header,
+    .mode-selection,
+    .home-footer {
+        animation: none;
+    }
+
+    .mode-card {
+        transition: none;
+    }
+}
+
+/* 焦點樣式 */
+.mode-card:focus {
+    outline: 2px solid #D5C1A5;
+    outline-offset: 2px;
+}
+
+/* 觸控優化 */
+@media (pointer: coarse) {
+    .mode-card {
+        padding: 28px 20px;
+    }
+
+    .mode-icon {
+        font-size: 44px;
+    }
+}

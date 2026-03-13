@@ -8,8 +8,8 @@ import OnboardingFlow from './OnboardingFlow';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'checkin' | 'history' | 'growth' | 'achievement';
-  onNavigate: (view: 'checkin' | 'history' | 'growth' | 'achievement') => void;
+  currentView: 'home' | 'checkin' | 'history' | 'growth' | 'achievement';
+  onNavigate: (view: 'home' | 'checkin' | 'history' | 'growth' | 'achievement') => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
@@ -43,14 +43,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
   return (
     <div className="app-container">
       <header className="glass-header">
-        <div className="logo-section" onClick={() => onNavigate('checkin')} style={{ cursor: 'pointer' }}>
+        <div className="logo-section" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
           <img src="/logo.png" alt="今心 Logo" className="logo-image" />
           <span className="logo-text">{t('今心')}</span>
         </div>
         <nav>
           <button
-            className={`nav-link ${currentView === 'checkin' ? 'active' : ''}`}
-            onClick={() => onNavigate('checkin')}
+            className={`nav-link ${currentView === 'home' || currentView === 'checkin' ? 'active' : ''}`}
+            onClick={() => onNavigate('home')}
           >
             {t('今日心情')}
           </button>

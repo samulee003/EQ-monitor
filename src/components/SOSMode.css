@@ -1,0 +1,395 @@
+/* SOS 緊急救援模式樣式 */
+.sos-mode {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2424 100%);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sos-container {
+    width: 100%;
+    max-width: 480px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 通用頭部樣式 */
+.sos-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.sos-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.sos-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+}
+
+/* 情境選擇頁面 */
+.scenario-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.scenario-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.scenario-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #C58B8A;
+    transform: translateY(-2px);
+}
+
+.scenario-card:active {
+    transform: translateY(0);
+}
+
+.scenario-emoji {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.scenario-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.scenario-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 呼吸頁面 */
+.breathing-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+}
+
+.breathing-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #97A6B4 0%, #AAB09B 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: breathe 8s infinite ease-in-out;
+    margin-bottom: 24px;
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.2); }
+    60% { transform: scale(1.2); }
+}
+
+.breathing-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.breathing-instruction {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.8;
+}
+
+/* 行動步驟頁面 */
+.action-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.action-step-item {
+    display: flex;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.action-step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #C58B8A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.action-step-content {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+.action-step-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.action-step-text h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.action-step-text p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+}
+
+/* 計時器 */
+.timer-section {
+    margin: 24px 0;
+    text-align: center;
+}
+
+.timer-btn {
+    background: linear-gradient(135deg, #D5C1A5 0%, #AAB09B 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timer-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(213, 193, 165, 0.3);
+}
+
+.timer-display {
+    background: rgba(213, 193, 165, 0.15);
+    border-radius: 20px;
+    padding: 32px;
+    border: 2px solid #D5C1A5;
+}
+
+.timer-count {
+    display: block;
+    font-size: 56px;
+    font-weight: 700;
+    color: #D5C1A5;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+}
+
+.timer-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* 完成頁面 */
+.complete-step {
+    text-align: center;
+}
+
+.complete-illustration {
+    margin-bottom: 24px;
+}
+
+.complete-emoji {
+    font-size: 80px;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.complete-step h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.complete-message {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    margin-bottom: 32px;
+}
+
+.complete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 按鈕樣式 */
+.sos-primary-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #C58B8A 0%, #D5C1A5 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 18px 32px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sos-primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(197, 139, 138, 0.3);
+}
+
+.sos-secondary-btn {
+    width: 100%;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sos-secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.sos-back-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 12px;
+    transition: color 0.3s ease;
+}
+
+.sos-back-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+    .sos-mode {
+        padding: 16px;
+    }
+
+    .sos-header h2 {
+        font-size: 24px;
+    }
+
+    .scenario-emoji {
+        font-size: 40px;
+    }
+
+    .scenario-title {
+        font-size: 18px;
+    }
+
+    .breathing-circle {
+        width: 160px;
+        height: 160px;
+    }
+
+    .breathing-text {
+        font-size: 20px;
+    }
+
+    .timer-count {
+        font-size: 48px;
+    }
+
+    .complete-emoji {
+        font-size: 64px;
+    }
+
+    .complete-step h2 {
+        font-size: 28px;
+    }
+}
+
+/* 動畫效果 */
+.sos-step {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 無障礙支持 */
+@media (prefers-reduced-motion: reduce) {
+    .breathing-circle {
+        animation: none;
+    }
+
+    .complete-emoji {
+        animation: none;
+    }
+
+    .sos-step {
+        animation: none;
+    }
+}
+
+/* 焦點樣式 */
+.scenario-card:focus,
+.sos-primary-btn:focus,
+.sos-secondary-btn:focus,
+.timer-btn:focus {
+    outline: 2px solid #D5C1A5;
+    outline-offset: 2px;
+}
