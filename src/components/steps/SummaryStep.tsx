@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../services/LanguageContext';
 import { uiIcons } from '../icons/SvgIcons';
 import AIInsightCard from '../AIInsightCard';
+import GrillMePanel from '../GrillMePanel';
 import { aiService, AIInsight } from '../../services/AIService';
 import { storageService } from '../../services/StorageService';
 import { Emotion } from '../../data/emotionData';
@@ -22,6 +23,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
     const { t } = useLanguage();
     const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
     const [isAILoading, setIsAILoading] = useState(false);
+    const [showGrillMe, setShowGrillMe] = useState(false);
 
     // 生成 AI 洞察
     const generateAIInsight = async (force = false) => {
@@ -122,6 +124,21 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                 quadrant={quadrant}
             />
 
+            {/* 烤問模式 */}
+            {!showGrillMe && !isAILoading && (
+                <button className="grill-me-trigger-btn" onClick={() => setShowGrillMe(true)}>
+                    🔥 {t('烤問我')}
+                    <span className="grill-me-sub">{t('深度自我探索')}</span>
+                </button>
+            )}
+            {showGrillMe && (
+                <GrillMePanel
+                    checkInData={{ emotion: selectedEmotions[0], intensity: 5 }}
+                    quadrant={quadrant}
+                    onClose={() => setShowGrillMe(false)}
+                />
+            )}
+
             {!isFullFlow && onContinueFullFlow && (
                 <div className="quick-regulate-section">
                     <p className="quick-regulate-title">{t('💡 想試試快速調節嗎？')}</p>
@@ -137,6 +154,36 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
             )}
 
             <button className="morandi-main-btn" onClick={onReset}>{t('返回')}</button>
+
+            <style>{`
+                .grill-me-trigger-btn {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                    width: 100%;
+                    padding: var(--s-3) var(--s-4);
+                    background: transparent;
+                    border: 1px dashed rgba(220, 80, 60, 0.4);
+                    border-radius: var(--radius-md);
+                    color: rgba(220, 80, 60, 0.8);
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: var(--transition-luxe);
+                    margin-bottom: var(--s-2);
+                }
+                .grill-me-trigger-btn:hover {
+                    border-color: rgba(220, 80, 60, 0.8);
+                    color: rgb(220, 80, 60);
+                    background: rgba(220, 80, 60, 0.05);
+                }
+                .grill-me-sub {
+                    font-size: 0.75rem;
+                    font-weight: 400;
+                    opacity: 0.7;
+                }
+            `}</style>
         </div>
     );
 };

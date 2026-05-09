@@ -6,7 +6,28 @@ export interface PhysicalData {
     heartRate?: number;
     heartRateVariability?: number;
 }
-import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
+import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON, GRILL_ME_SYSTEM_PROMPT, GRILL_ME_MOCK_QUESTIONS, GRILL_ME_MOCK_SYNTHESIS } from './prompts';
+
+export interface GrillMeQuestion {
+    id: number;
+    text: string;
+}
+
+export interface GrillMeQuestionsResult {
+    phase: 'questions';
+    intro: string;
+    questions: GrillMeQuestion[];
+}
+
+export interface GrillMeSynthesisResult {
+    phase: 'synthesis';
+    coreNeed: string;
+    hiddenBelief: string;
+    deeperTruth: string;
+    reframe: string;
+    microExperiment: string;
+    closingChallenge: string;
+}
 
 export interface AIInsight {
     summary: string;
@@ -235,6 +256,65 @@ class AIService {
         } catch (error) {
             console.error("Weekly Insight Failed:", error);
             return this.getMockFallback(dominantQuadrant);
+        }
+    }
+    async generateGrillQuestions(checkInData: any): Promise<GrillMeQuestionsResult> {
+        if (!this.apiKey || !this.apiUrl) {
+            return { phase: 'questions', ...GRILL_ME_MOCK_QUESTIONS };
+        }
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    messages: [
+                        { role: 'system', content: GRILL_ME_SYSTEM_PROMPT },
+                        { role: 'user', content: `請根據這份情緒覺察記錄，生成三個烤問問題（Phase 1）：\n${JSON.stringify(checkInData)}` }
+                    ],
+                    model: 'gpt-4o',
+                    temperature: 0.8
+                })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+            const result = await response.json();
+            const parsed = this.parseAIResponse(result.choices?.[0]?.message?.content);
+            return parsed as unknown as GrillMeQuestionsResult;
+        } catch (error) {
+            console.error('Grill Me questions failed:', error);
+            return { phase: 'questions', ...GRILL_ME_MOCK_QUESTIONS };
+        }
+    }
+
+    async generateGrillSynthesis(checkInData: any, answers: { id: number; question: string; answer: string }[]): Promise<GrillMeSynthesisResult> {
+        if (!this.apiKey || !this.apiUrl) {
+            return { phase: 'synthesis', ...GRILL_ME_MOCK_SYNTHESIS };
+        }
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    messages: [
+                        { role: 'system', content: GRILL_ME_SYSTEM_PROMPT },
+                        { role: 'user', content: `情緒覺察記錄：\n${JSON.stringify(checkInData)}\n\n使用者回答：\n${JSON.stringify(answers)}\n\n請進行深度整合分析（Phase 2）。` }
+                    ],
+                    model: 'gpt-4o',
+                    temperature: 0.75
+                })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+            const result = await response.json();
+            const parsed = this.parseAIResponse(result.choices?.[0]?.message?.content);
+            return parsed as unknown as GrillMeSynthesisResult;
+        } catch (error) {
+            console.error('Grill Me synthesis failed:', error);
+            return { phase: 'synthesis', ...GRILL_ME_MOCK_SYNTHESIS };
         }
     }
 }
