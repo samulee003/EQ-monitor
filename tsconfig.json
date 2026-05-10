@@ -18,7 +18,8 @@
         "jsx": "react-jsx",
         /* PWA types */
         "types": [
-            "vite-plugin-pwa/client"
+            "vite-plugin-pwa/client",
+            "node"
         ],
         /* Linting */
         "strict": true,
