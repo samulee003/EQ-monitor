@@ -8,10 +8,11 @@
 
 - **前端**：React 19 + TypeScript + Vite + PWA
 - **後端**：InsForge BaaS (PostgreSQL + Auth + Storage + AI + Edge Functions)
+- **AI Agent**：Google Gemini REST API (`gemini-3.1-flash-lite`)
 - **即時通訊**：LINE Bot 整合
-- **測試**：Vitest (前端)、~225 測試通過中
+- **測試**：Vitest (前端)、265 測試通過中
 
-**產品方向**：正從純 PWA 往 **agentic AI tool** 演進，考慮整合《Dealing with Feeling》五大模組（Labeling / Emergency / Strategies / Co-Regulation / Foundations）。**尚未最終確認，實作前必須先問。**
+**產品方向**：已完成 **Agentic AI Coach** MVP（對話介面 + Meta-Moment SOS），未來可擴充《Dealing with Feeling》五大模組（Labeling / Emergency / Strategies / Co-Regulation / Foundations）。**擴充前必須先問用戶確認。**
 
 ---
 
@@ -62,6 +63,7 @@
 - **狀態更新**：進行中的任務每完成一個 milestone 回報一次，不要等全部做完。
 - **測試策略**：改動後跑 `npm run test:run`。如果既有測試失敗，先判斷是否是我的改動導致。如果不是，記錄但不強修（見 Rule 2）。
 - **Git**：不主動 commit / push，除非用戶明確要求。
+- **Supervisor**：多 agent 並行時，必須有一個 supervisor agent 定時監控進度、識別阻塞、調度修正。
 
 ---
 
@@ -76,7 +78,8 @@
 | 樣式 | Tailwind CSS 3.4（**禁止升級 v4**，已鎖定） |
 | 建構 | Vite |
 | 測試 | Vitest |
-| 狀態管理 | 以 React hooks 為主，尚未引入全局狀態庫 |
+| 狀態管理 | 以 React hooks 為主，`useAppStore` 管理 view 路由 |
+| 路由 | Custom view-based（非 React Router）：`currentView` ∈ `{home, checkin, history, growth, achievement, coach}` |
 
 ### 4.2 後端（InsForge BaaS）
 
@@ -99,10 +102,29 @@
 **Edge Functions**（`server/insforge/functions/`）：
 - `weekly-report.ts` — 7 天情緒報告
 - `achievement-checker.ts` — 成就檢查與自動解鎖
+- `coach-simple.ts` — ✅ **已部署** AI 情緒教練 API
+
+**部署 URL**: `https://b88egxiz.functions.insforge.app/coach`
 
 **Auth Trigger**: `on_auth_user_created` 自動建立 `profiles` 列。
 
-### 4.3 InsForge SDK 使用規範
+### 4.3 AI Agent 架構
+
+**模型**: `gemini-3.1-flash-lite`
+**API Key**: 從 `Deno.env.get('GOOGLE_API_KEY')` 讀取（InsForge Edge Function secrets）
+
+**實現方式**: 純 REST API（非 ADK）
+- 原因：ADK JS 依賴 Node.js API，InsForge Deno bundler 無法解析本地相對匯入
+- 優點：零依賴、最穩定、Bundle 最小
+- 缺點：無 ADK 的 agent orchestration、session 不持久
+
+**系統提示核心**：
+- RULER 框架（Recognize / Understand / Label / Express / Regulate）
+- 繁體中文（臺灣用語）
+- 溫暖、不帶評判
+- 危機轉介規則（自傷意念 → 觸發 MetaMoment）
+
+### 4.4 InsForge SDK 使用規範
 
 - **初始化**: `src/lib/insforge/client.ts`
 - **Adapter Pattern**: `src/lib/insforge/adapter.ts`（基礎 CRUD）+ `syncAdapter.ts`（IndexedDB 離線緩存 + sync queue）
@@ -110,6 +132,15 @@
 - **回傳結構**: `{ data, error }`
 
 **寫 InsForge 整合代碼前，先 fetch 最新 SDK 文件**: MCP `fetch-docs` 工具可用文件類型：`instructions`, `auth-sdk-typescript`, `db-sdk-typescript`, `storage-sdk`, `functions-sdk`, `ai-integration-sdk`, `real-time`, `deployment`。
+
+**InsForge CLI 正確指令**:
+```bash
+# 設定 secrets
+npx @insforge/cli secrets add GOOGLE_API_KEY "..."
+
+# 部署 Edge Function
+npx @insforge/cli functions deploy coach --file server/insforge/functions/coach-simple.ts
+```
 
 ---
 
@@ -122,6 +153,9 @@
 | User API Key (`uak_`) 無法 headless 取得 | 未修 | 用 direct SQL + MCP 工具做基礎設施任務 |
 | Data migration（LocalStorage → InsForge）| **未實作** | 待排程 |
 | Server test `dotenv` missing | 未修 | `cd server && npm install` 可能解決 |
+| ADK JS 無法在 Deno 部署 | **已知，已繞過** | 使用純 REST API fallback |
+| Edge Function session 不持久 | **已知** | `InMemoryRunner` 記憶體儲存，每次請求獨立 |
+| E2E 測試框架缺失 | **已知** | 尚未引入 Playwright / Cypress |
 
 ---
 
@@ -129,23 +163,55 @@
 
 ```
 今心 APP/
-├── src/                      # 前端源碼
-│   ├── lib/insforge/         # InsForge SDK 整合
-│   │   ├── client.ts         # SDK client 初始化
-│   │   ├── adapter.ts        # 基礎 adapter (InsForgeAdapter class)
-│   │   ├── syncAdapter.ts    # 離線同步 adapter (+ IndexedDB cache)
-│   │   ├── types.ts          # TypeScript interfaces
-│   │   └── *.test.ts         # 測試
-│   ├── adapters/             # 既有 storage adapters
-│   ├── data/                 # 情緒資料、常數
-│   └── ...                   # 頁面、組件
+├── src/                          # 前端源碼
+│   ├── lib/
+│   │   ├── insforge/             # InsForge SDK 整合
+│   │   │   ├── client.ts         # SDK client 初始化
+│   │   │   ├── adapter.ts        # 基礎 adapter (InsForgeAdapter class)
+│   │   │   ├── syncAdapter.ts    # 離線同步 adapter (+ IndexedDB cache)
+│   │   │   ├── types.ts          # TypeScript interfaces
+│   │   │   └── *.test.ts         # 測試
+│   │   └── adk/                  # 🤖 AI Coach 客戶端
+│   │       ├── client.ts         # fetch wrapper → /coach
+│   │       ├── types.ts          # CoachMessage, CoachRequest, CoachResponse
+│   │       └── storage.ts        # LocalStorage chat history
+│   ├── components/coach/         # 🤖 AI Coach UI 組件
+│   │   ├── ChatBubble.tsx        # 訊息氣泡
+│   │   ├── ChatInput.tsx         # 輸入 + SOS 按鈕
+│   │   ├── MetaMomentOverlay.tsx # 4 步驟 SOS 覆蓋層
+│   │   ├── BreathingAnimation.tsx# 呼吸動畫
+│   │   ├── TypingIndicator.tsx   # 打字指示器
+│   │   ├── WelcomeCard.tsx       # 歡迎卡片
+│   │   └── CoachFAB.tsx          # 浮動快速入口
+│   ├── pages/CoachPage.tsx       # 🤖 教練主頁面
+│   ├── adapters/                 # 既有 storage adapters
+│   ├── data/                     # 情緒資料、常數
+│   └── ...                       # 頁面、組件
 ├── server/
 │   ├── insforge/
-│   │   ├── schema/           # SQL migration 檔 (001-005)
-│   │   └── functions/        # Edge Functions (Deno/TS)
-│   └── src/                  # 既有 server 源碼
-├── docs/insforge/            # SDK 文件快取
-├── AGENTS.md                 # 本文件
+│   │   ├── schema/               # SQL migration 檔 (001-005)
+│   │   ├── functions/            # Edge Functions (Deno/TS)
+│   │   │   ├── weekly-report.ts
+│   │   │   ├── achievement-checker.ts
+│   │   │   ├── coach.ts          # ADK 原始版本（未部署）
+│   │   │   └── coach-simple.ts   # ✅ REST API fallback（已部署）
+│   │   └── agents/               # ADK agent 定義（參考用）
+│   │       ├── emotionCoach.ts   # 主 agent 工廠
+│   │       ├── runner.ts         # InMemoryRunner 包裝
+│   │       ├── skills/
+│   │       │   └── metaMoment.ts # MetaMoment Skill 工廠
+│   │       └── tools/
+│   │           └── rulerData.ts  # DB 查詢 Tool
+│   └── src/                      # 既有 server 源碼 (Express + LINE Bot)
+├── docs/
+│   ├── insforge/                 # SDK 文件快取
+│   └── superpowers/              # 🤖 計畫與規格文件
+│       ├── plans/
+│       │   └── 2026-05-10-agentic-emotion-coach.md
+│       └── specs/
+│           └── 2026-05-10-agentic-emotion-coach-design.md
+├── AGENTS.md                     # 本文件
+├── CHANGELOG.md                  # 更新日誌
 └── ...
 ```
 
