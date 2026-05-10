@@ -1,10 +1,11 @@
+import { logger } from '../../utils/logger';
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../services/LanguageContext';
 import { uiIcons } from '../icons/SvgIcons';
 import AIInsightCard from '../AIInsightCard';
-import { aiService, AIInsight } from '../../services/AIService';
-import { storageService } from '../../services/StorageService';
-import { Emotion } from '../../data/emotionData';
+import { aiService, type AIInsight } from '../../services/AIService';
+import { dataAdapter } from '../../adapters';
+import { type Emotion } from '../../data/emotionData';
 
 interface SummaryStepProps {
     selectedEmotions: Emotion[];
@@ -29,7 +30,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
         
         setIsAILoading(true);
         try {
-            const history = storageService.getLogs().slice(0, 5);
+            const history = (await dataAdapter.logs.export()).slice(0, 5);
             const insight = await aiService.analyzeFeeling(
                 {
                     emotion: selectedEmotions[0],
@@ -40,7 +41,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
             );
             setAiInsight(insight);
         } catch (error) {
-            console.error('AI Insight generation failed:', error);
+            logger.error('[SummaryStep] AI Insight generation failed', { error: String(error) });
         } finally {
             setIsAILoading(false);
         }

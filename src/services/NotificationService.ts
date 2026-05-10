@@ -3,6 +3,8 @@
  * Handles browser notifications for daily check-in reminders.
  */
 
+import { settingsStore } from '../adapters';
+
 export interface NotificationSettings {
     enabled: boolean;
     hour: number;
@@ -10,7 +12,7 @@ export interface NotificationSettings {
     lastNotifiedDate?: string; // ISO date string to prevent duplicate daily notifications
 }
 
-const STORAGE_KEY = 'imxin_notification_settings';
+const SETTINGS_KEY = 'imxin_notification_settings';
 const DEFAULT_SETTINGS: NotificationSettings = {
     enabled: false,
     hour: 20, // Default: 8 PM
@@ -25,7 +27,6 @@ class NotificationService {
      */
     async requestPermission(): Promise<boolean> {
         if (!('Notification' in window)) {
-            console.warn('This browser does not support notifications');
             return false;
         }
 
@@ -34,7 +35,6 @@ class NotificationService {
         }
 
         if (Notification.permission === 'denied') {
-            console.warn('Notification permission was denied');
             return false;
         }
 
@@ -58,31 +58,20 @@ class NotificationService {
     }
 
     /**
-     * Get notification settings from localStorage
+     * Get notification settings
      */
     getSettings(): NotificationSettings {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-            }
-        } catch (e) {
-            console.error('Failed to load notification settings:', e);
-        }
-        return DEFAULT_SETTINGS;
+        const stored = settingsStore.get<NotificationSettings>(SETTINGS_KEY);
+        return stored ? { ...DEFAULT_SETTINGS, ...stored } : DEFAULT_SETTINGS;
     }
 
     /**
-     * Save notification settings to localStorage
+     * Save notification settings
      */
     saveSettings(settings: Partial<NotificationSettings>): void {
-        try {
-            const current = this.getSettings();
-            const updated = { ...current, ...settings };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        } catch (e) {
-            console.error('Failed to save notification settings:', e);
-        }
+        const current = this.getSettings();
+        const updated = { ...current, ...settings };
+        settingsStore.set(SETTINGS_KEY, updated);
     }
 
     /**
@@ -119,7 +108,6 @@ class NotificationService {
      */
     showNotification(title: string, body: string, tag?: string): void {
         if (Notification.permission !== 'granted') {
-            console.warn('Cannot show notification: permission not granted');
             return;
         }
 
@@ -219,8 +207,6 @@ class NotificationService {
         if (this.shouldSendReminder()) {
             this.sendDailyReminder();
         }
-
-        console.log('🔔 Daily reminder check started');
     }
 
     /**
@@ -230,7 +216,6 @@ class NotificationService {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            console.log('🔕 Daily reminder check stopped');
         }
     }
 

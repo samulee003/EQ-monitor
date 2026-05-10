@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../services/LanguageContext';
-import { exportService, ExportResult } from '../services/ExportService';
-import { RulerLogEntry } from '../types/RulerTypes';
+import { exportService, type ExportResult } from '../services/ExportService';
+import { type RulerLogEntry } from '../types/RulerTypes';
 
 interface ExportPanelProps {
     logs: RulerLogEntry[];

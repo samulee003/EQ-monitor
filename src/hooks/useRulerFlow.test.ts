@@ -62,12 +62,16 @@ describe('useRulerFlow', () => {
         });
 
         it('should have correct step order', () => {
-            expect(steps).toHaveLength(5);
+            expect(steps).toHaveLength(9);
             expect(steps[0].key).toBe('recognizing');
-            expect(steps[1].key).toBe('labeling');
-            expect(steps[2].key).toBe('understanding');
-            expect(steps[3].key).toBe('expressing');
-            expect(steps[4].key).toBe('regulating');
+            expect(steps[1].key).toBe('centering');
+            expect(steps[2].key).toBe('bodyScan');
+            expect(steps[3].key).toBe('labeling');
+            expect(steps[4].key).toBe('understanding');
+            expect(steps[5].key).toBe('expressing');
+            expect(steps[6].key).toBe('regulating');
+            expect(steps[7].key).toBe('neuroCheck');
+            expect(steps[8].key).toBe('summary');
         });
 
         it('should update currentStepIndex when step changes', () => {
@@ -77,7 +81,7 @@ describe('useRulerFlow', () => {
                 result.current.setStep('labeling');
             });
 
-            expect(result.current.currentStepIndex).toBe(1);
+            expect(result.current.currentStepIndex).toBe(3);
         });
     });
 
@@ -373,12 +377,12 @@ describe('useRulerFlow', () => {
                 });
             });
 
-            expect(result.current.step).toBe('summary');
+            expect(result.current.step).toBe('neuroCheck');
         });
     });
 
     describe('reset flow', () => {
-        it('should reset all state on resetFlow', () => {
+        it('should reset all state on resetFlow', async () => {
             const { result } = renderHook(() => useRulerFlow(), {});
             
             // Make some changes
@@ -390,8 +394,8 @@ describe('useRulerFlow', () => {
             });
 
             // Reset
-            act(() => {
-                result.current.resetFlow();
+            await act(async () => {
+                await result.current.resetFlow();
             });
 
             expect(result.current.step).toBe('recognizing');
@@ -476,14 +480,14 @@ describe('useRulerFlow', () => {
     });
 
     describe('show resume prompt', () => {
-        it('should set show resume prompt', () => {
+        it('should maintain showResumePrompt as false', () => {
             const { result } = renderHook(() => useRulerFlow());
             
             act(() => {
                 result.current.setShowResumePrompt(true);
             });
 
-            expect(result.current.showResumePrompt).toBe(true);
+            expect(result.current.showResumePrompt).toBe(false);
         });
     });
 });

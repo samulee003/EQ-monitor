@@ -1,5 +1,5 @@
 import React from 'react';
-import { AIInsight } from '../services/AIService';
+import { type AIInsight } from '../services/AIService';
 import { useLanguage } from '../services/LanguageContext';
 import { uiIcons } from './icons/SvgIcons';
 

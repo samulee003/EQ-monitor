@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Quadrant } from '../data/emotionData';
+import { type Quadrant } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 import { voiceGuideService, bodyScanScript } from '../services/VoiceGuideService';
 

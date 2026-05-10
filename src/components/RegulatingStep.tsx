@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Emotion, Quadrant } from '../data/emotionData';
+import { type Emotion, type Quadrant } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 import { regulationIcons } from './icons/SvgIcons';
-import { RegulatingData } from '../types/RulerTypes';
+import { type RegulatingData } from '../types/RulerTypes';
+import { settingsStore } from '../adapters';
 
 interface RegulatingStepProps {
     emotion: Emotion;
@@ -13,7 +14,7 @@ interface RegulatingStepProps {
 const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, onBack }) => {
     const { t } = useLanguage();
     const [selectedStrategies, setSelectedStrategies] = useState<string[]>([]);
-    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
+    const isParentRole = settingsStore.getUserRole() === 'parent';
 
     type StrategyItem = { icon: React.ReactNode; title: string; desc: string; type?: 'interactive'; recommended?: boolean; parentOnly?: boolean };
     const strategiesByQuadrant: Record<Quadrant, StrategyItem[]> = useMemo(() => {

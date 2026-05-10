@@ -5,6 +5,7 @@ import NotificationSettingsPanel from './NotificationSettings';
 import { notificationService } from '../services/NotificationService';
 import AchievementToast from './AchievementToast';
 import OnboardingFlow from './OnboardingFlow';
+import { settingsStore } from '../adapters';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,14 +30,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
   useEffect(() => {
     notificationService.initialize();
     
-    const onboardingCompleted = localStorage.getItem('imxin_onboarding_completed');
+    const onboardingCompleted = settingsStore.isOnboardingCompleted();
     if (!onboardingCompleted) {
       setShowOnboarding(true);
     }
   }, []);
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('imxin_onboarding_completed', 'true');
+    settingsStore.setOnboardingCompleted(true);
     setShowOnboarding(false);
   };
 

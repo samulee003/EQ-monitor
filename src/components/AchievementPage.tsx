@@ -3,11 +3,12 @@ import { useHabit } from '../services/HabitContext';
 import { ACHIEVEMENTS } from '../types/AchievementTypes';
 import { useLanguage } from '../services/LanguageContext';
 import { uiIcons } from './icons/SvgIcons';
+import { settingsStore } from '../adapters';
 
 const AchievementPage: React.FC = () => {
     const { progress } = useHabit();
     const { t } = useLanguage();
-    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
+    const isParentRole = settingsStore.getUserRole() === 'parent';
     const visibleAchievements = ACHIEVEMENTS.filter(a => a.category !== 'parenting' || isParentRole);
 
     return (

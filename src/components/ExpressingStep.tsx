@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Emotion } from '../data/emotionData';
+import { type Emotion } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 import VoiceRecorder from './VoiceRecorder';
 import { expressingIcons } from './icons/SvgIcons';
-import { ExpressingData } from '../types/RulerTypes';
+import { type ExpressingData } from '../types/RulerTypes';
 
 interface ExpressingStepProps {
     emotion: Emotion;

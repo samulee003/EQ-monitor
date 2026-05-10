@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import * as OpenCC from 'opencc-js';
+import { dataAdapter, StorageKeys } from '../adapters';
 
 type Language = 'zh-TW' | 'zh-CN';
 
@@ -11,13 +12,19 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'jinxin-language';
-
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [language, setLanguage] = useState<Language>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return (saved === 'zh-CN' || saved === 'zh-TW') ? saved : 'zh-TW';
-    });
+    const [language, setLanguage] = useState<Language>('zh-TW');
+
+    // 異步加載已保存的語言設置
+    useEffect(() => {
+        const loadLanguage = async () => {
+            const saved = await dataAdapter.settings.get<Language>(StorageKeys.LANGUAGE);
+            if (saved === 'zh-CN' || saved === 'zh-TW') {
+                setLanguage(saved);
+            }
+        };
+        loadLanguage();
+    }, []);
 
     // Create converter: Traditional to Simplified
     const converter = useMemo(() => {
@@ -25,7 +32,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, []);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, language);
+        dataAdapter.settings.set(StorageKeys.LANGUAGE, language);
     }, [language]);
 
     const toggleLanguage = useCallback(() => {

@@ -6,9 +6,9 @@
  * 並非臨床心理韌性評估。它不對應任何標準化心理量表（如 Connor-Davidson Resilience Scale），
  * 不應用於評估個人心理健康狀態。
  */
-import { Quadrant } from '../data/emotionData';
-import { RulerLogEntry } from '../types/RulerTypes';
-import { storageService } from './StorageService';
+import { type Quadrant } from '../data/emotionData';
+import { type RulerLogEntry } from '../types/RulerTypes';
+
 
 export interface DailyResilience {
     date: string;
@@ -57,7 +57,7 @@ class ResilienceService {
      * 計算每日「參與度指標」——反映使用者完成覺察流程的深度與主觀回饋。
      * 注意：此分數為參與激勵指標，非臨床韌性評估工具。
      */
-    getDashboardData(logs: RulerLogEntry[] = storageService.getLogs()): DailyResilience[] {
+    getDashboardData(logs: RulerLogEntry[]): DailyResilience[] {
         // Group by date and calculate average resilience
         const days: Record<string, { total: number, count: number, emotion: string }> = {};
 
@@ -90,7 +90,7 @@ class ResilienceService {
         })).reverse().slice(-7); // Last 7 days
     }
 
-    getOverallScore(logs: RulerLogEntry[] = storageService.getLogs()): number {
+    getOverallScore(logs: RulerLogEntry[]): number {
         const data = this.getDashboardData(logs);
         if (data.length === 0) return 0;
         const avg = data.reduce((acc, curr) => acc + curr.score, 0) / data.length;
@@ -102,7 +102,7 @@ class ResilienceService {
      * Returns data for the last 30 days for heatmap visualization.
      * Optimized: O(N) log processing + O(30) iteration
      */
-    getHeatmapData(logs: RulerLogEntry[] = storageService.getLogs()): HeatmapDay[] {
+    getHeatmapData(logs: RulerLogEntry[]): HeatmapDay[] {
         const today = new Date();
         const heatmap: HeatmapDay[] = [];
 
@@ -147,7 +147,7 @@ class ResilienceService {
      * getIntensityData
      * Returns last 7 logs with intensity values for bar chart.
      */
-    getIntensityData(logs: RulerLogEntry[] = storageService.getLogs()): IntensityData[] {
+    getIntensityData(logs: RulerLogEntry[]): IntensityData[] {
         return logs.slice(0, 7).map((log: RulerLogEntry) => ({
             label: new Date(log.timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' }),
             value: log.intensity || 5
@@ -159,7 +159,7 @@ class ResilienceService {
      * Calculates the diversity of emotions the user has identified.
      * Higher granularity = better emotional awareness (Lisa Feldman Barrett's research)
      */
-    getEmotionalGranularity(logs: RulerLogEntry[] = storageService.getLogs()): GranularityData {
+    getEmotionalGranularity(logs: RulerLogEntry[]): GranularityData {
         const uniqueEmotions = new Set<string>();
 
         logs.forEach((log: RulerLogEntry) => {
@@ -192,7 +192,7 @@ class ResilienceService {
      * Calculates the variety of regulation strategies the user has practiced.
      * More diverse strategies = better emotional flexibility
      */
-    getStrategyDiversity(logs: RulerLogEntry[] = storageService.getLogs()): StrategyDiversityData {
+    getStrategyDiversity(logs: RulerLogEntry[]): StrategyDiversityData {
         const usedStrategies = new Set<string>();
 
         logs.forEach((log: RulerLogEntry) => {

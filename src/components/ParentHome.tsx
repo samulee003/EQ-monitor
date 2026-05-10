@@ -1,8 +1,10 @@
+import { logger } from '../utils/logger';
 import React, { useState, useEffect } from 'react';
 import './ParentHome.css';
 import SOSMode from './SOSMode';
-import QuickCheckIn, { QuickCheckInData } from './QuickCheckIn';
-import { storageService } from '../services/StorageService';
+import QuickCheckIn, { type QuickCheckInData } from './QuickCheckIn';
+import { dataAdapter } from '../adapters';
+import { type RulerLogEntry } from '../types/RulerTypes';
 // import { useLanguage } from '../services/LanguageContext';
 
 // 深度覺察沿用現有的 CheckInFlow
@@ -18,31 +20,34 @@ const ParentHome: React.FC = () => {
     // const { t } = useLanguage();
 
     useEffect(() => {
-        // 設置個性化問候語
-        const hour = new Date().getHours();
-        let greet = '';
-        if (hour < 12) {
-            greet = '早安，今天會是美好的一天';
-        } else if (hour < 18) {
-            greet = '午安，記得給自己一點喘息';
-        } else {
-            greet = '晚安，辛苦你了';
-        }
-        setGreeting(greet);
+        const loadData = async () => {
+            // 設置個性化問候語
+            const hour = new Date().getHours();
+            let greet = '';
+            if (hour < 12) {
+                greet = '早安，今天會是美好的一天';
+            } else if (hour < 18) {
+                greet = '午安，記得給自己一點喘息';
+            } else {
+                greet = '晚安，辛苦你了';
+            }
+            setGreeting(greet);
 
-        // 獲取今日記錄數和連續記錄天數
-        const logs = storageService.getLogs();
-        const today = new Date().toDateString();
-        const todayLogs = logs.filter(log => 
-            new Date(log.timestamp).toDateString() === today
-        );
-        setTodayCount(todayLogs.length);
+            // 獲取今日記錄數和連續記錄天數
+            const data = await dataAdapter.logs.export();
+            const today = new Date().toDateString();
+            const todayLogs = data.filter((log: RulerLogEntry) =>
+                new Date(log.timestamp).toDateString() === today
+            );
+            setTodayCount(todayLogs.length);
 
-        // 簡化計算連續天數（實際應使用 HabitService）
-        const uniqueDays = new Set(logs.map(log => 
-            new Date(log.timestamp).toDateString()
-        ));
-        setStreakDays(Math.min(uniqueDays.size, 7)); // 簡化顯示
+            // 簡化計算連續天數（實際應使用 HabitService）
+            const uniqueDays = new Set(data.map((log: RulerLogEntry) =>
+                new Date(log.timestamp).toDateString()
+            ));
+            setStreakDays(Math.min(uniqueDays.size, 7)); // 簡化顯示
+        };
+        loadData();
     }, [mode]); // mode 改變時重新計算
 
     const handleSOSComplete = () => {
@@ -50,7 +55,7 @@ const ParentHome: React.FC = () => {
         setMode('home');
     };
 
-    const handleQuickComplete = (data: QuickCheckInData) => {
+    const handleQuickComplete = async (data: QuickCheckInData) => {
         // 保存快速記錄
         const logEntry = {
             emotions: [{
@@ -77,10 +82,10 @@ const ParentHome: React.FC = () => {
         };
 
         try {
-            storageService.saveLog(logEntry as any);
+            await dataAdapter.logs.create(logEntry as RulerLogEntry);
             setMode('home');
         } catch (error) {
-            console.error('Save failed:', error);
+            logger.error('[ParentHome] Save failed', { error: String(error) });
         }
     };
 

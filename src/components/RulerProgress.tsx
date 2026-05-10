@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Quadrant } from '../data/emotionData';
-import { RulerStep } from '../types/RulerTypes';
+import { type Quadrant } from '../data/emotionData';
+import { type RulerStep } from '../types/RulerTypes';
 import { useLanguage } from '../services/LanguageContext';
 
 interface RulerProgressProps {

@@ -1,0 +1,182 @@
+.parent-scenarios {
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+.scenarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--s-6);
+}
+.parent-badge {
+    background: hsla(0, 50%, 55%, 0.15) !important;
+    color: var(--color-red) !important;
+}
+.scenarios-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 var(--s-2) 0;
+}
+.scenarios-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0 0 var(--s-6) 0;
+}
+.scenario-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+}
+.scenario-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-luxe);
+    text-align: left;
+    width: 100%;
+}
+.scenario-btn:hover {
+    border-color: hsla(0,0%,100%,0.2);
+    transform: translateX(4px);
+    background: var(--glass-border);
+}
+.scenario-emoji {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+.scenario-label {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+.scenario-arrow {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+.scenario-active {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+}
+.comfort-card {
+    padding: var(--s-6);
+    background: var(--bg-secondary);
+    border: 1px solid;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+.comfort-emoji {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--s-4);
+}
+.comfort-text {
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 500;
+    margin: 0;
+}
+.steps-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin: var(--s-4) 0 var(--s-2) 0;
+}
+.action-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    margin-bottom: var(--s-6);
+}
+.action-step {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-3);
+    border-radius: var(--radius-sm);
+    transition: all 0.4s ease;
+}
+.action-step.hidden {
+    opacity: 0.25;
+    filter: blur(2px);
+}
+.action-step.visible {
+    opacity: 1;
+    filter: none;
+}
+.action-step.current {
+    background: hsla(0,0%,100%,0.03);
+    border: 1px solid var(--glass-border);
+}
+.step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+.action-step.current .step-number {
+    background: var(--text-primary);
+    color: var(--bg-color);
+    border-color: var(--text-primary);
+}
+.step-text {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+.quick-back-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: var(--s-2);
+}
+.quick-back-btn:hover { color: var(--text-primary); }
+.quick-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    background: hsla(45, 60%, 55%, 0.15);
+    color: var(--color-yellow);
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.morandi-main-btn {
+    width: 100%;
+    padding: var(--s-4);
+    background: var(--text-primary);
+    color: var(--bg-color);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition-luxe);
+    letter-spacing: 1px;
+}
+.morandi-main-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-luxe); filter: brightness(1.1); }
+.fade-slide-in {
+    animation: fadeSlideIn 0.5s ease-out forwards;
+}
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

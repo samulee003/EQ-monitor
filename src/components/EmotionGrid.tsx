@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { emotions, Quadrant, Emotion } from '../data/emotionData';
+import { emotions, type Quadrant, type Emotion } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
+import { settingsStore } from '../adapters';
 
 interface EmotionGridProps {
   quadrants: Quadrant[];
@@ -47,7 +48,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
   const { t } = useLanguage();
 
   const isParentRole = useMemo(() =>
-    localStorage.getItem('imxin_user_role') === 'parent',
+    settingsStore.getUserRole() === 'parent',
     []
   );
 

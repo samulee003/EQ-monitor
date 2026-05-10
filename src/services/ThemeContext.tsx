@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { StorageKeys } from '../adapters';
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -11,15 +12,21 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'imxin-theme';
-
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setThemeState] = useState<Theme>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY) as Theme;
-        return saved || 'system';
-    });
-
+    const [theme, setThemeState] = useState<Theme>('system');
     const [actualTheme, setActualTheme] = useState<'dark' | 'light'>('dark');
+
+    useEffect(() => {
+        const saved = localStorage.getItem(StorageKeys.THEME);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved) as Theme;
+                if (['dark', 'light', 'system'].includes(parsed)) {
+                    setThemeState(parsed);
+                }
+            } catch { }
+        }
+    }, []);
 
     // 檢測系統主題偏好
     const getSystemTheme = useCallback((): 'dark' | 'light' => {
@@ -59,7 +66,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // 持久化主題設置
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, theme);
+        localStorage.setItem(StorageKeys.THEME, JSON.stringify(theme));
     }, [theme]);
 
     const setTheme = useCallback((newTheme: Theme) => {
