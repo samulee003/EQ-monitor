@@ -3,12 +3,10 @@ import {
   auth,
   logs,
   draft,
-  profile,
   initialize,
   isAvailable,
   clearLogsCache,
   storageService,
-  settingsStore,
 } from './storage';
 import { _injectMasterKey, _resetKeyCache } from '../utils/crypto';
 

@@ -6,9 +6,9 @@ vi.mock('@insforge/sdk', () => ({
       signUp: vi.fn(),
       signInWithPassword: vi.fn(),
       signOut: vi.fn(),
-      getUser: vi.fn(),
+      getCurrentUser: vi.fn(),
     },
-    db: {
+    database: {
       from: () => ({
         select: vi.fn(() => ({ order: vi.fn(), limit: vi.fn(), eq: vi.fn(), single: vi.fn() })),
         insert: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('@insforge/sdk', () => ({
   }),
 }));
 
-import { InsForgeAdapter, insforgeAdapter } from './adapter';
+import { insforgeAdapter } from './adapter';
 
 describe('InsForgeAdapter', () => {
   beforeAll(() => {
