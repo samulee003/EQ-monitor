@@ -1,0 +1,39 @@
+# 依賴
+node_modules
+npm-debug.log
+
+# 構建輸出（會在容器中重新構建）
+dist
+
+# 環境與配置
+.env
+.env.local
+.env.*.local
+
+# 開發工具
+.vscode
+.idea
+*.swp
+*.swo
+
+# 測試
+coverage
+*.test.ts
+*.spec.ts
+
+# Git
+.git
+.gitignore
+
+# CI/CD 與文檔
+.github
+README.md
+CHANGELOG.md
+
+# 日誌
+logs
+*.log
+
+# 操作系統
+.DS_Store
+Thumbs.db

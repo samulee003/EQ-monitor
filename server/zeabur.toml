@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════════════════
+# 今心 ImXin Bot Server — Zeabur 服務配置
+# 
+# Zeabur 會自動檢測 Node.js 項目。此文件用於微調構建行為。
+# 部署時在 Dashboard 中將此服務的 Root Directory 設為 "server"。
+# ═══════════════════════════════════════════════════════════════
+
+[build]
+command = "npm install && npm run build"
+
+[env]
+NODE_ENV = "production"
+PORT = "3000"
