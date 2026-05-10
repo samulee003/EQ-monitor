@@ -502,20 +502,20 @@ export class InsForgeSyncAdapter {
   /** Pull the latest data from the backend and refresh the cache. */
   async pullLatest(): Promise<void> {
     const tasks = [
-      this.adapter.getLogs().then((r) => {
-        if (!r.error && r.data) return this.cache.set('logs', r.data);
+      Promise.resolve(this.adapter.getLogs()).then((r) => {
+        if (r && !r.error && r.data) return this.cache.set('logs', r.data);
       }),
-      this.adapter.getDraft().then((r) => {
-        if (!r.error && r.data) return this.cache.set('draft', r.data);
+      Promise.resolve(this.adapter.getDraft()).then((r) => {
+        if (r && !r.error && r.data) return this.cache.set('draft', r.data);
       }),
-      this.adapter.getAchievements().then((r) => {
-        if (!r.error && r.data) return this.cache.set('achievements', r.data);
+      Promise.resolve(this.adapter.getAchievements()).then((r) => {
+        if (r && !r.error && r.data) return this.cache.set('achievements', r.data);
       }),
-      this.adapter.getStreak().then((r) => {
-        if (!r.error && r.data) return this.cache.set('streak', r.data);
+      Promise.resolve(this.adapter.getStreak()).then((r) => {
+        if (r && !r.error && r.data) return this.cache.set('streak', r.data);
       }),
-      this.adapter.getProfile().then((r) => {
-        if (!r.error && r.data) return this.cache.set('profile', r.data);
+      Promise.resolve(this.adapter.getProfile()).then((r) => {
+        if (r && !r.error && r.data) return this.cache.set('profile', r.data);
       }),
     ];
     await Promise.allSettled(tasks);
