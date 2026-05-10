@@ -1,10 +1,6 @@
 /**
- * 數據適配器類型定義
- * 
- * 統一所有數據層操作類型，為後續遷移至 Supabase 等後端奠定基礎。
+ * 存儲模組類型定義
  */
-
-
 
 // ============================================
 // 用戶相關類型
@@ -35,22 +31,6 @@ export interface AuthResult {
 // 情緒記錄相關類型
 // ============================================
 
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  perPage: number;
-  hasMore: boolean;
-}
-
-export interface ListOptions {
-  page?: number;
-  perPage?: number;
-  orderBy?: string;
-  order?: 'asc' | 'desc';
-  filters?: Record<string, unknown>;
-}
-
 export interface ImportResult {
   success: boolean;
   imported: number;
@@ -76,30 +56,6 @@ export interface StreakInfo {
   checkinCount: number;
   weeklyCount: number;
   monthlyCount: number;
-}
-
-// ============================================
-// 同步相關
-// ============================================
-
-export interface SyncChange {
-  id: string;
-  table: string;
-  operation: 'create' | 'update' | 'delete';
-  data: unknown;
-  timestamp: string;
-}
-
-export interface SyncStatus {
-  lastSyncAt: string | null;
-  pendingChanges: number;
-  isOnline: boolean;
-}
-
-export interface SyncResult {
-  success: boolean;
-  conflicts: SyncChange[];
-  syncedAt: string;
 }
 
 // ============================================

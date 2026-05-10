@@ -270,12 +270,6 @@ export async function decryptData(ciphertext: string): Promise<string | null> {
     const decoder = new TextDecoder();
     const result = decoder.decode(decrypted);
 
-    // 🔄 透明遷移：v1 數據解密成功後，標記為需要重新加密
-    // 注意：重新加密由 LocalStorageStore 在下次寫入時自動完成
-    if (payload.v === 'v1') {
-      _markForReEncryption(ciphertext);
-    }
-
     return result;
   } catch (error) {
     console.warn('[crypto] 解密失敗:', error);
@@ -294,21 +288,6 @@ export function isEncrypted(value: string): boolean {
   } catch {
     return false;
   }
-}
-
-// ============================================
-// v1 → v2 透明遷移
-// ============================================
-
-/**
- * 標記 v1 加密數據需要重新加密
- *
- * 由 decryptData 內部調用。外部讀取 v1 數據後，
- * 在下次寫入時會自動以 v2 格式重新加密。
- */
-function _markForReEncryption(_ciphertext: string): void {
-  // 標記已被讀取，下次 store.set() 時會自動用 v2 加密
-  // 無需額外操作，因為 encryptData() 始終使用 v2 格式
 }
 
 /**

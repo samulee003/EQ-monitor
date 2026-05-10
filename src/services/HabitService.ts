@@ -5,7 +5,7 @@
  * 連續天數計算使用 statisticsUtils 的統一算法。
  */
 
-import { storageService } from './StorageService';
+import { storageService } from '../adapters';
 import { type UserProgress } from '../types/HabitTypes';
 import { ACHIEVEMENTS } from '../types/AchievementTypes';
 import { type RulerLogEntry } from '../types/RulerTypes';

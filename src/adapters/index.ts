@@ -1,16 +1,39 @@
 /**
  * 數據適配器統一導出
- * 
+ *
  * 使用方式:
  * ```ts
  * import { dataAdapter } from '@/adapters';
- * const logs = await dataAdapter.logs.list();
+ * const logs = await dataAdapter.logs.export();
  * ```
  */
 
-export type { IDataAdapter } from './IDataAdapter';
-export { LocalStorageAdapter, localStorageAdapter } from './LocalStorageAdapter';
-export { settingsStore } from './settingsStore';
+// 統一存儲模組
+export {
+  dataAdapter,
+  settingsStore,
+  storageService,
+  // 核心操作（可直接使用，無需通過 dataAdapter）
+  auth,
+  logs,
+  draft,
+  profile,
+  achievements,
+  streak,
+  settings,
+  initialize,
+  isAvailable,
+  clearLogsCache,
+  // 設置快捷方法
+  getLanguage, setLanguage,
+  getTheme, setTheme,
+  getNotificationSettings, setNotificationSettings,
+  hasPrivacyPin, setPrivacyPin, verifyPrivacyPin, removePrivacyPin,
+  isPrivacyEnabled, setPrivacyEnabled,
+  isOnboardingCompleted, setOnboardingCompleted,
+  getUserRole, setUserRole,
+} from './storage';
+
 export * from './types';
 
 // Bot 後端同步服務（獨立於數據適配器，但通過統一入口暴露便於發現）
@@ -22,8 +45,3 @@ export {
   type BotSyncError,
   type BotSyncResult,
 } from '../services/BotSyncService';
-
-// 全局默認適配器實例
-// 未來切換至 Supabase 時，只需更改此行
-import { localStorageAdapter } from './LocalStorageAdapter';
-export const dataAdapter = localStorageAdapter;
