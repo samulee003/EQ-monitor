@@ -1,3 +1,4 @@
+import { logger } from './utils/logger';
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
@@ -12,13 +13,13 @@ const updateSW = registerSW({
         }
     },
     onOfflineReady() {
-        console.log('🌿 今心 APP 已準備好離線使用！')
+        logger.info('今心 APP 已準備好離線使用！')
     },
     onRegistered(registration) {
-        console.log('🎉 Service Worker 註冊成功:', registration)
+        logger.info('Service Worker 註冊成功', { scope: registration?.scope })
     },
     onRegisterError(error) {
-        console.error('❌ Service Worker 註冊失敗:', error)
+        logger.error('Service Worker 註冊失敗', { error: String(error) })
     }
 })
 

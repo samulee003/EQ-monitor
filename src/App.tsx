@@ -1,17 +1,13 @@
-import { useState, Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import MainLayout from './components/MainLayout';
-import CheckInFlow from './components/CheckInFlow';
-import ParentHome from './components/ParentHome';
 import SplashScreen from './components/SplashScreen';
 import PrivacyLock from './components/PrivacyLock';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import SkipLink from './components/SkipLink';
 import A11yAnnouncer from './components/A11yAnnouncer';
-import { LanguageProvider } from './services/LanguageContext';
-import { HabitProvider } from './services/HabitContext';
-import { ThemeProvider } from './services/ThemeContext';
-import { AuthProvider } from './services/AuthContext';
+import CombinedProviders from './components/CombinedProviders';
+import { useAppStore } from './stores/appStore';
 import { useFocusVisible } from './hooks/useA11y';
 import './index.css';
 
@@ -19,66 +15,55 @@ import './index.css';
 const Timeline = lazy(() => import('./components/Timeline'));
 const GrowthDashboard = lazy(() => import('./components/GrowthDashboard'));
 const AchievementPage = lazy(() => import('./components/AchievementPage'));
+const CheckInFlow = lazy(() => import('./components/CheckInFlow'));
+const ParentHome = lazy(() => import('./components/ParentHome'));
 
 // 內部組件，可以使用 hooks
 function AppContent() {
   // 啟用焦點可見性管理
   useFocusVisible();
-  
-  const [view, setView] = useState<'home' | 'checkin' | 'history' | 'growth' | 'achievement'>('home');
-  const [showSplash, setShowSplash] = useState(true);
-  const [isLocked, setIsLocked] = useState(() => {
-    const hasPin = !!localStorage.getItem('imxin_privacy_pin');
-    const isEnabled = localStorage.getItem('imxin_privacy_enabled') === 'true';
-    return hasPin && isEnabled;
-  });
+
+  const {
+    currentView,
+    setView,
+    showSplash,
+    dismissSplash,
+    isLocked,
+    unlock,
+  } = useAppStore();
 
   if (showSplash) {
     return (
-      <AuthProvider>
-        <LanguageProvider>
-          <HabitProvider>
-            <SplashScreen onComplete={() => setShowSplash(false)} />
-          </HabitProvider>
-        </LanguageProvider>
-      </AuthProvider>
+      <CombinedProviders>
+        <SplashScreen onComplete={dismissSplash} />
+      </CombinedProviders>
     );
   }
 
   if (isLocked) {
     return (
-      <AuthProvider>
-        <LanguageProvider>
-          <HabitProvider>
-            <PrivacyLock onUnlock={() => setIsLocked(false)} />
-          </HabitProvider>
-        </LanguageProvider>
-      </AuthProvider>
+      <CombinedProviders>
+        <PrivacyLock onUnlock={unlock} />
+      </CombinedProviders>
     );
   }
 
   return (
     <>
       <SkipLink />
-      <AuthProvider>
-      <ThemeProvider>
-        <LanguageProvider>
-          <HabitProvider>
-            <ErrorBoundary>
-              <MainLayout currentView={view} onNavigate={(v) => setView(v)}>
-                <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
-                  {view === 'home' && <ParentHome />}
-                  {view === 'checkin' && <CheckInFlow />}
-                  {view === 'history' && <Timeline />}
-                  {view === 'growth' && <GrowthDashboard />}
-                  {view === 'achievement' && <AchievementPage />}
-                </Suspense>
-              </MainLayout>
-            </ErrorBoundary>
-          </HabitProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-      </AuthProvider>
+      <CombinedProviders>
+        <ErrorBoundary>
+          <MainLayout currentView={currentView} onNavigate={setView}>
+            <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
+              {currentView === 'home' && <ParentHome />}
+              {currentView === 'checkin' && <CheckInFlow />}
+              {currentView === 'history' && <Timeline />}
+              {currentView === 'growth' && <GrowthDashboard />}
+              {currentView === 'achievement' && <AchievementPage />}
+            </Suspense>
+          </MainLayout>
+        </ErrorBoundary>
+      </CombinedProviders>
       <A11yAnnouncer />
     </>
   );
