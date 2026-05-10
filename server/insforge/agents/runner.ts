@@ -3,7 +3,7 @@ import { createUserContent } from 'npm:@google/genai';
 import { createEmotionCoachAgent } from './emotionCoach.ts';
 
 const APP_NAME = 'imxin_emotion_coach';
-const MODEL_NAME = 'google-3.1 flash lite';
+const MODEL_NAME = 'gemini-3.1-flash-lite';
 
 export interface CoachRunResult {
   response: string;
