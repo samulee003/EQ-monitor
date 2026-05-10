@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BreathingAnimation } from './BreathingAnimation';
 
 interface Props {
@@ -39,22 +39,43 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [bestSelf, setBestSelf] = useState('');
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleNext = () => {
     if (step < STEPS.length - 1) setStep(step + 1);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+    <div
+      className="fixed inset-0 z-50 bg-white flex flex-col"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="meta-moment-title"
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+    >
       <div className="flex items-center justify-between px-4 py-3 border-b">
-        <h2 className="text-lg font-bold text-red-600">
+        <h2 id="meta-moment-title" className="text-lg font-bold text-red-600">
           🆘 Meta-Moment 緊急協助
         </h2>
-        <button onClick={onClose} className="text-gray-500 text-2xl">
+        <button
+          onClick={onClose}
+          aria-label="關閉"
+          className="text-gray-500 text-2xl px-2"
+        >
           ×
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center overflow-y-auto">
         <div className="mb-2 text-sm text-gray-400">{STEPS[step].title}</div>
         <p className="text-lg text-gray-800 mb-8 max-w-md">
           {STEPS[step].content}
@@ -69,6 +90,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
             onChange={(e) => setBestSelf(e.target.value)}
             placeholder="例如：冷靜、有耐心"
             className="w-full max-w-xs border rounded-lg px-4 py-2 text-center"
+            aria-label="描述你最好的自己"
           />
         )}
 
