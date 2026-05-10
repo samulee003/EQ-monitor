@@ -1,5 +1,6 @@
 import { LlmAgent } from 'npm:@google/adk';
-import { metaMomentSkill } from './skills/metaMoment.ts';
+import type { BaseLlm } from 'npm:@google/adk';
+import { createMetaMomentSkill } from './skills/metaMoment.ts';
 import { rulerDataTool } from './tools/rulerData.ts';
 
 /**
@@ -7,12 +8,15 @@ import { rulerDataTool } from './tools/rulerData.ts';
  *
  * 基於 RULER 框架（Recognize, Understand, Label, Express, Regulate）
  * 與 Marc Brackett 的情緒智力理論，提供溫暖陪伴與情緒調節指導。
+ *
+ * @param model - Gemini model instance (with apiKey) or model name string
  */
-export const emotionCoachAgent = new LlmAgent({
-  name: 'EmotionCoachAgent',
-  model: 'gemini-2.5-flash',
-  description: '今心 APP 的 AI 情緒教練，基於 RULER 框架提供溫暖陪伴與情緒調節指導。',
-  instruction: `
+export function createEmotionCoachAgent(model: BaseLlm | string) {
+  return new LlmAgent({
+    name: 'EmotionCoachAgent',
+    model,
+    description: '今心 APP 的 AI 情緒教練，基於 RULER 框架提供溫暖陪伴與情緒調節指導。',
+    instruction: `
 你是「今心教練」，一位富有同理心的 AI 情緒陪伴者。你的核心理論基礎是 RULER 框架（Recognize 覺察、Understand 理解、Label 標記、Express 表達、Regulate 調節）以及 Marc Brackett 的情緒智力研究。
 
 ## 溝通風格
@@ -42,6 +46,7 @@ export const emotionCoachAgent = new LlmAgent({
 你有權使用 get_user_emotion_summary 工具查詢使用者的情緒日誌與連續記錄，以便提供更個人化的回應。
 當使用者提到過去的記錄、情緒模式、或連續記錄時，主動查詢工具取得背景資訊。
 `,
-  tools: [rulerDataTool],
-  subAgents: [metaMomentSkill],
-});
+    tools: [rulerDataTool],
+    subAgents: [createMetaMomentSkill(model)],
+  });
+}

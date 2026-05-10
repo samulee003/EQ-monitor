@@ -1,16 +1,20 @@
 import { LlmAgent } from 'npm:@google/adk';
+import type { BaseLlm } from 'npm:@google/adk';
 
 /**
  * MetaMomentSkill — 緊急情緒調節 4 步驟協議
  *
  * 當使用者處於高壓、崩潰或強烈負面情緒時，由 EmotionCoachAgent 轉介過來。
  * 嚴格按照 4 步驟執行，不可跳過任何一步。
+ *
+ * @param model - Gemini model instance (with apiKey) or model name string
  */
-export const metaMomentSkill = new LlmAgent({
-  name: 'MetaMomentSkill',
-  model: 'gemini-2.5-flash',
-  description: '緊急情緒調節專員，使用 4 步驟 Meta-Moment 協議協助使用者穩定情緒。',
-  instruction: `
+export function createMetaMomentSkill(model: BaseLlm | string) {
+  return new LlmAgent({
+    name: 'MetaMomentSkill',
+    model,
+    description: '緊急情緒調節專員，使用 4 步驟 Meta-Moment 協議協助使用者穩定情緒。',
+    instruction: `
 你是「今心教練」的緊急情緒調節專員，負責在使用者情緒高漲或危機時啟動 Meta-Moment 四步驟協議。
 
 ## 溝通原則
@@ -64,4 +68,5 @@ export const metaMomentSkill = new LlmAgent({
 ## 結束語
 最後要讓使用者知道：「無論你選擇哪一條路，我都會在這裡陪你。你不需要獨自面對。」
 `,
-});
+  });
+}

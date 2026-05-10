@@ -1,13 +1,25 @@
-import { InMemoryRunner, isFinalResponse } from 'npm:@google/adk';
+import { InMemoryRunner, Gemini, isFinalResponse } from 'npm:@google/adk';
 import { createUserContent } from 'npm:@google/genai';
-import { emotionCoachAgent } from './emotionCoach.ts';
+import { createEmotionCoachAgent } from './emotionCoach.ts';
 
 const APP_NAME = 'imxin_emotion_coach';
+const MODEL_NAME = 'google-3.1 flash lite';
 
 export interface CoachRunResult {
   response: string;
   skillInvoked?: string;
   step?: number;
+}
+
+function getGeminiModel() {
+  const apiKey = Deno.env.get('GOOGLE_API_KEY');
+  if (!apiKey) {
+    console.warn('GOOGLE_API_KEY not set — agent will fail at runtime');
+  }
+  return new Gemini({
+    model: MODEL_NAME,
+    apiKey: apiKey ?? '',
+  });
 }
 
 /**
@@ -22,6 +34,9 @@ export async function runCoach(
   userId: string,
   sessionId: string
 ): Promise<CoachRunResult> {
+  const model = getGeminiModel();
+  const emotionCoachAgent = createEmotionCoachAgent(model);
+
   const runner = new InMemoryRunner({
     agent: emotionCoachAgent,
     appName: APP_NAME,
