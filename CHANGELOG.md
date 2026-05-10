@@ -4,6 +4,92 @@
 
 ---
 
+## [4.0.0] - 2026-05-11 — Agentic AI 情緒教練
+
+### 🎯 重大變更
+
+- **Agentic AI 轉型**：從「被動打卡工具」升級為「主動 AI 情緒教練」，導入 Google ADK JS v1.0.0（後採用 REST API fallback）。
+- **雙軌對話架構**：APP 內對話介面 + 已部署 Edge Function API，未來可擴展至 LINE Bot。
+- **Meta-Moment 緊急協助**：基於 Marc Brackett《Dealing with Feeling》的 4 步驟 SOS 流程（感知 → 暫停 → 看見最好自己 → 策略行動）。
+
+### ✨ 新增功能
+
+- **🧠 AI 情緒教練對話**
+  - 獨立 `/coach` 頁面，全螢幕聊天介面
+  - 基於 RULER 框架的系統提示（Recognize / Understand / Label / Express / Regulate）
+  - 讀取使用者歷史情緒日誌，提供個人化回應
+  - 模型：`gemini-3.1-flash-lite`
+- **🆘 Meta-Moment SOS 緊急協助**
+  - 紅色浮動 SOS 按鈕
+  - 4 步驟引導覆蓋層：身體掃描 → 4-7-8 呼吸動畫 → 最佳自我輸入 → 策略選擇
+  - 呼吸動畫：圓形縮放 + 即時倒數計時
+- **💬 對話體驗優化**
+  - 打字指示器（「教練正在思考...」）
+  - 歡迎卡片（首次使用引導 + 建議提示）
+  - 錯誤處理 + 重試按鈕（網路 / API / 超時）
+  - LocalStorage 聊天歷史持久化
+  - 浮動 FAB 快速入口（CoachFAB）
+- **♿ Accessibility**
+  - ARIA 標籤（SOS、輸入框、送出按鈕）
+  - 呼吸動畫 `aria-live` 播報
+  - MetaMoment 覆蓋層 `role="dialog"` + Escape 鍵關閉
+  - 全鍵盤可操作
+
+### 🔧 技術棧擴展
+
+| 層級 | 新增技術 |
+|------|----------|
+| AI Agent | Google Gemini REST API (`gemini-3.1-flash-lite`) |
+| Edge Function | InsForge Functions (Deno runtime) |
+| 前端狀態 | LocalStorage 持久化 |
+| 測試 | 新增 24 個 component tests |
+
+### 📁 新增檔案
+
+```
+src/pages/CoachPage.tsx                  # 教練主頁面
+src/components/coach/
+  ├── ChatBubble.tsx + .test.tsx         # 訊息氣泡
+  ├── ChatInput.tsx + .test.tsx          # 輸入 + SOS 按鈕
+  ├── MetaMomentOverlay.tsx              # 4 步驟 SOS 覆蓋層
+  ├── BreathingAnimation.tsx             # 呼吸動畫
+  ├── TypingIndicator.tsx + .test.tsx    # 打字指示器
+  ├── WelcomeCard.tsx + .test.tsx        # 歡迎卡片
+  └── CoachFAB.tsx                       # 浮動快速入口
+src/lib/adk/
+  ├── client.ts                          # API client
+  ├── types.ts                           # TypeScript 型別
+  └── storage.ts                         # LocalStorage 助手
+server/insforge/functions/coach-simple.ts # 已部署 Edge Function
+server/insforge/agents/
+  ├── emotionCoach.ts                    # 主 Agent 定義
+  ├── runner.ts                          # InMemoryRunner 包裝
+  ├── skills/metaMoment.ts               # MetaMoment Skill
+  └── tools/rulerData.ts                 # DB 查詢 Tool
+```
+
+### 🧪 測試
+
+- 新增 **24** 個 component tests（ChatBubble、ChatInput、TypingIndicator、WelcomeCard、CoachPage）
+- 總測試數：**265 / 265 通過**（20 test files）
+- Build：✅ 成功
+- TypeScript：✅ 零錯誤
+
+### 🚀 部署狀態
+
+| 服務 | URL | 狀態 |
+|------|-----|------|
+| Edge Function API | `https://b88egxiz.functions.insforge.app/coach` | ✅ 已部署 |
+| 前端 PWA | `https://<your-domain>/#coach` | ✅ 就緒 |
+
+### ⚠️ 已知限制
+
+- ADK JS 無法在 InsForge Deno runtime 部署（bundler 不支援本地相對匯入），已改用純 REST API 實現
+- `InMemoryRunner` session 不持久（Edge Function 無狀態），未來需遷移至持久 session store
+- E2E 測試框架（Playwright / Cypress）尚未建立
+
+---
+
 ## [3.0.0] - 2026-04-21 — Bot-First 架構重構
 
 ### 🎯 重大變更
