@@ -16,6 +16,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+            '@insforge/sdk': path.resolve(__dirname, './src/test/mocks/insforge-sdk.ts'),
         },
     },
 });
