@@ -98,13 +98,25 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React 核心庫
-          'react-vendor': ['react', 'react-dom'],
-          // OpenCC 體積較大，單獨打包
-          'i18n': ['opencc-js'],
-          // 情緒數據量大，按需加載
-          'emotion-data': ['./src/data/emotionData'],
+        manualChunks(id) {
+          // npm 套件分割
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) return 'react-vendor';
+            if (id.includes('opencc-js')) return 'i18n';
+            return 'vendor';
+          }
+          // 重型組件獨立分割
+          if (id.includes('/src/components/Timeline')) return 'ui-timeline';
+          if (id.includes('/src/components/GrowthDashboard')) return 'ui-dashboard';
+          if (id.includes('/src/components/AchievementPage')) return 'ui-achievement';
+          if (id.includes('/src/components/CheckInFlow')) return 'ui-checkin';
+          if (id.includes('/src/components/ParentHome') || id.includes('/src/components/ParentScenarios')) return 'ui-parent';
+          if (id.includes('/src/components/RegulatingStep') || id.includes('/src/components/ExpressingStep') || id.includes('/src/components/UnderstandingStep')) return 'ui-steps';
+          if (id.includes('/src/components/BodyScan') || id.includes('/src/components/MoodMeter') || id.includes('/src/components/EmotionGrid')) return 'ui-emotion';
+          if (id.includes('/src/components/ExportPanel') || id.includes('/src/components/NotificationSettings') || id.includes('/src/components/UserProfile')) return 'ui-settings';
+          if (id.includes('/src/components/AIChatAssistant') || id.includes('/src/components/AIInsightCard')) return 'ui-ai';
+          if (id.includes('/src/services/AIService') || id.includes('/src/services/StorageService') || id.includes('/src/services/HabitService')) return 'services-core';
+          if (id.includes('/src/data/emotionData')) return 'emotion-data';
         },
         // 優化 chunk 文件命名
         entryFileNames: 'assets/[name]-[hash].js',
@@ -122,7 +134,7 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
     // 啟用源碼映射（生產環境可關閉）
     sourcemap: mode === 'development',
   },
