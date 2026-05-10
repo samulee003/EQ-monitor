@@ -1,0 +1,40 @@
+name: Bot CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['server/**']
+  pull_request:
+    branches: [main]
+    paths: ['server/**']
+
+jobs:
+  bot-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Run lint
+        working-directory: ./server
+        run: npm run lint
+
+      - name: Build
+        working-directory: ./server
+        run: npm run build
+
+      - name: Run tests
+        working-directory: ./server
+        run: npm run test:run

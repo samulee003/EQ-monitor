@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════════
+# 今心 ImXin Bot Server — Render.com Blueprint
+# 
+# ⚠️ 注意：Render Blueprint 需放在倉庫根目錄才能自動檢測。
+#    若要使用，請將此文件複製到項目根目錄，或通過 Dashboard
+#    手動指定 Blueprint 路徑。
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  - type: web
+    name: imxin-bot-server
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # 🔐 敏感變量：首次部署時在 Dashboard 手動填入
+      - key: LINE_CHANNEL_ACCESS_TOKEN
+        sync: false
+      - key: LINE_CHANNEL_SECRET
+        sync: false
