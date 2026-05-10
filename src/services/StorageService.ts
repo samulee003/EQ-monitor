@@ -1,170 +1,114 @@
-import { RulerLogEntry, RulerDraft } from '../types/RulerTypes';
-import { UserProgress } from '../types/HabitTypes';
+import { logger } from '../utils/logger';
+/**
+ * StorageService - 數據存儲服務
+ * 
+ * 此服務現為 IDataAdapter 的輕量門面，所有實際存儲操作委派給適配器。
+ * 未來遷移至後端時，無需修改此文件——只需在適配器層切換實現。
+ */
 
-export interface ImportResult {
-    success: boolean;
-    imported: number;
-    skipped: number;
-    message: string;
-}
+import { dataAdapter } from '../adapters';
+import { type ImportResult } from '../adapters/types';
+import { type RulerLogEntry, type RulerDraft } from '../types/RulerTypes';
+import { type UserProgress } from '../types/HabitTypes';
+
+// 向後兼容的導出接口
+export type { ImportResult } from '../adapters/types';
 
 class StorageService {
-    private userId: string | null = null;
+  /**
+   * Set current user ID for data isolation
+   * @deprecated 適配器自動管理用戶 ID，此方法保留向後兼容
+   */
+  setUserId(_userId: string | null): void {
+    // LocalStorageAdapter 已自動從 CURRENT_USER 讀取用戶 ID
+    // 未來如需手動切換用戶，可在此擴展
+  }
 
-    /**
-     * Set current user ID for data isolation
-     */
-    setUserId(userId: string | null): void {
-        this.userId = userId;
+  // ---------- 進度 ----------
+
+  /**
+   * Save user progress (streak, achievements)
+   */
+  async saveProgress(progress: UserProgress): Promise<void> {
+    await dataAdapter.profile.saveProgress(progress);
+  }
+
+  /**
+   * Get user progress
+   */
+  async getProgress(): Promise<UserProgress | null> {
+    return await dataAdapter.profile.getProgress();
+  }
+
+  // ---------- 日誌 ----------
+
+  /**
+   * Save a completed check-in flow entry
+   */
+  async saveLog(entry: Omit<RulerLogEntry, 'id'> & { id?: string }): Promise<void> {
+    await dataAdapter.logs.create(entry);
+  }
+
+  /**
+   * Retrieve all historical logs
+   */
+  async getLogs(): Promise<RulerLogEntry[]> {
+    const result = await dataAdapter.logs.export();
+    return result;
+  }
+
+  /**
+   * Import logs from JSON data
+   * Validates data structure and merges with existing logs (skipping duplicates by timestamp)
+   */
+  async importLogs(jsonData: string): Promise<ImportResult> {
+    try {
+      const parsed = JSON.parse(jsonData);
+
+      if (!Array.isArray(parsed)) {
+        return {
+          success: false,
+          imported: 0,
+          skipped: 0,
+          message: '檔案格式錯誤：需要是陣列格式',
+        };
+      }
+
+      return await dataAdapter.logs.import(parsed as RulerLogEntry[]);
+    } catch (e) {
+      logger.error('[StorageService] Import failed', { error: String(e) });
+      return {
+        success: false,
+        imported: 0,
+        skipped: 0,
+        message: '檔案解析失敗，請確認是有效的 JSON 格式',
+      };
     }
+  }
 
-    /**
-     * Get storage key with user prefix
-     */
-    private getKey(baseKey: string): string {
-        if (this.userId) {
-            return `${baseKey}_${this.userId}`;
-        }
-        return baseKey;
-    }
+  // ---------- 草稿 ----------
 
-    private readonly KEYS = {
-        LOGS: 'feelings_logs',
-        DRAFT: 'ruler_draft',
-        PROGRESS: 'user_progress'
-    };
+  /**
+   * Save a draft of the current flow
+   */
+  async saveDraft(draft: RulerDraft): Promise<void> {
+    await dataAdapter.draft.save(draft);
+  }
 
-    /**
-     * Save user progress (streak, achievements)
-     */
-    saveProgress(progress: UserProgress): void {
-        localStorage.setItem(this.getKey(this.KEYS.PROGRESS), JSON.stringify(progress));
-    }
+  /**
+   * Retrieve the current draft if it exists
+   */
+  async getDraft(): Promise<RulerDraft | null> {
+    return await dataAdapter.draft.get();
+  }
 
-    /**
-     * Get user progress
-     */
-    getProgress(): UserProgress | null {
-        const stored = localStorage.getItem(this.getKey(this.KEYS.PROGRESS));
-        return stored ? JSON.parse(stored) : null;
-    }
-
-
-    /**
-     * Save a completed check-in flow entry
-     */
-    saveLog(entry: RulerLogEntry): void {
-        const logs = this.getLogs();
-        const newLogs = [entry, ...logs];
-        localStorage.setItem(this.getKey(this.KEYS.LOGS), JSON.stringify(newLogs));
-    }
-
-    /**
-     * Retrieve all historical logs
-     */
-    getLogs(): RulerLogEntry[] {
-        const stored = localStorage.getItem(this.getKey(this.KEYS.LOGS));
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    /**
-     * Import logs from JSON data
-     * Validates data structure and merges with existing logs (skipping duplicates by timestamp)
-     */
-    importLogs(jsonData: string): ImportResult {
-        try {
-            const parsed = JSON.parse(jsonData);
-
-            // Validate that it's an array
-            if (!Array.isArray(parsed)) {
-                return {
-                    success: false,
-                    imported: 0,
-                    skipped: 0,
-                    message: '檔案格式錯誤：需要是陣列格式'
-                };
-            }
-
-            // Validate each entry has required fields
-            const validEntries: RulerLogEntry[] = [];
-            for (const entry of parsed) {
-                if (entry.timestamp && entry.emotion && typeof entry.emotion === 'object') {
-                    validEntries.push(entry);
-                }
-            }
-
-            if (validEntries.length === 0) {
-                return {
-                    success: true,
-                    imported: 0,
-                    skipped: parsed.length,
-                    message: '沒有找到有效的記錄'
-                };
-            }
-
-            // Get existing logs and their timestamps
-            const existingLogs = this.getLogs();
-            const existingTimestamps = new Set(existingLogs.map(log => log.timestamp));
-
-            // Filter out duplicates
-            const newEntries = validEntries.filter(entry => !existingTimestamps.has(entry.timestamp));
-            const skippedCount = validEntries.length - newEntries.length;
-
-            if (newEntries.length === 0) {
-                return {
-                    success: true,
-                    imported: 0,
-                    skipped: skippedCount,
-                    message: `所有 ${skippedCount} 筆記錄已存在，無需匯入`
-                };
-            }
-
-            // Merge and sort by timestamp (newest first)
-            const mergedLogs = [...newEntries, ...existingLogs].sort((a, b) =>
-                new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            );
-
-            localStorage.setItem(this.getKey(this.KEYS.LOGS), JSON.stringify(mergedLogs));
-
-            return {
-                success: true,
-                imported: newEntries.length,
-                skipped: skippedCount,
-                message: `成功匯入 ${newEntries.length} 筆記錄${skippedCount > 0 ? `，跳過 ${skippedCount} 筆重複記錄` : ''}`
-            };
-        } catch (e) {
-            console.error('Import failed:', e);
-            return {
-                success: false,
-                imported: 0,
-                skipped: 0,
-                message: '檔案解析失敗，請確認是有效的 JSON 格式'
-            };
-        }
-    }
-
-    /**
-     * Save a draft of the current flow
-     */
-    saveDraft(draft: RulerDraft): void {
-        localStorage.setItem(this.getKey(this.KEYS.DRAFT), JSON.stringify(draft));
-    }
-
-    /**
-     * Retrieve the current draft if it exists
-     */
-    getDraft(): RulerDraft | null {
-        const stored = localStorage.getItem(this.KEYS.DRAFT);
-        return stored ? JSON.parse(stored) : null;
-    }
-
-    /**
-     * Clear the current draft
-     */
-    clearDraft(): void {
-        localStorage.removeItem(this.getKey(this.KEYS.DRAFT));
-    }
+  /**
+   * Clear the current draft
+   */
+  async clearDraft(): Promise<void> {
+    await dataAdapter.draft.clear();
+  }
 }
 
+// 單例導出
 export const storageService = new StorageService();
-

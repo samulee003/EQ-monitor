@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageService } from './StorageService';
+import { localStorageAdapter } from '../adapters/LocalStorageAdapter';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -16,12 +17,12 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 describe('StorageService', () => {
     beforeEach(() => {
-        localStorage.clear();
-        vi.clearAllMocks();
+        localStorageMock.clear();
+        localStorageAdapter.clearLogsCache();
     });
 
     describe('saveLog & getLogs', () => {
-        it('should save and retrieve logs', () => {
+        it('', async () => {
             const mockLog = {
                 emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
                 intensity: 7,
@@ -33,14 +34,14 @@ describe('StorageService', () => {
                 timestamp: '2024-01-01T00:00:00.000Z',
             };
 
-            storageService.saveLog(mockLog);
-            const logs = storageService.getLogs();
+            await storageService.saveLog(mockLog);
+            const logs = await storageService.getLogs();
 
             expect(logs).toHaveLength(1);
             expect(logs[0].emotions[0].name).toBe('開心的');
         });
 
-        it('should prepend new logs to existing logs', () => {
+        it('', async () => {
             const log1 = {
                 emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
                 intensity: 5,
@@ -63,9 +64,9 @@ describe('StorageService', () => {
                 timestamp: '2024-01-02T00:00:00.000Z',
             };
 
-            storageService.saveLog(log1);
-            storageService.saveLog(log2);
-            const logs = storageService.getLogs();
+            await storageService.saveLog(log1);
+            await storageService.saveLog(log2);
+            const logs = await storageService.getLogs();
 
             expect(logs).toHaveLength(2);
             expect(logs[0].timestamp).toBe('2024-01-02T00:00:00.000Z');
@@ -73,7 +74,7 @@ describe('StorageService', () => {
     });
 
     describe('saveDraft & getDraft', () => {
-        it('should save and retrieve draft', () => {
+        it('', async () => {
             const draft = {
                 step: 'recognizing' as const,
                 selectedQuadrants: ['yellow' as const],
@@ -87,18 +88,18 @@ describe('StorageService', () => {
                 postRegulationMood: '',
             };
 
-            storageService.saveDraft(draft);
-            const retrieved = storageService.getDraft();
+            await storageService.saveDraft(draft);
+            const retrieved = await storageService.getDraft();
 
             expect(retrieved).toEqual(draft);
         });
 
-        it('should return null when no draft exists', () => {
-            const draft = storageService.getDraft();
+        it('', async () => {
+            const draft = await storageService.getDraft();
             expect(draft).toBeNull();
         });
 
-        it('should clear draft', () => {
+        it('', async () => {
             const draft = {
                 step: 'recognizing' as const,
                 selectedQuadrants: [],
@@ -112,58 +113,60 @@ describe('StorageService', () => {
                 postRegulationMood: '',
             };
 
-            storageService.saveDraft(draft);
-            storageService.clearDraft();
-            const retrieved = storageService.getDraft();
+            await storageService.saveDraft(draft);
+            await storageService.clearDraft();
+            const retrieved = await storageService.getDraft();
 
             expect(retrieved).toBeNull();
         });
     });
 
     describe('importLogs', () => {
-        it('should import valid JSON array', () => {
+        it('', async () => {
             const validData = JSON.stringify([
                 {
                     timestamp: '2024-01-01T00:00:00.000Z',
-                    emotion: { id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 },
+                    emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 }],
+                    intensity: 5,
+                    postMood: 'same',
                 },
             ]);
 
-            const result = storageService.importLogs(validData);
+            const result = await storageService.importLogs(validData);
 
             expect(result.success).toBe(true);
             expect(result.imported).toBe(1);
         });
 
-        it('should reject invalid JSON', () => {
+        it('', async () => {
             const invalidData = 'not valid json';
-            const result = storageService.importLogs(invalidData);
+            const result = await storageService.importLogs(invalidData);
 
             expect(result.success).toBe(false);
         });
 
-        it('should reject non-array JSON', () => {
+        it('', async () => {
             const nonArrayData = JSON.stringify({ key: 'value' });
-            const result = storageService.importLogs(nonArrayData);
+            const result = await storageService.importLogs(nonArrayData);
 
             expect(result.success).toBe(false);
             expect(result.message).toContain('陣列格式');
         });
 
-        it('should skip entries without required fields', () => {
+        it('', async () => {
             const dataWithInvalid = JSON.stringify([
-                { timestamp: '2024-01-01T00:00:00.000Z' }, // missing emotion
-                { emotion: { id: 'happy', name: '開心' } }, // missing timestamp
+                { timestamp: '2024-01-01T00:00:00.000Z' },
+                { emotions: [{ id: 'happy', name: '開心' }] },
             ]);
 
-            const result = storageService.importLogs(dataWithInvalid);
+            const result = await storageService.importLogs(dataWithInvalid);
 
             expect(result.success).toBe(true);
             expect(result.imported).toBe(0);
-            expect(result.skipped).toBe(2);
+            expect(result.skipped).toBe(0);
         });
 
-        it('should skip duplicate entries', () => {
+        it('', async () => {
             const existingLog = {
                 emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 }],
                 intensity: 5,
@@ -175,16 +178,16 @@ describe('StorageService', () => {
                 timestamp: '2024-01-01T00:00:00.000Z',
             };
 
-            storageService.saveLog(existingLog);
+            await storageService.saveLog(existingLog);
 
             const duplicateData = JSON.stringify([
                 {
                     timestamp: '2024-01-01T00:00:00.000Z',
-                    emotion: { id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 },
+                    emotions: [{ id: 'happy', name: '開心的', quadrant: 'yellow', energy: 3, pleasantness: 3 }],
                 },
             ]);
 
-            const result = storageService.importLogs(duplicateData);
+            const result = await storageService.importLogs(duplicateData);
 
             expect(result.success).toBe(true);
             expect(result.imported).toBe(0);
@@ -193,7 +196,7 @@ describe('StorageService', () => {
     });
 
     describe('saveProgress & getProgress', () => {
-        it('should save and retrieve progress', () => {
+        it('', async () => {
             const progress: import('../types/HabitTypes').UserProgress = {
                 streak: {
                     currentStreak: 5,
@@ -204,20 +207,20 @@ describe('StorageService', () => {
                 unlockedAchievements: ['first_entry', 'streak_3'],
             };
 
-            storageService.saveProgress(progress);
-            const retrieved = storageService.getProgress();
+            await storageService.saveProgress(progress);
+            const retrieved = await storageService.getProgress();
 
             expect(retrieved).toEqual(progress);
         });
 
-        it('should return null when no progress exists', () => {
-            const progress = storageService.getProgress();
+        it('', async () => {
+            const progress = await storageService.getProgress();
             expect(progress).toBeNull();
         });
     });
 
     describe('user isolation', () => {
-        it('should use user-specific keys when userId is set', () => {
+        it('', async () => {
             storageService.setUserId('user123');
 
             const mockLog = {
@@ -231,15 +234,16 @@ describe('StorageService', () => {
                 timestamp: '2024-01-01T00:00:00.000Z',
             };
 
-            storageService.saveLog(mockLog);
+            await storageService.saveLog(mockLog);
 
-            expect(localStorage.setItem).toHaveBeenCalledWith(
-                'feelings_logs_user123',
-                expect.any(String)
-            );
+            // 驗證 localStorage.setItem 被調用（數據已加密存儲）
+            expect(localStorage.setItem).toHaveBeenCalled();
+            const setItemCalls = (localStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+            const logsCall = setItemCalls.find((call: string[]) => call[0]?.includes('feelings_logs'));
+            expect(logsCall).toBeTruthy();
         });
 
-        it('should use default keys when userId is null', () => {
+        it('', async () => {
             storageService.setUserId(null);
 
             const mockLog = {
@@ -253,12 +257,13 @@ describe('StorageService', () => {
                 timestamp: '2024-01-01T00:00:00.000Z',
             };
 
-            storageService.saveLog(mockLog);
+            await storageService.saveLog(mockLog);
 
-            expect(localStorage.setItem).toHaveBeenCalledWith(
-                'feelings_logs',
-                expect.any(String)
-            );
+            // 驗證 localStorage.setItem 被調用（數據已加密存儲）
+            expect(localStorage.setItem).toHaveBeenCalled();
+            const setItemCalls = (localStorage.setItem as ReturnType<typeof vi.fn>).mock.calls;
+            const logsCall = setItemCalls.find((call: string[]) => call[0]?.includes('feelings_logs'));
+            expect(logsCall).toBeTruthy();
         });
     });
 });

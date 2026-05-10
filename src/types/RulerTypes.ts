@@ -1,4 +1,4 @@
-import { Emotion, Quadrant } from '../data/emotionData';
+import { type Emotion, type Quadrant } from '../data/emotionData';
 
 export interface BodyScanData {
     location: string;
@@ -65,6 +65,7 @@ export interface RegulatingData {
 }
 
 export interface RulerLogEntry {
+    id: string;
     emotions: Emotion[];
     intensity: number;
     bodyScan: BodyScanData | null;
