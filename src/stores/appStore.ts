@@ -8,7 +8,7 @@
 import { create } from 'zustand';
 import { settingsStore } from '../adapters';
 
-export type AppView = 'home' | 'checkin' | 'history' | 'growth' | 'achievement';
+export type AppView = 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
 
 interface AppState {
   // 視圖路由
@@ -91,7 +91,7 @@ export const useAppStore = create<AppState>((set) => ({
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', () => {
     const hash = location.hash.slice(1) as AppView;
-    if (['home', 'checkin', 'history', 'growth', 'achievement'].includes(hash)) {
+    if (['home', 'checkin', 'history', 'growth', 'achievement', 'coach'].includes(hash)) {
       useAppStore.setState({ currentView: hash });
     }
   });

@@ -17,6 +17,7 @@ const GrowthDashboard = lazy(() => import('./components/GrowthDashboard'));
 const AchievementPage = lazy(() => import('./components/AchievementPage'));
 const CheckInFlow = lazy(() => import('./components/CheckInFlow'));
 const ParentHome = lazy(() => import('./components/ParentHome'));
+const CoachPage = lazy(() => import('./pages/CoachPage'));
 
 // 內部組件，可以使用 hooks
 function AppContent() {
@@ -60,6 +61,7 @@ function AppContent() {
               {currentView === 'history' && <Timeline />}
               {currentView === 'growth' && <GrowthDashboard />}
               {currentView === 'achievement' && <AchievementPage />}
+              {currentView === 'coach' && <CoachPage />}
             </Suspense>
           </MainLayout>
         </ErrorBoundary>
