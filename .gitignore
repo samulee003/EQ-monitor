@@ -27,3 +27,14 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# AI IDE / Tool directories
+.workbuddy/
+.claude/
+.Jules/
+.jules/
+
+# Bot server
+server/node_modules
+server/dist
+server/.env
