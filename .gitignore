@@ -38,3 +38,18 @@ dist-ssr
 server/node_modules
 server/dist
 server/.env
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf

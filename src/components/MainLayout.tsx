@@ -9,8 +9,8 @@ import { settingsStore } from '../adapters';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'home' | 'checkin' | 'history' | 'growth' | 'achievement';
-  onNavigate: (view: 'home' | 'checkin' | 'history' | 'growth' | 'achievement') => void;
+  currentView: 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
+  onNavigate: (view: 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach') => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
