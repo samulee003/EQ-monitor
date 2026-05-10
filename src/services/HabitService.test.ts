@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { habitService } from './HabitService';
-import { storageService } from './StorageService';
+import { storageService } from '../adapters/storage';
 import { type RulerLogEntry } from '../types/RulerTypes';
 
-// Mock StorageService
-vi.mock('./StorageService', () => ({
+// Mock storage
+vi.mock('../adapters/storage', () => ({
     storageService: {
         getProgress: vi.fn(),
         saveProgress: vi.fn(),

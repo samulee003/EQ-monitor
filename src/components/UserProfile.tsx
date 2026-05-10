@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../services/AuthContext';
 import { useLanguage } from '../services/LanguageContext';
-import { storageService } from '../services/StorageService';
+import { storageService } from '../adapters';
 
 interface UserProfileProps {
     onClose: () => void;
