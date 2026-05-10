@@ -12,22 +12,22 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
       case 'card':
         return (
           <div className="skeleton-card">
-            <div className="skeleton-line short" />
-            <div className="skeleton-line" />
-            <div className="skeleton-line medium" />
+            <div className="skeleton-line skeleton-shimmer short" />
+            <div className="skeleton-line skeleton-shimmer" />
+            <div className="skeleton-line skeleton-shimmer medium" />
             <div className="skeleton-tags">
-              <div className="skeleton-tag" />
-              <div className="skeleton-tag" />
+              <div className="skeleton-tag skeleton-shimmer" />
+              <div className="skeleton-tag skeleton-shimmer" />
             </div>
           </div>
         );
       case 'chart':
         return (
           <div className="skeleton-chart">
-            <div className="skeleton-circle" />
+            <div className="skeleton-circle skeleton-shimmer" />
             <div className="skeleton-chart-content">
-              <div className="skeleton-line short" />
-              <div className="skeleton-line" />
+              <div className="skeleton-line skeleton-shimmer short" />
+              <div className="skeleton-line skeleton-shimmer" />
             </div>
           </div>
         );
@@ -35,14 +35,14 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
         return (
           <div className="skeleton-heatmap">
             {Array.from({ length: 30 }).map((_, i) => (
-              <div key={i} className="skeleton-cell" />
+              <div key={i} className="skeleton-cell skeleton-shimmer" />
             ))}
           </div>
         );
       case 'circle':
-        return <div className="skeleton-circle-lg" />;
+        return <div className="skeleton-circle-lg skeleton-shimmer" />;
       default:
-        return <div className="skeleton-line" />;
+        return <div className="skeleton-line skeleton-shimmer" />;
     }
   };
 
@@ -59,12 +59,7 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
           100% { background-position: 200% 0; }
         }
 
-        .skeleton-wrapper {
-          width: 100%;
-        }
-
-        .skeleton-line {
-          height: 14px;
+        .skeleton-shimmer {
           background: linear-gradient(
             90deg,
             var(--glass-border) 25%,
@@ -73,10 +68,17 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
           );
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-wrapper {
+          width: 100%;
+        }
+
+        .skeleton-line {
+          height: 14px;
           border-radius: 4px;
           margin-bottom: 10px;
         }
-
         .skeleton-line.short { width: 40%; }
         .skeleton-line.medium { width: 70%; }
 
@@ -96,14 +98,6 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
         .skeleton-tag {
           width: 60px;
           height: 24px;
-          background: linear-gradient(
-            90deg,
-            var(--glass-border) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
-            var(--glass-border) 75%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
           border-radius: 4px;
         }
 
@@ -121,14 +115,6 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: linear-gradient(
-            90deg,
-            var(--glass-border) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
-            var(--glass-border) 75%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
           flex-shrink: 0;
         }
 
@@ -137,14 +123,6 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
           height: 120px;
           border-radius: 50%;
           margin: 0 auto;
-          background: linear-gradient(
-            90deg,
-            var(--glass-border) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
-            var(--glass-border) 75%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
         }
 
         .skeleton-chart-content {
@@ -159,14 +137,6 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
 
         .skeleton-cell {
           aspect-ratio: 1;
-          background: linear-gradient(
-            90deg,
-            var(--glass-border) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
-            var(--glass-border) 75%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
           border-radius: 3px;
         }
       `}</style>

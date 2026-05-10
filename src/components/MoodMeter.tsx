@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '../services/LanguageContext';
-import { Quadrant } from '../data/emotionData';
+import { type Quadrant } from '../data/emotionData';
 
 interface MoodMeterProps {
   onSelectQuadrants: (qs: Quadrant[]) => void;

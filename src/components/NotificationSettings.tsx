@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { notificationService, NotificationSettings } from '../services/NotificationService';
+import { notificationService, type NotificationSettings } from '../services/NotificationService';
 import { useLanguage } from '../services/LanguageContext';
+import { settingsStore } from '../adapters';
 
 interface NotificationSettingsProps {
     onClose: () => void;
@@ -15,11 +16,11 @@ const NotificationSettingsPanel: React.FC<NotificationSettingsProps> = ({ onClos
     const [isLoading, setIsLoading] = useState(false);
 
     // Privacy Lock state
-    const [privacyEnabled, setPrivacyEnabled] = useState(() => 
-        localStorage.getItem('imxin_privacy_enabled') === 'true'
+    const [privacyEnabled, setPrivacyEnabled] = useState(() =>
+        settingsStore.isPrivacyEnabled()
     );
-    const [hasPin, setHasPin] = useState(() => 
-        !!localStorage.getItem('imxin_privacy_pin')
+    const [hasPin, setHasPin] = useState(() =>
+        settingsStore.hasPrivacyPin()
     );
 
     useEffect(() => {
@@ -60,22 +61,21 @@ const handleTest = () => {
     const handlePrivacyToggle = () => {
         if (!hasPin) {
             // No PIN set, need to set one first - just enable and let PrivacyLock handle setup
-            localStorage.setItem('imxin_privacy_enabled', 'true');
+            settingsStore.setPrivacyEnabled(true);
             setPrivacyEnabled(true);
             // Reload page to trigger PrivacyLock setup flow
             window.location.reload();
         } else {
             // Toggle existing lock
             const newValue = !privacyEnabled;
-            localStorage.setItem('imxin_privacy_enabled', newValue.toString());
+            settingsStore.setPrivacyEnabled(newValue);
             setPrivacyEnabled(newValue);
         }
     };
 
     const handleClearPin = () => {
         if (window.confirm(t('確定要重置密碼嗎？這將會關閉應用鎖。'))) {
-            localStorage.removeItem('imxin_privacy_pin');
-            localStorage.removeItem('imxin_privacy_enabled');
+            settingsStore.removePrivacyPin();
             setHasPin(false);
             setPrivacyEnabled(false);
         }

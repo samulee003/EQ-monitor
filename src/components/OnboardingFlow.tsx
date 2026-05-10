@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../services/LanguageContext';
 import { notificationService } from '../services/NotificationService';
+import { settingsStore } from '../adapters';
 import { uiIcons } from './icons/SvgIcons';
 
 interface OnboardingFlowProps {
@@ -23,7 +24,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     const handleFinish = async () => {
         await notificationService.setEnabled(true);
         notificationService.setReminderTime(reminderHour, 0);
-        localStorage.setItem('imxin_user_role', userRole);
+        settingsStore.setUserRole(userRole);
         onComplete();
     };
 

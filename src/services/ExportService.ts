@@ -1,4 +1,4 @@
-import { RulerLogEntry } from '../types/RulerTypes';
+import { type RulerLogEntry } from '../types/RulerTypes';
 
 /**
  * ExportService - 數據導出服務

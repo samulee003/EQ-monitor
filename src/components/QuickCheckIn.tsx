@@ -1,6 +1,7 @@
+import { logger } from '../utils/logger';
 import React, { useState } from 'react';
 import './QuickCheckIn.css';
-import { ParentingEmotion, Quadrant, quickEmotions, parentScenarioTags } from '../data/parentingEmotionData';
+import { type ParentingEmotion, type Quadrant, quickEmotions, parentScenarioTags } from '../data/parentingEmotionData';
 // import { aiService } from '../services/AIService';
 
 interface QuickCheckInProps {
@@ -71,7 +72,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
             setAiFeedback(feedback);
             setStep('feedback');
         } catch (error) {
-            console.error('AI feedback error:', error);
+            logger.error('[QuickCheckIn] AI feedback error', { error: String(error) });
             setAiFeedback('謝謝你記錄了自己的感受。覺察是改變的第一步。');
             setStep('feedback');
         } finally {

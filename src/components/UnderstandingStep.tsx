@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Emotion, psychologicalNeeds } from '../data/emotionData';
+import { type Emotion, psychologicalNeeds } from '../data/emotionData';
 import { useLanguage } from '../services/LanguageContext';
 import { needsIcons } from './icons/SvgIcons';
-import { UnderstandingData, InteractionCycle } from '../types/RulerTypes';
+import { type UnderstandingData, type InteractionCycle } from '../types/RulerTypes';
+import { settingsStore } from '../adapters';
 
 interface UnderstandingStepProps {
     emotion: Emotion;
@@ -49,7 +50,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
     const [showInteractionCycle, setShowInteractionCycle] = useState(false);
     const [interactionCycle, setInteractionCycle] = useState<InteractionCycle>({ myReaction: '', childReaction: '', reflection: '' });
 
-    const isParentRole = localStorage.getItem('imxin_user_role') === 'parent';
+    const isParentRole = settingsStore.getUserRole() === 'parent';
     const isParentingContext = isParentRole && (what === '育兒' || what === '管教衝突') && who === '孩子';
 
     const defaultOptions = {

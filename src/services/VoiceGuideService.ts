@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * VoiceGuideService - 語音引導服務
  * 
@@ -149,7 +150,7 @@ class VoiceGuideService {
         onComplete?: () => void
     ): Promise<void> {
         if (!this.synthesis) {
-            console.warn('Web Speech API not supported');
+            logger.warn('Web Speech API not supported');
             return;
         }
 
@@ -208,7 +209,7 @@ class VoiceGuideService {
         };
 
         this.utterance.onerror = (event) => {
-            console.error('Speech synthesis error:', event);
+            logger.error('Speech synthesis error', { event });
             this.isPlaying = false;
         };
 

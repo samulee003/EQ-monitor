@@ -1,5 +1,6 @@
+import { logger } from '../utils/logger';
 import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
-import { RulerLogEntry, AIAnalysisData, ChatHistoryEntry } from '../types/RulerTypes';
+import { type RulerLogEntry, type AIAnalysisData, type ChatHistoryEntry } from '../types/RulerTypes';
 
 // PhysicalData 接口定義
 export interface PhysicalData {
@@ -21,6 +22,11 @@ export interface AIInsight {
 }
 
 class AIService {
+    // 環境變量來源說明：
+    // - VITE_API_PROXY_URL: 優先使用的代理端點（推薦，Key 在服務端）
+    // - VITE_ZEABUR_AI_API_URL: Zeabur 直连 API URL
+    // - VITE_ZEABUR_AI_API_KEY: API Key（僅在無代理時使用，絕不硬編碼）
+    private proxyUrl = import.meta.env.VITE_API_PROXY_URL;
     private apiUrl = import.meta.env.VITE_ZEABUR_AI_API_URL;
     private apiKey = import.meta.env.VITE_ZEABUR_AI_API_KEY;
 
@@ -66,19 +72,46 @@ class AIService {
      * Analyzes the check-in data, history, and physical context using LLM.
      */
     async analyzeFeeling(data: AIAnalysisData, history: ChatHistoryEntry[] = [], physical?: PhysicalData): Promise<AIInsight> {
-        console.log("[AIService] Analyzing data with Zeabur AI Hub...");
+        logger.info('[AIService] Analyzing data with Zeabur AI Hub...');
 
+        const userPrompt = this.constructUserPrompt(data, history, physical);
+        const isParentingContext = this.detectParentingContext(data);
+        const systemPrompt = isParentingContext
+            ? RULER_COACH_SYSTEM_PROMPT + '\n' + PARENTING_CONTEXT_ADDON
+            : RULER_COACH_SYSTEM_PROMPT;
+
+        // 優先使用代理端點（Key 在服務端，更安全）
+        if (this.proxyUrl) {
+            try {
+                const response = await fetch(this.proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: userPrompt }
+                        ],
+                        model: "gpt-4o",
+                        temperature: 0.7
+                    })
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    return this.parseAIResponse(result.choices?.[0]?.message?.content);
+                }
+                logger.warn('[AIService] Proxy failed, falling back to direct API');
+            } catch (error) {
+                logger.warn('[AIService] Proxy error, falling back to direct API', { error: String(error) });
+            }
+        }
+
+        // 回退：直接調用（需要環境變量中的 Key）
         if (!this.apiKey || !this.apiUrl) {
-            console.warn("Missing Zeabur AI API Key or URL. Using mock data.");
+            logger.warn('[AIService] Missing API Key or URL, using mock data');
             return this.getMockFallback(data.emotion?.quadrant);
         }
 
         try {
-            const userPrompt = this.constructUserPrompt(data, history, physical);
-            const isParentingContext = this.detectParentingContext(data);
-            const systemPrompt = isParentingContext
-                ? RULER_COACH_SYSTEM_PROMPT + '\n' + PARENTING_CONTEXT_ADDON
-                : RULER_COACH_SYSTEM_PROMPT;
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: {
@@ -90,7 +123,7 @@ class AIService {
                         { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
                     ],
-                    model: "gpt-4o", // Or the specific model alias provided by Zeabur
+                    model: "gpt-4o",
                     temperature: 0.7
                 })
             });
@@ -105,7 +138,7 @@ class AIService {
             return this.parseAIResponse(content);
 
         } catch (error) {
-            console.error("AI Service Failed:", error);
+            logger.error('[AIService] AI Service Failed', { error: String(error) });
             return this.getMockFallback(data.emotion?.quadrant);
         }
     }
@@ -138,7 +171,7 @@ class AIService {
             const cleanJson = content.replace(/```json\n?|\n?```/g, "").trim();
             return JSON.parse(cleanJson);
         } catch (e) {
-            console.error("Failed to parse AI JSON:", e);
+            logger.error('[AIService] Failed to parse AI JSON', { error: String(e) });
             return AIService.MOCK_INSIGHTS["default"];
         }
     }
@@ -235,7 +268,7 @@ class AIService {
             const result = await response.json();
             return this.parseAIResponse(result.choices?.[0]?.message?.content);
         } catch (error) {
-            console.error("Weekly Insight Failed:", error);
+            logger.error('[AIService] Weekly Insight Failed', { error: String(error) });
             return this.getMockFallback(dominantQuadrant);
         }
     }
@@ -292,7 +325,7 @@ class AIService {
             const result = await response.json();
             return result.choices?.[0]?.message?.content || this.getMockChatResponse(userMessage);
         } catch (error) {
-            console.error("Chat failed:", error);
+            logger.error('[AIService] Chat failed', { error: String(error) });
             return this.getMockChatResponse(userMessage);
         }
     }

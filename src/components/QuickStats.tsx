@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { storageService } from '../services/StorageService';
+import React, { useMemo, useState, useEffect } from 'react';
+import { dataAdapter } from '../adapters';
+import { type RulerLogEntry } from '../types/RulerTypes';
 import { calculateEmotionStats, getHealthRecommendation } from '../utils/statisticsUtils';
 import { getGreeting, isToday } from '../utils/dateUtils';
 import { useLanguage } from '../services/LanguageContext';
@@ -7,7 +8,16 @@ import { uiIcons } from './icons/SvgIcons';
 
 const QuickStats: React.FC = () => {
     const { t, language } = useLanguage();
-    const logs = useMemo(() => storageService.getLogs(), []);
+    const [logs, setLogs] = useState<RulerLogEntry[]>([]);
+
+    useEffect(() => {
+        const loadLogs = async () => {
+            const data = await dataAdapter.logs.export();
+            setLogs(data);
+        };
+        loadLogs();
+    }, []);
+
     const stats = useMemo(() => calculateEmotionStats(logs), [logs]);
     const recommendation = useMemo(() => getHealthRecommendation(stats), [stats]);
 

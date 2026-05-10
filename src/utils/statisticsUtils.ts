@@ -1,5 +1,6 @@
-import { RulerLogEntry } from '../types/RulerTypes';
-import { Quadrant } from '../data/emotionData';
+import { type RulerLogEntry } from '../types/RulerTypes';
+import { type Quadrant } from '../data/emotionData';
+import { type StreakData } from '../types/HabitTypes';
 
 /**
  * 情緒統計工具函數
@@ -94,46 +95,79 @@ export function calculateEmotionStats(logs: RulerLogEntry[]): EmotionStats {
 }
 
 /**
- * 計算連續記錄天數
+ * 統一連續天數計算算法
+ *
+ * 這是項目中唯一的連續天數計算實現。
+ * HabitService 和其他模組都應使用此函數，避免算法不一致。
+ *
+ * 算法邏輯：
+ * 1. 將日誌按日期去重（同一天多條記錄算一天）
+ * 2. 按日期降序排列
+ * 3. 當前連續天數：從最近記錄日開始，必須是今天或昨天
+ * 4. 歷史最長連續天數：遍歷所有日期找最長連續段
  */
-function calculateStreak(logs: RulerLogEntry[]): number {
-    if (logs.length === 0) return 0;
+export function calculateStreakDetailed(logs: RulerLogEntry[]): StreakData {
+    if (logs.length === 0) {
+        return { currentStreak: 0, longestStreak: 0, lastLogDate: null };
+    }
 
-    // 按日期分組
-    const dates = new Set<string>();
+    // 按日期去重（YYYY-MM-DD 格式確保跨時區一致性）
+    const dateSet = new Set<string>();
     logs.forEach(log => {
-        const date = new Date(log.timestamp);
-        dates.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
+        dateSet.add(new Date(log.timestamp).toISOString().split('T')[0]);
     });
 
-    const sortedDates = Array.from(dates)
-        .map(d => new Date(d))
-        .sort((a, b) => b.getTime() - a.getTime());
+    const sortedDates = Array.from(dateSet).sort((a, b) => b.localeCompare(a));
+    const lastLogDate = sortedDates[0] ?? null;
 
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-    for (let i = 0; i < sortedDates.length; i++) {
-        const expectedDate = new Date(today);
-        expectedDate.setDate(expectedDate.getDate() - i);
-        expectedDate.setHours(0, 0, 0, 0);
-
-        const hasEntry = sortedDates.some(date => {
-            const d = new Date(date);
-            d.setHours(0, 0, 0, 0);
-            return d.getTime() === expectedDate.getTime();
-        });
-
-        if (hasEntry) {
-            streak++;
-        } else if (i > 0) {
-            // 如果不是第一天就中斷，則停止計算
-            break;
+    // 當前連續天數：必須從今天或昨天開始計算
+    let currentStreak = 0;
+    if (sortedDates[0] === today || sortedDates[0] === yesterday) {
+        currentStreak = 1;
+        for (let i = 0; i < sortedDates.length - 1; i++) {
+            const curr = new Date(sortedDates[i]);
+            const next = new Date(sortedDates[i + 1]);
+            const diffDays = Math.round(
+                (curr.getTime() - next.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            if (diffDays === 1) {
+                currentStreak++;
+            } else {
+                break;
+            }
         }
     }
 
-    return streak;
+    // 歷史最長連續天數
+    let longestStreak = 0;
+    let tempStreak = 1;
+    for (let i = 0; i < sortedDates.length - 1; i++) {
+        const curr = new Date(sortedDates[i]);
+        const next = new Date(sortedDates[i + 1]);
+        const diffDays = Math.round(
+            (curr.getTime() - next.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (diffDays === 1) {
+            tempStreak++;
+        } else {
+            longestStreak = Math.max(longestStreak, tempStreak);
+            tempStreak = 1;
+        }
+    }
+    longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+
+    return { currentStreak, longestStreak, lastLogDate };
+}
+
+/**
+ * 計算連續記錄天數（簡化版，僅返回數字）
+ * 內部調用 calculateStreakDetailed 以保持算法一致性。
+ */
+function calculateStreak(logs: RulerLogEntry[]): number {
+    return calculateStreakDetailed(logs).currentStreak;
 }
 
 /**

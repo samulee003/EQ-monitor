@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHabit } from '../services/HabitContext';
-import { Achievement } from '../types/AchievementTypes';
+import { type Achievement } from '../types/AchievementTypes';
 import { useLanguage } from '../services/LanguageContext';
 
 const AchievementToast: React.FC = () => {

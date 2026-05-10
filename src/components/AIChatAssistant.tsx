@@ -1,7 +1,8 @@
+import { logger } from '../utils/logger';
 import React, { useState, useRef, useEffect } from 'react';
-import { aiService, AIInsight } from '../services/AIService';
-import { storageService } from '../services/StorageService';
-import { RulerLogEntry } from '../types/RulerTypes';
+import { aiService, type AIInsight } from '../services/AIService';
+import { dataAdapter } from '../adapters';
+import { type RulerLogEntry } from '../types/RulerTypes';
 import './AIChatAssistant.css';
 
 interface Message {
@@ -67,7 +68,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
     setIsLoading(true);
 
     try {
-      const history = storageService.getLogs().slice(0, 5);
+      const history = (await dataAdapter.logs.export()).slice(0, 5);
       const insight = await aiService.analyzeFeeling(currentLog, history);
 
       const analysisMessage: Message = {
@@ -94,7 +95,10 @@ ${insight.colorTheory || '無'}
 
       setMessages(prev => [...prev, analysisMessage]);
     } catch (error) {
-      console.error('Analysis failed:', error);
+      // Production-safe error logging
+      if (import.meta.env.DEV) {
+        logger.error('[AIChatAssistant] Analysis failed', { error: String(error) });
+      }
     } finally {
       setIsLoading(false);
       setIsAnalyzing(false);
@@ -116,7 +120,7 @@ ${insight.colorTheory || '無'}
     setIsLoading(true);
 
     try {
-      const history = storageService.getLogs().slice(0, 3);
+      const history = (await dataAdapter.logs.export()).slice(0, 3);
       const response = await aiService.chatWithAssistant(userMessage.content, history);
 
       const assistantMessage: Message = {
@@ -128,7 +132,10 @@ ${insight.colorTheory || '無'}
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Chat failed:', error);
+      // Production-safe error logging
+      if (import.meta.env.DEV) {
+        logger.error('[AIChatAssistant] Chat failed', { error: String(error) });
+      }
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),

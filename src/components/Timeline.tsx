@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
-import { storageService, ImportResult } from '../services/StorageService';
-import { RulerLogEntry } from '../types/RulerTypes';
+import { dataAdapter } from '../adapters';
+import { type ImportResult } from '../adapters/types';
+import { type RulerLogEntry } from '../types/RulerTypes';
 import ExportPanel from './ExportPanel';
 import Skeleton from './Skeleton';
 
@@ -37,8 +38,8 @@ const Timeline: React.FC = () => {
         }
     }, [importResult]);
 
-    const loadLogs = () => {
-        const data = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
+    const loadLogs = async () => {
+        const data = await dataAdapter.logs.export();
         setLogs(data);
     };
 
@@ -46,12 +47,19 @@ const Timeline: React.FC = () => {
         setDeleteConfirmId(timestamp);
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (deleteConfirmId) {
-            const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-            const updated = existing.filter((log: RulerLogEntry) => log.timestamp !== deleteConfirmId);
-            localStorage.setItem('feelings_logs', JSON.stringify(updated));
-            setLogs(updated);
+            // 查找對應的日誌 ID
+            const allLogs = await dataAdapter.logs.export();
+            const targetLog = allLogs.find((log: RulerLogEntry) => log.timestamp === deleteConfirmId);
+            if (targetLog && (targetLog as RulerLogEntry & { id?: string }).id) {
+                await dataAdapter.logs.delete((targetLog as RulerLogEntry & { id: string }).id);
+            } else {
+                // 兼容舊數據（無 id）：直接覆寫全部
+                const updated = allLogs.filter((log: RulerLogEntry) => log.timestamp !== deleteConfirmId);
+                await dataAdapter.logs.import(updated);
+            }
+            await loadLogs();
             setDeleteConfirmId(null);
         }
     };
@@ -65,22 +73,37 @@ const Timeline: React.FC = () => {
         setEditText(log.expressing?.expression || '');
     };
 
-    const handleEditSave = (timestamp: string) => {
-        const existing = JSON.parse(localStorage.getItem('feelings_logs') || '[]');
-        const updated = existing.map((log: RulerLogEntry) => {
-            if (log.timestamp === timestamp) {
-                return {
-                    ...log,
-                    expressing: {
-                        ...log.expressing,
-                        expression: editText
-                    }
-                };
-            }
-            return log;
-        });
-        localStorage.setItem('feelings_logs', JSON.stringify(updated));
-        setLogs(updated);
+    const handleEditSave = async (timestamp: string) => {
+        const allLogs = await dataAdapter.logs.export();
+        const targetLog = allLogs.find((log: RulerLogEntry) => log.timestamp === timestamp);
+        if (targetLog && (targetLog as RulerLogEntry & { id?: string }).id) {
+            await dataAdapter.logs.update((targetLog as RulerLogEntry & { id: string }).id, {
+                expressing: {
+                    ...(targetLog.expressing || {}),
+                    expression: editText,
+                    prompt: targetLog.expressing?.prompt || '',
+                    mode: targetLog.expressing?.mode || 'write'
+                }
+            });
+        } else {
+            // 兼容舊數據（無 id）：直接覆寫全部
+            const updated = allLogs.map((log: RulerLogEntry) => {
+                if (log.timestamp === timestamp) {
+                    return {
+                        ...log,
+                        expressing: {
+                            ...(log.expressing || {}),
+                            expression: editText,
+                            prompt: log.expressing?.prompt || '',
+                            mode: log.expressing?.mode || 'write'
+                        }
+                    };
+                }
+                return log;
+            });
+            await dataAdapter.logs.import(updated);
+        }
+        await loadLogs();
         setEditingId(null);
     };
 
@@ -93,13 +116,13 @@ const Timeline: React.FC = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             const content = e.target?.result as string;
-            const result = storageService.importLogs(content);
+            const result = await dataAdapter.logs.import(JSON.parse(content || '[]'));
             setImportResult(result);
 
             if (result.success && result.imported > 0) {
-                loadLogs(); // Refresh the list
+                await loadLogs(); // Refresh the list
             }
         };
         reader.onerror = () => {

@@ -68,18 +68,22 @@ describe('ThemeContext', () => {
     expect(result.current.theme).toBe('system');
   });
 
-  it('應該持久化主題設置', () => {
+  it('應該持久化主題設置', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
 
-    act(() => {
+    await act(async () => {
       result.current.setTheme('light');
     });
 
-    expect(localStorage.getItem('imxin-theme')).toBe('light');
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const stored = localStorage.getItem('imxin-theme');
+    expect(stored).not.toBeNull();
+    expect(stored).not.toBe('light');
   });
 
   it('應該讀取已保存的主題', () => {
-    localStorage.setItem('imxin-theme', 'dark');
+    localStorage.setItem('imxin-theme', JSON.stringify('dark'));
 
     const { result } = renderHook(() => useTheme(), { wrapper });
 

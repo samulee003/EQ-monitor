@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { aiService, AIInsight } from './AIService';
+import { aiService, type AIInsight } from './AIService';
 
 declare const global: typeof globalThis;
 

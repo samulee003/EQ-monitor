@@ -1,25 +1,29 @@
+import { logger } from '../utils/logger';
 import React, { useMemo, useState, useEffect } from 'react';
-import { resilienceService, DailyResilience, GranularityData, StrategyDiversityData } from '../services/ResilienceService';
-import { storageService } from '../services/StorageService';
+import { resilienceService, type DailyResilience, type GranularityData, type StrategyDiversityData } from '../services/ResilienceService';
+import { dataAdapter } from '../adapters';
+import { type RulerLogEntry } from '../types/RulerTypes';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
-import { aiService, AIInsight } from '../services/AIService';
-import { HeatmapDay, IntensityData } from '../services/ResilienceService';
+import { aiService, type AIInsight } from '../services/AIService';
+import { type HeatmapDay, type IntensityData } from '../services/ResilienceService';
 import Skeleton from './Skeleton';
 
 const GrowthDashboard: React.FC = () => {
     const { t } = useLanguage();
-    const logs = useMemo(() => storageService.getLogs(), []);
+    const [logs, setLogs] = useState<RulerLogEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const [weeklyInsight, setWeeklyInsight] = useState<AIInsight | null>(null);
     const [loadingInsight, setLoadingInsight] = useState(false);
 
     useEffect(() => {
-        // Simulate loading for smoother UX
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 400);
+        const loadData = async () => {
+            const data = await dataAdapter.logs.export();
+            setLogs(data);
+            setTimeout(() => setIsLoading(false), 400);
+        };
+        loadData();
     }, []);
 
     useEffect(() => {
@@ -30,7 +34,7 @@ const GrowthDashboard: React.FC = () => {
                     const insight = await aiService.generateWeeklyInsight(logs);
                     setWeeklyInsight(insight);
                 } catch (e) {
-                    console.error(e);
+                    logger.error('[GrowthDashboard] Failed to fetch insight', { error: String(e) });
                 } finally {
                     setLoadingInsight(false);
                 }
