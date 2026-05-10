@@ -43,14 +43,21 @@ export function BreathingAnimation() {
         : 'duration-0';
   const scaleClass = phase === 'exhale' ? 'scale-100' : 'scale-150';
 
+  const phaseText =
+    phase === 'inhale' ? '吸氣' : phase === 'hold' ? '屏息' : '吐氣';
+
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <div
         className={`w-32 h-32 rounded-full bg-blue-400 opacity-60 transition-transform ease-in-out ${durationClass} ${scaleClass}`}
+        aria-hidden="true"
       />
-      <p className="text-lg font-medium text-blue-700">
-        {phase === 'inhale' ? '吸氣' : phase === 'hold' ? '屏息' : '吐氣'} ({count})
+      <p className="text-lg font-medium text-blue-700" aria-live="polite">
+        {phaseText} ({count})
       </p>
+      <span className="sr-only" aria-live="polite">
+        {phaseText}，倒數 {count} 秒
+      </span>
     </div>
   );
 }

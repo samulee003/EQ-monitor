@@ -6,6 +6,7 @@ import { notificationService } from '../services/NotificationService';
 import AchievementToast from './AchievementToast';
 import OnboardingFlow from './OnboardingFlow';
 import { settingsStore } from '../adapters';
+import { CoachFAB } from './coach/CoachFAB';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -67,6 +68,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           >
             {t('成長看板')}
           </button>
+          <button
+            className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
+            onClick={() => onNavigate('coach')}
+          >
+            {t('教練')}
+          </button>
         </nav>
         <div className="header-actions">
           <button
@@ -102,6 +109,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
       {showOnboarding && (
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       )}
+
+      <CoachFAB
+        visible={currentView !== 'coach'}
+        onClick={() => onNavigate('coach')}
+      />
 
       <footer>
         <div className="footer-main">
