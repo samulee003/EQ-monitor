@@ -12,7 +12,6 @@ export function BreathingAnimation() {
     ];
     let idx = 0;
     let timer: number;
-    let countTimer: number;
 
     const run = () => {
       const step = cycle[idx];
@@ -25,7 +24,7 @@ export function BreathingAnimation() {
     };
     run();
 
-    countTimer = window.setInterval(() => {
+    const countTimer = window.setInterval(() => {
       setCount((c) => (c > 1 ? c - 1 : c));
     }, 1000);
 
