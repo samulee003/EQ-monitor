@@ -33,7 +33,8 @@ export function extractCoachMetaFromLogs(logs: RulerLogEntry[]): MigrationMeta {
   let streak = 0;
   let prevDate = '';
   for (const log of sorted) {
-    const dateStr = log.timestamp.slice(0, 10);
+    // 使用本地時區的日期，避免 UTC 邊界誤判
+    const dateStr = new Date(log.timestamp).toLocaleDateString('sv-SE');
     if (!prevDate) { streak = 1; prevDate = dateStr; continue; }
     const diff = (new Date(prevDate).getTime() - new Date(dateStr).getTime()) / 86400000;
     if (diff <= 1) { streak++; prevDate = dateStr; } else break;

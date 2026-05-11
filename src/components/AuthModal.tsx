@@ -214,9 +214,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                     required
                                 />
                                 <span>
-                                    我同意將情緒輪廓備份至雲端，數據僅用於提供個人化 AI 教練功能，不作商業用途。
+                                    {t('我同意將情緒輪廓備份至雲端，數據僅用於提供個人化 AI 教練功能，不作商業用途。')}
                                     {' '}
-                                    <a href="/privacy" target="_blank" rel="noopener noreferrer">隱私聲明</a>
+                                    <a href="/privacy" target="_blank" rel="noopener noreferrer">{t('隱私聲明')}</a>
                                 </span>
                             </label>
                             <label className={styles.checkboxLabel}>
@@ -225,7 +225,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                     checked={coachOptIn}
                                     onChange={e => setCoachOptIn(e.target.checked)}
                                 />
-                                <span>允許 AI 教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）</span>
+                                <span>{t('允許 AI 教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）')}</span>
                             </label>
                         </div>
                     )}
