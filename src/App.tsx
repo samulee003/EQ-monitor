@@ -11,6 +11,7 @@ import MigrationProgress from './components/MigrationProgress';
 import { useAppStore } from './stores/appStore';
 import { useFocusVisible } from './hooks/useA11y';
 import { useAuth } from './services/AuthContext';
+import { useLanguage } from './services/LanguageContext';
 import './index.css';
 
 // 懶加載非首屏組件
@@ -26,6 +27,7 @@ function AppContent() {
   // 啟用焦點可見性管理
   useFocusVisible();
 
+  const { t } = useLanguage();
   const { user, migrationNeeded, clearMigrationFlag } = useAuth();
 
   const {
@@ -74,9 +76,9 @@ function AppContent() {
               {currentView === 'coach' && <CoachPage />}
               {currentView !== 'home' && currentView !== 'checkin' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
                 <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                  <h2>頁面未找到</h2>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>這個頁面不存在。</p>
-                  <button className="morandi-main-btn" onClick={() => setView('home')}>回到首頁</button>
+                  <h2>{t('頁面未找到')}</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{t('這個頁面不存在。')}</p>
+                  <button className="morandi-main-btn" onClick={() => setView('home')}>{t('回到首頁')}</button>
                 </div>
               )}
             </Suspense>

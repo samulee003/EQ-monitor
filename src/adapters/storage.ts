@@ -265,7 +265,8 @@ export const logs = {
     ;(async () => {
       try {
         if (!currentUserId) return;
-        const allLogs = await logs.export();
+        // 直接用記憶體中的 logsCache，避免 O(n) 從 localStorage 重新讀取
+        const allLogs = logsCache || [entry];
         const patch = buildCoachContextPatch(currentUserId, allLogs);
         await upsertCoachContext(patch);
       } catch {
