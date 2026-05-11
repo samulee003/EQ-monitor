@@ -4,6 +4,84 @@
 
 ---
 
+## [4.1.0] - 2026-05-11 — InsForge 雲端同步 + AI 教練記憶
+
+### 🎯 重大變更
+
+- **三層隱私模型正式落地**：
+  - Tier 1（裝置）：原始日記內容、身體掃描、表達內容 — 永不上雲
+  - Tier 2（雲端元數據）：象限標籤、需求標籤、強度分數 — 同步至 InsForge `coach_context` 供 AI 教練記憶
+  - Tier 3（可選完整備份）：用戶可主動選擇加密全量備份
+- **AI 教練獲得持久記憶**：Edge Function 在生成回應前讀取 `coach_context`，能參考用戶連續記錄天數、常見情緒象限、核心需求與平均強度，提供真正個人化的陪伴。
+- **歷史數據遷移**：已使用本地記錄的用戶，首次登入後可一鍵將歷史元數據遷移至雲端。
+
+### ✨ 新增功能
+
+- **🔐 帳號系統 + 隱私同意**
+  - 註冊流程新增兩項勾選框：
+    - （必填）雲端備份同意書 — 數據僅用於 AI 教練，不作商業用途
+    - （選填）AI 教練主動關懷 — 允許系統根據情緒模式主動推送關心訊息
+  - Guest 登入支援（自動生成匿名帳號）
+  - `AuthContext` 同步 `coachOptIn` 狀態至 `coach_context`
+- **☁️ localStorage → InsForge 遷移**
+  - 自動偵測未遷移的本地記錄
+  - 增量提取 Tier-2 元數據（quadrants、needs、intensity、streak）
+  - `MigrationProgress` 全螢幕進度 UI（帶錯誤降級）
+  - 遷移後保留本地原始數據，可隨時重刷
+- **🧠 AI 教練記憶注入**
+  - Edge Function `fetchCoachContext()` 讀取用戶情緒輪廓
+  - `buildContextSummary()` 將元數據轉為中文摘要注入 Gemini system prompt
+  - 無輪廓時 graceful fallback（不影響對話）
+- **📊 即時元數據同步**
+  - 每次完成 RULER 記錄後，背景同步最新元數據至 `coach_context`
+  - `extractMetadataFromLog()` 純函數式提取，測試友好
+
+### 🔧 技術棧擴展
+
+| 層級 | 新增技術 |
+|------|----------|
+| 雲端資料庫 | InsForge PostgreSQL + `coach_context` 表 |
+| Edge Function | `coach` function（Deno runtime，已部署） |
+| 隱私安全 | Row Level Security（RLS）+ service_role 策略 |
+| 前端狀態 | `AuthContext` coachOptIn 同步 |
+
+### 📁 新增/修改檔案
+
+```
+server/insforge/schema/007_coach_context.sql    # coach_context 資料表 + RLS
+src/lib/insforge/coachContext.ts                # CRUD + 元數據提取
+src/lib/insforge/localStorageMigration.ts       # 遷移邏輯
+src/components/MigrationProgress.tsx            # 遷移進度 UI
+src/components/AuthModal.tsx                    # 隱私同意勾選框
+src/services/AuthContext.tsx                    # coachOptIn 狀態管理
+src/App.tsx                                     # 自動觸發遷移
+src/adapters/storage.ts                         # saveLog 後背景同步
+server/insforge/functions/coach-simple.ts       # 讀取 coach_context 注入 prompt
+```
+
+### 🧪 測試
+
+- 新增 **61** 個單元測試（frontend + backend）
+- 總測試數：**326 / 326 通過**（29 test files）+ **110 / 110 通過**（9 test files）
+- Build：✅ 成功
+- TypeScript：✅ 零錯誤
+
+### 🔒 安全與隱私
+
+- `coach_context` 啟用 RLS，用戶只能讀寫自己的資料
+- Edge Function 使用 `SERVICE_ROLE_KEY` 繞過 RLS（內部服務調用）
+- 原始日記內容始終留在 AES-256-GCM 加密的 localStorage / IndexedDB
+- 加密失敗時不再靜默降級為明文儲存（已移除危險 fallback）
+
+### 🚀 部署狀態
+
+| 服務 | URL | 狀態 |
+|------|-----|------|
+| Edge Function API | `https://b88egxiz.functions.insforge.app/coach` | ✅ 已部署（含記憶注入） |
+| InsForge 資料庫 | `coach_context` 表 | ✅ 已建立 |
+
+---
+
 ## [4.0.0] - 2026-05-11 — Agentic AI 情緒教練
 
 ### 🎯 重大變更
