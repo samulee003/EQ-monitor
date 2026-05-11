@@ -100,7 +100,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         </div>
       </header>
 
-      <main className="main-content">
+      <main id="main-content" className="main-content" tabIndex={-1}>
         {children}
       </main>
 
@@ -294,14 +294,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         footer {
-          padding: 1.5rem 2rem 1rem;
+          padding: 0.75rem 1rem 0.5rem;
           text-align: center;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: var(--text-secondary);
-          opacity: 0.6;
+          opacity: 0.55;
           display: flex;
           flex-direction: column;
-          gap: 0.4rem;
+          gap: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+          .footer-disclaimer { display: none; }
+          footer { padding: 0.5rem 1rem 0.5rem; }
         }
 
         .footer-main {

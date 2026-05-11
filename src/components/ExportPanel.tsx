@@ -65,7 +65,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({ logs, onClose }) => {
             <div className="export-panel" onClick={(e) => e.stopPropagation()}>
                 <div className="export-panel-header">
                     <h3>📤 {t('導出記錄')}</h3>
-                    <button className="close-btn" onClick={onClose}>✕</button>
+                    <button className="close-btn" aria-label="關閉" onClick={onClose}>✕</button>
                 </div>
 
                 <div className="export-stats">

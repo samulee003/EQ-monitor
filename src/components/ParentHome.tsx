@@ -5,7 +5,6 @@ import SOSMode from './SOSMode';
 import QuickCheckIn, { type QuickCheckInData } from './QuickCheckIn';
 import { dataAdapter } from '../adapters';
 import { type RulerLogEntry } from '../types/RulerTypes';
-// import { useLanguage } from '../services/LanguageContext';
 
 // 深度覺察沿用現有的 CheckInFlow
 const CheckInFlow = React.lazy(() => import('./CheckInFlow'));
@@ -57,11 +56,21 @@ const ParentHome: React.FC = () => {
 
     const handleQuickComplete = async (data: QuickCheckInData) => {
         // 保存快速記錄
-        const logEntry = {
+        const quadrantDefaults: Record<string, { energy: number; pleasantness: number }> = {
+            red: { energy: 4, pleasantness: 1 },
+            yellow: { energy: 4, pleasantness: 4 },
+            blue: { energy: 1, pleasantness: 1 },
+            green: { energy: 1, pleasantness: 4 },
+        };
+        const defaults = quadrantDefaults[data.emotion.quadrant] || { energy: 3, pleasantness: 3 };
+        const logEntry: RulerLogEntry = {
+            id: crypto.randomUUID(),
             emotions: [{
                 id: data.emotion.id,
                 name: data.emotion.name,
-                quadrant: data.emotion.quadrant
+                quadrant: data.emotion.quadrant,
+                energy: defaults.energy,
+                pleasantness: defaults.pleasantness,
             }],
             intensity: data.intensity,
             bodyScan: null,
@@ -82,16 +91,12 @@ const ParentHome: React.FC = () => {
         };
 
         try {
-            await dataAdapter.logs.create(logEntry as RulerLogEntry);
+            await dataAdapter.logs.create(logEntry);
             setMode('home');
         } catch (error) {
             logger.error('[ParentHome] Save failed', { error: String(error) });
         }
     };
-
-    // const handleDeepComplete = () => {
-    //     setMode('home');
-    // };
 
     // 渲染首頁
     if (mode === 'home') {
@@ -192,7 +197,12 @@ const ParentHome: React.FC = () => {
     if (mode === 'deep') {
         return (
             <React.Suspense fallback={<div className="loading">載入中...</div>}>
-                <CheckInFlow />
+                <div className="deep-checkin-wrapper">
+                    <button className="nav-btn deep-back-btn" onClick={() => setMode('home')}>
+                        ← 返回首頁
+                    </button>
+                    <CheckInFlow />
+                </div>
             </React.Suspense>
         );
     }

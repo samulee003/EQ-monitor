@@ -126,7 +126,7 @@ const BotDashboard: React.FC<BotDashboardProps> = ({ lineUserId }) => {
         <div className="distribution-section">
           <label className="section-label">
             <span className="section-icon-inline">{uiIcons.brain}</span>
-            {t('情緒分佤')}
+            {t('情緒分佈')}
           </label>
           <div className="bar-chart">
             {quadrantData.map((item) => (

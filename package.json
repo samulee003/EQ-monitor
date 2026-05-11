@@ -1,6 +1,6 @@
 {
   "name": "imxin-app",
-  "private": false,
+  "private": true,
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@google/adk": "^1.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.5",
@@ -71,7 +70,6 @@
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "lint-staged": "^16.4.0",
-    "pg": "^8.20.0",
     "rollup-plugin-visualizer": "^7.0.0",
     "terser": "^5.46.0",
     "typescript": "^5.9.3",

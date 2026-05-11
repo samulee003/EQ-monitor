@@ -16,7 +16,7 @@ const AchievementToast: React.FC = () => {
             // Show for 4 seconds, then clear and check for next
             const timer = setTimeout(() => {
                 setCurrent(null);
-                clearNewlyUnlocked();
+                clearNewlyUnlocked(next.id);
             }, 4000);
             
             return () => clearTimeout(timer);
@@ -26,7 +26,7 @@ const AchievementToast: React.FC = () => {
     if (!current) return null;
 
     return (
-        <div className="achievement-toast-overlay">
+        <div className="achievement-toast-overlay" role="status" aria-live="polite" aria-atomic="true">
             <div className="achievement-toast-card">
                 <div className="achievement-icon-wrapper">
                     <span className="achievement-icon">{current.icon}</span>

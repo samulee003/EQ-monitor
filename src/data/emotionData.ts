@@ -151,6 +151,13 @@ export const emotions: Emotion[] = [
     { id: 'family_warmth', name: '家的溫暖的', quadrant: 'green', energy: 1, pleasantness: 4, isParenting: true },
 ];
 
+export const PostMoodOptions = {
+    MUCH_BETTER: '感覺輕鬆多了',
+    SOMEWHAT_CALM: '平靜了一些',
+    SAME: '依然差不多',
+    NEW_THOUGHTS: '產生了新思緒',
+} as const;
+
 export const psychologicalNeeds: PsychologicalNeed[] = [
     { id: 'respect', label: '尊重與認可', icon: '🤝', desc: '渴望被看見、被聽見或被重視' },
     { id: 'safety', label: '安全與穩定', icon: '🛡️', desc: '追求生理或心理上的安全感與預測性' },

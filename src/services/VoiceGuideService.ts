@@ -119,6 +119,7 @@ class VoiceGuideService {
     private script: VoiceGuideScript | null = null;
     private onProgressCallback: ((section: number, total: number) => void) | null = null;
     private onCompleteCallback: (() => void) | null = null;
+    private sectionTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
         if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -138,7 +139,25 @@ class VoiceGuideService {
      */
     getVoices(): SpeechSynthesisVoice[] {
         if (!this.synthesis) return [];
-        return this.synthesis.getVoices().filter(v => v.lang.startsWith('zh'));
+        return this.synthesis.getVoices().filter(v => v.lang?.startsWith('zh'));
+    }
+
+    /**
+     * 確保語音列表已加載（Chrome 異步加載）
+     */
+    private async ensureVoicesLoaded(): Promise<void> {
+        if (!this.synthesis) return;
+        if (this.synthesis.getVoices().length > 0) return;
+
+        await new Promise<void>((resolve) => {
+            const handler = () => resolve();
+            this.synthesis!.onvoiceschanged = handler;
+            // Fallback: some browsers don't fire the event if voices are already cached
+            setTimeout(() => {
+                this.synthesis!.onvoiceschanged = null;
+                resolve();
+            }, 1000);
+        });
     }
 
     /**
@@ -160,6 +179,7 @@ class VoiceGuideService {
         this.onCompleteCallback = onComplete || null;
         this.isPlaying = true;
 
+        await this.ensureVoicesLoaded();
         await this.playNextSection();
     }
 
@@ -202,7 +222,8 @@ class VoiceGuideService {
             if (!this.isPlaying) return;
             
             // 暫停後播放下一段
-            setTimeout(() => {
+            this.sectionTimeout = setTimeout(() => {
+                this.sectionTimeout = null;
                 this.currentSection++;
                 this.playNextSection();
             }, section.pauseAfter * 1000);
@@ -240,6 +261,10 @@ class VoiceGuideService {
      */
     stop(): void {
         this.isPlaying = false;
+        if (this.sectionTimeout) {
+            clearTimeout(this.sectionTimeout);
+            this.sectionTimeout = null;
+        }
         if (this.synthesis) {
             this.synthesis.cancel();
         }

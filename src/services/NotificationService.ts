@@ -148,7 +148,7 @@ class NotificationService {
         if (!settings.enabled) return false;
 
         const now = new Date();
-        const today = now.toISOString().split('T')[0];
+        const today = now.toLocaleDateString('sv');
 
         // Already notified today
         if (settings.lastNotifiedDate === today) {
@@ -157,9 +157,11 @@ class NotificationService {
 
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
+        const currentTotalMinutes = currentHour * 60 + currentMinute;
+        const targetTotalMinutes = settings.hour * 60 + settings.minute;
 
-        // Check if current time is within the reminder window (within 1 minute)
-        if (currentHour === settings.hour && currentMinute === settings.minute) {
+        // Check if current time has reached or passed the target time
+        if (currentTotalMinutes >= targetTotalMinutes) {
             return true;
         }
 
@@ -185,7 +187,7 @@ class NotificationService {
         this.showNotification('今心 • 每日心情記錄', randomMessage, 'imxin-daily');
 
         // Mark as notified today
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toLocaleDateString('sv');
         this.saveSettings({ lastNotifiedDate: today });
     }
 
@@ -227,6 +229,13 @@ class NotificationService {
         if (settings.enabled && Notification.permission === 'granted') {
             this.startReminderCheck();
         }
+    }
+
+    /**
+     * Destroy the service and clean up all intervals
+     */
+    destroy(): void {
+        this.stopReminderCheck();
     }
 }
 

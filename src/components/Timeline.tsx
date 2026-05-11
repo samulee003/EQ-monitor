@@ -24,10 +24,11 @@ const Timeline: React.FC = () => {
 
     useEffect(() => {
         // Simulate loading for smoother UX
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             loadLogs();
             setIsLoading(false);
         }, 300);
+        return () => clearTimeout(timer);
     }, []);
 
     // Auto-hide import result after 5 seconds
@@ -43,19 +44,18 @@ const Timeline: React.FC = () => {
         setLogs(data);
     };
 
-    const handleDeleteClick = (timestamp: string) => {
-        setDeleteConfirmId(timestamp);
+    const handleDeleteClick = (id: string) => {
+        setDeleteConfirmId(id);
     };
 
     const handleDeleteConfirm = async () => {
         if (deleteConfirmId) {
-            // 查找對應的日誌 ID
             const allLogs = await dataAdapter.logs.export();
-            const targetLog = allLogs.find((log: RulerLogEntry) => log.timestamp === deleteConfirmId);
-            if (targetLog && (targetLog as RulerLogEntry & { id?: string }).id) {
-                await dataAdapter.logs.delete((targetLog as RulerLogEntry & { id: string }).id);
+            const targetLog = allLogs.find((log: RulerLogEntry) => log.id === deleteConfirmId);
+            if (targetLog && targetLog.id) {
+                await dataAdapter.logs.delete(targetLog.id);
             } else {
-                // 兼容舊數據（無 id）：直接覆寫全部
+                // 兼容舊數據（無 id）：按 timestamp 覆寫全部
                 const updated = allLogs.filter((log: RulerLogEntry) => log.timestamp !== deleteConfirmId);
                 await dataAdapter.logs.import(updated);
             }
@@ -69,15 +69,15 @@ const Timeline: React.FC = () => {
     };
 
     const handleEditStart = (log: RulerLogEntry) => {
-        setEditingId(log.timestamp);
+        setEditingId(log.id);
         setEditText(log.expressing?.expression || '');
     };
 
-    const handleEditSave = async (timestamp: string) => {
+    const handleEditSave = async (id: string) => {
         const allLogs = await dataAdapter.logs.export();
-        const targetLog = allLogs.find((log: RulerLogEntry) => log.timestamp === timestamp);
-        if (targetLog && (targetLog as RulerLogEntry & { id?: string }).id) {
-            await dataAdapter.logs.update((targetLog as RulerLogEntry & { id: string }).id, {
+        const targetLog = allLogs.find((log: RulerLogEntry) => log.id === id);
+        if (targetLog && targetLog.id) {
+            await dataAdapter.logs.update(targetLog.id, {
                 expressing: {
                     ...(targetLog.expressing || {}),
                     expression: editText,
@@ -86,9 +86,9 @@ const Timeline: React.FC = () => {
                 }
             });
         } else {
-            // 兼容舊數據（無 id）：直接覆寫全部
+            // 兼容舊數據（無 id）：按 timestamp 覆寫全部
             const updated = allLogs.map((log: RulerLogEntry) => {
-                if (log.timestamp === timestamp) {
+                if (log.timestamp === id) {
                     return {
                         ...log,
                         expressing: {
@@ -118,7 +118,19 @@ const Timeline: React.FC = () => {
         const reader = new FileReader();
         reader.onload = async (e) => {
             const content = e.target?.result as string;
-            const result = await dataAdapter.logs.import(JSON.parse(content || '[]'));
+            let parsed: unknown;
+            try {
+                parsed = JSON.parse(content || '[]');
+            } catch {
+                setImportResult({
+                    success: false,
+                    imported: 0,
+                    skipped: 0,
+                    message: t('檔案格式錯誤，請確認為有效的 JSON 檔案')
+                });
+                return;
+            }
+            const result = await dataAdapter.logs.import(parsed);
             setImportResult(result);
 
             if (result.success && result.imported > 0) {
@@ -393,7 +405,7 @@ const Timeline: React.FC = () => {
 
             <div ref={listTopRef} className="timeline-list">
                 {paginatedLogs.map((log, index) => (
-                    <div key={log.timestamp || index} className="timeline-card">
+                    <div key={log.id || index} className="timeline-card">
                         <div className="card-top">
                             <span className="card-date">{formatDate(log.timestamp)}</span>
                             <div className="card-actions">
@@ -401,10 +413,10 @@ const Timeline: React.FC = () => {
                                     className="card-emotion-dot"
                                     style={{ backgroundColor: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})`, color: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})` }}
                                 ></div>
-                                {editingId !== log.timestamp && (
+                                {editingId !== log.id && (
                                     <>
-                                        <button className="edit-btn" onClick={() => handleEditStart(log)}>✎</button>
-                                        <button className="delete-btn" onClick={() => handleDeleteClick(log.timestamp)}>✕</button>
+                                        <button className="edit-btn" aria-label="編輯" onClick={() => handleEditStart(log)}>✎</button>
+                                        <button className="delete-btn" aria-label="刪除" onClick={() => handleDeleteClick(log.id || log.timestamp)}>✕</button>
                                     </>
                                 )}
                             </div>
@@ -431,7 +443,7 @@ const Timeline: React.FC = () => {
                                 </div>
                             </div>
 
-                            {editingId === log.timestamp ? (
+                            {editingId === log.id ? (
                                 <div className="edit-area">
                                     <textarea
                                         value={editText}
@@ -440,7 +452,7 @@ const Timeline: React.FC = () => {
                                         placeholder={t('更新你的感受表達...')}
                                     />
                                     <div className="edit-actions">
-                                        <button className="save-btn" onClick={() => handleEditSave(log.timestamp)}>{t('儲存')}</button>
+                                        <button className="save-btn" onClick={() => handleEditSave(log.id || log.timestamp)}>{t('儲存')}</button>
                                         <button className="cancel-btn" onClick={() => setEditingId(null)}>{t('取消')}</button>
                                     </div>
                                 </div>

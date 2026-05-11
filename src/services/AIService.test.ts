@@ -110,10 +110,8 @@ describe('AIService', () => {
             
             // 使用 vi.spyOn 來暫時修改私有屬性
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const data = {
                 emotion: { id: 'yellow_happy', quadrant: 'yellow' as const, name: '開心', energy: 4, pleasantness: 4 },
@@ -128,8 +126,7 @@ describe('AIService', () => {
             expect(result.underlyingPatterns).toEqual(['模式1', '模式2']);
             
             // 恢復原始值
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該處理帶有 markdown 代碼塊的 JSON', async () => {
@@ -152,10 +149,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const data = {
                 emotion: { id: 'green_calm', quadrant: 'green' as const, name: '平靜', energy: 2, pleasantness: 4 },
@@ -168,8 +163,7 @@ describe('AIService', () => {
             
             expect(result.summary).toBe('帶代碼塊的摘要');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該在 JSON 解析失敗時返回默認 insight', async () => {
@@ -185,10 +179,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const data = {
                 emotion: { id: 'blue_sad', quadrant: 'blue' as const, name: '難過', energy: 1, pleasantness: 1 },
@@ -203,8 +195,7 @@ describe('AIService', () => {
             expect(result.summary).toBeDefined();
             expect(result.underlyingPatterns).toBeDefined();
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該在 API 錯誤時返回 mock fallback', async () => {
@@ -214,10 +205,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const data = {
                 emotion: { id: 'red_angry', quadrant: 'red' as const, name: '生氣', energy: 4, pleasantness: 2 },
@@ -231,8 +220,7 @@ describe('AIService', () => {
             expect(result.summary).toBeDefined();
             expect(result.underlyingPatterns).toBeDefined();
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
     });
 
@@ -346,10 +334,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const logs = [
                 { emotions: [{ quadrant: 'yellow', name: '開心' }], timestamp: Date.now(), intensity: 7 },
@@ -360,8 +346,7 @@ describe('AIService', () => {
             expect(global.fetch).toHaveBeenCalled();
             expect(result.summary).toBe('API 週洞察');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該在 API 錯誤時返回 mock fallback', async () => {
@@ -371,10 +356,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const logs = [
                 { emotions: [{ quadrant: 'red' }], timestamp: Date.now() },
@@ -384,8 +367,7 @@ describe('AIService', () => {
             
             expect(result.summary).toBeDefined();
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
     });
 
@@ -403,18 +385,15 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const result = await aiService.chatWithAssistant('你好');
             
             expect(global.fetch).toHaveBeenCalled();
             expect(result).toBe('API 回應內容');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該在 API 錯誤時返回 mock fallback', async () => {
@@ -424,34 +403,28 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const result = await aiService.chatWithAssistant('你好');
             
             expect(result).toContain('情緒');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
 
         it('應該處理網絡錯誤', async () => {
             global.fetch = vi.fn().mockRejectedValueOnce(new Error('Network Error'));
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const result = await aiService.chatWithAssistant('你好');
             
             expect(result).toContain('情緒');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
     });
 
@@ -474,10 +447,8 @@ describe('AIService', () => {
             });
             
             const service = aiService as any;
-            const originalUrl = service.apiUrl;
-            const originalKey = service.apiKey;
-            service.apiUrl = 'https://api.test.com';
-            service.apiKey = 'test-key';
+            const originalProxyUrl = service.proxyUrl;
+            service.proxyUrl = 'https://api.test.com';
             
             const data = {
                 emotion: { id: 'red_angry', quadrant: 'red' as const, name: '憤怒', energy: 4, pleasantness: 2 },
@@ -494,8 +465,7 @@ describe('AIService', () => {
             const requestBody = JSON.parse(callArgs[1].body);
             expect(requestBody.messages[0].content).toContain('育兒');
             
-            service.apiUrl = originalUrl;
-            service.apiKey = originalKey;
+            service.proxyUrl = originalProxyUrl;
         });
     });
 });

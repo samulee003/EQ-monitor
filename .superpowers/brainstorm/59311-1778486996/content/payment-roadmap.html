@@ -1,0 +1,133 @@
+<h2>設計第 3 段：支付流程 + Sprint 路線圖</h2>
+<p class="subtitle">從免費體驗到付費升級的完整路徑，以及建議的實作順序</p>
+
+<div class="section">
+  <h3>升級觸發點（用戶在哪裡看到付費牆）</h3>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;">
+      <div style="font-weight:600;margin-bottom:6px;">A. 配額用完時</div>
+      <div style="color:var(--text-muted);line-height:1.6;">教練想主動關心你，但本月 3 次已用完。LINE 收到：「本月的免費陪伴次數已用完，升級繼續讓我陪著你 →」</div>
+    </div>
+    <div style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;">
+      <div style="font-weight:600;margin-bottom:6px;">B. App 內設定頁</div>
+      <div style="color:var(--text-muted);line-height:1.6;">用戶主動查看「教練方案」，看到免費 vs Pro 對比，隨時升級</div>
+    </div>
+    <div style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;">
+      <div style="font-weight:600;margin-bottom:6px;">C. 教練記憶到期</div>
+      <div style="color:var(--text-muted);line-height:1.6;">7 天記憶期限到，教練提示：「我快記不住你了，升級讓我一直記得你的旅程」</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>支付流程</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:260px;">
+      <div class="mockup">
+        <div class="mockup-header">升級頁面（App 內）</div>
+        <div class="mockup-body" style="padding:20px;font-size:12px;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;">解鎖完整教練陪伴</div>
+            <div style="color:var(--text-muted);font-size:11px;margin-top:4px;">讓教練一直記得你，主動關心你</div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <div style="flex:1;border:2px solid var(--accent);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:10px;color:var(--accent);font-weight:600;">月付</div>
+              <div style="font-size:18px;font-weight:700;margin:4px 0;">$5</div>
+              <div style="font-size:10px;color:var(--text-muted);">USD / 月<br>MOP 50</div>
+            </div>
+            <div style="flex:1;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;background:var(--surface);">
+              <div style="font-size:10px;color:var(--text-muted);font-weight:600;">年付</div>
+              <div style="font-size:18px;font-weight:700;margin:4px 0;">$45</div>
+              <div style="font-size:10px;color:var(--text-muted);">USD / 年<br>省 25%</div>
+            </div>
+          </div>
+
+          <!-- 支付方式選擇 -->
+          <div class="label" style="margin-bottom:8px;">選擇付款方式</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+            <div style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;font-size:11px;cursor:pointer;">💳 信用卡<br><span style="color:var(--text-muted);font-size:10px;">Stripe</span></div>
+            <div style="border:2px solid var(--accent);border-radius:6px;padding:8px;text-align:center;font-size:11px;cursor:pointer;background:var(--surface);">🔴 MPAY<br><span style="color:var(--accent);font-size:10px;">澳門通</span></div>
+            <div style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;font-size:11px;cursor:pointer;">🔵 支付寶<br><span style="color:var(--text-muted);font-size:10px;">Alipay</span></div>
+            <div style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;font-size:11px;cursor:pointer;">🟢 微信支付<br><span style="color:var(--text-muted);font-size:10px;">WeChat Pay</span></div>
+          </div>
+
+          <div class="mock-button" style="width:100%;background:var(--accent);color:#fff;">開始 Pro 方案</div>
+          <div style="text-align:center;margin-top:8px;font-size:10px;color:var(--text-muted);">隨時可取消 · 無合約</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:220px;">
+      <h3 style="margin-bottom:12px;">支付閘道路由</h3>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.8;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <strong style="color:var(--text);">Stripe</strong>（InsForge 內建）<br>
+        → 信用卡、Apple Pay、Google Pay<br>
+        → 幣別：USD<br>
+        → 訂閱管理：InsForge payments CLI<br><br>
+        <strong style="color:var(--text);">MPAY / 支付寶 / 微信</strong>（待 skill 集成）<br>
+        → 幣別：MOP / CNY<br>
+        → 訂閱確認後回寫 InsForge<br>
+        &nbsp;&nbsp;subscription_tier = "pro"
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--text-muted);line-height:1.7;">
+        <div class="label" style="margin-bottom:6px;">訂閱狀態同步</div>
+        Stripe webhook → InsForge edge function<br>
+        → 更新 coach_context.subscription_tier<br>
+        → 即時生效，無需用戶重啟 App
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Sprint 路線圖（建議實作順序）</h3>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div style="background:var(--accent);color:#fff;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;white-space:nowrap;">Sprint 1</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;flex:1;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:6px;">InsForge 基礎 + 即時教練（1-2 週）</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+          ① coach_context 資料表 migration<br>
+          ② Auth Modal（Email + Google/GitHub）+ 隱私同意<br>
+          ③ 完成記錄後 → 上傳元數據到 coach_context<br>
+          ④ 觸發④（完成後即時教練）用現有 coach edge function 升級<br>
+          <span style="color:#AAB09B;">✓ 完成後用戶已有雲端輪廓 + 教練有記憶</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div style="background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;white-space:nowrap;">Sprint 2</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;flex:1;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:6px;">Stripe 訂閱 + 主動觸達（1-2 週）</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+          ① Stripe 設定（InsForge payments CLI）<br>
+          ② 升級頁面 UI + 訂閱狀態同步<br>
+          ③ coach-agent edge function（觸發①②③）<br>
+          ④ InsForge schedules（每小時 / 每日 / 每週一）<br>
+          ⑤ LINE Bot 主動推送集成<br>
+          <span style="color:#AAB09B;">✓ 完成後 Freemium 模型完整運作</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div style="background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;white-space:nowrap;">Sprint 3</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;flex:1;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:6px;">PWA 推播 + MPAY/支付寶/微信（待 skill）</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+          ① PWA Web Push Notification 集成<br>
+          ② MPAY skill 集成（你提供）<br>
+          ③ 支付寶 skill 集成（你提供）<br>
+          ④ 微信支付 skill 集成（你提供）<br>
+          ⑤ 完整備份（Tier 3）選項<br>
+          <span style="color:#AAB09B;">✓ 完成後全管道、全支付方式上線</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

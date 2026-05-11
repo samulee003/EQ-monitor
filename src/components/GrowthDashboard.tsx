@@ -21,9 +21,10 @@ const GrowthDashboard: React.FC = () => {
         const loadData = async () => {
             const data = await dataAdapter.logs.export();
             setLogs(data);
-            setTimeout(() => setIsLoading(false), 400);
         };
         loadData();
+        const timer = setTimeout(() => setIsLoading(false), 400);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {

@@ -36,9 +36,17 @@ interface AppState {
   clearImportToast: () => void;
 }
 
+const VALID_APP_VIEWS: AppView[] = ['home', 'checkin', 'history', 'growth', 'achievement', 'coach'];
+
+function getValidViewFromHash(): AppView {
+  if (typeof window === 'undefined') return 'home';
+  const hash = location.hash.slice(1);
+  return VALID_APP_VIEWS.includes(hash as AppView) ? (hash as AppView) : 'home';
+}
+
 export const useAppStore = create<AppState>((set) => ({
   // 視圖路由（默認從 URL hash 讀取，否則 home）
-  currentView: (typeof window !== 'undefined' && location.hash.slice(1) as AppView) || 'home',
+  currentView: getValidViewFromHash(),
   setView: (view) => {
     set({ currentView: view });
     // 同步到 URL hash，支持瀏覽器前進後退
@@ -91,7 +99,7 @@ export const useAppStore = create<AppState>((set) => ({
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', () => {
     const hash = location.hash.slice(1) as AppView;
-    if (['home', 'checkin', 'history', 'growth', 'achievement', 'coach'].includes(hash)) {
+    if (VALID_APP_VIEWS.includes(hash)) {
       useAppStore.setState({ currentView: hash });
     }
   });

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * useA11y - 可訪問性輔助 Hook
@@ -94,13 +94,20 @@ export const useSkipLink = () => {
 
 // 宣布動態內容變化（屏幕閱讀器）
 export const useAnnouncer = () => {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
     const announcer = document.getElementById(`aria-announcer-${priority}`);
     if (announcer) {
+      // 清除之前的 timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       announcer.textContent = message;
       // 3秒後清除
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         announcer.textContent = '';
+        timeoutRef.current = null;
       }, 3000);
     }
   }, []);

@@ -2,7 +2,6 @@ import { logger } from '../utils/logger';
 import React, { useState } from 'react';
 import './QuickCheckIn.css';
 import { type ParentingEmotion, type Quadrant, quickEmotions, parentScenarioTags } from '../data/parentingEmotionData';
-// import { aiService } from '../services/AIService';
 
 interface QuickCheckInProps {
     onComplete?: (data: QuickCheckInData) => void;
