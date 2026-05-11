@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BreathingAnimation } from './BreathingAnimation';
+import styles from './MetaMomentOverlay.module.css';
 
 interface Props {
   onClose: () => void;
@@ -53,31 +54,37 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-white flex flex-col"
+      className={styles.overlay}
       role="dialog"
       aria-modal="true"
       aria-labelledby="meta-moment-title"
-      style={{
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      }}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b">
-        <h2 id="meta-moment-title" className="text-lg font-bold text-red-600">
-          🆘 Meta-Moment 緊急協助
-        </h2>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.headerIcon}>🆘</div>
+          <h2
+            id="meta-moment-title"
+            className={styles.headerTitle}
+          >
+            Meta-Moment 緊急協助
+          </h2>
+        </div>
         <button
           onClick={onClose}
           aria-label="關閉"
-          className="text-gray-500 text-2xl px-2"
+          className={styles.closeButton}
         >
           ×
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center overflow-y-auto">
-        <div className="mb-2 text-sm text-gray-400">{STEPS[step].title}</div>
-        <p className="text-lg text-gray-800 mb-8 max-w-md">
+      {/* Content */}
+      <div className={styles.content}>
+        <div className={styles.stepLabel}>
+          {STEPS[step].title}
+        </div>
+        <p className={styles.stepContent}>
           {STEPS[step].content}
         </p>
 
@@ -89,19 +96,20 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
             value={bestSelf}
             onChange={(e) => setBestSelf(e.target.value)}
             placeholder="例如：冷靜、有耐心"
-            className="w-full max-w-xs border rounded-lg px-4 py-2 text-center"
+            className={styles.bestSelfInput}
             aria-label="描述你最好的自己"
           />
         )}
 
         {step === 3 && (
-          <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div className={styles.strategyList}>
             {STRATEGIES.map((s) => (
               <button
                 key={s}
                 onClick={() => onComplete({ bestSelf, strategy: s })}
-                className="px-4 py-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-left"
+                className={styles.strategyButton}
               >
+                <span>✓</span>
                 {s}
               </button>
             ))}
@@ -109,11 +117,12 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
         )}
       </div>
 
+      {/* Footer Action */}
       {step < 3 && (
-        <div className="p-4">
+        <div className={styles.footer}>
           <button
             onClick={handleNext}
-            className="w-full py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+            className={styles.nextButton}
           >
             {step === 0
               ? '我準備好了，開始呼吸'

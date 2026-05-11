@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import styles from './BreathingAnimation.module.css';
 
 export function BreathingAnimation() {
   const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
@@ -34,24 +35,27 @@ export function BreathingAnimation() {
     };
   }, []);
 
-  const durationClass =
-    phase === 'inhale'
-      ? 'duration-[4000ms]'
-      : phase === 'exhale'
-        ? 'duration-[8000ms]'
-        : 'duration-0';
-  const scaleClass = phase === 'exhale' ? 'scale-100' : 'scale-150';
+  const scale = phase === 'exhale' ? 1 : 1.5;
+  const transitionDuration =
+    phase === 'inhale' ? '4000ms' : phase === 'exhale' ? '8000ms' : '0ms';
 
   const phaseText =
     phase === 'inhale' ? '吸氣' : phase === 'hold' ? '屏息' : '吐氣';
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
+    <div className={styles.container}>
       <div
-        className={`w-32 h-32 rounded-full bg-blue-400 opacity-60 transition-transform ease-in-out ${durationClass} ${scaleClass}`}
+        className={styles.circle}
+        style={{
+          transform: `scale(${scale})`,
+          transitionDuration,
+        }}
         aria-hidden="true"
       />
-      <p className="text-lg font-medium text-blue-700" aria-live="polite">
+      <p
+        className={styles.phaseText}
+        aria-live="polite"
+      >
         {phaseText} ({count})
       </p>
       <span className="sr-only" aria-live="polite">
