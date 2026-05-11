@@ -12,12 +12,19 @@ const MigrationProgress: React.FC<Props> = ({ userId, onComplete }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     runMigration(userId, (d, t) => {
+      if (cancelled) return;
       setDone(d);
       setTotal(t);
     })
-      .then(onComplete)
-      .catch(err => setError(err instanceof Error ? err.message : '遷移失敗'));
+      .then(() => {
+        if (!cancelled) onComplete();
+      })
+      .catch(err => {
+        if (!cancelled) setError(err instanceof Error ? err.message : '遷移失敗');
+      });
+    return () => { cancelled = true; };
   }, [userId, onComplete]);
 
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;

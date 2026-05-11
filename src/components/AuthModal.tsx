@@ -97,7 +97,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
         setError('');
         try {
             const guestEmail = `guest_${Date.now()}@imxin.app`;
-            const guestPassword = crypto.randomUUID().slice(0, 12);
+            const guestPassword = (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 12);
             const result = await register(guestEmail, guestPassword, t('訪客用戶'));
             if (result.success) {
                 onClose();

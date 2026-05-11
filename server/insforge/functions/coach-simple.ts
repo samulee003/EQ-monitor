@@ -119,11 +119,11 @@ interface StreakData {
 async function getUserEmotionSummary(userId: string) {
   try {
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({
       baseUrl,
-      anonKey,
+      anonKey: serviceRoleKey,
     });
 
     const { data: logs, error: logsError } = await client.database
@@ -181,11 +181,11 @@ interface CoachContextRow {
 async function fetchCoachContext(userId: string): Promise<CoachContextRow | null> {
   try {
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({
       baseUrl,
-      anonKey,
+      anonKey: serviceRoleKey,
     });
 
     const { data, error } = await client.database
@@ -251,11 +251,11 @@ interface CoachMessage {
 async function getConversationHistory(sessionId: string, limit = 10): Promise<CoachMessage[]> {
   try {
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({
       baseUrl,
-      anonKey,
+      anonKey: serviceRoleKey,
     });
 
     const { data, error } = await client.database
@@ -289,11 +289,11 @@ async function saveMessage(
 ): Promise<void> {
   try {
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({
       baseUrl,
-      anonKey,
+      anonKey: serviceRoleKey,
     });
 
     const { error } = await client.database
@@ -315,11 +315,11 @@ async function saveMessage(
 async function cleanupOldMessages(sessionId: string, maxMessages = 20): Promise<void> {
   try {
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({
       baseUrl,
-      anonKey,
+      anonKey: serviceRoleKey,
     });
 
     const { data, error } = await client.database
@@ -438,6 +438,7 @@ export default async function (req: Request): Promise<Response> {
     const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({
         systemInstruction,
         contents,
@@ -462,10 +463,12 @@ export default async function (req: Request): Promise<Response> {
       skillInvoked = 'MetaMomentSkill';
     }
 
-    // Persist conversation (non-blocking to response, but awaited for reliability)
-    await saveMessage(sessionId, userId, 'user', message);
-    await saveMessage(sessionId, userId, 'model', responseText);
-    await cleanupOldMessages(sessionId, 20);
+    // Persist conversation fire-and-forget (don't block response)
+    Promise.all([
+      saveMessage(sessionId, userId, 'user', message),
+      saveMessage(sessionId, userId, 'model', responseText),
+      cleanupOldMessages(sessionId, 20),
+    ]).catch(e => console.error('Coach message persistence error:', e));
 
     return new Response(
       JSON.stringify({
