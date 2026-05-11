@@ -1,3 +1,7 @@
+// NOTE: This in-memory Map does not share state across instances.
+// For multi-instance deployments (e.g., Fly.io with multiple machines),
+// consider using Redis or another shared store for rate limiting.
+
 /**
  * Rate Limiter — 簡易速率限制中間件
  *

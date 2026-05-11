@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
-import { InsForgeSyncAdapter, syncAdapter } from './syncAdapter';
+import { InsForgeSyncAdapter, syncAdapter } from './_deprecated/syncAdapter';
 
 const DB_NAME = 'insforge_sync_v1';
 

@@ -6,6 +6,7 @@ import styles from './ErrorBoundary.module.css';
 interface Props {
     children: ReactNode;
     fallback?: ReactNode;
+    onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface State {
@@ -31,6 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         logger.error('ErrorBoundary caught an error', { error: String(error), componentStack: errorInfo.componentStack });
+        this.props.onError?.(error, errorInfo);
     }
 
     handleReset = () => {

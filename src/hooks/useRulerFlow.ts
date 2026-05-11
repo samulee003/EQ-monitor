@@ -5,7 +5,7 @@
  * 替代原有的多個 useState，使狀態轉換更清晰、可預測、可測試。
  */
 
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useRef } from 'react';
 import { dataAdapter } from '../adapters';
 import { useHabit } from '../services/HabitContext';
 import { type RulerStep, type RulerDraft, type RulerLogEntry, type BodyScanData, type UnderstandingData, type ExpressingData, type RegulatingData } from '../types/RulerTypes';
@@ -222,43 +222,55 @@ export const steps: { key: RulerStep; label: string; letter: string }[] = [
 export const useRulerFlow = () => {
   const [state, dispatch] = useReducer(rulerReducer, INITIAL_STATE);
   const { refreshProgress } = useHabit();
+  const moodCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentStepIndex = steps.findIndex(s => s.key === state.step);
 
   // 初始化：加載草稿
   useEffect(() => {
     const loadDraft = async () => {
-      const draft = await dataAdapter.draft.get();
-      if (draft && draft.step && draft.step !== 'recognizing') {
-        dispatch({ type: 'RESUME_DRAFT', draft });
-        // 恢復後顯示提示，讓用戶選擇是否繼續
-        dispatch({ type: 'SET_STEP', step: 'recognizing' });
-        // 保存 pendingDraft 用於 resumeDraft 動作
-        // 注意：由於 reducer 純函數限制，這裡需要手動合併
+      try {
+        const draft = await dataAdapter.draft.get();
+        if (draft && draft.step && draft.step !== 'recognizing') {
+          dispatch({ type: 'RESUME_DRAFT', draft });
+        }
+      } catch {
+        dispatch({ type: 'RESET_FLOW' });
       }
     };
     loadDraft();
+
+    return () => {
+      if (moodCompleteTimeoutRef.current) {
+        clearTimeout(moodCompleteTimeoutRef.current);
+        moodCompleteTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   // 副作用：保存草稿
   useEffect(() => {
     const saveDraft = async () => {
-      if (state.step === 'summary') {
-        await dataAdapter.draft.clear();
-      } else if (state.step !== 'recognizing' || state.selectedQuadrants.length > 0) {
-        const draft: RulerDraft = {
-          step: state.step,
-          selectedQuadrants: state.selectedQuadrants,
-          selectedEmotions: state.selectedEmotions,
-          emotionIntensity: state.emotionIntensity,
-          bodyScanData: state.bodyScanData,
-          understandingData: state.understandingData,
-          expressingData: state.expressingData,
-          regulatingData: state.regulatingData,
-          isFullFlow: state.isFullFlow,
-          postRegulationMood: state.postRegulationMood,
-        };
-        await dataAdapter.draft.save(draft);
+      try {
+        if (state.step === 'summary') {
+          await dataAdapter.draft.clear();
+        } else if (state.step !== 'recognizing' || state.selectedQuadrants.length > 0) {
+          const draft: RulerDraft = {
+            step: state.step,
+            selectedQuadrants: state.selectedQuadrants,
+            selectedEmotions: state.selectedEmotions,
+            emotionIntensity: state.emotionIntensity,
+            bodyScanData: state.bodyScanData,
+            understandingData: state.understandingData,
+            expressingData: state.expressingData,
+            regulatingData: state.regulatingData,
+            isFullFlow: state.isFullFlow,
+            postRegulationMood: state.postRegulationMood,
+          };
+          await dataAdapter.draft.save(draft);
+        }
+      } catch (err) {
+        console.error('[useRulerFlow] Failed to save draft:', err);
       }
     };
     saveDraft();
@@ -326,9 +338,14 @@ export const useRulerFlow = () => {
 
   const handleMoodComplete = (quadrants: Quadrant[], intensity: number) => {
     dispatch({ type: 'SET_MOOD_COMPLETE', quadrants, intensity });
+    // 清除之前的 timeout
+    if (moodCompleteTimeoutRef.current) {
+      clearTimeout(moodCompleteTimeoutRef.current);
+    }
     // 3 秒後自動進入 bodyScan
-    setTimeout(() => {
+    moodCompleteTimeoutRef.current = setTimeout(() => {
       dispatch({ type: 'SET_STEP', step: 'bodyScan' });
+      moodCompleteTimeoutRef.current = null;
     }, 3000);
   };
 
@@ -362,6 +379,10 @@ export const useRulerFlow = () => {
   };
 
   const resetFlow = async () => {
+    if (moodCompleteTimeoutRef.current) {
+      clearTimeout(moodCompleteTimeoutRef.current);
+      moodCompleteTimeoutRef.current = null;
+    }
     await dataAdapter.draft.clear();
     dispatch({ type: 'RESET_FLOW' });
   };

@@ -66,7 +66,8 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
 
     const strategies = strategiesByQuadrant[emotion.quadrant];
 
-    // Update aura color on mount
+    // NOTE: --aura-color controls the global body background gradient (see index.css).
+    // TODO: Refactor to use a React ref or context instead of document.documentElement.
     useEffect(() => {
         document.documentElement.style.setProperty('--aura-color', `hsla(var(--h-${emotion.quadrant}), var(--s-${emotion.quadrant}), var(--l-${emotion.quadrant}), 0.2)`);
     }, [emotion.quadrant]);
@@ -125,7 +126,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
         <div className="regulating-step fade-in">
             {activeInteractive ? (
                 <div className="interactive-overlay fade-in">
-                    <button className="close-overlay" onClick={() => setActiveInteractive(null)}>✕</button>
+                    <button className="close-overlay" aria-label="關閉" onClick={() => setActiveInteractive(null)}>✕</button>
                     {activeInteractive === t('引導式深呼吸') && (
                         <div className="breathing-session">
                             <div className={`pacer-circle ${breatheStage}`}>
@@ -190,8 +191,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
 
                     <div className="strategies-grid">
                         {strategies.map(s => (
-                            <div
+                            <button
                                 key={s.title}
+                                type="button"
                                 className={`strategy-item ${s.type === 'interactive' ? 'interactive' : ''} ${selectedStrategies.includes(s.title) ? 'active' : ''}`}
                                 onClick={() => toggleStrategy(s.title, s.type)}
                             >
@@ -206,7 +208,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                                     <p>{s.desc}</p>
                                 </div>
                                 {selectedStrategies.includes(s.title) && <div className="checked-mark">✓</div>}
-                            </div>
+                            </button>
                         ))}
                     </div>
 
@@ -237,6 +239,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     background: var(--bg-secondary); border: 1px solid var(--glass-border); 
                     border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-luxe); 
                     position: relative; overflow: hidden;
+                    appearance: none; width: 100%; text-align: left; font-family: inherit; font-size: inherit; color: inherit;
                 }
                 .strategy-item:hover { border-color: hsla(0,0%,100%,0.2); background: var(--glass-border); transform: translateX(4px); }
                 .strategy-item.interactive { border-left: 4px solid var(--text-primary); }

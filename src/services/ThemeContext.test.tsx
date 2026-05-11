@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import React from 'react';
 
@@ -75,11 +75,11 @@ describe('ThemeContext', () => {
       result.current.setTheme('light');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 200));
-
     const stored = localStorage.getItem('imxin-theme');
-    expect(stored).not.toBeNull();
-    expect(stored).not.toBe('light');
+    await waitFor(() => {
+      expect(stored).not.toBeNull();
+    });
+    expect(stored).toBe('"light"');
   });
 
   it('應該讀取已保存的主題', () => {

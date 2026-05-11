@@ -234,9 +234,10 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
         green: '#AAB09B'
     };
 
+    // NOTE: --aura-color controls the global body background gradient (see index.css).
+    // TODO: Refactor to use a React ref or context instead of document.documentElement.
     useEffect(() => {
         document.documentElement.style.setProperty('--aura-color', `${quadrantColors[quadrant]}33`);
-        document.documentElement.style.setProperty('--accent-scan', quadrantColors[quadrant]);
         
         // 檢查語音支持
         setIsSupported(voiceGuideService.isSupported());
@@ -293,7 +294,7 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
     }, [isAudioPlaying]);
 
     return (
-        <div className="body-scan-step fade-in">
+        <div className="body-scan-step fade-in" style={{ '--accent-scan': quadrantColors[quadrant] } as React.CSSProperties}>
             <div className="step-header">
                 <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">

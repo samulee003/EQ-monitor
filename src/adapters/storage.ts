@@ -57,12 +57,8 @@ async function storeGet<T>(key: string, fallback: T): Promise<T> {
 
 async function storeSet<T>(key: string, value: T): Promise<void> {
   const json = JSON.stringify(value);
-  try {
-    const encrypted = await encryptData(json);
-    localStorage.setItem(key, encrypted);
-  } catch {
-    localStorage.setItem(key, json);
-  }
+  const encrypted = await encryptData(json);
+  localStorage.setItem(key, encrypted);
 }
 
 function storeRemove(key: string): void {

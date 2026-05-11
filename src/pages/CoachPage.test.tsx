@@ -3,6 +3,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
 
+vi.mock('../services/AuthContext', () => ({
+  useAuth: () => ({ user: null }),
+}));
+
 describe('CoachPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();

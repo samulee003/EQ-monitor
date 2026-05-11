@@ -20,7 +20,7 @@ vi.mock('@insforge/sdk', () => ({
   }),
 }));
 
-import { insforgeAdapter } from './adapter';
+import { insforgeAdapter } from './_deprecated/adapter';
 
 describe('InsForgeAdapter', () => {
   beforeAll(() => {

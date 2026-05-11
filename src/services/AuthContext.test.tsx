@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from './AuthContext';
 import { dataAdapter } from '../adapters';
 import { _injectMasterKey, _resetKeyCache } from '../utils/crypto';
@@ -39,14 +39,12 @@ describe('AuthContext', () => {
     it('初始狀態應為未登入且加載完成', async () => {
         const { result } = renderHook(() => useAuth(), { wrapper });
 
-        // 等待 useEffect 完成
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 50));
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
         });
 
         expect(result.current.user).toBeNull();
         expect(result.current.isAuthenticated).toBe(false);
-        expect(result.current.isLoading).toBe(false);
     });
 
     it('應成功登入', async () => {
@@ -174,12 +172,11 @@ describe('AuthContext', () => {
 
         const { result } = renderHook(() => useAuth(), { wrapper });
 
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 50));
+        await waitFor(() => {
+            expect(result.current.isAuthenticated).toBe(true);
         });
 
         expect(result.current.user).toBeTruthy();
         expect(result.current.user?.email).toBe('existing@example.com');
-        expect(result.current.isAuthenticated).toBe(true);
     });
 });
