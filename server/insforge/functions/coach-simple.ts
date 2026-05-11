@@ -118,7 +118,7 @@ interface StreakData {
 
 async function getUserEmotionSummary(userId: string) {
   try {
-    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || 'https://b88egxiz.ap-southeast.insforge.app';
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
     const anonKey = Deno.env.get('ANON_KEY') || '';
 
     const client = createClient({

@@ -206,7 +206,7 @@ async function main(): Promise<void> {
   const masterKey = getEnv('MIGRATION_MASTER_KEY');
   const email = getEnv('INSFORGE_EMAIL');
   const password = getEnv('INSFORGE_PASSWORD');
-  const apiUrl = process.env.VITE_INSFORGE_URL || 'https://b88egxiz.ap-southeast.insforge.app';
+  const apiUrl = process.env.VITE_INSFORGE_URL || '';
 
   /* -- load localStorage -- */
   if (!fs.existsSync(lsPath)) {

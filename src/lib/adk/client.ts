@@ -1,6 +1,6 @@
 import type { CoachRequest, CoachResponse } from './types';
 
-const COACH_API_URL = import.meta.env.VITE_COACH_API_URL || 'https://b88egxiz.functions.insforge.app/coach';
+const COACH_API_URL = import.meta.env.VITE_COACH_API_URL || '';
 const TIMEOUT_MS = 15000;
 
 export async function sendMessage(req: CoachRequest): Promise<CoachResponse> {
