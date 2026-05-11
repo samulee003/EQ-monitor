@@ -1,6 +1,6 @@
 import { createClient } from '@insforge/sdk';
 
-const API_BASE_URL = import.meta.env.VITE_INSFORGE_URL || 'https://b88egxiz.ap-southeast.insforge.app';
+const API_BASE_URL = import.meta.env.VITE_INSFORGE_URL || '';
 
 export const insforge = createClient({
   baseUrl: API_BASE_URL,
