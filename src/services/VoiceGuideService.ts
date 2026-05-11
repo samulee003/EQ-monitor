@@ -131,7 +131,19 @@ class VoiceGuideService {
      * 檢查是否支持語音
      */
     isSupported(): boolean {
-        return this.synthesis !== null;
+        if (!this.synthesis) return false;
+        // 某些裝置裝了 speechSynthesis 但沒有中文語音 → 播出來會是亂念英文，視同不支援
+        const voices = this.synthesis.getVoices();
+        if (voices.length === 0) return true; // 仍在載入，先樂觀回傳 true，由 hasChineseVoice 在播放前再次檢查
+        return voices.some(v => v.lang?.startsWith('zh'));
+    }
+
+    /**
+     * 確認系統有中文語音可用（播放時的硬性條件）
+     */
+    hasChineseVoice(): boolean {
+        if (!this.synthesis) return false;
+        return this.synthesis.getVoices().some(v => v.lang?.startsWith('zh'));
     }
 
     /**
@@ -180,6 +192,15 @@ class VoiceGuideService {
         this.isPlaying = true;
 
         await this.ensureVoicesLoaded();
+
+        // 如果裝置沒有中文語音，不要硬播英文語音念中文字（會變亂碼念音）
+        if (!this.hasChineseVoice()) {
+            logger.warn('No Chinese TTS voice available; aborting playback');
+            this.isPlaying = false;
+            this.onCompleteCallback?.();
+            return;
+        }
+
         await this.playNextSection();
     }
 
