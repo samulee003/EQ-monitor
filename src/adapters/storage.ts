@@ -19,6 +19,7 @@ import { type RulerLogEntry, type RulerDraft } from '../types/RulerTypes';
 import { type UserProgress } from '../types/HabitTypes';
 import { encryptData, decryptData, isEncrypted } from '../utils/crypto';
 import { hashPassword, verifyPassword, isLegacyHash } from '../utils/passwordHash';
+import { upsertCoachContext, buildCoachContextPatch } from '@/lib/insforge/coachContext';
 
 // ============================================
 // 工具函數
@@ -259,6 +260,19 @@ export const logs = {
     };
     if (logsCache) logsCache.unshift(entry);
     await storeSet(userKey(StorageKeys.LOGS, currentUserId), logsCache || [entry]);
+
+    // 背景同步元數據至 coach_context（非關鍵路徑）
+    ;(async () => {
+      try {
+        if (!currentUserId) return;
+        const allLogs = await logs.export();
+        const patch = buildCoachContextPatch(currentUserId, allLogs);
+        await upsertCoachContext(patch);
+      } catch {
+        // 非關鍵路徑，靜默失敗
+      }
+    })();
+
     return entry;
   },
 
