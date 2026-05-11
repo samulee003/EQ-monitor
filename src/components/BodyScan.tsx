@@ -238,12 +238,15 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
     // TODO: Refactor to use a React ref or context instead of document.documentElement.
     useEffect(() => {
         document.documentElement.style.setProperty('--aura-color', `${quadrantColors[quadrant]}33`);
-        
-        // 檢查語音支持
+
+        // 檢查語音支持（語音清單可能異步載入，先檢查一次，1 秒後再覆檢一次）
         setIsSupported(voiceGuideService.isSupported());
-        
-        // 清理函數
+        const recheck = window.setTimeout(() => {
+            setIsSupported(voiceGuideService.isSupported());
+        }, 1200);
+
         return () => {
+            clearTimeout(recheck);
             voiceGuideService.stop();
         };
     }, [quadrant]);
@@ -324,9 +327,9 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 </button>
                 <div className="audio-info">
                     <span className="audio-title">
-                        {isSupported 
+                        {isSupported
                             ? t('正念身體掃描語音引導 (3分鐘)')
-                            : t('您的瀏覽器不支持語音功能')
+                            : t('此裝置未安裝中文語音引擎，請改用文字版練習')
                         }
                     </span>
                     <div className="audio-progress-bar">

@@ -38,6 +38,49 @@ const scenarios: ScenarioData[] = [
     }
 ];
 
+// 呼吸引導：與 .breathing-circle CSS 動畫節奏對齊（7s 一輪 = 吸 2.45s / 屏 2.1s / 吐 2.45s）
+const BreatheStepView: React.FC<{ onNext: () => void }> = ({ onNext }) => {
+    const [phase, setPhase] = React.useState<'inhale' | 'hold' | 'exhale'>('inhale');
+    React.useEffect(() => {
+        const cycle: { p: 'inhale' | 'hold' | 'exhale'; ms: number }[] = [
+            { p: 'inhale', ms: 2450 },
+            { p: 'hold', ms: 2100 },
+            { p: 'exhale', ms: 2450 },
+        ];
+        let idx = 0;
+        let timer: ReturnType<typeof setTimeout>;
+        const run = () => {
+            setPhase(cycle[idx].p);
+            timer = setTimeout(() => {
+                idx = (idx + 1) % cycle.length;
+                run();
+            }, cycle[idx].ms);
+        };
+        run();
+        return () => clearTimeout(timer);
+    }, []);
+    const phaseLabel = phase === 'inhale' ? '吸氣' : phase === 'hold' ? '屏息' : '吐氣';
+    return (
+        <div className="sos-step breathe-step">
+            <div className="sos-header">
+                <h2>先深呼吸</h2>
+                <p className="sos-subtitle">這份感受很難受，它會過去的</p>
+            </div>
+            <div className="breathing-container">
+                <div className="breathing-circle">
+                    <div className="breathing-text" aria-live="polite">{phaseLabel}</div>
+                </div>
+                <p className="breathing-instruction">
+                    跟著圓圈的節奏呼吸
+                </p>
+            </div>
+            <button className="sos-primary-btn" onClick={onNext}>
+                我準備好了，下一步 →
+            </button>
+        </div>
+    );
+};
+
 const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
     const [step, setStep] = useState<SOSStep>('select');
     const [selectedScenario, setSelectedScenario] = useState<SOSScenario | null>(null);
@@ -90,7 +133,7 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
     const renderSelectStep = () => (
         <div className="sos-step select-step">
             <div className="sos-header">
-                <h2>🆘 情緒急救</h2>
+                <h2>情緒急救</h2>
                 <p className="sos-subtitle">選擇你現在的情境，我們陪你一起處理</p>
             </div>
 
@@ -116,35 +159,14 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
         </div>
     );
 
-    const renderBreatheStep = () => (
-        <div className="sos-step breathe-step">
-            <div className="sos-header">
-                <h2>💚 先深呼吸</h2>
-                <p className="sos-subtitle">你已經做得很好了，這種感受很難，但它會過去</p>
-            </div>
-
-            <div className="breathing-container">
-                <div className="breathing-circle">
-                    <div className="breathing-text">吸氣...</div>
-                </div>
-                <p className="breathing-instruction">
-                    跟著圓圈的節奏呼吸<br/>
-                    吸氣 4 秒 → 憋氣 4 秒 → 吐氣 6 秒
-                </p>
-            </div>
-
-            <button className="sos-primary-btn" onClick={startBreathing}>
-                我準備好了，下一步 →
-            </button>
-        </div>
-    );
+    const renderBreatheStep = () => <BreatheStepView onNext={startBreathing} />;
 
     const renderActionStep = () => {
         if (!selectedScenario) return null;
 
         const actions: Record<SOSScenario, { title: string; steps: { icon: string; title: string; desc: string }[] }> = {
             yelled: {
-                title: '🛠️ 修復三步驟',
+                title: '修復',
                 steps: [
                     {
                         icon: '🧘',
@@ -164,7 +186,7 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
                 ]
             },
             crying: {
-                title: '🛠️ 暫停策略',
+                title: '暫停',
                 steps: [
                     {
                         icon: '✅',
@@ -184,7 +206,7 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
                 ]
             },
             overwhelmed: {
-                title: '🆘 緊急自我慈悲',
+                title: '陪伴自己',
                 steps: [
                     {
                         icon: '📞',
