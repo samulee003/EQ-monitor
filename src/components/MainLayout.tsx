@@ -157,7 +157,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           width: 40px;
           object-fit: contain;
           border-radius: 8px;
-          filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
           transition: transform 0.3s ease;
         }
 
@@ -173,7 +172,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          filter: drop-shadow(0 0 20px rgba(197, 139, 138, 0.2));
           white-space: nowrap;
           flex-shrink: 0;
         }
@@ -239,7 +237,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
         .achievement-nav-btn:hover { transform: scale(1.1); background: var(--glass-border); }
         .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
-        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: hsla(43, 40%, 70%, 0.15); }
+        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: var(--surface-hover); }
 
         .settings-btn {
           background: var(--glass-bg);

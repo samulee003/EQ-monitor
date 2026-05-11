@@ -490,7 +490,7 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 .audio-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
                 .audio-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
                 .audio-section { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
-                .audio-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+                .audio-progress-bar { width: 100%; height: 4px; background: var(--surface-hover); border-radius: 2px; overflow: hidden; }
                 .audio-progress-fill { height: 100%; background: var(--accent-scan); border-radius: 2px; transition: width 0.3s linear; }
                 .audio-play-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -529,8 +529,8 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
 
                 /* Popular items get subtle initial highlight */
                 .scan-btn.popular {
-                    border-color: hsla(0, 0%, 100%, 0.12);
-                    background: hsla(0, 0%, 100%, 0.03);
+                    border-color: var(--glass-border);
+                    background: var(--glass-bg);
                 }
                 .popular-dot {
                     position: absolute;
@@ -544,19 +544,19 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 }
 
                 .scan-btn:hover {
-                    border-color: var(--accent-scan, hsla(0, 0%, 100%, 0.25));
-                    background: hsla(0, 0%, 100%, 0.05);
+                    border-color: var(--accent-scan, var(--glass-border));
+                    background: var(--glass-bg);
                     transform: translateY(-2px);
                     color: var(--text-primary);
                 }
 
                 .scan-btn.active {
-                    background: hsla(0, 0%, 100%, 0.08);
+                    background: var(--glass-bg);
                     color: var(--text-primary);
                     border-color: var(--accent-scan, var(--text-primary));
                     box-shadow: 
                         0 4px 24px hsla(0, 0%, 0%, 0.3),
-                        inset 0 0 20px hsla(0, 0%, 100%, 0.04);
+                        inset 0 0 20px var(--glass-bg);
                     transform: translateY(-3px) scale(1.02);
                 }
 
@@ -566,16 +566,16 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: hsla(0, 0%, 100%, 0.04);
+                    background: var(--glass-bg);
                     border-radius: 12px;
-                    border: 1px solid hsla(0, 0%, 100%, 0.06);
+                    border: 1px solid var(--glass-border);
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                     flex-shrink: 0;
                 }
 
                 .scan-btn:hover .icon-wrapper {
-                    background: hsla(0, 0%, 100%, 0.08);
-                    border-color: var(--accent-scan, hsla(0, 0%, 100%, 0.15));
+                    background: var(--surface-elevated);
+                    border-color: var(--accent-scan, var(--glass-border));
                 }
 
                 .scan-btn.active .icon-wrapper {

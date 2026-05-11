@@ -491,11 +491,11 @@ const GrowthDashboard: React.FC = () => {
                 }
                 .heatmap-cell { 
                     aspect-ratio: 1; 
-                    background: rgba(255,255,255,0.03); 
+                    background: var(--surface-hover); 
                     border-radius: 3px; 
                     transition: transform 0.2s; 
                 }
-                .heatmap-cell.active:hover { transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,255,0.1); z-index: 10; cursor: help; }
+                .heatmap-cell.active:hover { transform: scale(1.2); box-shadow: 0 0 10px var(--glass-border); z-index: 10; cursor: help; }
                 
                 .heatmap-legend { 
                     display: flex; 
@@ -568,12 +568,12 @@ const GrowthDashboard: React.FC = () => {
 
                 .metric-visual { flex-shrink: 0; }
                 .metric-visual .circular-chart { width: 56px; height: 56px; }
-                .metric-visual .circle.granularity { stroke: #4DD0E1; }
+                .metric-visual .circle.granularity { stroke: var(--color-blue); }
 
                 .toolbox-icon {
                     width: 56px;
                     height: 56px;
-                    background: linear-gradient(135deg, rgba(255,193,7,0.2), rgba(255,152,0,0.2));
+                    background: linear-gradient(135deg, rgba(213, 193, 165, 0.2), rgba(197, 168, 138, 0.2));
                     border-radius: 12px;
                     display: flex;
                     flex-direction: column;
@@ -615,16 +615,16 @@ const GrowthDashboard: React.FC = () => {
                     padding: 2px 8px;
                     font-size: 0.65rem;
                     border-radius: 20px;
-                    background: rgba(255,255,255,0.08);
+                    background: var(--surface-hover);
                     color: var(--text-secondary);
                     font-weight: 600;
                 }
                 .badge-icon { width: 12px; height: 12px; display: inline-flex; }
                 .badge-icon svg { width: 100%; height: 100%; }
-                .level-badge.beginner, .level-badge.starter { background: rgba(158,158,158,0.2); }
-                .level-badge.growing, .level-badge.developing { background: rgba(76,175,80,0.2); color: #81C784; }
-                .level-badge.rich, .level-badge.diverse { background: rgba(33,150,243,0.2); color: #64B5F6; }
-                .level-badge.expert, .level-badge.master { background: rgba(255,193,7,0.2); color: #FFD54F; }
+                .level-badge.beginner, .level-badge.starter { background: var(--glass-bg); }
+                .level-badge.growing, .level-badge.developing { background: rgba(170, 176, 155, 0.2); color: var(--color-green); }
+                .level-badge.rich, .level-badge.diverse { background: rgba(151, 166, 180, 0.2); color: var(--color-blue); }
+                .level-badge.expert, .level-badge.master { background: rgba(213, 193, 165, 0.2); color: var(--color-yellow); }
 
                 .section-icon { width: 16px; height: 16px; display: inline-flex; vertical-align: middle; margin-right: 4px; }
                 .section-icon svg { width: 100%; height: 100%; }
@@ -646,7 +646,7 @@ const GrowthDashboard: React.FC = () => {
 
                 /* AI Insight Section Styles */
                 .ai-insight-section {
-                    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+                    background: var(--glass-bg);
                     border: 1px solid var(--glass-border);
                     border-radius: var(--radius-lg);
                     padding: 1.25rem;
@@ -761,7 +761,7 @@ const GrowthDashboard: React.FC = () => {
                     align-items: flex-start;
                     gap: 0.75rem;
                     padding: 0.75rem 1rem;
-                    background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent);
+                    background: linear-gradient(90deg, rgba(213, 193, 165, 0.1), transparent);
                     border-radius: var(--radius-md);
                     font-size: 0.9rem;
                     color: var(--text-secondary);
@@ -808,7 +808,7 @@ const GrowthDashboard: React.FC = () => {
                 }
                 .pattern-tag {
                     padding: 4px 10px;
-                    background: rgba(255,255,255,0.05);
+                    background: var(--surface-hover);
                     border: 1px solid var(--glass-border);
                     border-radius: 16px;
                     font-size: 0.8rem;

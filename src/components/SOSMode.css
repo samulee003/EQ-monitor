@@ -28,13 +28,13 @@
 .sos-header h2 {
     font-size: 28px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 12px;
 }
 
 .sos-subtitle {
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
     line-height: 1.6;
 }
 
@@ -47,8 +47,8 @@
 }
 
 .scenario-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
     border-radius: 20px;
     padding: 24px;
     display: flex;
@@ -60,7 +60,7 @@
 }
 
 .scenario-card:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--surface-hover);
     border-color: #C58B8A;
     transform: translateY(-2px);
 }
@@ -77,12 +77,12 @@
 .scenario-title {
     font-size: 20px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .scenario-subtitle {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
 }
 
 /* 呼吸頁面 */
@@ -130,13 +130,13 @@
 .breathing-text {
     font-size: 24px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .breathing-instruction {
     text-align: center;
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     line-height: 1.8;
 }
 
@@ -151,10 +151,10 @@
 .action-step-item {
     display: flex;
     gap: 16px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-elevated);
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
 }
 
 .action-step-number {
@@ -162,7 +162,7 @@
     height: 32px;
     border-radius: 50%;
     background: #C58B8A;
-    color: #fff;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -185,13 +185,13 @@
 .action-step-text h4 {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .action-step-text p {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -236,7 +236,7 @@
 
 .timer-label {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
 }
 
 /* 完成頁面 */
@@ -262,13 +262,13 @@
 .complete-step h2 {
     font-size: 32px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 16px;
 }
 
 .complete-message {
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
     line-height: 1.8;
     margin-bottom: 32px;
 }
@@ -301,25 +301,25 @@
 .sos-secondary-btn {
     width: 100%;
     background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--glass-border);
     border-radius: 16px;
     padding: 16px 32px;
     font-size: 16px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .sos-secondary-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: var(--surface-hover);
+    border-color: var(--glass-border);
 }
 
 .sos-back-btn {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
     padding: 12px;
@@ -327,7 +327,7 @@
 }
 
 .sos-back-btn:hover {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
 }
 
 /* 響應式設計 */

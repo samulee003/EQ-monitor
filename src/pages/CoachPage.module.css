@@ -69,7 +69,7 @@
 
 .errorMessage {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   flex: 1;
   line-height: 1.5;
 }
@@ -78,8 +78,8 @@
   font-size: 0.875rem;
   padding: var(--s-1) var(--s-3);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: var(--glass-bg);
+  color: var(--text-primary);
   border: none;
   cursor: pointer;
   white-space: nowrap;
@@ -89,7 +89,7 @@
 }
 
 .retryButton:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--glass-border);
 }
 
 .retryButton:active {

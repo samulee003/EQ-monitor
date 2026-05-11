@@ -143,12 +143,12 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
             .step-tag { font-size: 0.8rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.4rem 0.8rem; border-radius: 20px; }
             .intensity-display { height: 260px; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
             .preview-sphere { width: 160px; height: 160px; position: relative; display: flex; align-items: center; justify-content: center; }
-            .sphere-core { position: absolute; inset: 0; border-radius: 50%; background: var(--dynamic-color); border: 2px solid rgba(255,255,255, calc(0.15 + var(--current-vibrancy) * 0.5)); box-shadow: 0 0 calc(var(--glow-size) * 0.6) var(--dynamic-color); transition: all 0.3s ease; opacity: 0.8; }
+            .sphere-core { position: absolute; inset: 0; border-radius: 50%; background: var(--dynamic-color); border: 2px solid var(--glass-border); box-shadow: 0 0 calc(var(--glow-size) * 0.6) var(--dynamic-color); transition: all 0.3s ease; opacity: 0.8; }
             .sphere-glow-layer { position: absolute; inset: -15px; border-radius: 50%; background: var(--dynamic-color); opacity: calc(0.1 + var(--current-vibrancy) * 0.2); filter: blur(calc(var(--glow-size) * 0.8)); transition: all 0.3s ease; }
             .intensity-control-card { width: 100%; background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); }
             .intensity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
             .intensity-value { font-size: 2rem; font-weight: 800; color: var(--dynamic-color); font-family: 'Outfit', sans-serif; }
-            .morandi-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); outline: none; transition: 0.2s; }
+            .morandi-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--glass-bg); outline: none; transition: 0.2s; }
             .morandi-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--dynamic-color); cursor: pointer; border: 4px solid var(--bg-secondary); box-shadow: 0 0 15px var(--dynamic-color); }
             .slider-labels { display: flex; justify-content: space-between; margin-top: 1rem; color: var(--text-secondary); font-size: 0.8rem; }
             .morandi-main-btn { width: 100%; padding: 1.25rem; background: var(--text-primary); color: var(--bg-color); font-weight: 700; font-size: 1.1rem; border: none; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
