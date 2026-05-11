@@ -241,9 +241,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     position: relative; overflow: hidden;
                     appearance: none; width: 100%; text-align: left; font-family: inherit; font-size: inherit; color: inherit;
                 }
-                .strategy-item:hover { border-color: hsla(0,0%,100%,0.2); background: var(--glass-border); transform: translateX(4px); }
+                .strategy-item:hover { border-color: var(--glass-border); background: var(--glass-border); transform: translateX(4px); }
                 .strategy-item.interactive { border-left: 4px solid var(--text-primary); }
-                .strategy-item.active { border-color: var(--text-primary); background: hsla(0,0%,100%,0.05); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                .strategy-item.active { border-color: var(--text-primary); background: var(--glass-bg); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
                 
                 .strategy-icon-wrapper {
                     width: 52px;
@@ -251,7 +251,7 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: hsla(0,0%,100%,0.03);
+                    background: var(--glass-bg);
                     border-radius: 16px;
                     border: 1px solid var(--glass-border);
                     transition: var(--transition-luxe);
@@ -290,15 +290,15 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     letter-spacing: 1px;
                 }
                 .strategy-meta p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
-                .checked-mark { position: absolute; right: var(--s-6); color: var(--text-primary); font-weight: 900; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); opacity: 0.8; }
-                .strategy-item.active .checked-mark { color: #fff; }
+                .checked-mark { position: absolute; right: var(--s-6); color: var(--text-primary); font-weight: 900; filter: drop-shadow(0 0 10px var(--glass-border)); opacity: 0.8; }
+                .strategy-item.active .checked-mark { color: var(--text-primary); }
                 
                 /* Interactive Overlays */
                 .interactive-overlay { 
                     position: fixed; inset: 0; background: var(--bg-color); 
                     z-index: 1000; padding: var(--s-12) var(--s-6); display: flex; flex-direction: column;
                     align-items: center; justify-content: center;
-                    background-image: radial-gradient(circle at center, hsla(0,0%,100%,0.03) 0%, transparent 70%);
+                    background-image: radial-gradient(circle at center, var(--glass-bg) 0%, transparent 70%);
                 }
                 .close-overlay { position: absolute; top: var(--s-8); right: var(--s-8); background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-luxe); backdrop-filter: var(--glass-blur); }
                 .close-overlay:hover { background: var(--glass-border); transform: rotate(90deg); }
@@ -310,9 +310,9 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                     background: var(--text-primary); display: flex; 
                     align-items: center; justify-content: center;
                     transition: all 4s cubic-bezier(0.4, 0, 0.2, 1); 
-                    box-shadow: 0 0 80px hsla(0, 0%, 100%, 0.1);
+                    box-shadow: 0 0 80px var(--glass-border);
                 }
-                .pacer-circle::after { content: ''; position: absolute; inset: -20px; border: 1px solid hsla(0, 0%, 100%, 0.1); border-radius: 50%; animation: pulseAura 4s infinite; }
+                .pacer-circle::after { content: ''; position: absolute; inset: -20px; border: 1px solid var(--glass-border); border-radius: 50%; animation: pulseAura 4s infinite; }
                 
                 @keyframes pulseAura {
                     from { transform: scale(1); opacity: 0.5; }

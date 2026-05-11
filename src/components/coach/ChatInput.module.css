@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   background: var(--grad-red);
-  color: #fff;
+  color: var(--text-primary);
   border: none;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(214, 115, 115, 0.35);
@@ -87,7 +87,7 @@
 
 .sendButtonActive {
   background: var(--grad-blue);
-  color: #fff;
+  color: var(--text-primary);
   box-shadow: 0 2px 10px rgba(107, 143, 168, 0.35);
 }
 
@@ -113,7 +113,7 @@
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--text-secondary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;

@@ -205,7 +205,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
           opacity: 0.9;
           filter: blur(0.5px);
           box-shadow: 
-            inset 0 4px 8px hsla(0, 0%, 100%, 0.3),
+            inset 0 4px 8px hsla(0, 0%, 0%, 0.15),
             inset 0 -4px 8px rgba(0,0,0,0.2),
             0 10px 25px -5px rgba(0,0,0,0.3);
           transition: var(--transition-luxe);
@@ -267,7 +267,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
         .sphere-wrapper:hover .sphere-inner {
           opacity: 1;
           box-shadow: 
-            inset 0 4px 12px hsla(0, 0%, 100%, 0.4),
+            inset 0 4px 12px hsla(0, 0%, 0%, 0.2),
             inset 0 -6px 12px rgba(0,0,0,0.3),
             0 15px 35px -5px rgba(0,0,0,0.4);
         }
@@ -289,7 +289,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
         }
         .sphere-wrapper.active .sphere-inner {
           box-shadow:
-            inset 0 4px 12px hsla(0, 0%, 100%, 0.5),
+            inset 0 4px 12px hsla(0, 0%, 0%, 0.25),
             0 0 20px currentColor;
           border: 2px solid var(--text-primary);
         }

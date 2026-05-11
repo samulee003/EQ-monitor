@@ -33,6 +33,13 @@
   --glass-border: hsla(0, 0%, 100%, 0.08);
   --glass-blur: blur(24px);
 
+  /* Semantic Surface Tokens */
+  --surface-elevated: hsla(0, 0%, 100%, 0.06);
+  --surface-hover: hsla(0, 0%, 100%, 0.1);
+  --surface-input: hsla(0, 0%, 0%, 0.2);
+  --surface-mask: hsla(0, 0%, 0%, 0.6);
+  --divider: hsla(0, 0%, 100%, 0.1);
+
   --shadow-luxe:
     0 4px 24px -1px rgba(0, 0, 0, 0.2),
     0 10px 40px -5px rgba(0, 0, 0, 0.3),
@@ -78,8 +85,15 @@
   --grad-green: radial-gradient(circle at center, #9bc48d 0%, rgba(141, 174, 127, 0.2) 70%);
 
   /* UI Tokens - Light Theme */
-  --glass-bg: hsla(0, 0%, 0%, 0.025);
-  --glass-border: hsla(0, 0%, 0%, 0.08);
+  --glass-bg: hsla(0, 0%, 0%, 0.04);
+  --glass-border: hsla(0, 0%, 0%, 0.12);
+
+  /* Semantic Surface Tokens - Light Theme */
+  --surface-elevated: hsla(0, 0%, 0%, 0.04);
+  --surface-hover: hsla(0, 0%, 0%, 0.08);
+  --surface-input: hsla(0, 0%, 0%, 0.06);
+  --surface-mask: hsla(0, 0%, 0%, 0.4);
+  --divider: hsla(0, 0%, 0%, 0.1);
 
   --shadow-luxe:
     0 4px 24px -1px rgba(0, 0, 0, 0.08),

@@ -63,7 +63,7 @@ const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', count = 1, className
           background: linear-gradient(
             90deg,
             var(--glass-border) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
+            var(--glass-bg) 50%,
             var(--glass-border) 75%
           );
           background-size: 200% 100%;

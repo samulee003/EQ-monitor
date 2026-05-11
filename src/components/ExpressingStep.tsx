@@ -173,7 +173,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                     border-radius: var(--radius-md); cursor: pointer; text-align: left;
                     transition: var(--transition-luxe);
                 }
-                .mode-card.active { border-color: var(--text-primary); background: hsla(0,0%,100%,0.05); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                .mode-card.active { border-color: var(--text-primary); background: var(--glass-bg); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
                 
                 .mode-icon-wrapper {
                     width: 48px;
@@ -181,7 +181,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: hsla(0,0%,100%,0.03);
+                    background: var(--glass-bg);
                     border-radius: 14px;
                     border: 1px solid var(--glass-border);
                     transition: var(--transition-luxe);
@@ -220,7 +220,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 .textarea-container { position: relative; flex: 1; display: flex; }
 
                 .expression-textarea { 
-                    width: 100%; min-height: 200px; background: rgba(0,0,0,0.2); 
+                    width: 100%; min-height: 200px; background: var(--surface-input); 
                     border: 1px solid var(--glass-border); border-radius: var(--radius-sm); 
                     padding: 1rem; color: var(--text-primary); font-family: inherit; 
                     font-size: 1rem; line-height: 1.6; outline: none; resize: none; 
@@ -273,7 +273,7 @@ const ExpressingStep: React.FC<ExpressingStepProps> = ({ emotion, onComplete, on
                 .reset-btn { background: none; border: 1px solid var(--text-secondary); color: var(--text-secondary); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
 
                 .shred-trigger-btn { 
-                    width: 100%; padding: 1.25rem; background: #B48A89; color: #fff; 
+                    width: 100%; padding: 1.25rem; background: #B48A89; color: var(--text-primary); 
                     font-weight: 700; border: none; border-radius: var(--radius-md); 
                     cursor: pointer; transition: var(--transition);
                 }

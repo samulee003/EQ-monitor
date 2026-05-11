@@ -252,7 +252,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                 .field-desc { font-size: 0.8rem; color: var(--text-secondary); margin: calc(-1 * var(--s-2)) 0 var(--s-4) 0; opacity: 0.7; }
                 
                 .morandi-textarea { 
-                    width: 100%; min-height: 100px; background: hsla(0, 0%, 0%, 0.2); 
+                    width: 100%; min-height: 100px; background: var(--surface-input); 
                     border: 1px solid var(--glass-border); border-radius: var(--radius-md); 
                     padding: var(--s-4); color: var(--text-primary); font-family: inherit; 
                     resize: vertical; outline: none; transition: var(--transition-luxe);
@@ -267,8 +267,8 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                     border-radius: var(--radius-md); cursor: pointer; text-align: left;
                     transition: var(--transition-luxe);
                 }
-                .need-card:hover { border-color: hsla(0, 0%, 100%, 0.2); background: var(--glass-border); transform: translateX(4px); }
-                .need-card.active { background: hsla(0, 0%, 100%, 0.05); border-color: var(--text-primary); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
+                .need-card:hover { border-color: var(--glass-border); background: var(--glass-border); transform: translateX(4px); }
+                .need-card.active { background: var(--glass-bg); border-color: var(--text-primary); box-shadow: var(--shadow-luxe); transform: scale(1.02); }
                 
                 .need-icon-wrapper {
                     width: 48px;
@@ -276,7 +276,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: hsla(0, 0%, 100%, 0.03);
+                    background: var(--glass-bg);
                     border-radius: 14px;
                     border: 1px solid var(--glass-border);
                     transition: var(--transition-luxe);
@@ -321,7 +321,7 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComple
                     min-height: 44px;  /* Touch-friendly minimum */
                     display: inline-flex; align-items: center; justify-content: center;
                 }
-                .morandi-chip:hover { border-color: hsla(0, 0%, 100%, 0.2); color: var(--text-primary); }
+                .morandi-chip:hover { border-color: var(--glass-border); color: var(--text-primary); }
                 .morandi-chip.active { background: var(--text-primary); color: var(--bg-color); border-color: var(--text-primary); font-weight: 700; box-shadow: var(--shadow-sm); }
                 .morandi-chip.add { border-style: dashed; opacity: 0.6; }
                 

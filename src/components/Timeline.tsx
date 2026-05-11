@@ -344,7 +344,7 @@ const Timeline: React.FC = () => {
                         transition: var(--transition);
                     }
                     .import-btn-empty:hover {
-                        background: rgba(255,255,255,0.05);
+                        background: var(--surface-hover);
                         color: var(--text-primary);
                         border-color: var(--text-secondary);
                     }
@@ -359,8 +359,8 @@ const Timeline: React.FC = () => {
                         animation: slideUp 0.3s ease;
                         z-index: 1000;
                     }
-                    .import-toast.success { background: var(--color-green); color: white; }
-                    .import-toast.error { background: var(--color-red); color: white; }
+                    .import-toast.success { background: var(--color-green); color: var(--text-primary); }
+                    .import-toast.error { background: var(--color-red); color: var(--text-primary); }
                     @keyframes slideUp {
                         from { opacity: 0; transform: translateX(-50%) translateY(10px); }
                         to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -519,7 +519,7 @@ const Timeline: React.FC = () => {
                     color: var(--bg-color);
                     border: none;
                 }
-                .export-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: var(--text-secondary); }
+                .export-btn:hover { background: var(--surface-hover); color: var(--text-primary); border-color: var(--text-secondary); }
                 .export-btn.primary:hover { filter: brightness(0.9); transform: translateY(-1px); }
                 .export-btn.secondary { padding: 8px 12px; opacity: 0.6; }
                 .export-btn.secondary:hover { opacity: 1; }
@@ -547,8 +547,8 @@ const Timeline: React.FC = () => {
                     box-shadow: var(--shadow-luxe);
                     white-space: nowrap;
                 }
-                .import-toast.success { background: var(--color-green); color: #fff; }
-                .import-toast.error { background: var(--color-red); color: #fff; }
+                .import-toast.success { background: var(--color-green); color: var(--text-primary); }
+                .import-toast.error { background: var(--color-red); color: var(--text-primary); }
                 @keyframes slideUp {
                     from { opacity: 0; transform: translateX(-50%) translateY(10px); }
                     to { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -559,7 +559,7 @@ const Timeline: React.FC = () => {
                     .timeline-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
                 }
                 .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
-                .timeline-card:hover { border-color: hsla(0,0%,100%,0.15); background: var(--glass-bg); }
+                .timeline-card:hover { border-color: var(--glass-border); background: var(--glass-bg); }
                 
                 .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
                 .card-date { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -684,7 +684,7 @@ const Timeline: React.FC = () => {
                 }
                 .delete-confirm-btn {
                     background: var(--color-red);
-                    color: #fff;
+                    color: var(--text-primary);
                 }
                 .delete-confirm-btn:hover { filter: brightness(1.1); }
                 .delete-cancel-btn {
