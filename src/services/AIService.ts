@@ -23,12 +23,8 @@ export interface AIInsight {
 
 class AIService {
     // 環境變量來源說明：
-    // - VITE_API_PROXY_URL: 優先使用的代理端點（推薦，Key 在服務端）
-    // - VITE_ZEABUR_AI_API_URL: Zeabur 直连 API URL
-    // - VITE_ZEABUR_AI_API_KEY: API Key（僅在無代理時使用，絕不硬編碼）
+    // - VITE_API_PROXY_URL: 使用的代理端點（Key 在服務端，更安全）
     private proxyUrl = import.meta.env.VITE_API_PROXY_URL;
-    private apiUrl = import.meta.env.VITE_ZEABUR_AI_API_URL;
-    private apiKey = import.meta.env.VITE_ZEABUR_AI_API_KEY;
 
     private static MOCK_INSIGHTS: Record<string, AIInsight> = {
         "default": {
@@ -80,10 +76,10 @@ class AIService {
             ? RULER_COACH_SYSTEM_PROMPT + '\n' + PARENTING_CONTEXT_ADDON
             : RULER_COACH_SYSTEM_PROMPT;
 
-        // 優先使用代理端點（Key 在服務端，更安全）
+        // 使用代理端點（Key 在服務端，更安全）
         if (this.proxyUrl) {
             try {
-                const response = await fetch(this.proxyUrl, {
+                const response = await this.fetchWithTimeout(this.proxyUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -99,48 +95,19 @@ class AIService {
                     const result = await response.json();
                     return this.parseAIResponse(result.choices?.[0]?.message?.content);
                 }
-                logger.warn('[AIService] Proxy failed, falling back to direct API');
+                logger.warn('[AIService] Proxy failed, using mock fallback');
             } catch (error) {
-                logger.warn('[AIService] Proxy error, falling back to direct API', { error: String(error) });
+                if (error instanceof Error && error.name === 'AbortError') {
+                    logger.warn('[AIService] Proxy request timed out, using mock fallback');
+                } else {
+                    logger.warn('[AIService] Proxy error, using mock fallback', { error: String(error) });
+                }
             }
+        } else {
+            logger.warn('[AIService] No proxy URL configured, using mock data');
         }
 
-        // 回退：直接調用（需要環境變量中的 Key）
-        if (!this.apiKey || !this.apiUrl) {
-            logger.warn('[AIService] Missing API Key or URL, using mock data');
-            return this.getMockFallback(data.emotion?.quadrant);
-        }
-
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: userPrompt }
-                    ],
-                    model: "gpt-4o",
-                    temperature: 0.7
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            const content = result.choices?.[0]?.message?.content;
-
-            return this.parseAIResponse(content);
-
-        } catch (error) {
-            logger.error('[AIService] AI Service Failed', { error: String(error) });
-            return this.getMockFallback(data.emotion?.quadrant);
-        }
+        return this.getMockFallback(data.emotion?.quadrant);
     }
 
     private detectParentingContext(data: AIAnalysisData): boolean {
@@ -176,6 +143,17 @@ class AIService {
         }
     }
 
+    private async fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 30000): Promise<Response> {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const res = await fetch(url, { ...options, signal: controller.signal });
+            return res;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
     private getMockFallback(quadrant?: string): AIInsight {
         return AIService.MOCK_INSIGHTS[quadrant || "default"] || AIService.MOCK_INSIGHTS["default"];
     }
@@ -196,7 +174,7 @@ class AIService {
         const dominantQuadrant = Object.entries(quadrantCounts)
             .sort((a, b) => b[1] - a[1])[0]?.[0] || 'green';
 
-        if (!this.apiKey || !this.apiUrl) {
+        if (!this.proxyUrl) {
             const weekMockInsights: Record<string, AIInsight> = {
                 red: {
                     summary: "本週你經歷了許多高能量的挑戰時刻。這些「紅色」時光顯示你對生活充滿投入，但也需要學會在刺激與反應之間找到緩衝空間。",
@@ -248,12 +226,9 @@ class AIService {
                 fullFlowCount: logs.filter(l => l.isFullFlow).length
             };
 
-            const response = await fetch(this.apiUrl, {
+            const response = await this.fetchWithTimeout(this.proxyUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
                         { role: "system", content: WEEKLY_INSIGHT_SYSTEM_PROMPT },
@@ -268,7 +243,11 @@ class AIService {
             const result = await response.json();
             return this.parseAIResponse(result.choices?.[0]?.message?.content);
         } catch (error) {
-            logger.error('[AIService] Weekly Insight Failed', { error: String(error) });
+            if (error instanceof Error && error.name === 'AbortError') {
+                logger.warn('[AIService] Weekly insight request timed out, using mock fallback');
+            } else {
+                logger.error('[AIService] Weekly Insight Failed', { error: String(error) });
+            }
             return this.getMockFallback(dominantQuadrant);
         }
     }
@@ -278,7 +257,7 @@ class AIService {
      * Real-time chat with AI assistant for emotional support and guidance.
      */
     async chatWithAssistant(userMessage: string, history: ChatHistoryEntry[] = []): Promise<string> {
-        if (!this.apiKey || !this.apiUrl) {
+        if (!this.proxyUrl) {
             return this.getMockChatResponse(userMessage);
         }
 
@@ -290,12 +269,9 @@ class AIService {
                 intensity: log.intensity
             }));
 
-            const response = await fetch(this.apiUrl, {
+            const response = await this.fetchWithTimeout(this.proxyUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
                         { 
@@ -325,7 +301,11 @@ class AIService {
             const result = await response.json();
             return result.choices?.[0]?.message?.content || this.getMockChatResponse(userMessage);
         } catch (error) {
-            logger.error('[AIService] Chat failed', { error: String(error) });
+            if (error instanceof Error && error.name === 'AbortError') {
+                logger.warn('[AIService] Chat request timed out, using mock fallback');
+            } else {
+                logger.error('[AIService] Chat failed', { error: String(error) });
+            }
             return this.getMockChatResponse(userMessage);
         }
     }

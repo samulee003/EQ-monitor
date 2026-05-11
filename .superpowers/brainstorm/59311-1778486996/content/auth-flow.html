@@ -1,0 +1,115 @@
+<h2>設計第 1 段：認證 + 資料同步</h2>
+<p class="subtitle">Auth Modal 流程 — 三個狀態</p>
+
+<div class="section">
+  <h3>狀態機流程</h3>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;min-width:120px;">
+      <div class="label">① 入口</div>
+      <div style="font-size:13px;margin-top:4px;">訪客模式<br>（現有 localStorage）</div>
+    </div>
+    <div style="font-size:20px;color:var(--accent);">→</div>
+    <div style="background:var(--surface);border:2px solid var(--accent);border-radius:8px;padding:12px 16px;text-align:center;min-width:120px;">
+      <div class="label" style="color:var(--accent);">② Auth Modal</div>
+      <div style="font-size:13px;margin-top:4px;">登入 / 註冊<br>+ 隱私同意</div>
+    </div>
+    <div style="font-size:20px;color:var(--accent);">→</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;min-width:120px;">
+      <div class="label">③ 遷移</div>
+      <div style="font-size:13px;margin-top:4px;">localStorage<br>→ InsForge</div>
+    </div>
+    <div style="font-size:20px;color:var(--accent);">→</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;min-width:120px;">
+      <div class="label">④ 完成</div>
+      <div style="font-size:13px;margin-top:4px;">雙寫模式<br>本機 + 雲端</div>
+    </div>
+  </div>
+</div>
+
+<div class="split" style="gap:20px;">
+  <!-- 左：Auth Modal 設計 -->
+  <div class="mockup" style="flex:1;">
+    <div class="mockup-header">Auth Modal — 註冊畫面</div>
+    <div class="mockup-body" style="padding:20px;font-size:13px;">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:18px;font-weight:600;">建立帳號</div>
+        <div style="color:var(--text-muted);font-size:12px;margin-top:4px;">雲端備份 · AI 教練記憶 · 跨裝置同步</div>
+      </div>
+      <div class="mock-input" style="margin-bottom:8px;">Email</div>
+      <div class="mock-input" style="margin-bottom:8px;">密碼</div>
+      <div class="mock-input" style="margin-bottom:16px;">確認密碼</div>
+
+      <!-- 社交登入 -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <div class="mock-button" style="flex:1;font-size:12px;background:var(--surface);color:var(--text);border:1px solid var(--border);">G  Google</div>
+        <div class="mock-button" style="flex:1;font-size:12px;background:var(--surface);color:var(--text);border:1px solid var(--border);">⌥  GitHub</div>
+      </div>
+
+      <!-- 隱私聲明（關鍵） -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:16px;height:16px;border:2px solid var(--accent);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent);">✓</div>
+          <div style="font-size:11px;line-height:1.5;color:var(--text-muted);">
+            我同意將本機情緒記錄備份至雲端，並了解：數據僅用於提供個人化 AI 教練功能，不作商業用途。閱讀<span style="color:var(--accent);text-decoration:underline;">隱私權政策</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:16px;height:16px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;"></div>
+          <div style="font-size:11px;line-height:1.5;color:var(--text-muted);">
+            允許 AI 教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-button" style="width:100%;background:var(--accent);color:#fff;font-size:14px;">建立帳號</div>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--text-muted);">已有帳號？<span style="color:var(--accent);">登入</span></div>
+    </div>
+  </div>
+
+  <!-- 右：遷移畫面 -->
+  <div class="mockup" style="flex:1;">
+    <div class="mockup-header">遷移進度畫面</div>
+    <div class="mockup-body" style="padding:24px;text-align:center;font-size:13px;">
+      <div style="font-size:32px;margin-bottom:12px;">☁️</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:8px;">正在備份你的記錄</div>
+      <div style="color:var(--text-muted);font-size:12px;margin-bottom:24px;">把本機 42 筆情緒記錄<br>安全地傳送到雲端</div>
+
+      <!-- 進度條 -->
+      <div style="background:var(--surface);border-radius:100px;height:8px;margin-bottom:8px;overflow:hidden;">
+        <div style="background:var(--accent);height:100%;width:67%;border-radius:100px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:24px;">28 / 42 筆</div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--text-muted);text-align:left;line-height:1.8;">
+        ✓ 情緒記錄<br>
+        ✓ 連續記錄天數<br>
+        ⟳ 成就紀錄…<br>
+        ○ 用戶設定
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>同步策略：雙寫 + 離線佇列</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;">
+      <div class="label">新記錄</div>
+      <div style="font-size:12px;margin-top:6px;line-height:1.6;color:var(--text-muted);">
+        同時寫入 localStorage（即時）+ InsForge（背景）<br>
+        → 網路斷開時進入離線佇列<br>
+        → 恢復連線後自動補同步
+      </div>
+    </div>
+    <div style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;">
+      <div class="label">讀取優先級</div>
+      <div style="font-size:12px;margin-top:6px;line-height:1.6;color:var(--text-muted);">
+        已登入：InsForge 為主（最新數據）<br>
+        離線 / 訪客：localStorage 為主<br>
+        → 兩者合併時去重（以 id + created_at 為鍵）
+      </div>
+    </div>
+  </div>
+</div>

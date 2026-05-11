@@ -47,6 +47,8 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
   const [intensity, setIntensity] = useState(5);
   const { t } = useLanguage();
 
+  const selectedIds = useMemo(() => new Set(selectedEmotions.map(e => e.id)), [selectedEmotions]);
+
   const isParentRole = useMemo(() =>
     settingsStore.getUserRole() === 'parent',
     []
@@ -179,7 +181,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
           <EmotionBubble
             key={emotion.id}
             emotion={emotion}
-            isSelected={!!selectedEmotions.find(e => e.id === emotion.id)}
+            isSelected={selectedIds.has(emotion.id)}
             onToggle={toggleEmotion}
             t={t}
             color={quadrantColors[emotion.quadrant]}

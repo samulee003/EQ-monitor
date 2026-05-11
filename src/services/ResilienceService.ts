@@ -6,7 +6,7 @@
  * 並非臨床心理韌性評估。它不對應任何標準化心理量表（如 Connor-Davidson Resilience Scale），
  * 不應用於評估個人心理健康狀態。
  */
-import { type Quadrant } from '../data/emotionData';
+import { type Quadrant, PostMoodOptions } from '../data/emotionData';
 import { type RulerLogEntry } from '../types/RulerTypes';
 
 
@@ -58,11 +58,16 @@ class ResilienceService {
      * 注意：此分數為參與激勵指標，非臨床韌性評估工具。
      */
     getDashboardData(logs: RulerLogEntry[]): DailyResilience[] {
+        // Sort oldest → newest for consistent day ordering
+        const sorted = [...logs].sort((a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+
         // Group by date and calculate average resilience
         const days: Record<string, { total: number, count: number, emotion: string }> = {};
 
         // Process last 7 days for the chart
-        logs.forEach((entry: RulerLogEntry) => {
+        sorted.forEach((entry: RulerLogEntry) => {
             const date = new Date(entry.timestamp).toLocaleDateString();
             if (!days[date]) {
                 days[date] = { total: 0, count: 0, emotion: entry.emotions?.[0]?.name || '未知' };
@@ -76,8 +81,8 @@ class ResilienceService {
             }
 
             // Bonus for reported positive shift
-            if (entry.postMood === '感覺輕鬆多了') entryScore += 30;
-            if (entry.postMood === '平靜了一些') entryScore += 15;
+            if (entry.postMood === PostMoodOptions.MUCH_BETTER) entryScore += 30;
+            if (entry.postMood === PostMoodOptions.SOMEWHAT_CALM) entryScore += 15;
 
             days[date].total += entryScore;
             days[date].count += 1;
@@ -87,7 +92,7 @@ class ResilienceService {
             date,
             score: Math.min(100, Math.round(data.total / data.count)),
             dominantEmotion: data.emotion
-        })).reverse().slice(-7); // Last 7 days
+        })).slice(-7); // Last 7 days
     }
 
     getOverallScore(logs: RulerLogEntry[]): number {
@@ -106,9 +111,14 @@ class ResilienceService {
         const today = new Date();
         const heatmap: HeatmapDay[] = [];
 
+        // Sort oldest → newest so the last item is the latest log of each day
+        const sorted = [...logs].sort((a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+
         // Pre-process logs into a Map for O(1) lookup
         const logsByDate = new Map<string, RulerLogEntry[]>();
-        logs.forEach(log => {
+        sorted.forEach(log => {
             const dateStr = new Date(log.timestamp).toLocaleDateString();
             if (!logsByDate.has(dateStr)) {
                 logsByDate.set(dateStr, []);
@@ -124,8 +134,8 @@ class ResilienceService {
             const dayLogs = logsByDate.get(dateStr) || [];
 
             if (dayLogs.length > 0) {
-                // Use the most frequent quadrant or the last one
-                const latest = dayLogs[0];
+                // Use the most recent log of the day
+                const latest = dayLogs[dayLogs.length - 1];
                 heatmap.push({
                     date: dateStr,
                     intensity: latest.intensity || 5,
@@ -148,10 +158,13 @@ class ResilienceService {
      * Returns last 7 logs with intensity values for bar chart.
      */
     getIntensityData(logs: RulerLogEntry[]): IntensityData[] {
-        return logs.slice(0, 7).map((log: RulerLogEntry) => ({
+        const sorted = [...logs].sort((a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        return sorted.slice(-7).map((log: RulerLogEntry) => ({
             label: new Date(log.timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' }),
             value: log.intensity || 5
-        })).reverse();
+        }));
     }
 
     /**

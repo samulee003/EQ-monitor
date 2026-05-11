@@ -7,7 +7,7 @@ import { type Achievement, ACHIEVEMENTS } from '../types/AchievementTypes';
 interface HabitContextType {
     progress: UserProgress;
     newlyUnlocked: Achievement[];
-    clearNewlyUnlocked: () => void;
+    clearNewlyUnlocked: (id?: string) => void;
     refreshProgress: () => Promise<Achievement[]>;
 }
 
@@ -27,29 +27,42 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // 異步加載初始進度
     useEffect(() => {
         const loadProgress = async () => {
-            const p = await habitService.getProgress();
-            setProgress(p);
-            setIsInitialized(true);
+            try {
+                const p = await habitService.getProgress();
+                setProgress(p);
+            } catch {
+                setProgress(DEFAULT_PROGRESS);
+            } finally {
+                setIsInitialized(true);
+            }
         };
         loadProgress();
     }, []);
 
     const refreshProgress = useCallback(async (): Promise<Achievement[]> => {
-        const logs = await dataAdapter.logs.export();
-        const { newlyUnlocked: ids } = await habitService.updateProgress(logs);
-        const updatedProgress = await habitService.getProgress();
-        setProgress(updatedProgress);
+        try {
+            const logs = await dataAdapter.logs.export();
+            const { newlyUnlocked: ids } = await habitService.updateProgress(logs);
+            const updatedProgress = await habitService.getProgress();
+            setProgress(updatedProgress);
 
-        if (ids.length > 0) {
-            const newAchievements = ACHIEVEMENTS.filter(a => ids.includes(a.id));
-            setNewlyUnlocked(prev => [...prev, ...newAchievements]);
-            return newAchievements;
+            if (ids.length > 0) {
+                const newAchievements = ACHIEVEMENTS.filter(a => ids.includes(a.id));
+                setNewlyUnlocked(prev => [...prev, ...newAchievements]);
+                return newAchievements;
+            }
+            return [];
+        } catch {
+            return [];
         }
-        return [];
     }, []);
 
-    const clearNewlyUnlocked = useCallback(() => {
-        setNewlyUnlocked([]);
+    const clearNewlyUnlocked = useCallback((id?: string) => {
+        if (id) {
+            setNewlyUnlocked(prev => prev.filter(a => a.id !== id));
+        } else {
+            setNewlyUnlocked([]);
+        }
     }, []);
 
     // 初始化完成前顯示默認值，避免閃爍

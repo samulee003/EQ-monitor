@@ -1,0 +1,139 @@
+<h2>隱私優先架構：三層模式</h2>
+<p class="subtitle">原始情緒記錄永遠不離開裝置，AI 教練只看「輪廓」，不看「內容」</p>
+
+<div class="section">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+
+    <!-- Tier 1 -->
+    <div style="flex:1;min-width:200px;background:var(--surface);border:2px solid #AAB09B;border-radius:12px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="background:#AAB09B;color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;">預設</div>
+        <div style="font-weight:600;">純本地模式</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">
+        不需帳號。所有情緒記錄<br>
+        AES-256 加密存在裝置上。<br>
+        App 完整功能可用，<br>
+        AI 教練為單次對話（無記憶）
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        <div class="label" style="margin-bottom:6px;">留在裝置</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+          ✓ 完整情緒日誌<br>
+          ✓ 表達內容、身體掃描<br>
+          ✓ 所有 RULER 步驟細節<br>
+          ✓ 成就、連續天數
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 2 -->
+    <div style="flex:1;min-width:200px;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="background:var(--accent);color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;">教練模式</div>
+        <div style="font-weight:600;">輕量雲端（推薦）</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">
+        建立帳號後自願開啟。<br>
+        只同步「情緒輪廓」到雲端，<br>
+        原始記錄內容仍留在裝置。<br>
+        解鎖主動 AI 教練功能。
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;">
+            <div class="label" style="margin-bottom:6px;color:var(--accent);">上傳到雲端</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+              ✓ 象限標籤 + 日期<br>
+              ✓ 情緒強度分數<br>
+              ✓ 需求標籤（連結感等）<br>
+              ✓ 連續天數、最後活躍
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="label" style="margin-bottom:6px;">留在裝置</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+              ✓ 表達的具體文字<br>
+              ✓ 身體感受細節<br>
+              ✓ 觸發事件描述<br>
+              ✓ 完整對話記錄
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 3 -->
+    <div style="flex:1;min-width:200px;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:16px;opacity:0.85;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;">選擇性</div>
+        <div style="font-weight:600;">完整備份</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">
+        需要二次明確確認。<br>
+        完整日誌加密後備份，<br>
+        主要用途：換裝置時還原。<br>
+        AI 教練不讀取原始內容。
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        <div class="label" style="margin-bottom:6px;">備份到雲端（加密）</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+          ✓ 全部資料（加密存儲）<br>
+          ✓ 可隨時刪除雲端備份<br>
+          ✗ AI 教練不解密讀取<br>
+          ✗ 不用於任何分析
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>AI 教練看到的 vs. 看不到的</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;">
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>✓ 教練看到（元數據）</h4>
+          <ul>
+            <li>「最近 5 次都在紅色象限」</li>
+            <li>「平均強度 7.8/10」</li>
+            <li>「主要需求：連結感 × 3」</li>
+            <li>「已連續 3 天未記錄」</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>✗ 教練看不到（原始內容）</h4>
+          <ul>
+            <li>「我對孩子大叫了，覺得...」</li>
+            <li>身體掃描的具體感受</li>
+            <li>情緒碎紙機的表達文字</li>
+            <li>互動循環的細節描述</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;">
+      <div class="label" style="margin-bottom:8px;">教練訊息示例</div>
+      <div style="font-size:12px;line-height:1.8;color:var(--text-muted);">
+        基於元數據，教練仍能說：<br><br>
+        「<span style="color:var(--text);">你最近三次都在紅色象限，強度都不低。我注意到你很常有一種對『連結感』的渴望。今天有空，我們來聊聊嗎？</span>」<br><br>
+        ← 有意義、有溫度，且完全不需要讀取原始內容
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;">
+  <h3 style="margin-bottom:8px;">InsForge 只存這些（Tier 2）</h3>
+  <div style="font-family:monospace;font-size:11px;color:var(--text-muted);line-height:1.8;">
+    coach_context 表：<br>
+    &nbsp;&nbsp;user_id, last_active, streak_days,<br>
+    &nbsp;&nbsp;recent_quadrants: ["red","red","blue","red"],<br>
+    &nbsp;&nbsp;recent_needs: ["connection","rest"],<br>
+    &nbsp;&nbsp;avg_intensity: 7.2,<br>
+    &nbsp;&nbsp;coach_opted_in: true,<br>
+    &nbsp;&nbsp;line_user_id: "Uxxxxx" (if linked)
+  </div>
+</div>

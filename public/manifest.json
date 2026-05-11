@@ -1,16 +1,24 @@
 {
-    "name": "今心 ImXin",
-    "short_name": "今心",
-    "description": "你的每日情緒覺察夥伴",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#fdfaf3",
-    "theme_color": "#d5c1a5",
-    "icons": [
-        {
-            "src": "/logo.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "今心 ImXin - 你的每日情緒覺察夥伴",
+  "short_name": "今心",
+  "description": "引導式情緒覺察工具。透過覺察、命名與選擇回應，助你找回內在的平靜。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfaf3",
+  "theme_color": "#fdfaf3",
+  "orientation": "portrait",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

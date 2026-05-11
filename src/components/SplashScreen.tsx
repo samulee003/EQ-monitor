@@ -16,13 +16,23 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         if (hasPlayedRef.current) return;
         hasPlayedRef.current = true;
 
+        // Skip splash if already played this session
+        if (sessionStorage.getItem('splashPlayed') === '1') {
+            onComplete();
+            return;
+        }
+        sessionStorage.setItem('splashPlayed', '1');
+
         // Ensure video starts playing
         if (videoRef.current) {
             videoRef.current.play().catch(() => {
-                // Autoplay blocked - skip splash immediately
                 onComplete();
             });
         }
+
+        // Hard timeout fallback: dismiss after 5s even if onEnded never fires
+        const timeoutId = setTimeout(() => onComplete(), 5000);
+        return () => clearTimeout(timeoutId);
     }, [onComplete]);
 
     // If video fails to load, skip splash

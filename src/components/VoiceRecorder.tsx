@@ -58,11 +58,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
 
   return (
     <div className="voice-recorder">
-      <div className={`record-btn ${simulationState}`} onClick={toggleRecording}>
+      <button type="button" className={`record-btn ${simulationState}`} onClick={toggleRecording} aria-label={isRecording ? '停止錄音' : '開始錄音'}>
         {simulationState === 'idle' && <span className="icon">{uiIcons.microphone}</span>}
         {simulationState === 'recording' && <span className="icon stop-icon"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg></span>}
         {simulationState === 'processing' && <div className="loader"></div>}
-      </div>
+      </button>
 
       <div className="status-text">
         {simulationState === 'idle' && t("點擊開始語音表達")}

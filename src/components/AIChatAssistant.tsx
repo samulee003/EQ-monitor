@@ -178,7 +178,7 @@ ${insight.colorTheory || '無'}
               </span>
             </div>
           </div>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" aria-label="關閉" onClick={onClose}>✕</button>
         </div>
 
         {/* Messages */}
@@ -192,12 +192,14 @@ ${insight.colorTheory || '無'}
                 {message.role === 'assistant' ? '🤖' : '👤'}
               </div>
               <div className="message-content">
-                <div 
-                  className="message-text"
-                  dangerouslySetInnerHTML={{
-                    __html: message.content.replace(/\n/g, '<br/>')
-                  }}
-                />
+                <div className="message-text">
+                  {message.content.split('\n').map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < message.content.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
+                </div>
                 <span className="message-time">
                   {message.timestamp.toLocaleTimeString('zh-TW', { 
                     hour: '2-digit', 
@@ -252,6 +254,7 @@ ${insight.colorTheory || '無'}
           />
           <button
             className="send-btn"
+            aria-label="發送訊息"
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
           >

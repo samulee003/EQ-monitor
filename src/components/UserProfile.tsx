@@ -132,7 +132,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                 {/* Header */}
                 <div className="profile-header">
                     <h2>{t('個人中心')}</h2>
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <button className="close-btn" aria-label="關閉" onClick={onClose}>×</button>
                 </div>
 
                 {/* Tabs */}
@@ -613,7 +613,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                 .profile-btn.danger {
                     background: hsla(0, 50%, 50%, 0.1);
                     border-color: hsla(0, 50%, 50%, 0.3);
-                    color: #ff6b6b;
+                    color: var(--color-red);
                 }
 
                 .profile-btn.danger:hover {
@@ -648,7 +648,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                     background: hsla(120, 50%, 40%, 0.1);
                     border: 1px solid hsla(120, 50%, 40%, 0.2);
                     border-radius: var(--radius-md);
-                    color: #6bcb77;
+                    color: var(--color-green);
                     text-align: center;
                     margin-bottom: var(--s-4);
                 }
@@ -664,13 +664,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                 .message.success {
                     background: hsla(120, 50%, 40%, 0.1);
                     border: 1px solid hsla(120, 50%, 40%, 0.2);
-                    color: #6bcb77;
+                    color: var(--color-green);
                 }
 
                 .message.error {
                     background: hsla(0, 50%, 50%, 0.1);
                     border: 1px solid hsla(0, 50%, 50%, 0.2);
-                    color: #ff6b6b;
+                    color: var(--color-red);
                 }
 
                 .data-section {
@@ -700,7 +700,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                 }
 
                 .warning-text {
-                    color: #ff6b6b;
+                    color: var(--color-red);
                     font-size: 0.85rem;
                     margin-bottom: var(--s-3);
                 }
