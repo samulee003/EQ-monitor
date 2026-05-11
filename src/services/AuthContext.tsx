@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { dataAdapter } from '../adapters';
+import { upsertCoachContext } from '@/lib/insforge/coachContext';
 
 export interface User {
     id: string;
@@ -15,7 +16,7 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    register: (email: string, password: string, displayName: string) => Promise<{ success: boolean; error?: string }>;
+    register: (email: string, password: string, displayName: string, coachOptIn?: boolean) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     updateProfile: (data: Partial<User>) => Promise<boolean>;
     changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -31,18 +32,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // 初始化：檢查是否有已登錄用戶
     useEffect(() => {
         const initAuth = async () => {
-            const currentUser = await dataAdapter.auth.getUser();
-            if (currentUser) {
-                setUser({
-                    id: currentUser.id,
-                    email: currentUser.email || '',
-                    displayName: currentUser.displayName || '',
-                    avatar: currentUser.avatar,
-                    createdAt: currentUser.createdAt || '',
-                    lastLoginAt: currentUser.updatedAt || '',
-                });
+            try {
+                const currentUser = await dataAdapter.auth.getUser();
+                if (currentUser) {
+                    setUser({
+                        id: currentUser.id,
+                        email: currentUser.email || '',
+                        displayName: currentUser.displayName || '',
+                        avatar: currentUser.avatar,
+                        createdAt: currentUser.createdAt || '',
+                        lastLoginAt: currentUser.updatedAt || '',
+                    });
+                }
+            } catch {
+                setUser(null);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         initAuth();
     }, []);
@@ -65,7 +71,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const register = async (
         email: string,
         password: string,
-        displayName: string
+        displayName: string,
+        coachOptIn: boolean = false
     ): Promise<{ success: boolean; error?: string }> => {
         const result = await dataAdapter.auth.signUp(email, password, { displayName });
         if (result.success && result.user) {
@@ -77,6 +84,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 createdAt: result.user.createdAt || '',
                 lastLoginAt: result.user.updatedAt || '',
             });
+
+            // Initialize coach_context (fire-and-forget)
+            upsertCoachContext({
+                user_id: result.user.id,
+                coach_opted_in: coachOptIn,
+                last_active: new Date().toISOString(),
+                streak_days: 0,
+                recent_quadrants: [],
+                recent_needs: [],
+                avg_intensity: 0,
+                subscription_tier: 'free',
+                proactive_count_this_month: 0,
+                coach_memory_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            }).catch(err => console.warn('coach_context init failed (non-blocking):', err));
         }
         return result;
     };
