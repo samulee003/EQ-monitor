@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
 
 describe('rateLimiter', () => {
@@ -87,9 +87,9 @@ describe('rateLimiter', () => {
 
     vi.advanceTimersByTime(60 * 1000 + 1);
 
-    res.status.mockClear();
-    res.json.mockClear();
-    next.mockClear();
+    (res.status as Mock).mockClear();
+    (res.json as Mock).mockClear();
+    (next as Mock).mockClear();
 
     rateLimiter(req, res, next);
     expect(next).toHaveBeenCalledTimes(1);

@@ -130,7 +130,7 @@ const Timeline: React.FC = () => {
                 });
                 return;
             }
-            const result = await dataAdapter.logs.import(parsed);
+            const result = await dataAdapter.logs.import(parsed as RulerLogEntry[]);
             setImportResult(result);
 
             if (result.success && result.imported > 0) {
