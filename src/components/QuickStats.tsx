@@ -35,7 +35,7 @@ const QuickStats: React.FC = () => {
         <div className="quick-stats fade-in">
             <div className="stats-greeting">
                 <span className="greeting-emoji">
-                    {stats.streakDays >= 7 ? '🔥' : stats.streakDays >= 3 ? '⭐' : '🌿'}
+                    {stats.streakDays >= 7 ? '!' : stats.streakDays >= 3 ? '+' : '○'}
                 </span>
                 <div className="greeting-text">
                     <h3>{greeting}</h3>

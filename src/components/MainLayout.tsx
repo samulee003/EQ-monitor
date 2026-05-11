@@ -22,8 +22,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
   // 主題圖標
   const themeIcon = {
-    dark: '🌙',
-    light: '☀️',
+    dark: '●',
+    light: '○',
     system: '💻'
   }[theme];
 
@@ -81,7 +81,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
           >
-            🏅
+            ◆
           </button>
           <button
             className="theme-toggle"
@@ -95,7 +95,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
           >
-            🔔
+            ●
           </button>
         </div>
       </header>

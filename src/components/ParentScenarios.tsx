@@ -25,7 +25,7 @@ const ParentScenarios: React.FC<ParentScenariosProps> = ({ onDismiss }) => {
         {
             id: 'yelled',
             label: t('我剛對孩子發了脾氣'),
-            emoji: '😔',
+            emoji: '~',
             quadrant: 'red',
             comfort: t('你不是壞父母。你只是一個累壞了的人類。能意識到這一點，就已經是愛的表現。'),
             steps: [
@@ -39,7 +39,7 @@ const ParentScenarios: React.FC<ParentScenariosProps> = ({ onDismiss }) => {
         {
             id: 'crying',
             label: t('孩子一直哭我快崩潰'),
-            emoji: '😰',
+            emoji: '?',
             quadrant: 'red',
             comfort: t('孩子的哭聲會觸發你的「戰或逃」反應，這是正常的生理機制，不是你的錯。'),
             steps: [
@@ -52,7 +52,7 @@ const ParentScenarios: React.FC<ParentScenariosProps> = ({ onDismiss }) => {
         {
             id: 'not_good_enough',
             label: t('我感覺自己不是好父母'),
-            emoji: '💔',
+            emoji: '!',
             quadrant: 'blue',
             comfort: t('完美的父母不存在。「夠好的父母」才是孩子真正需要的——而你已經是了。'),
             steps: [
@@ -65,7 +65,7 @@ const ParentScenarios: React.FC<ParentScenariosProps> = ({ onDismiss }) => {
         {
             id: 'exhausted',
             label: t('我好累想要獨處'),
-            emoji: '😮‍💨',
+            emoji: '~',
             quadrant: 'blue',
             comfort: t('需要休息不是自私，是必需。你無法從空杯子裡倒出水來。'),
             steps: [

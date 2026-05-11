@@ -203,7 +203,7 @@ const Timeline: React.FC = () => {
                     <div className="floating-leaf leaf-2">{uiIcons.leaf}</div>
                     <div className="empty-circle-outer">
                         <div className="empty-circle-inner">
-                            <span className="empty-emoji">🌱</span>
+                            <span className="empty-emoji">+</span>
                         </div>
                     </div>
                 </div>
