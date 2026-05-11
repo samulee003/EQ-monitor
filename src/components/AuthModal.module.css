@@ -1,0 +1,27 @@
+.privacySection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.checkboxLabel {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent, #7c6f5b);
+}
+
+.checkboxLabel a {
+  color: var(--accent, #7c6f5b);
+  text-decoration: underline;
+}

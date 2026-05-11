@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../services/AuthContext';
 import { useLanguage } from '../services/LanguageContext';
+import styles from './AuthModal.module.css';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -21,6 +22,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
+    const [privacyConsent, setPrivacyConsent] = useState(false);
+    const [coachOptIn, setCoachOptIn] = useState(false);
 
     if (!isOpen) return null;
 
@@ -29,6 +32,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
         setPassword('');
         setConfirmPassword('');
         setDisplayName('');
+        setPrivacyConsent(false);
+        setCoachOptIn(false);
         setError('');
         setSuccess('');
     };
@@ -44,49 +49,66 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
         setSuccess('');
         setIsLoading(true);
 
-        if (mode === 'register') {
-            if (password !== confirmPassword) {
-                setError('兩次輸入的密碼不一致');
-                setIsLoading(false);
-                return;
-            }
+        try {
+            if (mode === 'register') {
+                if (password !== confirmPassword) {
+                    setError('兩次輸入的密碼不一致');
+                    setIsLoading(false);
+                    return;
+                }
 
-            const result = await register(email, password, displayName);
-            if (result.success) {
-                setSuccess('註冊成功！');
-                setTimeout(() => {
-                    onClose();
-                    resetForm();
-                }, 1000);
+                if (!privacyConsent) {
+                    setError('請先閱讀並同意隱私聲明');
+                    setIsLoading(false);
+                    return;
+                }
+
+                const result = await register(email, password, displayName, coachOptIn);
+                if (result.success) {
+                    setSuccess('註冊成功！');
+                    setTimeout(() => {
+                        onClose();
+                        resetForm();
+                    }, 1000);
+                } else {
+                    setError(result.error || '註冊失敗');
+                }
             } else {
-                setError(result.error || '註冊失敗');
+                const result = await login(email, password);
+                if (result.success) {
+                    setSuccess('登錄成功！');
+                    setTimeout(() => {
+                        onClose();
+                        resetForm();
+                    }, 1000);
+                } else {
+                    setError(result.error || '登錄失敗');
+                }
             }
-        } else {
-            const result = await login(email, password);
-            if (result.success) {
-                setSuccess('登錄成功！');
-                setTimeout(() => {
-                    onClose();
-                    resetForm();
-                }, 1000);
-            } else {
-                setError(result.error || '登錄失敗');
-            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '操作失敗，請稍後再試');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     const handleGuestLogin = async () => {
         setIsLoading(true);
-        const guestEmail = `guest_${Date.now()}@imxin.app`;
-        const result = await register(guestEmail, 'guest123', t('訪客用戶'));
-        if (result.success) {
-            onClose();
-        } else {
-            setError('訪客登錄失敗');
+        setError('');
+        try {
+            const guestEmail = `guest_${Date.now()}@imxin.app`;
+            const guestPassword = crypto.randomUUID().slice(0, 12);
+            const result = await register(guestEmail, guestPassword, t('訪客用戶'));
+            if (result.success) {
+                onClose();
+            } else {
+                setError(result.error || '訪客登錄失敗');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '訪客登錄失敗，請稍後再試');
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     return (
@@ -177,6 +199,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                 minLength={6}
                                 disabled={isLoading}
                             />
+                        </div>
+                    )}
+
+                    {mode === 'register' && (
+                        <div className={styles.privacySection}>
+                            <label className={styles.checkboxLabel}>
+                                <input
+                                    type="checkbox"
+                                    checked={privacyConsent}
+                                    onChange={e => setPrivacyConsent(e.target.checked)}
+                                    required
+                                />
+                                <span>
+                                    我同意將情緒輪廓備份至雲端，數據僅用於提供個人化 AI 教練功能，不作商業用途。
+                                    {' '}
+                                    <a href="/privacy" target="_blank" rel="noopener noreferrer">隱私聲明</a>
+                                </span>
+                            </label>
+                            <label className={styles.checkboxLabel}>
+                                <input
+                                    type="checkbox"
+                                    checked={coachOptIn}
+                                    onChange={e => setCoachOptIn(e.target.checked)}
+                                />
+                                <span>允許 AI 教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）</span>
+                            </label>
                         </div>
                     )}
 
@@ -374,13 +422,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
 
                 .auth-message.error {
                     background: hsla(0, 50%, 50%, 0.1);
-                    color: #ff6b6b;
+                    color: var(--color-red);
                     border: 1px solid hsla(0, 50%, 50%, 0.2);
                 }
 
                 .auth-message.success {
                     background: hsla(120, 50%, 40%, 0.1);
-                    color: #6bcb77;
+                    color: var(--color-green);
                     border: 1px solid hsla(120, 50%, 40%, 0.2);
                 }
 
