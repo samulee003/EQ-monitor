@@ -20,10 +20,10 @@ export interface QuickCheckInData {
 type QuickStep = 'quadrant' | 'emotion' | 'intensity' | 'scenario' | 'feedback';
 
 const quadrantConfig: Record<Quadrant, { emoji: string; label: string; color: string; desc: string }> = {
-    red: { emoji: '😤', label: '高能量', color: '#C58B8A', desc: '不舒服' },
-    yellow: { emoji: '😊', label: '高能量', color: '#D5C1A5', desc: '開心' },
-    blue: { emoji: '😢', label: '低能量', color: '#97A6B4', desc: '不舒服' },
-    green: { emoji: '😌', label: '低能量', color: '#AAB09B', desc: '平靜' }
+    red: { emoji: '!', label: '高能量', color: '#C58B8A', desc: '不舒服' },
+    yellow: { emoji: '+', label: '高能量', color: '#D5C1A5', desc: '開心' },
+    blue: { emoji: '~', label: '低能量', color: '#97A6B4', desc: '不舒服' },
+    green: { emoji: '○', label: '低能量', color: '#AAB09B', desc: '平靜' }
 };
 
 const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {

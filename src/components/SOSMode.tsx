@@ -21,19 +21,19 @@ interface ScenarioData {
 const scenarios: ScenarioData[] = [
     {
         id: 'yelled',
-        emoji: '😤',
+        emoji: '!',
         title: '剛對孩子發脾氣',
         subtitle: '現在感到愧疚或後悔'
     },
     {
         id: 'crying',
-        emoji: '😭',
+        emoji: '~',
         title: '孩子一直哭',
         subtitle: '我快崩潰了'
     },
     {
         id: 'overwhelmed',
-        emoji: '😫',
+        emoji: '?',
         title: '我快受不了了',
         subtitle: '感覺快要失控'
     }
@@ -263,7 +263,7 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
     const renderCompleteStep = () => (
         <div className="sos-step complete-step">
             <div className="complete-illustration">
-                <span className="complete-emoji">💚</span>
+                <span className="complete-emoji">○</span>
             </div>
             
             <h2>你做得很好</h2>

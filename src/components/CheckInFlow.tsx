@@ -84,7 +84,7 @@ const CheckInFlow: React.FC = () => {
                     <QuickStats />
                     <div className={`quick-entry-buttons${isParentRole ? ' is-parent' : ''}`}>
                         <button className="quick-entry-btn" onClick={() => setQuickMode('quick')}>
-                            <span className="qe-icon">&#9889;</span>
+                            <span className="qe-icon">+</span>
                             <div className="qe-text">
                                 <span className="qe-title">{t('快速記錄')}</span>
                                 <span className="qe-desc">{t('< 60 秒完成')}</span>
@@ -92,7 +92,7 @@ const CheckInFlow: React.FC = () => {
                         </button>
                         {isParentRole && (
                             <button className="quick-entry-btn parent-entry" onClick={() => setQuickMode('parent')}>
-                                <span className="qe-icon">&#128588;</span>
+                                <span className="qe-icon">!</span>
                                 <div className="qe-text">
                                     <span className="qe-title">{t('親職支援')}</span>
                                     <span className="qe-desc">{t('即時行動指引')}</span>

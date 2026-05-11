@@ -19,7 +19,6 @@ const Timeline = lazy(() => import('./components/Timeline'));
 const GrowthDashboard = lazy(() => import('./components/GrowthDashboard'));
 const AchievementPage = lazy(() => import('./components/AchievementPage'));
 const CheckInFlow = lazy(() => import('./components/CheckInFlow'));
-const HomePage = lazy(() => import('./components/HomePage'));
 const CoachPage = lazy(() => import('./pages/CoachPage'));
 
 // 內部組件，可以使用 hooks
@@ -59,7 +58,7 @@ function AppContent() {
       <ErrorBoundary>
         <MainLayout currentView={currentView} onNavigate={setView}>
           <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
-            {currentView === 'home' && <HomePage />}
+            {currentView === 'home' && <CheckInFlow />}
             {currentView === 'checkin' && <CheckInFlow />}
             {currentView === 'history' && <Timeline />}
             {currentView === 'growth' && <GrowthDashboard />}
