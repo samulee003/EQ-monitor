@@ -178,7 +178,7 @@ const PrivacyLock: React.FC<PrivacyLockProps> = ({ onUnlock }) => {
                     justify-content: center;
                     transition: var(--transition);
                 }
-                .key:hover { background: hsla(0,0%,100%,0.05); }
+                .key:hover { background: var(--surface-hover); }
                 .key.empty { background: transparent; border: none; cursor: default; }
                 .key:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -192,7 +192,7 @@ const PrivacyLock: React.FC<PrivacyLockProps> = ({ onUnlock }) => {
 
                 .confirm-area { margin-top: var(--s-8); display: flex; flex-direction: column; gap: 10px; }
                 .confirm-input {
-                    background: rgba(0,0,0,0.2);
+                    background: var(--surface-elevated);
                     border: 1px solid var(--glass-border);
                     border-radius: var(--radius-sm);
                     padding: 10px;

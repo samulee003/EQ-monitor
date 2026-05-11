@@ -100,12 +100,12 @@
     color: var(--text-secondary); cursor: pointer; transition: var(--transition-luxe);
     font-size: 0.9rem; font-weight: 500;
 }
-.option-chip:hover { border-color: hsla(0,0%,100%,0.2); color: var(--text-primary); }
+.option-chip:hover { border-color: var(--glass-border); color: var(--text-primary); }
 .option-chip.active { background: var(--text-primary); color: var(--bg-color); font-weight: 700; box-shadow: var(--shadow-sm); }
 
 .physical-context-collect {
     margin: var(--s-8) 0; padding: var(--s-4);
-    background: rgba(0,0,0,0.1); border-radius: var(--radius-md);
+    background: var(--surface-elevated); border-radius: var(--radius-md);
     display: flex; flex-direction: column; gap: var(--s-4);
 }
 .collect-item { text-align: left; }
@@ -131,7 +131,7 @@
 
 .quick-regulate-section {
     margin-top: var(--s-6); padding: var(--s-6);
-    background: hsla(0,0%,100%,0.02); border-radius: var(--radius-md);
+    background: var(--surface-elevated); border-radius: var(--radius-md);
     border: 1px dashed var(--glass-border); text-align: center;
 }
 .quick-regulate-title { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--s-4); }

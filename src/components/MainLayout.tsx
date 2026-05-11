@@ -10,8 +10,8 @@ import { CoachFAB } from './coach/CoachFAB';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
-  onNavigate: (view: 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach') => void;
+  currentView: 'home' | 'history' | 'growth' | 'achievement' | 'coach';
+  onNavigate: (view: 'home' | 'history' | 'growth' | 'achievement' | 'coach') => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
@@ -22,9 +22,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
   // 主題圖標
   const themeIcon = {
-    dark: '●',
-    light: '○',
-    system: '💻'
+    dark: '暗',
+    light: '亮',
+    system: '系'
   }[theme];
 
   // Initialize notification service and check onboarding
@@ -51,7 +51,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         </div>
         <nav>
           <button
-            className={`nav-link ${currentView === 'home' || currentView === 'checkin' ? 'active' : ''}`}
+            className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => onNavigate('home')}
           >
             {t('今日心情')}
@@ -81,7 +81,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
           >
-            ◆
+            勳
           </button>
           <button
             className="theme-toggle"
@@ -95,7 +95,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
           >
-            ●
+            訊
           </button>
         </div>
       </header>

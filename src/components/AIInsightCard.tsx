@@ -128,7 +128,7 @@ export const AIInsightCard: React.FC<AIInsightCardProps> = ({
 
             <style>{`
                 .ai-insight-card {
-                    background: linear-gradient(135deg, var(--glass-bg) 0%, hsla(0,0%,100%,0.02) 100%);
+                    background: linear-gradient(135deg, var(--glass-bg) 0%, var(--surface-elevated) 100%);
                     border: 1px solid var(--glass-border);
                     border-radius: var(--radius-lg);
                     padding: var(--s-6);
@@ -216,7 +216,7 @@ export const AIInsightCard: React.FC<AIInsightCardProps> = ({
 
                 .suggested-action {
                     padding: var(--s-3);
-                    background: hsla(0,0%,100%,0.03);
+                    background: var(--surface-elevated);
                     border-left: 3px solid var(--color-green);
                     border-radius: 0 var(--radius-md) var(--radius-md) 0;
                 }

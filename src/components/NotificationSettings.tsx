@@ -390,7 +390,7 @@ const handleTest = () => {
                         padding: var(--s-3) var(--s-4);
                         font-size: 0.95rem;
                         font-weight: 600;
-                        color: white;
+                        color: #1a1a1a;
                         cursor: pointer;
                         transition: all 0.3s ease;
                         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
