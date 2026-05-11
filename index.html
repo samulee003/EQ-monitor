@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/logo.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#fdfaf3" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.insforge.app https://*.zeabur.app https://generativelanguage.googleapis.com; img-src 'self' data: blob:; font-src 'self';">
 
   <title>今心 ImXin - 你的每日情緒覺察夥伴</title>
   <meta name="description" content="引導式情緒覺察工具。透過覺察、命名與選擇回應，助你找回內在的平靜。Luminous Morandi 療癒美學設計。" />
@@ -15,13 +16,15 @@
   <meta property="og:url" content="https://imxin.zeabur.app/" />
   <meta property="og:title" content="今心 ImXin - 你的每日情緒覺察夥伴" />
   <meta property="og:description" content="引導式情緒覺察工具。透過覺察、命名與選擇回應，助你找回內在的平靜。" />
-  <meta property="og:image" content="/og-image.png" />
+  <!-- og:image fallback: /og-image.png does not exist -->
+  <!-- <meta property="og:image" content="/og-image.png" /> -->
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:title" content="今心 ImXin - 你的每日情緒覺察夥伴" />
   <meta property="twitter:description" content="引導式情緒覺察工具。透過覺察、命名與選擇回應，助你找回內在的平靜。" />
 
+  <link rel="apple-touch-icon" href="/logo.png" />
   <link rel="manifest" href="/manifest.json" />
 </head>
 

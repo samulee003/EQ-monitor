@@ -26,13 +26,14 @@ const needIconMap: Record<string, React.ReactNode> = {
 const UnderstandingStep: React.FC<UnderstandingStepProps> = ({ emotion, onComplete, onBack }) => {
     const { t } = useLanguage();
     const [trigger, setTrigger] = useState('');
-    const [message, _setMessage] = useState(''); // Kept for type compatibility if needed, but not currently used in UI
+    const [message] = useState(''); // Kept for type compatibility if needed, but not currently used in UI
     const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
     const [what, setWhat] = useState('');
     const [who, setWho] = useState('');
     const [where, setWhere] = useState('');
 
-    // Update aura color on mount
+    // NOTE: --aura-color controls the global body background gradient (see index.css).
+    // TODO: Refactor to use a React ref or context instead of document.documentElement.
     React.useEffect(() => {
         document.documentElement.style.setProperty('--aura-color', `hsla(var(--h-${emotion.quadrant}), var(--s-${emotion.quadrant}), var(--l-${emotion.quadrant}), 0.2)`);
     }, [emotion.quadrant]);
