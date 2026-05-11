@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { dataAdapter } from '../adapters';
 import { upsertCoachContext } from '@/lib/insforge/coachContext';
+import { isMigrationNeeded } from '@/lib/insforge/localStorageMigration';
+import { getCoachContext } from '@/lib/insforge/coachContext';
 
 export interface User {
     id: string;
@@ -21,6 +23,8 @@ export interface AuthContextType {
     updateProfile: (data: Partial<User>) => Promise<boolean>;
     changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
     deleteAccount: () => Promise<boolean>;
+    migrationNeeded: boolean;
+    clearMigrationFlag: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +32,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [migrationNeeded, setMigrationNeeded] = useState(false);
 
     // 初始化：檢查是否有已登錄用戶
     useEffect(() => {
@@ -64,6 +69,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 createdAt: result.user.createdAt || '',
                 lastLoginAt: result.user.updatedAt || '',
             });
+            getCoachContext(result.user.id)
+                .then(ctx => {
+                    if (isMigrationNeeded(ctx?.migration_completed_at ?? null)) {
+                        setMigrationNeeded(true);
+                    }
+                })
+                .catch(() => {/* 非關鍵，忽略 */});
         }
         return result;
     };
@@ -151,6 +163,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateProfile,
         changePassword,
         deleteAccount,
+        migrationNeeded,
+        clearMigrationFlag: () => setMigrationNeeded(false),
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -7,8 +7,10 @@ import LoadingSpinner from './components/LoadingSpinner';
 import SkipLink from './components/SkipLink';
 import A11yAnnouncer from './components/A11yAnnouncer';
 import CombinedProviders from './components/CombinedProviders';
+import MigrationProgress from './components/MigrationProgress';
 import { useAppStore } from './stores/appStore';
 import { useFocusVisible } from './hooks/useA11y';
+import { useAuth } from './services/AuthContext';
 import './index.css';
 
 // 懶加載非首屏組件
@@ -23,6 +25,8 @@ const CoachPage = lazy(() => import('./pages/CoachPage'));
 function AppContent() {
   // 啟用焦點可見性管理
   useFocusVisible();
+
+  const { user, migrationNeeded, clearMigrationFlag } = useAuth();
 
   const {
     currentView,
@@ -53,6 +57,12 @@ function AppContent() {
     <>
       <SkipLink />
       <CombinedProviders>
+        {migrationNeeded && user && (
+          <MigrationProgress
+            userId={user.id}
+            onComplete={clearMigrationFlag}
+          />
+        )}
         <ErrorBoundary>
           <MainLayout currentView={currentView} onNavigate={setView}>
             <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
@@ -62,6 +72,13 @@ function AppContent() {
               {currentView === 'growth' && <GrowthDashboard />}
               {currentView === 'achievement' && <AchievementPage />}
               {currentView === 'coach' && <CoachPage />}
+              {currentView !== 'home' && currentView !== 'checkin' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                  <h2>頁面未找到</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>這個頁面不存在。</p>
+                  <button className="morandi-main-btn" onClick={() => setView('home')}>回到首頁</button>
+                </div>
+              )}
             </Suspense>
           </MainLayout>
         </ErrorBoundary>
