@@ -16,7 +16,9 @@ export async function sendMessage(req: CoachRequest): Promise<CoachResponse> {
     });
     clearTimeout(timeoutId);
     if (!res.ok) throw new Error(`Coach API error: ${res.status}`);
-    return res.json();
+    const body = await res.json();
+    if (body?.error) throw new Error(typeof body.error === 'string' ? body.error : 'Coach API error');
+    return body?.data ?? body;
   } catch (err) {
     clearTimeout(timeoutId);
     if (err instanceof Error && err.name === 'AbortError') {
