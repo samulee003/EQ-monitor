@@ -170,6 +170,71 @@ async function getUserEmotionSummary(userId: string) {
   }
 }
 
+interface CoachContextRow {
+  user_id: string;
+  streak_days: number;
+  recent_quadrants: string[];
+  recent_needs: string[];
+  avg_intensity: number;
+}
+
+async function fetchCoachContext(userId: string): Promise<CoachContextRow | null> {
+  try {
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+    const anonKey = Deno.env.get('ANON_KEY') || '';
+
+    const client = createClient({
+      baseUrl,
+      anonKey,
+    });
+
+    const { data, error } = await client.database
+      .from('coach_context')
+      .select('user_id, streak_days, recent_quadrants, recent_needs, avg_intensity')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('fetchCoachContext error:', error);
+      return null;
+    }
+
+    return data as CoachContextRow | null;
+  } catch (e) {
+    console.error('fetchCoachContext failed:', e);
+    return null;
+  }
+}
+
+function buildContextSummary(ctx: CoachContextRow | null): string {
+  if (!ctx) return '';
+
+  const parts: string[] = [];
+  parts.push('【使用者情緒檔案】');
+
+  if (ctx.streak_days > 0) {
+    parts.push(`連續記錄天數：${ctx.streak_days} 天`);
+  }
+
+  if (ctx.recent_quadrants && ctx.recent_quadrants.length > 0) {
+    parts.push(`最近常出現的情緒象限：${ctx.recent_quadrants.join('、')}`);
+  }
+
+  if (ctx.recent_needs && ctx.recent_needs.length > 0) {
+    parts.push(`最近的核心需求：${ctx.recent_needs.join('、')}`);
+  }
+
+  if (ctx.avg_intensity > 0) {
+    parts.push(`平均情緒強度：${ctx.avg_intensity}`);
+  }
+
+  if (parts.length === 1) {
+    return '';
+  }
+
+  return parts.join('\n');
+}
+
 interface CoachMessage {
   id: string;
   session_id: string;
@@ -319,6 +384,15 @@ export default async function (req: Request): Promise<Response> {
 
     // Build context from DB (optional, graceful fallback)
     const summary = await getUserEmotionSummary(userId);
+
+    // Fetch coach context for emotional profile injection (graceful fallback)
+    let contextSummary = '';
+    try {
+      const coachCtx = await fetchCoachContext(userId);
+      contextSummary = buildContextSummary(coachCtx);
+    } catch (e) {
+      console.error('Coach context fetch failed, continuing without context:', e);
+    }
     const historyContext =
       summary.recentLogs.length > 0
         ? `使用者最近記錄了 ${summary.recentLogs.length} 筆情緒日誌，連續記錄天數為 ${summary.streak.current_streak} 天。`
@@ -332,15 +406,19 @@ export default async function (req: Request): Promise<Response> {
       throw new Error('GOOGLE_API_KEY is not set');
     }
 
+    const enrichedSystemPrompt = contextSummary
+      ? `${SYSTEM_PROMPT}\n\n${contextSummary}`
+      : SYSTEM_PROMPT;
+
     const systemInstruction = crisis
       ? {
           parts: [
             {
-              text: `${SYSTEM_PROMPT}\n\n【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。`,
+              text: `${enrichedSystemPrompt}\n\n【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。`,
             },
           ],
         }
-      : { parts: [{ text: SYSTEM_PROMPT }] };
+      : { parts: [{ text: enrichedSystemPrompt }] };
 
     const currentUserText = crisis
       ? `【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。\n\n${historyContext}\n\n使用者說：「${message}」`
