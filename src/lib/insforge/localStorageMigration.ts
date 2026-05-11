@@ -52,7 +52,15 @@ export async function runMigration(
   onProgress?: (done: number, total: number) => void
 ): Promise<void> {
   const raw = localStorage.getItem('feelings_logs');
-  const logs: RulerLogEntry[] = raw ? (JSON.parse(raw) as RulerLogEntry[]) : [];
+  let logs: RulerLogEntry[] = [];
+  if (raw) {
+    try {
+      logs = JSON.parse(raw) as RulerLogEntry[];
+    } catch {
+      console.warn('[Migration] Failed to parse feelings_logs, treating as empty');
+      logs = [];
+    }
+  }
   const total = logs.length;
 
   onProgress?.(0, total);
