@@ -59,12 +59,11 @@ function AppContent() {
         <MainLayout currentView={currentView} onNavigate={setView}>
           <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
             {currentView === 'home' && <CheckInFlow />}
-            {currentView === 'checkin' && <CheckInFlow />}
             {currentView === 'history' && <Timeline />}
             {currentView === 'growth' && <GrowthDashboard />}
             {currentView === 'achievement' && <AchievementPage />}
             {currentView === 'coach' && <CoachPage />}
-            {currentView !== 'home' && currentView !== 'checkin' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
+            {currentView !== 'home' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
               <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
                 <h2>{t('頁面未找到')}</h2>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{t('這個頁面不存在。')}</p>

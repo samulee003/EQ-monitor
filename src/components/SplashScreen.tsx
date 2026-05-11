@@ -108,7 +108,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 }
 
                 .skip-splash-btn:focus-visible {
-                    outline: 2px solid rgba(255, 255, 255, 0.6);
+                    outline: 2px solid var(--text-primary);
                     outline-offset: 2px;
                 }
             `}</style>

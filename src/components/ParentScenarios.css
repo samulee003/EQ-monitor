@@ -43,7 +43,7 @@
     width: 100%;
 }
 .scenario-btn:hover {
-    border-color: hsla(0,0%,100%,0.2);
+    border-color: var(--glass-border);
     transform: translateX(4px);
     background: var(--glass-border);
 }
@@ -114,7 +114,7 @@
     filter: none;
 }
 .action-step.current {
-    background: hsla(0,0%,100%,0.03);
+    background: var(--surface-elevated);
     border: 1px solid var(--glass-border);
 }
 .step-number {

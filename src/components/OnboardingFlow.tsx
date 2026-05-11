@@ -77,10 +77,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <p>{t('選擇最符合的角色，我們會為你客製化體驗。')}</p>
                         <div className="role-grid">
                             {([
-                                { key: 'parent' as UserRole, label: t('父母'), icon: '●', desc: t('育兒情境、親職策略') },
-                                { key: 'general' as UserRole, label: t('通用'), icon: '🌿', desc: t('一般情緒管理') },
-                                { key: 'student' as UserRole, label: t('學生'), icon: '📖', desc: t('學業與社交壓力') },
-                                { key: 'professional' as UserRole, label: t('職場'), icon: '💼', desc: t('工作壓力管理') },
+                                { key: 'parent' as UserRole, label: t('父母'), icon: '育', desc: t('育兒情境、親職策略') },
+                                { key: 'general' as UserRole, label: t('通用'), icon: '通', desc: t('一般情緒管理') },
+                                { key: 'student' as UserRole, label: t('學生'), icon: '學', desc: t('學業與社交壓力') },
+                                { key: 'professional' as UserRole, label: t('職場'), icon: '職', desc: t('工作壓力管理') },
                             ]).map(role => (
                                 <button
                                     key={role.key}
@@ -214,7 +214,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <p>{t('每次完成情緒覺察，你都在建立更強大的心理韌性。達成連續記錄、探索不同情緒，解鎖成就徽章。在「成長看板」中，你可以回顧自己的情緒趨勢與進步。')}</p>
                         <div className="feature-tags">
                             <span className="feature-tag">🔥 {t('連續記錄')}</span>
-                            <span className="feature-tag">◆ {t('成就徽章')}</span>
+                            <span className="feature-tag">勳 {t('成就徽章')}</span>
                             <span className="feature-tag">📊 {t('成長看板')}</span>
                         </div>
                         <div className="step-actions">
@@ -427,7 +427,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     align-items: center; 
                     justify-content: center;
                     font-weight: 900; 
-                    color: rgba(0,0,0,0.5); 
+                    color: var(--text-secondary); 
                     font-size: 1.1rem;
                 }
                 
@@ -606,7 +606,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     text-align: center;
                 }
                 .role-btn:hover {
-                    border-color: hsla(0,0%,100%,0.2);
+                    border-color: var(--glass-border);
                     transform: translateY(-2px);
                 }
                 .role-btn.active {
