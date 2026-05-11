@@ -40,58 +40,52 @@ function AppContent() {
   } = useAppStore();
 
   if (showSplash) {
-    return (
-      <CombinedProviders>
-        <SplashScreen onComplete={dismissSplash} />
-      </CombinedProviders>
-    );
+    return <SplashScreen onComplete={dismissSplash} />;
   }
 
   if (isLocked) {
-    return (
-      <CombinedProviders>
-        <PrivacyLock onUnlock={unlock} />
-      </CombinedProviders>
-    );
+    return <PrivacyLock onUnlock={unlock} />;
   }
 
   return (
     <>
       <SkipLink />
-      <CombinedProviders>
-        {migrationNeeded && user && (
-          <MigrationProgress
-            userId={user.id}
-            onComplete={clearMigrationFlag}
-          />
-        )}
-        <ErrorBoundary>
-          <MainLayout currentView={currentView} onNavigate={setView}>
-            <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
-              {currentView === 'home' && <ParentHome />}
-              {currentView === 'checkin' && <CheckInFlow />}
-              {currentView === 'history' && <Timeline />}
-              {currentView === 'growth' && <GrowthDashboard />}
-              {currentView === 'achievement' && <AchievementPage />}
-              {currentView === 'coach' && <CoachPage />}
-              {currentView !== 'home' && currentView !== 'checkin' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
-                <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                  <h2>{t('頁面未找到')}</h2>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{t('這個頁面不存在。')}</p>
-                  <button className="morandi-main-btn" onClick={() => setView('home')}>{t('回到首頁')}</button>
-                </div>
-              )}
-            </Suspense>
-          </MainLayout>
-        </ErrorBoundary>
-      </CombinedProviders>
+      {migrationNeeded && user && (
+        <MigrationProgress
+          userId={user.id}
+          onComplete={clearMigrationFlag}
+        />
+      )}
+      <ErrorBoundary>
+        <MainLayout currentView={currentView} onNavigate={setView}>
+          <Suspense fallback={<LoadingSpinner message="載入頁面中..." />}>
+            {currentView === 'home' && <ParentHome />}
+            {currentView === 'checkin' && <CheckInFlow />}
+            {currentView === 'history' && <Timeline />}
+            {currentView === 'growth' && <GrowthDashboard />}
+            {currentView === 'achievement' && <AchievementPage />}
+            {currentView === 'coach' && <CoachPage />}
+            {currentView !== 'home' && currentView !== 'checkin' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
+              <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                <h2>{t('頁面未找到')}</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{t('這個頁面不存在。')}</p>
+                <button className="morandi-main-btn" onClick={() => setView('home')}>{t('回到首頁')}</button>
+              </div>
+            )}
+          </Suspense>
+        </MainLayout>
+      </ErrorBoundary>
       <A11yAnnouncer />
     </>
   );
 }
 
 function App() {
-  return <AppContent />;
+  return (
+    <CombinedProviders>
+      <AppContent />
+    </CombinedProviders>
+  );
 }
 
 export default App;
