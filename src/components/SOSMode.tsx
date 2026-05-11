@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useBreathingPhase } from '../hooks/useBreathingPhase';
 import './SOSMode.css';
 
 interface SOSModeProps {
@@ -38,28 +39,12 @@ const scenarios: ScenarioData[] = [
     }
 ];
 
-// 呼吸引導：與 .breathing-circle CSS 動畫節奏對齊（7s 一輪 = 吸 2.45s / 屏 2.1s / 吐 2.45s）
+// 文字節奏對齊 .breathing-circle 的 @keyframes（7s 一輪 = 35% 吸 / 30% 屏 / 35% 吐）
+const SOS_BREATHING = { inhaleMs: 2450, holdMs: 2100, exhaleMs: 2450 };
+const PHASE_LABEL = { inhale: '吸氣', hold: '屏息', exhale: '吐氣' } as const;
+
 const BreatheStepView: React.FC<{ onNext: () => void }> = ({ onNext }) => {
-    const [phase, setPhase] = React.useState<'inhale' | 'hold' | 'exhale'>('inhale');
-    React.useEffect(() => {
-        const cycle: { p: 'inhale' | 'hold' | 'exhale'; ms: number }[] = [
-            { p: 'inhale', ms: 2450 },
-            { p: 'hold', ms: 2100 },
-            { p: 'exhale', ms: 2450 },
-        ];
-        let idx = 0;
-        let timer: ReturnType<typeof setTimeout>;
-        const run = () => {
-            setPhase(cycle[idx].p);
-            timer = setTimeout(() => {
-                idx = (idx + 1) % cycle.length;
-                run();
-            }, cycle[idx].ms);
-        };
-        run();
-        return () => clearTimeout(timer);
-    }, []);
-    const phaseLabel = phase === 'inhale' ? '吸氣' : phase === 'hold' ? '屏息' : '吐氣';
+    const phase = useBreathingPhase(SOS_BREATHING);
     return (
         <div className="sos-step breathe-step">
             <div className="sos-header">
@@ -67,12 +52,11 @@ const BreatheStepView: React.FC<{ onNext: () => void }> = ({ onNext }) => {
                 <p className="sos-subtitle">這份感受很難受，它會過去的</p>
             </div>
             <div className="breathing-container">
-                <div className="breathing-circle">
-                    <div className="breathing-text" aria-live="polite">{phaseLabel}</div>
+                <div className="breathing-circle" aria-hidden="true">
+                    <div className="breathing-text">{PHASE_LABEL[phase]}</div>
                 </div>
-                <p className="breathing-instruction">
-                    跟著圓圈的節奏呼吸
-                </p>
+                <span className="sr-only" aria-live="polite">{PHASE_LABEL[phase]}</span>
+                <p className="breathing-instruction">跟著圓圈的節奏呼吸</p>
             </div>
             <button className="sos-primary-btn" onClick={onNext}>
                 我準備好了，下一步 →
