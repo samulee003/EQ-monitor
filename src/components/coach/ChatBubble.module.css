@@ -1,0 +1,87 @@
+.bubbleRow {
+  display: flex;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+.bubbleRowUser {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.avatarUser {
+  background: var(--grad-blue);
+  color: var(--bg-color);
+}
+
+.avatarModel {
+  background: linear-gradient(135deg, #c5a88a 0%, #b8a090 100%);
+  color: var(--bg-color);
+}
+
+.bubbleColumn {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+}
+
+.bubble {
+  padding: var(--s-3) var(--s-4);
+  font-size: 0.875rem;
+  line-height: 1.625;
+  word-break: break-word;
+}
+
+.bubbleUser {
+  background: var(--grad-blue);
+  color: #fff;
+  border: none;
+  border-radius: 20px 20px 4px 20px;
+  box-shadow: 0 2px 12px rgba(107, 143, 168, 0.3);
+}
+
+.bubbleModel {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px 20px 20px 4px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+  padding: 0 var(--s-1);
+}
+
+.skillBadge {
+  font-size: 10px;
+  padding: 2px var(--s-2);
+  border-radius: 9999px;
+  background: var(--grad-red);
+  color: #fff;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.timestamp {
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  line-height: 1.4;
+}

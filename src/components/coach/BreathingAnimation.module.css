@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-6);
+}
+
+.circle {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  opacity: 0.5;
+  box-shadow: 0 0 40px rgba(107, 143, 168, 0.2);
+  transition: transform ease-in-out;
+}
+
+.phaseText {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--color-blue);
+}

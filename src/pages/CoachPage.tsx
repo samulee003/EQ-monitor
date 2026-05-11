@@ -7,9 +7,8 @@ import { ChatInput } from '../components/coach/ChatInput';
 import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { WelcomeCard } from '../components/coach/WelcomeCard';
-
-const SESSION_ID = crypto.randomUUID();
-const USER_ID = 'test-user'; // TODO: replace with auth user
+import { useAuth } from '../services/AuthContext';
+import styles from './CoachPage.module.css';
 
 const WELCOME_MSG: CoachMessage = {
   id: 'welcome',
@@ -33,11 +32,16 @@ function getErrorMessage(type: ErrorType): string {
 }
 
 export default function CoachPage() {
+  const { user } = useAuth();
+  // TODO: Remove 'test-user' fallback once auth is fully wired for all users
+  const userId = user?.id || 'test-user';
+
   const [messages, setMessages] = useState<CoachMessage[]>([WELCOME_MSG]);
   const [loading, setLoading] = useState(false);
   const [showSOS, setShowSOS] = useState(false);
   const [error, setError] = useState<{ type: ErrorType; retryText: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   // Load history on mount
   useEffect(() => {
@@ -73,8 +77,8 @@ export default function CoachPage() {
     try {
       const res = await sendMessage({
         message: text,
-        userId: USER_ID,
-        sessionId: SESSION_ID,
+        userId: userId,
+        sessionId: sessionIdRef.current,
       });
       const modelMsg: CoachMessage = {
         id: crypto.randomUUID(),
@@ -128,16 +132,18 @@ export default function CoachPage() {
   const showWelcome = messages.length <= 1;
 
   return (
-    <div
-      className="flex flex-col bg-white"
-      style={{ height: '100dvh' }}
-    >
-      <header className="flex items-center justify-between px-4 py-3 border-b bg-white sticky top-0 z-10">
-        <h1 className="text-lg font-semibold text-gray-800">今心教練</h1>
-        <span className="text-xs text-gray-400">AI 陪伴你的情緒旅程</span>
+    <div className={styles.coachPage}>
+      {/* Header */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.headerIcon}>🤖</div>
+          <h1 className={styles.headerTitle}>今心教練</h1>
+        </div>
+        <span className={styles.headerSubtitle}>AI 陪伴你的情緒旅程</span>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      {/* Chat Area */}
+      <div className={styles.chatArea}>
         {showWelcome && <WelcomeCard onPromptClick={handlePromptClick} />}
         {messages.map((m) => (
           <ChatBubble key={m.id} message={m} />
@@ -146,14 +152,15 @@ export default function CoachPage() {
         <div ref={bottomRef} />
       </div>
 
+      {/* Error Banner */}
       {error && (
-        <div className="px-4 py-2 bg-red-50 border-t border-red-100 flex items-center justify-between gap-3">
-          <span className="text-sm text-red-700 flex-1">
+        <div className={styles.errorBanner}>
+          <span className={styles.errorMessage}>
             {getErrorMessage(error.type)}
           </span>
           <button
             onClick={handleRetry}
-            className="text-sm px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition whitespace-nowrap"
+            className={styles.retryButton}
           >
             再試一次
           </button>

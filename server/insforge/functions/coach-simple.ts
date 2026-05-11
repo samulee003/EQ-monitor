@@ -170,6 +170,121 @@ async function getUserEmotionSummary(userId: string) {
   }
 }
 
+interface CoachMessage {
+  id: string;
+  session_id: string;
+  user_id: string;
+  role: 'user' | 'model';
+  content: string;
+  created_at: string;
+}
+
+/**
+ * 取得指定 session 的最近對話紀錄
+ * 失敗時返回空陣列，不影響主流程
+ */
+async function getConversationHistory(sessionId: string, limit = 10): Promise<CoachMessage[]> {
+  try {
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+    const anonKey = Deno.env.get('ANON_KEY') || '';
+
+    const client = createClient({
+      baseUrl,
+      anonKey,
+    });
+
+    const { data, error } = await client.database
+      .from('coach_messages')
+      .select('id, session_id, user_id, role, content, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      console.error('getConversationHistory error:', error);
+      return [];
+    }
+
+    return (data ?? []) as CoachMessage[];
+  } catch (e) {
+    console.error('getConversationHistory failed:', e);
+    return [];
+  }
+}
+
+/**
+ * 儲存單筆對話訊息
+ * 失敗時僅記錄 log，不影響主流程
+ */
+async function saveMessage(
+  sessionId: string,
+  userId: string,
+  role: 'user' | 'model',
+  content: string
+): Promise<void> {
+  try {
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+    const anonKey = Deno.env.get('ANON_KEY') || '';
+
+    const client = createClient({
+      baseUrl,
+      anonKey,
+    });
+
+    const { error } = await client.database
+      .from('coach_messages')
+      .insert({ session_id: sessionId, user_id: userId, role, content });
+
+    if (error) {
+      console.error('saveMessage error:', error);
+    }
+  } catch (e) {
+    console.error('saveMessage failed:', e);
+  }
+}
+
+/**
+ * 清理過舊的對話紀錄，保留最近 maxMessages 筆
+ * 防止資料無限制增長
+ */
+async function cleanupOldMessages(sessionId: string, maxMessages = 20): Promise<void> {
+  try {
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+    const anonKey = Deno.env.get('ANON_KEY') || '';
+
+    const client = createClient({
+      baseUrl,
+      anonKey,
+    });
+
+    const { data, error } = await client.database
+      .from('coach_messages')
+      .select('created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .offset(maxMessages);
+
+    if (error || !data || data.length === 0) {
+      return;
+    }
+
+    const cutoff = (data[0] as { created_at: string }).created_at;
+
+    const { error: deleteError } = await client.database
+      .from('coach_messages')
+      .delete()
+      .eq('session_id', sessionId)
+      .lt('created_at', cutoff);
+
+    if (deleteError) {
+      console.error('cleanupOldMessages delete error:', deleteError);
+    }
+  } catch (e) {
+    console.error('cleanupOldMessages failed:', e);
+  }
+}
+
 interface CoachRequestBody {
   message: string;
   userId: string;
@@ -209,25 +324,45 @@ export default async function (req: Request): Promise<Response> {
         ? `使用者最近記錄了 ${summary.recentLogs.length} 筆情緒日誌，連續記錄天數為 ${summary.streak.current_streak} 天。`
         : '這是使用者第一次與你對話，或者尚無情緒日誌記錄。';
 
+    // Fetch conversation history (graceful fallback: empty array on failure)
+    const history = await getConversationHistory(sessionId, 10);
+
     const apiKey = Deno.env.get('GOOGLE_API_KEY');
     if (!apiKey) {
       throw new Error('GOOGLE_API_KEY is not set');
     }
 
-    const prompt = crisis
-      ? `${SYSTEM_PROMPT}\n\n【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。\n\n${historyContext}\n\n使用者說：「${message}」`
-      : `${SYSTEM_PROMPT}\n\n${historyContext}\n\n使用者說：「${message}」`;
+    const systemInstruction = crisis
+      ? {
+          parts: [
+            {
+              text: `${SYSTEM_PROMPT}\n\n【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。`,
+            },
+          ],
+        }
+      : { parts: [{ text: SYSTEM_PROMPT }] };
+
+    const currentUserText = crisis
+      ? `【緊急狀態】使用者可能處於危機中，請直接進入 Meta-Moment 四步驟協議。\n\n${historyContext}\n\n使用者說：「${message}」`
+      : `${historyContext}\n\n使用者說：「${message}」`;
+
+    const contents = [
+      ...history.map((msg) => ({
+        role: msg.role,
+        parts: [{ text: msg.content }],
+      })),
+      {
+        role: 'user',
+        parts: [{ text: currentUserText }],
+      },
+    ];
 
     const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }],
-          },
-        ],
+        systemInstruction,
+        contents,
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 1024,
@@ -243,12 +378,16 @@ export default async function (req: Request): Promise<Response> {
 
     const geminiData = await geminiRes.json();
     const responseText =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ??
-      '抱歉，我無法回應。';
+      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '抱歉，我無法回應。';
 
     if (crisis) {
       skillInvoked = 'MetaMomentSkill';
     }
+
+    // Persist conversation (non-blocking to response, but awaited for reliability)
+    await saveMessage(sessionId, userId, 'user', message);
+    await saveMessage(sessionId, userId, 'model', responseText);
+    await cleanupOldMessages(sessionId, 20);
 
     return new Response(
       JSON.stringify({
