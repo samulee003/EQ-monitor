@@ -58,3 +58,4 @@ server/.env
 .roo
 .trae
 .windsurf
+coverage/

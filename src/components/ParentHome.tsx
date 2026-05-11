@@ -108,12 +108,12 @@ const ParentHome: React.FC = () => {
                         <h1 className="greeting">{greeting}</h1>
                         <p className="sub-greeting">
                             {todayCount > 0 
-                                ? `今天已記錄 ${todayCount} 次心情 💚` 
+                                ? `今天已記錄 ${todayCount} 次心情` 
                                 : '今天還沒記錄心情，需要 1 分鐘嗎？'}
                         </p>
                         {streakDays > 1 && (
                             <div className="streak-badge">
-                                🔥 連續 {streakDays} 天
+                                連續 {streakDays} 天
                             </div>
                         )}
                     </div>
@@ -125,7 +125,7 @@ const ParentHome: React.FC = () => {
                             className="mode-card mode-sos"
                             onClick={() => setMode('sos')}
                         >
-                            <div className="mode-icon">🆘</div>
+                            <div className="mode-icon" aria-hidden="true">!</div>
                             <div className="mode-content">
                                 <h2>我需要急救</h2>
                                 <p>剛對孩子發脾氣 / 孩子哭鬧 / 快崩潰</p>
@@ -139,7 +139,7 @@ const ParentHome: React.FC = () => {
                             className="mode-card mode-quick"
                             onClick={() => setMode('quick')}
                         >
-                            <div className="mode-icon">⚡</div>
+                            <div className="mode-icon" aria-hidden="true">+</div>
                             <div className="mode-content">
                                 <h2>快速記錄心情</h2>
                                 <p>花 1 分鐘記下現在的感受</p>
@@ -153,7 +153,7 @@ const ParentHome: React.FC = () => {
                             className="mode-card mode-deep"
                             onClick={() => setMode('deep')}
                         >
-                            <div className="mode-icon">🧘</div>
+                            <div className="mode-icon" aria-hidden="true">○</div>
                             <div className="mode-content">
                                 <h2>深度覺察練習</h2>
                                 <p>完整的情緒探索與調節</p>
@@ -165,7 +165,7 @@ const ParentHome: React.FC = () => {
 
                     {/* 底部提示 */}
                     <div className="home-footer">
-                        <p>💡 小提示：修復比完美更重要</p>
+                        <p>小提示：修復比完美更重要</p>
                         <p className="footer-sub">每次願意面對自己的情緒，都是很棒的成長</p>
                     </div>
                 </div>
