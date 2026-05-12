@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { sendMessage } from '../lib/adk/client';
 import { loadChatHistory, saveChatHistory } from '../lib/adk/storage';
-import type { CoachMessage } from '../lib/adk/types';
+import type { CoachMessage, CoachAction } from '../lib/adk/types';
 import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
 import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { WelcomeCard } from '../components/coach/WelcomeCard';
 import { useAuth } from '../services/AuthContext';
+import { useAppStore } from '../stores/appStore';
 import styles from './CoachPage.module.css';
 
 const WELCOME_MSG: CoachMessage = {
@@ -31,6 +32,31 @@ function getErrorMessage(type: ErrorType): string {
   }
 }
 
+/** 執行 Agent 觸發的前端動作 */
+function executeCoachAction(action: CoachAction, reason?: string): string {
+  const setView = useAppStore.getState().setView;
+
+  switch (action) {
+    case 'start_breathing':
+      // 呼吸動作由頁面內的覆蓋層處理，這裡回傳提示文字
+      return reason ? `已準備好呼吸練習：${reason}` : '已準備好呼吸練習';
+    case 'start_checkin':
+      setView('home');
+      return reason ? `已為你開啟情緒記錄：${reason}` : '已為你開啟情緒記錄';
+    case 'open_sos':
+      // SOS 由頁面內的 MetaMomentOverlay 處理
+      return reason ? `已準備好緊急協助：${reason}` : '已準備好緊急協助';
+    case 'show_history':
+      setView('history');
+      return '已為你開啟歷史回顧';
+    case 'show_growth':
+      setView('growth');
+      return '已為你開啟成長儀表板';
+    default:
+      return '';
+  }
+}
+
 export default function CoachPage() {
   const { user } = useAuth();
   // TODO: Remove 'test-user' fallback once auth is fully wired for all users
@@ -39,6 +65,8 @@ export default function CoachPage() {
   const [messages, setMessages] = useState<CoachMessage[]>([WELCOME_MSG]);
   const [loading, setLoading] = useState(false);
   const [showSOS, setShowSOS] = useState(false);
+  const [showBreathing, setShowBreathing] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ action: CoachAction; reason?: string } | null>(null);
   const [error, setError] = useState<{ type: ErrorType; retryText: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
@@ -61,6 +89,24 @@ export default function CoachPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  /** 處理 Agent 回傳的 action */
+  const handleAction = useCallback((action: CoachAction | undefined, reason?: string) => {
+    if (!action) return;
+
+    if (action === 'open_sos') {
+      setShowSOS(true);
+      return;
+    }
+    if (action === 'start_breathing') {
+      setPendingAction({ action, reason });
+      setShowBreathing(true);
+      return;
+    }
+
+    // 導航類 action
+    executeCoachAction(action, reason);
+  }, []);
+
   const doSend = useCallback(async (text: string, addUserMsg = true) => {
     setError(null);
     if (addUserMsg) {
@@ -80,18 +126,23 @@ export default function CoachPage() {
         userId: userId,
         sessionId: sessionIdRef.current,
       });
+
+      // 處理 action 指令
+      if (res.action) {
+        handleAction(res.action as CoachAction, res.actionReason);
+      }
+
       const modelMsg: CoachMessage = {
         id: crypto.randomUUID(),
         role: 'model',
         content: res.response,
         timestamp: new Date().toISOString(),
-        metadata: res.metadata
-          ? {
-              skillInvoked: res.skillInvoked,
-              step: res.step,
-              emotions: res.metadata.emotions_detected,
-            }
-          : undefined,
+        metadata: {
+          skillInvoked: res.skillInvoked,
+          step: res.step,
+          action: res.action,
+          actionReason: res.actionReason,
+        },
       };
       setMessages((prev) => [...prev, modelMsg]);
     } catch (err) {
@@ -104,7 +155,7 @@ export default function CoachPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [handleAction, userId]);
 
   const handleSend = useCallback(
     (text: string) => doSend(text, true),
@@ -136,7 +187,7 @@ export default function CoachPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <div className={styles.headerIcon}>🤖</div>
+          <div className={styles.headerIcon}>教</div>
           <h1 className={styles.headerTitle}>今心教練</h1>
         </div>
         <span className={styles.headerSubtitle}>AI 陪伴你的情緒旅程</span>
@@ -183,6 +234,63 @@ export default function CoachPage() {
             );
           }}
         />
+      )}
+
+      {/* TODO: Breathing overlay triggered by agent action */}
+      {showBreathing && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--surface-mask)',
+            backdropFilter: 'blur(12px)',
+          }}
+          onClick={() => setShowBreathing(false)}
+        >
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              borderRadius: 'var(--radius-luxe)',
+              padding: '2rem',
+              maxWidth: '360px',
+              textAlign: 'center',
+              border: '1px solid var(--glass-border)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                background: 'var(--grad-blue)',
+                margin: '0 auto 1.5rem',
+                animation: 'breatheLuxe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              }}
+            />
+            <p style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+              {pendingAction?.reason || '跟著教練一起呼吸'}
+            </p>
+            <button
+              onClick={() => setShowBreathing(false)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: 'var(--text-primary)',
+                color: 'var(--bg-color)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              完成
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

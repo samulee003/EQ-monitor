@@ -1,7 +1,7 @@
-import { Runner, Gemini, isFinalResponse } from 'npm:@google/adk';
-import { createUserContent } from 'npm:@google/genai';
-import { createEmotionCoachAgent } from './emotionCoach.ts';
-import { InsForgeSessionService } from './session/InsForgeSessionService.ts';
+import { Runner, Gemini, isFinalResponse } from '@google/adk';
+import { createUserContent } from '@google/genai';
+import { createEmotionCoachAgent } from './emotionCoach.js';
+import { InsForgeSessionService } from './session/InsForgeSessionService.js';
 
 const APP_NAME = 'imxin_emotion_coach';
 const MODEL_NAME = 'gemini-3.1-flash-lite';
@@ -15,7 +15,7 @@ export interface CoachRunResult {
 }
 
 function getGeminiModel() {
-  const apiKey = Deno.env.get('GOOGLE_API_KEY');
+  const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     console.warn('GOOGLE_API_KEY not set — agent will fail at runtime');
   }
@@ -25,13 +25,6 @@ function getGeminiModel() {
   });
 }
 
-/**
- * 執行情緒教練對話一輪（使用持久化 SessionService）
- *
- * @param userMessage 使用者輸入訊息
- * @param userId      使用者 UUID
- * @param sessionId   對話 session ID
- */
 export async function runCoach(
   userMessage: string,
   userId: string,
@@ -40,7 +33,6 @@ export async function runCoach(
   const model = getGeminiModel();
   const emotionCoachAgent = createEmotionCoachAgent(model);
 
-  // 使用 InsForge PostgreSQL 持久化 SessionService
   const sessionService = new InsForgeSessionService();
 
   const runner = new Runner({
@@ -49,7 +41,6 @@ export async function runCoach(
     sessionService,
   });
 
-  // 確保 session 存在（getOrCreateSession 會自動建立）
   const session = await sessionService.getOrCreateSession({
     appName: APP_NAME,
     userId,
@@ -69,18 +60,10 @@ export async function runCoach(
     sessionId,
     newMessage,
   })) {
-    // 記錄是否有轉介到子代理
     if (event.author === 'MetaMomentSkill') {
       skillInvoked = 'MetaMomentSkill';
     }
 
-    // 嘗試從事件狀態中取得步驟資訊（若有的話）
-    if (event?.state && typeof event.state === 'object') {
-      const s = (event.state as Record<string, unknown>)?.meta_moment_step;
-      if (typeof s === 'number') step = s;
-    }
-
-    // 檢查是否有 trigger_action 工具呼叫
     if (event.content?.parts?.length) {
       for (const part of event.content.parts) {
         if ('functionCall' in part && part.functionCall) {
@@ -94,13 +77,19 @@ export async function runCoach(
       }
     }
 
-    // 取得最終回應文字
     if (isFinalResponse(event) && event.content?.parts?.length) {
       const part = event.content.parts[0];
       if ('text' in part && part.text) {
         responseText = part.text;
       }
     }
+  }
+
+  // 從持久化 session 中讀取最終狀態
+  const finalSession = await sessionService.getSession({ appName: APP_NAME, userId, sessionId });
+  if (finalSession?.state) {
+    const s = finalSession.state.meta_moment_step;
+    if (typeof s === 'number') step = s;
   }
 
   return {
