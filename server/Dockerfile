@@ -3,21 +3,17 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# 安裝全部依賴（含 devDependencies，build 階段需要 TypeScript）
-# 注意：npm ci 在 NODE_ENV=production 時會跳過 devDeps，故先不設定
 COPY package*.json ./
-RUN npm ci
+# 強制以 development 模式安裝，確保 devDependencies（TypeScript）包含在內
+RUN NODE_ENV=development npm ci
 
-# 複製源碼並編譯 TypeScript
 COPY . .
 RUN ./node_modules/.bin/tsc
 
-# 移除 devDependencies，縮小映像體積
+# 移除 devDependencies，縮小映像
 RUN npm prune --production
 
-# 設定生產環境（放在 build 之後）
 ENV NODE_ENV=production
-
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
