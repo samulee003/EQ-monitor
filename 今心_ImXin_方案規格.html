@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今心 ImXin — 產品方案規格書</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --bg-secondary: #252525;
+      --bg-tertiary: #2e2e2e;
+      --text: #f5f3ef;
+      --text-secondary: #a8a29e;
+      --text-muted: #78716c;
+      --red: #C58B8A;
+      --yellow: #D5C1A5;
+      --blue: #97A6B4;
+      --green: #AAB09B;
+      --accent: #D5C1A5;
+      --border: rgba(245,243,239,0.08);
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+      --max-width: 960px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", Roboto, sans-serif;
+      --font-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f3ef;
+        --bg-secondary: #fff;
+        --bg-tertiary: #ebe8e3;
+        --text: #1a1a1a;
+        --text-secondary: #57534e;
+        --text-muted: #a8a29e;
+        --border: rgba(0,0,0,0.08);
+        --shadow: 0 4px 24px rgba(0,0,0,0.08);
+        --shadow-sm: 0 1px 4px rgba(0,0,0,0.05);
+      }
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { max-width: 100%; display: block; }
+
+    /* Navigation */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(26,26,26,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    @media (prefers-color-scheme: light) {
+      .nav { background: rgba(245,243,239,0.9); }
+    }
+    .nav-inner {
+      max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; height: 56px;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 1.25rem; font-size: 0.85rem; }
+    .nav-links a { color: var(--text-secondary); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-links a.active { color: var(--accent); font-weight: 600; }
+
+    /* Hero */
+    .hero {
+      padding: 4rem 1.5rem 3rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 1.5rem;
+    }
+    .hero-meta {
+      display: inline-flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .hero-meta span {
+      background: var(--bg-tertiary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+    }
+
+    /* Sections */
+    .section {
+      max-width: var(--max-width); margin: 0 auto; padding: 3rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section:last-child { border-bottom: none; }
+    .section-title {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-desc {
+      color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .card p, .card li { color: var(--text-secondary); font-size: 0.9rem; }
+    .card ul { padding-left: 1.25rem; margin-top: 0.5rem; }
+    .card li { margin-bottom: 0.35rem; }
+
+    /* Screenshot */
+    .screenshot {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      background: #111;
+      margin: 1.5rem auto;
+      max-width: 380px;
+    }
+    .screenshot img {
+      width: 100%; height: auto; display: block;
+    }
+    .screenshot-caption {
+      text-align: center; font-size: 0.8rem; color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Grid */
+    .grid-2 {
+      display: grid; grid-template-columns: 1fr; gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .grid-3 {
+      display: grid; grid-template-columns: 1fr; gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block; font-size: 0.75rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: 4px; margin-right: 0.35rem;
+      text-transform: uppercase; letter-spacing: 0.02em;
+    }
+    .tag-red { background: rgba(197,139,138,0.15); color: var(--red); }
+    .tag-yellow { background: rgba(213,193,165,0.15); color: var(--yellow); }
+    .tag-blue { background: rgba(151,166,180,0.15); color: var(--blue); }
+    .tag-green { background: rgba(170,176,155,0.15); color: var(--green); }
+    .tag-accent { background: rgba(213,193,165,0.15); color: var(--accent); }
+
+    /* Table */
+    .spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 1rem; }
+    .spec-table th, .spec-table td {
+      text-align: left; padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-table th {
+      font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+      background: var(--bg-tertiary);
+    }
+    .spec-table tr:hover td { background: var(--bg-tertiary); }
+
+    /* Code */
+    code {
+      font-family: var(--font-mono); font-size: 0.85em;
+      background: var(--bg-tertiary); padding: 0.15rem 0.35rem;
+      border-radius: 4px; border: 1px solid var(--border);
+    }
+    pre {
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem;
+      overflow-x: auto; font-size: 0.8rem; line-height: 1.6;
+      margin: 0.75rem 0;
+    }
+    pre code { background: none; padding: 0; border: none; }
+
+    /* Feature block with screenshot side by side */
+    .feature-row {
+      display: flex; flex-direction: column; gap: 1.5rem; align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 720px) {
+      .feature-row { flex-direction: row; align-items: flex-start; }
+      .feature-row .feature-text { flex: 1; }
+      .feature-row .feature-media { flex-shrink: 0; width: 280px; }
+    }
+    .feature-row.reverse { flex-direction: column; }
+    @media (min-width: 720px) {
+      .feature-row.reverse { flex-direction: row-reverse; }
+    }
+
+    /* Color swatches */
+    .swatches { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .swatch { width: 48px; height: 48px; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+
+    /* Footer */
+    .footer {
+      text-align: center; padding: 3rem 1.5rem;
+      color: var(--text-muted); font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Anchor offset for sticky nav */
+    .anchor { display: block; position: relative; top: -60px; visibility: hidden; }
+
+    /* Timeline / Flow */
+    .flow-list { list-style: none; padding: 0; margin: 1rem 0; }
+    .flow-list li {
+      position: relative; padding-left: 2rem; padding-bottom: 1.25rem;
+      border-left: 2px solid var(--border); margin-left: 0.5rem;
+    }
+    .flow-list li:last-child { border-left: 2px solid transparent; }
+    .flow-list li::before {
+      content: attr(data-step);
+      position: absolute; left: -0.65rem; top: 0;
+      width: 1.3rem; height: 1.3rem; border-radius: 50%;
+      background: var(--bg-tertiary); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+    }
+    .flow-list li.active::before { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .flow-list li strong { display: block; font-weight: 600; margin-bottom: 0.15rem; }
+    .flow-list li span { font-size: 0.85rem; color: var(--text-secondary); }
+
+    /* Status badge */
+    .status { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600; }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .status-ok::before { background: var(--green); }
+    .status-warn::before { background: var(--yellow); }
+    .status-err::before { background: var(--red); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">今心 ImXin</div>
+    <div class="nav-links">
+      <a href="#overview">概述</a>
+      <a href="#architecture">架構</a>
+      <a href="#features">功能</a>
+      <a href="#design">設計</a>
+      <a href="#data">資料</a>
+      <a href="#deploy">部署</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>今心 ImXin 方案規格書</h1>
+  <p class="subtitle">開源情緒覺察工具 · 基於耶魯大學 RULER 框架 · Bot-First 雙入口架構</p>
+  <div class="hero-meta">
+    <span>v1.0</span>
+    <span>MIT License</span>
+    <span>React 19 + TypeScript</span>
+    <span>InsForge BaaS</span>
+  </div>
+</header>
+
+<!-- ========== 產品概述 ========== -->
+<div class="anchor" id="overview"></div>
+<section class="section">
+  <h2 class="section-title">📱 產品概述</h2>
+  <p class="section-desc">今心（ImXin）是一款開源情緒覺察工具，名稱取自「今心即為念」。協助使用者在情緒高漲時暫停、覺察並選擇回應方式。</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>🎯 產品定位</h3>
+      <ul>
+        <li>以<strong>耶魯大學 Marc Brackett 的 RULER 情緒智力框架</strong>為核心方法論</li>
+        <li>雙入口架構：<strong>LINE Bot</strong> 對話練習 + <strong>PWA 儀表盤</strong> 歷史回顧</li>
+        <li>個人隱私優先：端側加密、本地優先、可選雲端同步</li>
+        <li>支援繁體中文（台灣用語），100+ 情緒詞彙庫</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>👤 目標用戶</h3>
+      <ul>
+        <li>希望提升情緒覺察能力的一般使用者</li>
+        <li>需要親職情緒支援的父母（Parent Role）</li>
+        <li>偏好低門檻、對話式互動的 LINE 用戶</li>
+        <li>關注數據隱私、希望資料自主的用戶</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>🧠 RULER 五步框架</h3>
+    <div class="grid-2" style="margin-top:0.75rem;">
+      <div>
+        <p><span class="tag tag-red">R</span> <strong>Recognizing</strong> — 覺察情緒訊號（身體感受、行為線索）</p>
+        <p style="margin-top:0.5rem"><span class="tag tag-yellow">U</span> <strong>Understanding</strong> — 理解情緒成因（什麼引發了這個情緒）</p>
+        <p style="margin-top:0.5rem"><span class="tag tag-blue">L</span> <strong>Labeling</strong> — 精確標記情緒（從 100+ 詞彙中選擇）</p>
+      </div>
+      <div>
+        <p><span class="tag tag-yellow">E</span> <strong>Expressing</strong> — 適當表達情緒（選擇表達方式與對象）</p>
+        <p style="margin-top:0.5rem"><span class="tag tag-green">R</span> <strong>Regulating</strong> — 調節情緒策略（呼吸、身體掃描、認知重構）</p>
+        <p style="margin-top:0.5rem"><span class="tag tag-accent">+</span> <strong>NeuroCheck</strong> — 生理狀態檢視（睡眠、活動量）</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 系統架構 ========== -->
+<div class="anchor" id="architecture"></div>
+<section class="section">
+  <h2 class="section-title">🏗️ 系統架構</h2>
+  <p class="section-desc">雙入口、三層架構：前端 PWA + Node.js Bot Server + InsForge BaaS</p>
+
+  <div class="card">
+    <h3>架構總覽</h3>
+    <pre><code>┌─────────────────┐     ┌──────────────────┐     ┌─────────────────────────┐
+│   用戶入口層     │     │    服務層         │     │      基礎設施層           │
+├─────────────────┤     ├──────────────────┤     ├─────────────────────────┤
+│ 🥇 LINE Bot     │────▶│ Express 5 Server │────▶│ InsForge PostgreSQL     │
+│    (主要入口)    │     │ server/          │     │ + Auth + Storage        │
+├─────────────────┤     ├──────────────────┤     ├─────────────────────────┤
+│ 📊 PWA 前端      │────▶│ Vite 7 Build     │────▶│ InsForge Edge Functions │
+│    (歷史回顧)    │     │ React 19 + TS    │     │ (AI Coach / 週報 / 成就) │
+└─────────────────┘     └──────────────────┘     └─────────────────────────┘
+                              │                           │
+                              ▼                           ▼
+                        Google Gemini REST API      Deno Runtime</code></pre>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3>前端 PWA</h3>
+      <ul>
+        <li><strong>React 19.2</strong> + TypeScript 5.9 (Strict)</li>
+        <li><strong>Vite 7</strong> + vite-plugin-pwa + Workbox</li>
+        <li><strong>Capacitor 7</strong>（Android 原生包裝）</li>
+        <li>狀態管理：Zustand 5 + Context + useReducer</li>
+        <li>樣式：Vanilla CSS + CSS Modules（Morandi UI）</li>
+        <li>開放轉換：opencc-js（繁簡）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>後端 Bot Server</h3>
+      <ul>
+        <li><strong>Node.js 18+</strong> + Express 5</li>
+        <li><strong>LINE SDK</strong> @line/bot-sdk 9.x</li>
+        <li><strong>TypeScript</strong> + tsx 熱重載</li>
+        <li>測試：Vitest 4 + supertest</li>
+        <li>數據庫適配器：Memory / PostgreSQL 雙模式</li>
+        <li>中間件：限速、日誌、錯誤處理</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>BaaS — InsForge</h3>
+      <ul>
+        <li><strong>PostgreSQL</strong> + Row Level Security</li>
+        <li><strong>Auth</strong>（JWT + 匿名登入）</li>
+        <li><strong>Storage</strong>（Private Buckets）</li>
+        <li><strong>Edge Functions</strong>（Deno Runtime）</li>
+        <li><strong>Realtime</strong>（WebSocket Pub/Sub）</li>
+        <li>AI：Google Gemini REST API</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>部署平台</h3>
+    <table class="spec-table">
+      <tr><th>服務</th><th>平台</th><th>URL</th><th>狀態</th></tr>
+      <tr><td>PWA 前端</td><td>Zeabur（靜態託管）</td><td><code>https://today-mood.zeabur.app</code></td><td><span class="status status-ok">線上</span></td></tr>
+      <tr><td>Edge Function</td><td>InsForge Functions</td><td><code>https://b88egxiz.functions.insforge.app/coach</code></td><td><span class="status status-ok">線上</span></td></tr>
+      <tr><td>InsForge API</td><td>InsForge</td><td><code>https://b88egxiz.ap-southeast.insforge.app</code></td><td><span class="status status-ok">線上</span></td></tr>
+      <tr><td>Bot 後端</td><td>Fly.io（預留）</td><td>—</td><td><span class="status status-warn">未登入</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 功能模組 ========== -->
+<div class="anchor" id="features"></div>
+<section class="section">
+  <h2 class="section-title">🧩 功能模組詳細說明</h2>
+  <p class="section-desc">PWA 儀表盤五大視圖 + LINE Bot 對話流程 + Agentic AI 能力</p>
+
+  <!-- 首頁 / 情緒覺察 -->
+  <div class="feature-row">
+    <div class="feature-text">
+      <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">
+        <span class="tag tag-red">首頁</span> 情緒覺察（Check-In Flow）
+      </h3>
+      <p>用戶進入 App 後的核心流程，基於 RULER 框架設計，提供完整版與快速版雙軌體驗。</p>
+
+      <div class="card" style="margin-top:1rem;">
+        <h3>完整 RULER 流程（~3-5 分鐘）</h3>
+        <ul class="flow-list">
+          <li data-step="R"><strong>Recognizing — 情緒象限選擇</strong><span>MoodMeter 四象限熱力圖，用戶點選當下情緒所在的高能量/低能量 × 高愉悅/低愉悅區域。</span></li>
+          <li data-step="C"><strong>Centering — 回到當下</strong><span>簡短引導語，協助用戶從反應模式切換到回應模式（Meta-Moment 第一步）。</span></li>
+          <li data-step="B"><strong>BodyScan — 身體掃描</strong><span>引導覺察身體緊繃部位，將情緒與身體感受連結。</span></li>
+          <li data-step="L"><strong>Labeling — 精確標記</strong><span>EmotionGrid 根據所選象限展示 100+ 情緒詞彙，支持多選與搜尋。</span></li>
+          <li data-step="U"><strong>Understanding — 理解成因</strong><span>開放式問題引導用戶思考：「什麼引發了這個情緒？」</span></li>
+          <li data-step="E"><strong>Expressing — 表達方式</strong><span>選擇表達對象與方式（獨處、書寫、對話），評估表達後的預期結果。</span></li>
+          <li data-step="R"><strong>Regulating — 調節策略</strong><span>根據情緒類型推薦調節策略（呼吸練習、認知重構、身體活動）。</span></li>
+          <li data-step="N"><strong>NeuroCheck — 生理狀態</strong><span>記錄睡眠時數與活動量，提供身心關聯洞察。</span></li>
+          <li data-step="✓" class="active"><strong>Summary — 總結與存檔</strong><span>完整的 RULER 日誌，可選擇繼續深入或結束。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>快捷入口</h3>
+        <ul>
+          <li><strong>快速記錄</strong>（&lt; 60 秒）：繞過完整流程，直接選擇情緒與強度，快速存檔。</li>
+          <li><strong>親職支援</strong>（Parent Role）：針對育兒情境設計的即時行動指引與情緒詞彙。</li>
+          <li><strong>繼續草稿</strong>：自動保存未完成的 RULER 流程，下次進入時提示恢復。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>危機安全機制</h3>
+        <ul>
+          <li>高風險情緒（絕望、無助、暴怒等）自動觸發<strong>危機介入彈窗</strong></li>
+          <li>提供台灣 24 小時心理支持熱線：<strong>安心專線 1925</strong>、<strong>生命線 1909</strong></li>
+          <li>一鍵撥號（tel: 連結），不干擾用戶主流程</li>
+        </ul>
+      </div>
+    </div>
+    <div class="feature-media">
+      <div class="screenshot">
+        <img src="docs/spec-screenshots/01-home.png" alt="今心首頁截圖">
+      </div>
+      <p class="screenshot-caption">首頁：MoodMeter + QuickStats + 快捷入口</p>
+    </div>
+  </div>
+
+  <!-- 歷史回顧 -->
+  <div class="feature-row reverse">
+    <div class="feature-text">
+      <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">
+        <span class="tag tag-blue">歷史</span> 時間軸（Timeline）
+      </h3>
+      <p>所有情緒覺察記錄的時間軸視圖，支持多維度篩選與搜尋。</p>
+      <div class="card" style="margin-top:1rem;">
+        <h3>功能特性</h3>
+        <ul>
+          <li><strong>時間軸列表</strong>：按時間倒序排列，顯示情緒、強度、象限、備註</li>
+          <li><strong>象限篩選</strong>：快速過濾紅/黃/藍/綠四象限記錄</li>
+          <li><strong>關鍵字搜尋</strong>：搜尋情緒名稱或備註內容</li>
+          <li><strong>詳情展開</strong>：點擊單條記錄查看完整 RULER 五步內容</li>
+          <li><strong>數據導出</strong>：支持 JSON / CSV 匯出（本地處理，不上傳伺服器）</li>
+          <li><strong>隱私鎖</strong>：進入歷史頁面前可要求 PIN 驗證</li>
+        </ul>
+      </div>
+    </div>
+    <div class="feature-media">
+      <div class="screenshot">
+        <img src="docs/spec-screenshots/02-history.png" alt="歷史時間軸截圖">
+      </div>
+      <p class="screenshot-caption">歷史時間軸：情緒記錄一覽</p>
+    </div>
+  </div>
+
+  <!-- 成長儀表盤 -->
+  <div class="feature-row">
+    <div class="feature-text">
+      <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">
+        <span class="tag tag-green">成長</span> 儀表盤（Growth Dashboard）
+      </h3>
+      <p>以視覺化方式呈現用戶的情緒覺察習慣與趨勢。</p>
+      <div class="card" style="margin-top:1rem;">
+        <h3>數據視覺化</h3>
+        <ul>
+          <li><strong>情緒熱力圖</strong>：以日曆格子形式展示每日情緒象限分布</li>
+          <li><strong>趨勢曲線</strong>：情緒強度與頻率的時間序列圖</li>
+          <li><strong>象限佔比</strong>：四象限的圓餅/環形圖統計</li>
+          <li><strong>連續紀錄</strong>：當前連續天數、最長連續天數、本週/本月統計</li>
+          <li><strong>週報洞察</strong>：AI 自動生成每週情緒趨勢摘要（Edge Function）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="feature-media">
+      <div class="screenshot">
+        <img src="docs/spec-screenshots/03-growth.png" alt="成長儀表盤截圖">
+      </div>
+      <p class="screenshot-caption">成長儀表盤：情緒熱力圖與趨勢</p>
+    </div>
+  </div>
+
+  <!-- 成就系統 -->
+  <div class="feature-row reverse">
+    <div class="feature-text">
+      <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">
+        <span class="tag tag-yellow">成就</span> 成就系統（Achievements）
+      </h3>
+      <p>遊戲化機制激勵持續覺察練習，所有成就條件在前端計算。</p>
+      <div class="card" style="margin-top:1rem;">
+        <h3>成就類型</h3>
+        <ul>
+          <li><strong>初次覺察</strong>：完成第一次 RULER 記錄</li>
+          <li><strong>連續紀錄</strong>：3 天 / 7 天 / 30 天連續記錄</li>
+          <li><strong>探索者</strong>：在四個象限都留下過記錄</li>
+          <li><strong>深度覺察</strong>：完成完整 RULER 五步流程 N 次</li>
+          <li><strong>表達練習</strong>：使用 Expressing 步驟記錄 N 次</li>
+          <li><strong>親職英雄</strong>：以 Parent Role 完成記錄（隱藏成就）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>狀態追蹤</h3>
+        <ul>
+          <li>已解鎖 / 未解鎖 / 新獲得（未查看）三種狀態</li>
+          <li>成就解鎖時即時 toast 通知</li>
+          <li>連續紀錄斷掉時溫柔提醒，無責怪語氣</li>
+        </ul>
+      </div>
+    </div>
+    <div class="feature-media">
+      <div class="screenshot">
+        <img src="docs/spec-screenshots/04-achievement.png" alt="成就系統截圖">
+      </div>
+      <p class="screenshot-caption">成就系統：解鎖進度與獎盃展示</p>
+    </div>
+  </div>
+
+  <!-- AI 教練 -->
+  <div class="feature-row">
+    <div class="feature-text">
+      <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">
+        <span class="tag tag-accent">教練</span> AI 情緒教練（Agentic AI Coach）
+      </h3>
+      <p>基於 Google Gemini 的 Agentic AI 教練，具備工具調用、Session 記憶、主動行動能力。</p>
+
+      <div class="card" style="margin-top:1rem;">
+        <h3>Agentic 能力清單</h3>
+        <ul>
+          <li><strong>工具調用（Function Calling）</strong>：AI 可主動調用 4 個工具完成複雜任務</li>
+          <li><strong>Session 持久化</strong>：對話記憶存儲於 PostgreSQL，跨對話保持上下文</li>
+          <li><strong>子代理路由</strong>：偵測到危機情緒時自動切換至 Meta-Moment 協議</li>
+          <li><strong>主動行動</strong>：AI 可觸發前端功能（啟動呼吸器、開啟 SOS、導航至記錄頁面）</li>
+          <li><strong>趨勢分析</strong>：查詢用戶歷史數據，提供個人化洞察與建議</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>4 個內建 Tools</h3>
+        <table class="spec-table">
+          <tr><th>工具名稱</th><th>功能</th><th>觸發場景</th></tr>
+          <tr><td><code>get_user_emotion_summary</code></td><td>查詢用戶近期情緒摘要</td><td>用戶問「我最近怎麼樣」</td></tr>
+          <tr><td><code>get_emotion_trend</code></td><td>分析情緒趨勢與模式</td><td>用戶問「我最近有沒有進步」</td></tr>
+          <tr><td><code>save_ruler_log</code></td><td>將對話內容存為 RULER 日誌</td><td>用戶完成一次口頭覺察</td></tr>
+          <tr><td><code>trigger_action</code></td><td>觸發前端動作（呼吸/SOS/導航）</td><td>AI 判斷用戶需要即時調節</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Meta-Moment 危機協議</h3>
+        <ul>
+          <li>當用戶輸入包含高風險關鍵詞（自傷、絕望、無意義等），自動切換為 Meta-Moment 安全模式</li>
+          <li>AI 不給建議，而是引導用戶暫停、呼吸、確認當下安全</li>
+          <li>提供一鍵撥打 1925 / 1909 的 SOS 按鈕</li>
+          <li>所有危機對話標記為高優先級，便於後續專業介入追蹤</li>
+        </ul>
+      </div>
+    </div>
+    <div class="feature-media">
+      <div class="screenshot">
+        <img src="docs/spec-screenshots/05-coach.png" alt="AI 教練截圖">
+      </div>
+      <p class="screenshot-caption">AI 教練：Agentic 對話介面</p>
+    </div>
+  </div>
+
+  <!-- LINE Bot -->
+  <div class="card" style="margin-top:2rem;">
+    <h3>💬 LINE Bot 對話流程</h3>
+    <p>LINE 為主要入口，用戶無需安裝 App 即可開始 RULER 練習。</p>
+    <ul style="margin-top:0.75rem;">
+      <li><strong>對話式狀態機</strong>：透過 LINE Message API 維持用戶會話狀態，逐步引導 RULER 五步</li>
+      <li><strong>快捷按鈕</strong>：Quick Reply 提供情緒詞彙、強度選項、操作按鈕</li>
+      <li><strong>圖文選單</strong>：底部固定選單提供「開始覺察」、「歷史記錄」、「設定」、「緊急支援」</li>
+      <li><strong>Webhook 簽名驗證</strong>：獨立 raw body 解析器確保 LINE 平台安全性</li>
+      <li><strong>數據同步</strong>：LINE 端記錄可同步至 PWA 儀表盤（需綁定帳號）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== 設計系統 ========== -->
+<div class="anchor" id="design"></div>
+<section class="section">
+  <h2 class="section-title">🎨 設計系統 — Luminous Morandi</h2>
+  <p class="section-desc">受 Morandi 畫作啟發的低飽和度配色，兼顧情緒安全與視覺舒適。</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>情緒象限配色</h3>
+      <div class="swatches">
+        <div class="swatch" style="background:#C58B8A;" title="Red — 高能量低愉悅"></div>
+        <div class="swatch" style="background:#D5C1A5;" title="Yellow — 高能量高愉悅"></div>
+        <div class="swatch" style="background:#97A6B4;" title="Blue — 低能量低愉悅"></div>
+        <div class="swatch" style="background:#AAB09B;" title="Green — 低能量高愉悅"></div>
+      </div>
+      <p style="margin-top:0.75rem; font-size:0.85rem;">每個象限對應一種情緒類型，在 MoodMeter、進度條、統計圖表中統一使用。</p>
+    </div>
+    <div class="card">
+      <h3>主題模式</h3>
+      <ul>
+        <li><strong>Dark（預設）</strong>：#1a1a1a 背景，降低夜間使用眼睛疲勞</li>
+        <li><strong>Light</strong>：#f5f3ef 背景，高對比閱讀場景</li>
+        <li><strong>System</strong>：跟隨系統偏好自動切換</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1rem;">
+    <div class="card">
+      <h3>字體</h3>
+      <ul>
+        <li>西文：<strong>Inter</strong>（可讀性、螢幕優化）</li>
+        <li>中文：<strong>Noto Sans TC</strong>（繁體中文完整支援）</li>
+        <li>8 級字階：Display (28px) → Caption (12px)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>動效原則</h3>
+      <ul>
+        <li>過渡時間：fast 150ms / normal 250ms / slow 400ms</li>
+        <li>緩動曲線：ease-out 為主，減少焦慮感</li>
+        <li>頁面切換：fade + slide，方向暗示導航層級</li>
+        <li>尊重 <code>prefers-reduced-motion</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>組件規範</h3>
+    <ul>
+      <li>函數組件 + Hooks，禁止使用 Class 組件</li>
+      <li>Props 類型：<code>React.FC&lt;{ propName: Type }&gt;</code></li>
+      <li>樣式：CSS Modules（<code>*.module.css</code>）或 CSS 自定義屬性</li>
+      <li><strong>禁止</strong>在 JSX 中嵌入 <code>&lt;style&gt;</code> 標籤</li>
+      <li>圓角系統：sm 8px / md 12px / lg 20px / xl 28px</li>
+      <li>間距系統：4px base unit，s-1 (4px) → s-10 (40px)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== 資料存儲 ========== -->
+<div class="anchor" id="data"></div>
+<section class="section">
+  <h2 class="section-title">🗄️ 資料存儲與安全</h2>
+  <p class="section-desc">本地優先 + 可選雲端同步，端到端加密保護敏感資料。</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>前端存儲（LocalStorage / IndexedDB）</h3>
+      <table class="spec-table">
+        <tr><th>鍵名</th><th>用途</th></tr>
+        <tr><td><code>feelings_logs</code></td><td>情緒記錄日誌（AES-256-GCM 加密）</td></tr>
+        <tr><td><code>ruler_draft</code></td><td>當前流程草稿（auto-save）</td></tr>
+        <tr><td><code>user_progress</code></td><td>用戶進度 / 成就 / 連續紀錄</td></tr>
+        <tr><td><code>imxin_privacy_pin</code></td><td>隱私鎖 PIN（PBKDF2-SHA256 哈希）</td></tr>
+        <tr><td><code>imxin-theme</code></td><td>主題偏好</td></tr>
+        <tr><td><code>jinxin-language</code></td><td>語言偏好</td></tr>
+      </table>
+      <p style="margin-top:0.75rem; font-size:0.8rem;">所有數據操作通過 <code>dataAdapter</code> 抽象層，禁止直接訪問 localStorage。</p>
+    </div>
+    <div class="card">
+      <h3>InsForge 資料表（RLS 已啟用）</h3>
+      <table class="spec-table">
+        <tr><th>表名</th><th>用途</th></tr>
+        <tr><td><code>profiles</code></td><td>使用者資料擴展</td></tr>
+        <tr><td><code>ruler_logs</code></td><td>情緒日誌（完整 RULER flow）</td></tr>
+        <tr><td><code>ruler_drafts</code></td><td>流程草稿（auto-save）</td></tr>
+        <tr><td><code>achievement_records</code></td><td>成就解鎖紀錄</td></tr>
+        <tr><td><code>streaks</code></td><td>連續紀錄統計</td></tr>
+        <tr><td><code>adk_sessions</code></td><td>AI 教練 Session 持久化</td></tr>
+        <tr><td><code>adk_events</code></td><td>AI 教練對話事件流</td></tr>
+      </table>
+      <p style="margin-top:0.75rem; font-size:0.8rem;">所有資料表啟用 Row Level Security，用戶僅能存取自己的資料。</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>🔐 安全機制</h3>
+    <div class="grid-2">
+      <div>
+        <h4>數據加密</h4>
+        <ul>
+          <li>算法：<strong>AES-256-GCM</strong> + 隨機 IV + 鹽值</li>
+          <li>密鑰：256-bit 主密鑰存儲於 IndexedDB</li>
+          <li>兼容：可解密 v1 設備指紋密鑰加密的歷史數據</li>
+        </ul>
+      </div>
+      <div>
+        <h4>PIN 與密碼</h4>
+        <ul>
+          <li>算法：<strong>PBKDF2-SHA256</strong>，600,000 次迭代</li>
+          <li>鹽值：128-bit 隨機</li>
+          <li>格式：<code>$pbkdf2-sha256$&lt;iterations&gt;$&lt;salt&gt;$&lt;hash&gt;</code></li>
+          <li>兼容：自動檢測舊版 DJB2 哈希並遷移</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 部署與開發 ========== -->
+<div class="anchor" id="deploy"></div>
+<section class="section">
+  <h2 class="section-title">🚀 部署與開發</h2>
+  <p class="section-desc">多平台部署策略，CI/CD 自動化，開箱即用的開發環境。</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>前端開發</h3>
+      <pre><code># 開發伺服器
+npm run dev        # http://localhost:5173
+
+# 生產構建
+npm run build      # 輸出至 dist/
+
+# 測試
+npm run test:run   # 330 測試
+npm run test:coverage
+
+# 類型檢查 + 代碼檢查
+npx tsc --noEmit
+npm run lint
+
+# 移動端
+npm run cap:sync   # 構建並同步 Capacitor
+npm run cap:open   # 打開 Android Studio</code></pre>
+    </div>
+    <div class="card">
+      <h3>後端開發</h3>
+      <pre><code>cd server/
+
+# 開發
+npm run dev        # http://localhost:3000
+
+# 測試
+npm run test:run   # 52 測試
+
+# 構建
+npm run build
+npm run start
+
+# Edge Function 部署
+npx @insforge/cli functions deploy coach \
+  --file server/insforge/functions/coach-simple.ts</code></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>技術規格總表</h3>
+    <table class="spec-table">
+      <tr><th>項目</th><th>規格</th></tr>
+      <tr><td>前端框架</td><td>React 19.2 + TypeScript 5.9 Strict</td></tr>
+      <tr><td>構建工具</td><td>Vite 7 + Rollup</td></tr>
+      <tr><td>PWA</td><td>vite-plugin-pwa + Workbox（離線支援）</td></tr>
+      <tr><td>移動端</td><td>Capacitor 7（Android API 34+）</td></tr>
+      <tr><td>狀態管理</td><td>Zustand 5 + React Context + useReducer</td></tr>
+      <tr><td>後端框架</td><td>Express 5 + TypeScript</td></tr>
+      <tr><td>Bot SDK</td><td>@line/bot-sdk 9.x</td></tr>
+      <tr><td>BaaS</td><td>InsForge（PostgreSQL 16 + Deno Edge Functions）</td></tr>
+      <tr><td>AI 模型</td><td>Google Gemini 3.1 Flash Lite（REST API）</td></tr>
+      <tr><td>加密</td><td>AES-256-GCM + PBKDF2-SHA256（600K rounds）</td></tr>
+      <tr><td>測試框架</td><td>Vitest 4 + jsdom / supertest</td></tr>
+      <tr><td>包管理</td><td>npm</td></tr>
+      <tr><td>部署</td><td>Zeabur（PWA）/ InsForge（Edge Functions）</td></tr>
+      <tr><td>授權</td><td>MIT License</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>今心 ImXin — 開源情緒覺察工具</p>
+  <p style="margin-top:0.25rem;">GitHub: <a href="https://github.com/samulee003/EQ-monitor">samulee003/EQ-monitor</a> | 授權: MIT License</p>
+  <p style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-muted);">「情緒調節不是與生俱來的性格，而是一套可以透過有意識的練習與策略，不斷學習與精進的實用技能。」 — Marc Brackett</p>
+</footer>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('.anchor');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  function onScroll() {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.offsetTop + sec.offsetHeight;
+      if (scrollY >= top - 120) current = sec.getAttribute('id');
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+</script>
+
+</body>
+</html>
