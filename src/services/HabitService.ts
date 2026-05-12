@@ -21,11 +21,15 @@ const DEFAULT_PROGRESS: UserProgress = {
   totalLogs: 0,
 };
 
+const ACHIEVEMENT_CHECKER_URL = 'https://b88egxiz.functions.insforge.app/achievement-checker';
+
 class HabitService {
   /**
    * Update user progress after a new log is saved
+   * @param logs - Ruler log entries
+   * @param userId - Optional user ID for cloud sync via Edge Function
    */
-  async updateProgress(logs: RulerLogEntry[]): Promise<{ newlyUnlocked: string[] }> {
+  async updateProgress(logs: RulerLogEntry[], userId?: string): Promise<{ newlyUnlocked: string[] }> {
     const currentProgress = (await storageService.getProgress()) || DEFAULT_PROGRESS;
     const totalLogs = logs.length;
 
@@ -96,6 +100,30 @@ class HabitService {
         newlyUnlocked.push(achievement.id);
       }
     });
+
+    // Sync to cloud via Edge Function if userId is provided
+    if (userId && userId !== 'test-user' && !userId.startsWith('local-')) {
+      try {
+        const res = await fetch(ACHIEVEMENT_CHECKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+        if (res.ok) {
+          const result = await res.json();
+          const cloudNewly = result.data?.newly_unlocked as string[] | undefined;
+          if (cloudNewly && cloudNewly.length > 0) {
+            for (const key of cloudNewly) {
+              if (!newlyUnlocked.includes(key)) {
+                newlyUnlocked.push(key);
+              }
+            }
+          }
+        }
+      } catch {
+        // Silently fail: local calculation is the source of truth
+      }
+    }
 
     const updatedProgress: UserProgress = {
       streak,

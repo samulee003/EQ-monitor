@@ -1,5 +1,5 @@
 import { logger } from '../utils/logger';
-import { RULER_COACH_SYSTEM_PROMPT, WEEKLY_INSIGHT_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
+import { RULER_COACH_SYSTEM_PROMPT, PARENTING_CONTEXT_ADDON } from './prompts';
 import { type RulerLogEntry, type AIAnalysisData, type ChatHistoryEntry } from '../types/RulerTypes';
 
 // PhysicalData 接口定義
@@ -160,9 +160,12 @@ class AIService {
 
     /**
      * generateWeeklyInsight
-     * Analyzes a week of logs to find patterns and provide strategic advice.
+     * Calls the weekly-report Edge Function for cloud-connected users,
+     * falls back to local calculation for offline users.
      */
-    async generateWeeklyInsight(logs: RulerLogEntry[]): Promise<AIInsight> {
+    async generateWeeklyInsight(userId: string, logs: RulerLogEntry[]): Promise<AIInsight> {
+        const WEEKLY_REPORT_URL = 'https://b88egxiz.functions.insforge.app/weekly-report';
+
         // Calculate dominant quadrant for mock fallback
         const quadrantCounts: Record<string, number> = { red: 0, yellow: 0, blue: 0, green: 0 };
         logs.forEach(log => {
@@ -174,7 +177,7 @@ class AIService {
         const dominantQuadrant = Object.entries(quadrantCounts)
             .sort((a, b) => b[1] - a[1])[0]?.[0] || 'green';
 
-        if (!this.proxyUrl) {
+        const localFallback = (): AIInsight => {
             const weekMockInsights: Record<string, AIInsight> = {
                 red: {
                     summary: "本週你經歷了許多高能量的挑戰時刻。這些「紅色」時光顯示你對生活充滿投入，但也需要學會在刺激與反應之間找到緩衝空間。",
@@ -206,49 +209,39 @@ class AIService {
                 }
             };
             return weekMockInsights[dominantQuadrant] || weekMockInsights['green'];
+        };
+
+        // For local-only users (no real userId), use local fallback
+        if (!userId || userId === 'test-user' || userId.startsWith('local-')) {
+            return localFallback();
         }
 
         try {
-            const historyContext = logs.map(log => ({
-                date: new Date(log.timestamp).toLocaleDateString('zh-TW'),
-                emotion: log.emotions?.[0]?.name,
-                quadrant: log.emotions?.[0]?.quadrant,
-                intensity: log.intensity,
-                trigger: log.understanding?.trigger,
-                regulation: log.regulating?.selectedStrategies
-            }));
-
-            // Calculate stats for context
-            const stats = {
-                totalLogs: logs.length,
-                averageIntensity: logs.reduce((sum, l) => sum + (l.intensity || 5), 0) / logs.length,
-                dominantQuadrant,
-                fullFlowCount: logs.filter(l => l.isFullFlow).length
-            };
-
-            const response = await this.fetchWithTimeout(this.proxyUrl, {
+            const response = await this.fetchWithTimeout(WEEKLY_REPORT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: [
-                        { role: "system", content: WEEKLY_INSIGHT_SYSTEM_PROMPT },
-                        { role: "user", content: `本週統計：${JSON.stringify(stats)}\n\n日誌詳情：${JSON.stringify(historyContext)}` }
-                    ],
-                    model: "gpt-4o",
-                    temperature: 0.7
-                })
+                body: JSON.stringify({ userId }),
             });
 
-            if (!response.ok) throw new Error("API failed");
+            if (!response.ok) throw new Error(`weekly-report API error: ${response.status}`);
             const result = await response.json();
-            return this.parseAIResponse(result.choices?.[0]?.message?.content);
+            if (result.error) throw new Error(result.error);
+            const data = result.data;
+            if (!data || !data.summary) throw new Error('Invalid weekly report response');
+            return {
+                summary: data.summary,
+                underlyingPatterns: data.underlyingPatterns || [],
+                suggestedAction: data.suggestedAction || '',
+                empatheticQuote: data.empatheticQuote || '',
+                colorTheory: data.colorTheory || '',
+            };
         } catch (error) {
             if (error instanceof Error && error.name === 'AbortError') {
                 logger.warn('[AIService] Weekly insight request timed out, using mock fallback');
             } else {
                 logger.error('[AIService] Weekly Insight Failed', { error: String(error) });
             }
-            return this.getMockFallback(dominantQuadrant);
+            return localFallback();
         }
     }
 
