@@ -1,18 +1,22 @@
-# 今心 ImXin Bot Server — 單階段構建（避免多階段 Docker 快取衝突）
+# 今心 ImXin Bot Server
 FROM node:22-alpine
 
 WORKDIR /app
 
-# 安裝所有依賴（含 devDependencies，build 需要 TypeScript）
+# 安裝全部依賴（含 devDependencies，build 階段需要 TypeScript）
+# 注意：npm ci 在 NODE_ENV=production 時會跳過 devDeps，故先不設定
 COPY package*.json ./
 RUN npm ci
 
-# 複製源碼並編譯
+# 複製源碼並編譯 TypeScript
 COPY . .
 RUN ./node_modules/.bin/tsc
 
 # 移除 devDependencies，縮小映像體積
 RUN npm prune --production
+
+# 設定生產環境（放在 build 之後）
+ENV NODE_ENV=production
 
 EXPOSE 3000
 
