@@ -61,6 +61,7 @@ export type RulerFlowAction =
   | { type: 'SET_POST_MOOD'; mood: string }
   | { type: 'SET_FULL_FLOW'; value: boolean }
   | { type: 'RESET_FLOW' }
+  | { type: 'SHOW_RESUME_PROMPT'; draft: RulerDraft }
   | { type: 'RESUME_DRAFT'; draft: RulerDraft }
   | { type: 'DISMISS_RESUME_PROMPT' }
   | { type: 'SET_STEP'; step: RulerStep }
@@ -171,6 +172,13 @@ function rulerReducer(state: RulerFlowState, action: RulerFlowAction): RulerFlow
     case 'RESET_FLOW':
       return { ...INITIAL_STATE };
 
+    case 'SHOW_RESUME_PROMPT':
+      return {
+        ...INITIAL_STATE,
+        showResumePrompt: true,
+        pendingDraft: action.draft,
+      };
+
     case 'RESUME_DRAFT':
       return {
         ...INITIAL_STATE,
@@ -190,8 +198,9 @@ function rulerReducer(state: RulerFlowState, action: RulerFlowAction): RulerFlow
 
     case 'DISMISS_RESUME_PROMPT':
       return {
-        ...state,
+        ...INITIAL_STATE,
         showResumePrompt: false,
+        pendingDraft: null,
       };
 
     default:
@@ -232,7 +241,7 @@ export const useRulerFlow = () => {
       try {
         const draft = await dataAdapter.draft.get();
         if (draft && draft.step && draft.step !== 'recognizing') {
-          dispatch({ type: 'RESUME_DRAFT', draft });
+          dispatch({ type: 'SHOW_RESUME_PROMPT', draft });
         }
       } catch {
         dispatch({ type: 'RESET_FLOW' });
@@ -388,8 +397,11 @@ export const useRulerFlow = () => {
   };
 
   const resumeDraft = () => {
-    // 暫時簡化：直接重置（因為草稿恢復邏輯較複雜，需重構組件傳遞）
-    dispatch({ type: 'DISMISS_RESUME_PROMPT' });
+    if (state.pendingDraft) {
+      dispatch({ type: 'RESUME_DRAFT', draft: state.pendingDraft });
+    } else {
+      dispatch({ type: 'DISMISS_RESUME_PROMPT' });
+    }
   };
 
   return {
