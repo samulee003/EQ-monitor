@@ -1,5 +1,6 @@
 import { memoryAdapter } from './memoryAdapter.js';
 import { createSupabaseAdapter } from './supabaseAdapter.js';
+import { createInsforgeAdapter } from './insforgeAdapter.js';
 import type { RulerData } from '../types.js';
 import type { DbSession, DbUser } from './memoryAdapter.js';
 
@@ -17,15 +18,24 @@ export interface DatabaseAdapter {
   getAllSessions(): Promise<DbSession[]>;
 }
 
+const DATABASE_URL = process.env.DATABASE_URL || '';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 
-export const adapterName: 'supabase' | 'memory' =
-  SUPABASE_URL && SUPABASE_SERVICE_KEY ? 'supabase' : 'memory';
+// 優先順序：InsForge PostgreSQL（DATABASE_URL 指向 insforge.app）→ Supabase → Memory
+function resolveAdapterName(): 'insforge' | 'supabase' | 'memory' {
+  if (DATABASE_URL && DATABASE_URL.includes('insforge.app')) return 'insforge';
+  if (SUPABASE_URL && SUPABASE_SERVICE_KEY) return 'supabase';
+  return 'memory';
+}
+
+export const adapterName: 'insforge' | 'supabase' | 'memory' = resolveAdapterName();
 
 export const db: DatabaseAdapter =
-  adapterName === 'supabase'
-    ? createSupabaseAdapter(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    : memoryAdapter;
+  adapterName === 'insforge'
+    ? createInsforgeAdapter(DATABASE_URL)
+    : adapterName === 'supabase'
+      ? createSupabaseAdapter(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+      : memoryAdapter;
 
 console.log(`[DB] Adapter: ${adapterName}`);

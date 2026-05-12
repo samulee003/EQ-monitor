@@ -2,10 +2,18 @@ import { createClient } from '@supabase/supabase-js';
 import { FunctionTool } from '@google/adk';
 import { z } from 'zod';
 
-const client = createClient(
-  process.env.INSFORGE_URL || process.env.INSFORGE_BASE_URL || '',
-  process.env.SERVICE_ROLE_KEY || ''
-);
+// 懶初始化：避免測試環境缺少環境變數時模組載入失敗
+let _client: ReturnType<typeof createClient> | null = null;
+function getClient(): ReturnType<typeof createClient> {
+  if (!_client) {
+    _client = createClient(
+      process.env.INSFORGE_URL || process.env.INSFORGE_BASE_URL || 'http://localhost',
+      process.env.SERVICE_ROLE_KEY || 'placeholder'
+    );
+  }
+  return _client;
+}
+const client = { from: (table: string) => getClient().from(table) } as ReturnType<typeof createClient>;
 
 export interface EmotionLog {
   emotions: Array<{ name?: string; quadrant?: string; id?: string }>;
