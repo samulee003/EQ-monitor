@@ -14,7 +14,7 @@ function getClient(): ReturnType<typeof createClient> {
   }
   return _client;
 }
-// client 已由 getClient() 取代，直接在各方法中呼叫
+const client = { from: (table: string) => getClient().from(table) } as ReturnType<typeof createClient>;
 
 export interface EmotionLog {
   emotions: Array<{ name?: string; quadrant?: string; id?: string }>;
