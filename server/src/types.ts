@@ -9,7 +9,8 @@ export type RulerStep =
   | 'label'
   | 'express'
   | 'regulate'
-  | 'summary';
+  | 'summary'
+  | 'completed';
 
 export interface UserSession {
   userId: string;
