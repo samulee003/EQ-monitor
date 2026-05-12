@@ -63,7 +63,7 @@ describe('rulerBot', () => {
       expect(r7.text).toContain('練習完成');
       expect(r7.text).toContain('焦慮');
       expect(r7.text).toContain('安全感');
-      expect(getSessionStatus(userId)).toBe('無活躍會話');
+      expect(getSessionStatus(userId)).toContain('completed');
     });
 
     it('說不出來的身體部位也能正常進行', async () => {
@@ -305,6 +305,13 @@ describe('rulerBot', () => {
       await processMessage(userId, '說說話');
       await processMessage(userId, '呼吸');
       await processMessage(userId, '好多了');
+
+      // summary 後進入 completed 狀態
+      expect(getSessionStatus(userId)).toContain('completed');
+
+      // 回應後清除 session，下一次即可開始新流程
+      await processMessage(userId, '謝謝');
+      expect(getSessionStatus(userId)).toBe('無活躍會話');
 
       const r = await processMessage(userId, '新的開始');
       expect(r.text).toContain('第一步：覺察');
