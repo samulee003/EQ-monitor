@@ -21,10 +21,13 @@
     ],
     "license": "MIT",
     "dependencies": {
+        "@google/adk": "^1.1.0",
+        "@google/genai": "^2.0.1",
         "@line/bot-sdk": "^9.7.3",
         "@supabase/supabase-js": "^2.49.4",
         "dotenv": "^16.5.0",
-        "express": "^5.1.0"
+        "express": "^5.1.0",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@types/express": "^5.0.1",

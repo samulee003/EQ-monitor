@@ -16,6 +16,7 @@ import { logger } from './utils/logger.js';
 import { getMetrics } from './utils/metrics.js';
 import { getActiveSessionCount } from './rulerBot.js';
 import { dashboardRoutes } from './api/dashboard.js';
+import coachRoutes from './routes/coach.js';
 
 
 
@@ -97,6 +98,9 @@ app.get('/metrics', (_req: Request, res: Response) => {
 // 儀表盤 API（供 PWA 調用）
 app.get('/api/dashboard/:lineUserId/summary', asyncHandler(dashboardRoutes.getSummary));
 app.get('/api/dashboard/:lineUserId/weekly-report', asyncHandler(dashboardRoutes.getWeeklyReport));
+
+// AI Coach API（ADK Agent）
+app.use('/api/coach', coachRoutes);
 
 // ═══════════════════════════════════════════════════════════════
 // LINE Webhook
@@ -303,6 +307,7 @@ const server = app.listen(PORT, () => {
 ║    GET  /health  — 健康檢查（含內存、會話數）            ║
 ║    GET  /metrics — 運行指標                              ║
 ║    POST /webhook — LINE Bot Webhook                      ║
+║    POST /api/coach — AI Coach Agent (ADK)                ║
 ╚══════════════════════════════════════════════════════════╝
   `);
 });

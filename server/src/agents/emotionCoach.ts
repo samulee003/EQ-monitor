@@ -1,21 +1,13 @@
-import { LlmAgent } from 'npm:@google/adk';
-import type { BaseLlm } from 'npm:@google/adk';
-import { createMetaMomentSkill } from './skills/metaMoment.ts';
+import { LlmAgent } from '@google/adk';
+import type { BaseLlm } from '@google/adk';
+import { createMetaMomentSkill } from './skills/metaMoment.js';
 import {
   rulerDataTool,
   saveRulerLogTool,
   getEmotionTrendTool,
   triggerActionTool,
-} from './tools/index.ts';
+} from './tools/index.js';
 
-/**
- * EmotionCoachAgent — 今心情緒教練主代理
- *
- * 基於 RULER 框架（Recognize, Understand, Label, Express, Regulate）
- * 與 Marc Brackett 的情緒智力理論，提供溫暖陪伴與情緒調節指導。
- *
- * @param model - Gemini model instance (with apiKey) or model name string
- */
 export function createEmotionCoachAgent(model: BaseLlm | string) {
   return new LlmAgent({
     name: 'EmotionCoachAgent',
