@@ -87,6 +87,7 @@ app.get('/health', (_req: Request, res: Response) => {
     },
     sessionCount: getActiveSessionCount(),
     requestCount: metrics.totalRequests,
+    adapter: adapterName,
     version: '1.0.0',
   });
 });

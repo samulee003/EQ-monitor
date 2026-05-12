@@ -4,6 +4,83 @@
 
 ---
 
+## [4.2.0] - 2026-05-12 — Agentic AI 工具升級 + Edge Functions 擴展
+
+### 🎯 重大變更
+
+- **Agentic AI 能力擴展**：從單一 `coach` Edge Function 擴展為三大 Agentic 工具矩陣
+  - `coach`：AI 情緒教練（4 Tools + Session 持久化 + Meta-Moment 危機協議）
+  - `weekly-report`：週報生成（讀取 `ruler_logs` 分析象限分佈與趨勢）
+  - `achievement-checker`：成就檢查（讀取 `ruler_logs` + `streaks`，自動解鎖成就）
+- **前端改呼叫 Edge Function**：`AIService.generateWeeklyInsight` 與 `HabitService.updateProgress` 改為優先呼叫 Edge Function，失敗時本地 fallback
+- **部署平台統一**：放棄 Fly.io 路徑，Bot Server 統一部署至 Zeabur（與 PWA 同平台）
+- **設計系統文件化**：新增 `DESIGN.md`（402 行，58 color tokens + 8 typography + 20 component specs）
+- **方案規格書**：新增 `今心_ImXin_方案規格.html`（含 5 頁實機截圖）
+
+### ✨ 新增功能
+
+- **📊 週報 Edge Function**
+  - 讀取用戶近 7 天 `ruler_logs`
+  - 計算象限分佈、平均強度、最頻繁情緒
+  - 回傳個人化洞察（summary + patterns + suggestedAction + quote + colorTheory）
+- **🏆 成就檢查 Edge Function**
+  - 讀取 `ruler_logs` 計算統計（totalLogs / fullFlowCount / uniqueEmotions / currentStreak）
+  - 與 `achievement_records` 比對，自動插入新解鎖成就
+  - 5 條規則：first_log / streak_3 / streak_7 / emotions_10 / full_ruler_5
+- **🔧 前端適配**
+  - `GrowthDashboard` 傳遞 `userId` 給週報 API
+  - `HabitContext` 傳遞 `userId` 給成就更新
+  - 本地用戶（`test-user` 或 `local-*`）自動 fallback 到本地計算，無需網路
+
+### 🔧 技術棧擴展
+
+| 層級 | 新增/變更 |
+|------|----------|
+| Edge Function | `weekly-report.ts`、`achievement-checker.ts`（Deno runtime） |
+| 資料庫 | `streaks` 表 RLS 策略修復（新增 `Users can upsert own streaks`） |
+| 前端 API | `AIService.ts`、`HabitService.ts` 新增 Edge Function 呼叫路徑 |
+| 部署 | `server/zeabur.toml` 成為 Bot Server 主要配置，移除 Fly.io 優先級 |
+| 文件 | `DESIGN.md`、`今心_ImXin_方案規格.html`、`CLAUDE_CODE_HANDOFF.md` |
+
+### 📁 新增/修改檔案
+
+```
+server/insforge/functions/weekly-report.ts       # 週報生成 Edge Function
+server/insforge/functions/achievement-checker.ts # 成就檢查 Edge Function
+src/services/AIService.ts                        # 週報改呼叫 Edge Function
+src/services/HabitService.ts                     # 成就同步到 Edge Function
+src/components/GrowthDashboard.tsx               # 傳遞 userId
+src/services/HabitContext.tsx                    # 傳遞 userId
+DESIGN.md                                        # 設計系統文件
+今心_ImXin_方案規格.html                          # 產品規格書（含截圖）
+CLAUDE_CODE_HANDOFF.md                           # Claude Code 交接文件
+Zeabur_Bot_Server_部署需求.md                     # Bot Server 部署技術規格
+```
+
+### 🧪 測試
+
+- 總測試數：**330 / 330 通過**（前端）+ **52 / 52 通過**（後端，1 文件 dotenv 忽略）
+- Build：✅ 成功
+- TypeScript：✅ 零錯誤
+
+### 🚀 部署狀態
+
+| 服務 | URL | 狀態 |
+|------|-----|------|
+| Edge Function — Coach | `https://b88egxiz.functions.insforge.app/coach` | ✅ 已上線 |
+| Edge Function — Weekly | `https://b88egxiz.functions.insforge.app/weekly-report` | ✅ 已部署 |
+| Edge Function — Achievement | `https://b88egxiz.functions.insforge.app/achievement-checker` | ✅ 已部署 |
+| PWA 前端 | `https://today-mood.zeabur.app` | ✅ 已上線 |
+| Bot Server | Zeabur（`server/`） | ⏳ 待部署 |
+
+### ⚠️ 已知限制
+
+- 數據遷移（LocalStorage → InsForge）尚未完成，需等待認證架構整合
+- 主動推送（Proactive AI / Cron）尚未實現
+- Bot Server 尚未部署至 Zeabur
+
+---
+
 ## [4.1.0] - 2026-05-11 — InsForge 雲端同步 + AI 教練記憶
 
 ### 🎯 重大變更

@@ -94,6 +94,7 @@ describe('Express app', () => {
     expect(res.body).toHaveProperty('memory');
     expect(res.body.sessionCount).toBe(0);
     expect(res.body.requestCount).toBe(10);
+    expect(res.body).toHaveProperty('adapter');
     expect(res.body.version).toBe('1.0.0');
   });
 
