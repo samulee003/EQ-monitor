@@ -5,12 +5,15 @@ import { dataAdapter } from '../adapters';
 import { type RulerLogEntry } from '../types/RulerTypes';
 import { utilityIcons, uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
+import { useAuth } from '../services/AuthContext';
 import { aiService, type AIInsight } from '../services/AIService';
 import { type HeatmapDay, type IntensityData } from '../services/ResilienceService';
 import Skeleton from './Skeleton';
 
 const GrowthDashboard: React.FC = () => {
     const { t } = useLanguage();
+    const { user } = useAuth();
+    const userId = user?.id || 'test-user';
     const [logs, setLogs] = useState<RulerLogEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +35,7 @@ const GrowthDashboard: React.FC = () => {
             if (logs.length >= 3) { // Only fetch if we have enough data
                 setLoadingInsight(true);
                 try {
-                    const insight = await aiService.generateWeeklyInsight(logs);
+                    const insight = await aiService.generateWeeklyInsight(userId, logs);
                     setWeeklyInsight(insight);
                 } catch (e) {
                     logger.error('[GrowthDashboard] Failed to fetch insight', { error: String(e) });
@@ -42,7 +45,7 @@ const GrowthDashboard: React.FC = () => {
             }
         };
         fetchInsight();
-    }, [logs]);
+    }, [logs, userId]);
 
     const data: DailyResilience[] = useMemo(() => resilienceService.getDashboardData(logs), [logs]);
 
@@ -251,7 +254,7 @@ const GrowthDashboard: React.FC = () => {
                                 onClick={async () => {
                                     setLoadingInsight(true);
                                     try {
-                                        const insight = await aiService.generateWeeklyInsight(logs);
+                                        const insight = await aiService.generateWeeklyInsight(userId, logs);
                                         setWeeklyInsight(insight);
                                     } finally {
                                         setLoadingInsight(false);

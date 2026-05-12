@@ -266,8 +266,8 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'blue' }], timestamp: Date.now() - 172800000 },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('test-user', logs);
+
             expect(result.summary).toContain('紅色');
             expect(result.colorTheory).toContain('紅色象限');
         });
@@ -278,8 +278,8 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'yellow' }], timestamp: Date.now() - 86400000 },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('test-user', logs);
+
             expect(result.summary).toContain('黃色');
             expect(result.colorTheory).toContain('黃色象限');
         });
@@ -290,8 +290,8 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'blue' }], timestamp: Date.now() - 86400000 },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('test-user', logs);
+
             expect(result.summary).toContain('藍色');
             expect(result.colorTheory).toContain('藍色象限');
         });
@@ -302,14 +302,14 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'green' }], timestamp: Date.now() - 86400000 },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('test-user', logs);
+
             expect(result.summary).toContain('綠色');
             expect(result.colorTheory).toContain('綠色象限');
         });
 
         it('應該為空日誌返回紅色洞察（默認行為）', async () => {
-            const result = await aiService.generateWeeklyInsight([]);
+            const result = await aiService.generateWeeklyInsight('test-user', []);
             
             // 空日誌時，quadrantCounts 全為 0，排序後返回第一個（red）
             expect(result.summary).toBeDefined();
@@ -320,16 +320,13 @@ describe('AIService', () => {
             global.fetch = vi.fn().mockResolvedValueOnce({
                 ok: true,
                 json: () => Promise.resolve({
-                    choices: [{
-                        message: {
-                            content: JSON.stringify({
-                                summary: 'API 週洞察',
-                                underlyingPatterns: ['模式1'],
-                                suggestedAction: '建議',
-                                empatheticQuote: '語錄'
-                            })
-                        }
-                    }]
+                    data: {
+                        summary: 'API 週洞察',
+                        underlyingPatterns: ['模式1'],
+                        suggestedAction: '建議',
+                        empatheticQuote: '語錄',
+                        colorTheory: ''
+                    }
                 })
             });
             
@@ -341,8 +338,8 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'yellow', name: '開心' }], timestamp: Date.now(), intensity: 7 },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('real-user-id', logs);
+
             expect(global.fetch).toHaveBeenCalled();
             expect(result.summary).toBe('API 週洞察');
             
@@ -363,10 +360,10 @@ describe('AIService', () => {
                 { emotions: [{ quadrant: 'red' }], timestamp: Date.now() },
             ] as any[];
             
-            const result = await aiService.generateWeeklyInsight(logs);
-            
+            const result = await aiService.generateWeeklyInsight('real-user-id', logs);
+
             expect(result.summary).toBeDefined();
-            
+
             service.proxyUrl = originalProxyUrl;
         });
     });

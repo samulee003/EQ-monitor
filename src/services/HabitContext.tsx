@@ -3,6 +3,7 @@ import { dataAdapter } from '../adapters';
 import { habitService } from './HabitService';
 import { type UserProgress } from '../types/HabitTypes';
 import { type Achievement, ACHIEVEMENTS } from '../types/AchievementTypes';
+import { useAuth } from './AuthContext';
 
 interface HabitContextType {
     progress: UserProgress;
@@ -20,6 +21,8 @@ const DEFAULT_PROGRESS: UserProgress = {
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
 export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
+    const userId = user?.id;
     const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
     const [newlyUnlocked, setNewlyUnlocked] = useState<Achievement[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
@@ -42,7 +45,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const refreshProgress = useCallback(async (): Promise<Achievement[]> => {
         try {
             const logs = await dataAdapter.logs.export();
-            const { newlyUnlocked: ids } = await habitService.updateProgress(logs);
+            const { newlyUnlocked: ids } = await habitService.updateProgress(logs, userId);
             const updatedProgress = await habitService.getProgress();
             setProgress(updatedProgress);
 
@@ -55,7 +58,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         } catch {
             return [];
         }
-    }, []);
+    }, [userId]);
 
     const clearNewlyUnlocked = useCallback((id?: string) => {
         if (id) {

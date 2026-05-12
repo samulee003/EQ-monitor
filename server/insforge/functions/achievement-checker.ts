@@ -24,40 +24,22 @@ export default async function (req: Request): Promise<Response> {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
-
-    if (!userToken) {
-      return new Response(
-        JSON.stringify({ data: null, error: 'Unauthorized: missing token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Verify user token
-    const authClient = createClient({
-      baseUrl: Deno.env.get('INSFORGE_URL'),
-      edgeFunctionToken: userToken,
-    });
-
-    const { data: userData } = await authClient.auth.getCurrentUser();
-    const userId = userData?.user?.id;
+    const body = await req.json().catch(() => ({}));
+    const userId = body.userId || '';
 
     if (!userId) {
       return new Response(
-        JSON.stringify({ data: null, error: 'Unauthorized: invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ data: null, error: 'Missing userId' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Service role client for DB operations
-    const serviceClient = createClient({
-      baseUrl: Deno.env.get('INSFORGE_URL'),
-      anonKey: Deno.env.get('SERVICE_ROLE_KEY'),
-    });
+    const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+    const anonKey = Deno.env.get('ANON_KEY') || '';
+    const client = createClient({ baseUrl, anonKey });
 
     // Fetch all ruler logs for the user
-    const { data: logs, error: logsError } = await serviceClient.database
+    const { data: logs, error: logsError } = await client.database
       .from('ruler_logs')
       .select('emotions, is_full_flow')
       .eq('user_id', userId);
@@ -70,7 +52,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Fetch streak data
-    const { data: streakData, error: streakError } = await serviceClient.database
+    const { data: streakData, error: streakError } = await client.database
       .from('streaks')
       .select('current_streak')
       .eq('user_id', userId)
@@ -114,7 +96,7 @@ export default async function (req: Request): Promise<Response> {
     ];
 
     // Get already unlocked achievements
-    const { data: existingAchievements, error: achievementsError } = await serviceClient.database
+    const { data: existingAchievements, error: achievementsError } = await client.database
       .from('achievement_records')
       .select('achievement_key')
       .eq('user_id', userId);
@@ -144,7 +126,7 @@ export default async function (req: Request): Promise<Response> {
         unlocked_at: new Date().toISOString(),
       }));
 
-      const { error: insertError } = await serviceClient.database
+      const { error: insertError } = await client.database
         .from('achievement_records')
         .insert(inserts);
 
