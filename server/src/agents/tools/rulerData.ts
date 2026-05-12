@@ -35,7 +35,7 @@ export interface EmotionSummary {
 }
 
 export async function getUserEmotionSummary(userId: string): Promise<EmotionSummary> {
-  const { data: logs, error: logsError } = await client
+  const { data: logs, error: logsError } = await getClient()
     .from('ruler_logs')
     .select('emotions, intensity, created_at')
     .eq('user_id', userId)
@@ -46,7 +46,7 @@ export async function getUserEmotionSummary(userId: string): Promise<EmotionSumm
     console.error('ruler_logs query error:', logsError);
   }
 
-  const { data: streak, error: streakError } = await client
+  const { data: streak, error: streakError } = await getClient()
     .from('streaks')
     .select('current_streak, longest_streak, total_logs, last_checkin_date')
     .eq('user_id', userId)
