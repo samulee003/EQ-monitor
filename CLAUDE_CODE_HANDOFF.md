@@ -32,10 +32,10 @@
 │                        用戶入口層                              │
 ├─────────────────────────────────────────────────────────────┤
 │  🥇 LINE Bot  ←─── webhook ───→  🤖 Bot Server (Node.js)   │
-│      (主要入口)                      (Zeabur — 部署中)      │
+│      (主要入口)                      (Zeabur — 已部署 ✅)    │
 ├─────────────────────────────────────────────────────────────┤
 │  📊 PWA 前端  ←─── API ───────→  ⚡ Edge Functions (Deno)   │
-│   (Zeabur)                          (InsForge — 已上線)     │
+│   (Zeabur)                          (InsForge — 已上線 ✅)   │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -47,117 +47,106 @@
 ```
 
 **已上線服務：**
-- PWA 前端：`https://today-mood.zeabur.app`
-- Edge Function — AI Coach：`https://b88egxiz.functions.insforge.app/coach`
-- Edge Function — 週報：`https://b88egxiz.functions.insforge.app/weekly-report`
-- Edge Function — 成就檢查：`https://b88egxiz.functions.insforge.app/achievement-checker`
+- PWA 前端：`https://today-mood.zeabur.app` ✅
+- Bot Server：`https://imxin-bot.zeabur.app` ✅
+- Edge Function — AI Coach：`https://b88egxiz.functions.insforge.app/coach` ✅
+- Edge Function — 週報：`https://b88egxiz.functions.insforge.app/weekly-report` ✅
+- Edge Function — 成就檢查：`https://b88egxiz.functions.insforge.app/achievement-checker` ✅
 - InsForge API：`https://b88egxiz.ap-southeast.insforge.app`
 
 ---
 
-## 三、已完成清單（前一位 Agent 交付）
+## 三、本 Session 已完成（Kimi → 你的交接）
 
-### 3.1 Agentic AI 核心
-- [x] Edge Function `coach` 重寫為 Agentic 版本（Function Calling + Session 持久化）
-- [x] 資料庫新增 `adk_sessions`, `adk_events`, `adk_app_states`, `adk_user_states`
-- [x] 4 個 Tools：`get_user_emotion_summary`, `get_emotion_trend`, `save_ruler_log`, `trigger_action`
-- [x] 危機偵測關鍵詞 → 自動切換 `META_MOMENT_PROMPT`
-- [x] 前端 `CoachPage.tsx` 適配 action 觸發（呼吸/記錄/SOS/導航）
+### 3.1 修復 LINE Bot RULER 流程循環 Bug
+**問題**：第五步（Regulate）結束後，用戶點 summary 的「謝謝」quickReply，Bot 又自動開啟第一步（Recognize）。
 
-### 3.2 Edge Functions 部署
-- [x] `coach` — 已部署並上線
-- [x] `weekly-report` — 已部署（2025-05-12）
-- [x] `achievement-checker` — 已部署（2025-05-12）
+**根因**：`handleSummary()` 在回傳訊息前就清除了 session，用戶點「謝謝」後 `getOrCreateSession()` 創建新的 `idle` session，觸發 `handleIdle()` 重新開始流程。
 
-### 3.3 前端改動（已改未部署）
-- [x] `AIService.ts` — `generateWeeklyInsight` 改呼叫 `weekly-report` Edge Function
-- [x] `GrowthDashboard.tsx` — 傳遞 `userId` 給週報 API
-- [x] `HabitService.ts` — `updateProgress` 同步成就到 `achievement-checker` Edge Function
-- [x] `HabitContext.tsx` — 傳遞 `userId` 給成就更新
-- [x] `streaks` 表 RLS 策略修復（允許用戶 upsert 自己的記錄）
+**修復**：
+- 新增 `RulerStep = 'completed'`
+- `handleSummary()` 不再清除 session，改為 `advanceStep(session, 'completed')`
+- 新增 `handleCompleted()`：回傳「不客氣...」後才清除 session
+- 用戶必須再發一則訊息才會開始新流程
 
-### 3.4 設計與文件
-- [x] `DESIGN.md` — 402 行設計系統文件
-- [x] `今心_ImXin_方案規格.html` — 含截圖的完整規格文件
-- [x] `Zeabur_Bot_Server_部署需求.md` — Bot Server 部署技術規格
+**Commit**：`c7d6544`（已 push）
+
+### 3.2 Health Endpoint 新增 Adapter 資訊
+- `GET /health` 現在回傳 `"adapter": "insforge"`（或 memory/supabase），方便確認 Bot Server 是否連上 PostgreSQL
+- **Commit**：`ab59d99`（已 push）
+
+### 3.3 驗證 Bot-PWA 聯動的關鍵發現（⚠️ 重要）
+
+經過完整探索，**LINE Bot 和 PWA 目前完全沒有數據聯動**。
+
+| 系統 | 數據存儲 | 用戶 ID | 表名 |
+|------|---------|---------|------|
+| LINE Bot | InsForge PostgreSQL | `line_user_id` | `bot_users`, `ruler_sessions`, `chat_messages` |
+| PWA | `localStorage` | `user_{timestamp}_{rand}` | `feelings_logs` |
+
+**核心問題**：
+- Bot 寫入 `ruler_sessions`（flat schema，通過 `pg` Pool）
+- PWA 讀取 `feelings_logs`（localStorage，AES-256-GCM 加密）
+- 兩者是**完全不同的表結構、不同的用戶身份體系、不同的存儲層**
+- PWA 的 `src/lib/insforge/` 適配器代碼在 `_deprecated/` 目錄，生產環境未使用
+- PWA 認證也是純 localStorage（`imxin_users`），與 InsForge `auth.users` 完全獨立
+
+這意味著：**用戶在 LINE 上做的 RULER 練習，不會出現在 PWA 的歷史回顧中。**
 
 ---
 
-## 四、待辦清單（由你接手）
+## 四、接下來的方向（由你接手）
 
-### 🔴 P0 — 阻塞級（優先處理）
+### 🔴 P0 — 阻塞級
 
-#### 4.1 Bot Server 部署到 Zeabur
-**狀態**：前一位 Agent 已寫好需求文件，尚未執行
-**文件**：`Zeabur_Bot_Server_部署需求.md`
-**核心工作**：
-- [ ] 新增 `server/src/db/insforgeAdapter.ts`（用 `pg` 連 InsForge PostgreSQL）
-- [ ] 修改 `server/src/db/index.ts` 優先使用 InsForge adapter
-- [ ] 確保 `npm run build` 無錯誤
-- [ ] Zeabur Dashboard 新增 Service（Root Directory: `server/`）
-- [ ] 設定環境變數（`LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`, `DATABASE_URL` 等）
-- [ ] 部署並驗證 `/health`
-- [ ] LINE Developers Console 設定 Webhook URL
+#### 4.1 確認 Bot Server 數據庫連線
+- [ ] 等 Zeabur 重新部署後，`curl https://imxin-bot.zeabur.app/health` 確認 `"adapter": "insforge"`
+- [ ] 如果 adapter 是 `"memory"`，檢查 Zeabur 環境變數 `DATABASE_URL` 是否正確設定
+- [ ] 確認 `ruler_sessions` 表有數據（可用 MCP `run-raw-sql` 查詢）
 
-#### 4.2 前端 PWA 重新部署
-**狀態**：前端已有改動（週報 + 成就同步），但未 push 觸發 Zeabur 構建
-**核心工作**：
-- [ ] `npm run test:run` 確認 330 測試通過
-- [ ] `npx tsc --noEmit` 確認無類型錯誤
-- [ ] `npm run build` 確認構建成功
-- [ ] `git commit` + `git push` 觸發 Zeabur 自動部署
-- [ ] 驗證線上 PWA 的週報與成就功能正常
+#### 4.2 關閉 LINE Auto-reply
+- [ ] 進 [manager.line.biz](https://manager.line.biz) → 設定 → 回應設定 → 關閉自動回覆
+- [ ] 將回應模式設為「Webhook」
 
-### 🟡 P1 — 重要級
+### 🟡 P1 — 重要級（二選一或並行）
 
-#### 4.3 認證架構整合（本地認證 ↔ InsForge Auth）
-**問題**：目前 `storage.ts` 的 `signUp`/`signIn` 是純 localStorage 實現，與 InsForge `auth.users` 完全獨立。這導致：
-- 無法寫入 `ruler_logs`（RLS 要求 `auth.uid() = user_id`）
-- 無法寫入 `achievement_records`
-- 無法寫入 `streaks`
-- 數據遷移無法進行
+#### 方向 A：讓 Bot 數據進入 PWA（短期方案）
+這是最快的「看起來有聯動」的方案：
 
-**建議方案**（選一）：
-- **方案 A**：`storage.ts` 的 `signUp`/`signIn` 同時呼叫 InsForge SDK `insforge.auth.signUp` / `signInWithPassword`，保存 accessToken，後續 SDK 操作自動帶上 auth header
-- **方案 B**：使用 InsForge 匿名登入（如果 SDK 支持）或自動創建帳號
-- **方案 C**：創建一個 `/api/migrate` Edge Function，接收 localStorage payload，用 service role 寫入（需要 `SERVICE_ROLE_KEY`）
+1. **在 Bot Server 寫入 `ruler_logs` 表**（而非現在的 `ruler_sessions`）
+   - `ruler_logs` 是 PWA 的 deprecated adapter 預期讀取的表
+   - schema 不同，需要數據轉換：`ruler_sessions` flat columns → `ruler_logs` jsonb 結構
+   - 或者直接在 `insforgeAdapter.ts` 中同時寫入兩張表
 
-**注意**：這是許多其他功能的**前置條件**。
+2. **在 PWA 啟用 InsForge 讀取**
+   - 把 `src/lib/insforge/_deprecated/` 的代碼恢復並整合到 `dataAdapter`
+   - 或者新增一個簡單的 `fetch` 讀取 `ruler_logs` API
+   - 需要處理認證：PWA 目前沒有 JWT，需要 Anonymous Key 或臨時方案
 
-#### 4.4 數據遷移（LocalStorage → InsForge）
-**狀態**：`localStorageMigration.ts` 只有 `coach_context` 元數據遷移，未遷移真正的 `feelings_logs`
-**依賴**：4.3 認證整合完成後才能進行
-**核心工作**：
-- [ ] `runMigration()` 將 `feelings_logs` 批量插入 `ruler_logs`
-- [ ] `user_progress` 遷移到 `achievement_records` + `streaks`
-- [ ] 處理重複插入（upsert 或去重）
-- [ ] `MigrationProgress` 組件顯示真實進度
+#### 方向 B：打通認證 + 統一數據模型（長期方案）
+這是正確但工作量大的方案：
+
+1. **認證整合**：PWA 改用 InsForge Auth（或至少產生一致的 user_id）
+2. **統一表結構**：Bot 和 PWA 共用 `ruler_logs` 表
+3. **LINE 綁定**：用戶在 PWA 輸入綁定碼或掃 QR，將 `line_user_id` 關聯到 `auth.users.id`
+4. **數據遷移**：將現有 localStorage 數據遷移到 InsForge
+
+#### 建議
+如果目標是「快速驗證聯動」，**先走方向 A**：
+- 讓 Bot 同時寫入 `ruler_sessions`（現有）和 `ruler_logs`（PWA 可讀）
+- PWA 用 Anonymous Key 讀取 `ruler_logs`（繞過 RLS 或用 public policy）
+- 這樣歷史頁面就能看到 LINE 的記錄
 
 ### 🟢 P2 — 增強級
 
-#### 4.5 主動推送（Proactive AI）
-**狀態**：完全未實現
-**需求**：
-- [ ] 創建 Edge Function `proactive-check` 或 `daily-nudge`
-- [ ] InsForge Schedule（cron）每天固定時間觸發
-- [ ] 檢查用戶最後活動時間，若超過 48 小時未記錄，發送溫柔提醒
-- [ ] 檢測連續高壓情緒（紅色象限佔比 > 60%），主動推送呼吸練習
-- [ ] 連續紀錄里程碑（3/7/30 天）自動發送鼓勵訊息
+#### 4.3 主動推送（Proactive AI）
+- [ ] Edge Function `daily-nudge` + InsForge Schedule（cron）
+- [ ] 48 小時未記錄 → 溫柔提醒
+- [ ] 連續高壓 → 推送呼吸練習
 
-#### 4.6 LINE Bot ↔ PWA 數據同步
-**狀態**：架構預留，未完整串接
-**需求**：
-- [ ] LINE Bot 用戶可以綁定 PWA 帳號（輸入綁定碼或掃描 QR）
-- [ ] LINE 端記錄的 RULER flow 同步到 PWA 的 `ruler_logs`
-- [ ] PWA 的歷史回顧可以看到 LINE 端記錄的數據
-
-#### 4.7 測試覆蓋率補齊
-**狀態**：前端 330 測試通過，但核心組件（MoodMeter、EmotionGrid、CoachPage）缺少交互測試
-**需求**：
-- [ ] `MoodMeter.test.tsx` — 象限選擇、多選、確認
-- [ ] `EmotionGrid.test.tsx` — 情緒搜尋、多選、分類
-- [ ] `CoachPage.test.tsx` — 對話發送、action 觸發、錯誤處理
-- [ ] Bot Server 測試補齊（目前 52 測試，1 個 dotenv 文件失敗）
+#### 4.4 測試補齊
+- [ ] Bot Server 目前 112 tests passed，保持即可
+- [ ] 前端 330 tests passed
 
 ---
 
@@ -172,7 +161,9 @@
 | 前端 Coach Client | `src/lib/adk/client.ts` |
 | Bot Server 入口 | `server/src/index.ts` |
 | Bot 對話狀態機 | `server/src/rulerBot.ts` |
-| 資料庫適配器 | `server/src/db/index.ts` |
+| Bot 資料庫適配器 | `server/src/db/insforgeAdapter.ts` |
+| PWA 資料適配器（localStorage） | `src/adapters/storage.ts` |
+| PWA InsForge 適配器（deprecated） | `src/lib/insforge/_deprecated/` |
 | RULER Flow 前端 | `src/components/CheckInFlow.tsx` |
 | 情緒詞彙數據 | `src/data/emotionData.ts` |
 
@@ -187,55 +178,41 @@
 - **API URL**: `https://b88egxiz.ap-southeast.insforge.app`
 - **PostgreSQL**: `postgresql://postgres:036fd61640ebc629542456b8e98e788d@b88egxiz.ap-southeast.database.insforge.app:5432/insforge?sslmode=require`
 
-### 已部署 Secrets（InsForge）
+### 已部署 Secrets（InsForge Edge Functions）
 - `GOOGLE_API_KEY` — Gemini API
 - `API_KEY`, `ANON_KEY`, `JWT_SECRET` — InsForge 系統
 
-### 缺少 Secrets（需設定）
-- `LINE_CHANNEL_ACCESS_TOKEN` — LINE Bot
-- `LINE_CHANNEL_SECRET` — LINE Bot
-- `SERVICE_ROLE_KEY` — InsForge Service Role（如需後端繞過 RLS）
+### Zeabur Bot Server 環境變數（需確認）
+- `LINE_CHANNEL_ACCESS_TOKEN`
+- `LINE_CHANNEL_SECRET`
+- `DATABASE_URL`（應指向 InsForge PostgreSQL）
+
+### 缺少 Secrets
+- `SERVICE_ROLE_KEY` — InsForge Service Role（如需後端繞過 RLS 寫入）
 
 ---
 
-## 七、設計約束（不可違反）
-
-1. **語言**：所有界面文字、註釋、提交訊息、文件命名使用**繁體中文（台灣）**
-2. **狀態管理**：按策略表選擇唯一方案，禁止混用
-3. **數據操作**：必須通過 `dataAdapter`，禁止直接訪問 localStorage
-4. **加密**：密碼必須用 `passwordHash.ts`（PBKDF2），數據加密用 `crypto.ts`（AES-256-GCM）
-5. **測試**：修改後必須跑 `npm run test:run`，覆蓋率門檻 80%
-6. **Git**：Husky pre-commit 已壞，commit 加 `--no-verify`
-
----
-
-## 八、快速指令參考
+## 七、快速驗證指令
 
 ```bash
-# 前端
-cd "/Users/samulee003/Desktop/今心 APP"
-npm run dev           # localhost:5173
-npm run build         # dist/
-npm run test:run      # 330 測試
-npx tsc --noEmit      # 類型檢查
+# 確認 Bot Server 健康
+curl -s https://imxin-bot.zeabur.app/health
 
-# 後端
-cd server/
-npm run dev           # localhost:3000
-npm run build         # dist/
-npm run test:run      # 52 測試
+# 確認 Edge Functions
+curl -s https://b88egxiz.functions.insforge.app/coach
 
-# InsForge CLI（已 link）
-cd "/Users/samulee003/Desktop/今心 APP"
-npx @insforge/cli functions list
-npx @insforge/cli functions deploy <name> --file <path>
-npx @insforge/cli secrets list
+# 查詢 Bot 數據（用 MCP run-raw-sql）
+SELECT COUNT(*) FROM bot_users;
+SELECT COUNT(*) FROM ruler_sessions;
+SELECT COUNT(*) FROM chat_messages;
+
+# 查詢 PWA 數據（用 MCP run-raw-sql）
+SELECT COUNT(*) FROM ruler_logs;
+SELECT COUNT(*) FROM profiles;
 ```
 
 ---
 
-> **交接人**：Kimi Code CLI
-> **日期**：2026-05-12
-> **狀態**：基礎架構 + Agentic AI 核心已完成，等待 Bot Server 部署與認證整合
->
-> **情緒調節不是與生俱來的性格，而是一套可以透過有意識的練習與策略，不斷學習與精進的實用技能。** — Marc Brackett
+> **交接日期**：2026-05-11
+> 
+> **最後 Commit**：`c7d6544` fix: RULER 流程結束後說謝謝不再自動重開第一步
