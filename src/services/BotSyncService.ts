@@ -30,6 +30,10 @@ export interface BotSyncError {
   status?: number;
 }
 
+export interface LineBindingResult {
+  lineUserId: string;
+}
+
 export type BotSyncResult<T> =
   | { data: T; error: null }
   | { data: null; error: BotSyncError };
@@ -41,7 +45,7 @@ class BotSyncService {
     // 優先從環境變量讀取，其次從本地設置讀取，最後使用默認值
     const envUrl = import.meta.env.VITE_BOT_API_URL;
     const settingsUrl = this.getSettingsApiUrl();
-    this.baseUrl = envUrl || settingsUrl || 'http://localhost:3000';
+    this.baseUrl = envUrl || settingsUrl || 'https://imxin-bot.zeabur.app';
   }
 
   private getSettingsApiUrl(): string | null {
@@ -111,6 +115,51 @@ class BotSyncService {
     }
   }
 
+  private async post<T>(endpoint: string, body: Record<string, unknown>): Promise<BotSyncResult<T>> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error('[BotSyncService] API error', {
+          endpoint,
+          status: response.status,
+          body: errorBody,
+        });
+        return {
+          data: null,
+          error: {
+            message: `API 錯誤: ${response.statusText}`,
+            status: response.status,
+          },
+        };
+      }
+
+      const data = (await response.json()) as T;
+      return { data, error: null };
+    } catch (err) {
+      logger.error('[BotSyncService] Network error', {
+        endpoint,
+        error: String(err),
+      });
+      return {
+        data: null,
+        error: {
+          message: err instanceof Error ? err.message : '網絡請求失敗',
+        },
+      };
+    }
+  }
+
   /**
    * 獲取用戶儀表盤摘要
    */
@@ -135,6 +184,19 @@ class BotSyncService {
       };
     }
     return this.request<WeeklyReport>(`/api/dashboard/${encodeURIComponent(lineUserId)}/weekly-report`);
+  }
+
+  async claimLineBinding(code: string, appUserId: string): Promise<BotSyncResult<LineBindingResult>> {
+    if (!code.trim()) {
+      return { data: null, error: { message: '綁定碼不能為空' } };
+    }
+    if (!appUserId.trim()) {
+      return { data: null, error: { message: '使用者 ID 不能為空' } };
+    }
+    return this.post<LineBindingResult>('/api/line-binding/claim', {
+      code: code.trim().toUpperCase(),
+      appUserId,
+    });
   }
 }
 

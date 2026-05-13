@@ -7,7 +7,7 @@
 
 ## 背景說明
 
-舊的 InsForge API Key (`ik_98a424fbe1f147f40b08386adb0da6b9`) 已經洩露到 Git 歷史中。
+舊的 InsForge API Key 已經洩露到 Git 歷史中。
 需要：
 1. 在 InsForge 生成新的 API Key
 2. 在 Zeabur 更新環境變數

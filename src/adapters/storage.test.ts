@@ -8,6 +8,8 @@ import {
   clearLogsCache,
   storageService,
 } from './storage';
+import { type Quadrant } from '../data/emotionData';
+import { type UserProgress } from '../types/HabitTypes';
 import { _injectMasterKey, _resetKeyCache } from '../utils/crypto';
 
 const TEST_MASTER_KEY = Array.from(crypto.getRandomValues(new Uint8Array(32)))
@@ -251,7 +253,7 @@ describe('storage', () => {
         it('應保存和讀取草稿', async () => {
             const d = {
                 step: 'labeling' as const,
-                selectedQuadrants: ['yellow'] as import('../data/emotionData').Quadrant[],
+                selectedQuadrants: ['yellow'] as Quadrant[],
                 selectedEmotions: [],
                 emotionIntensity: 5,
                 bodyScanData: null,
@@ -272,7 +274,7 @@ describe('storage', () => {
         it('應清除草稿', async () => {
             const d = {
                 step: 'recognizing' as const,
-                selectedQuadrants: [] as import('../data/emotionData').Quadrant[],
+                selectedQuadrants: [] as Quadrant[],
                 selectedEmotions: [],
                 emotionIntensity: 5,
                 bodyScanData: null,
@@ -401,7 +403,7 @@ describe('storage', () => {
         });
 
         it('應保存和讀取進度', async () => {
-            const progress: import('../types/HabitTypes').UserProgress = {
+            const progress: UserProgress = {
                 streak: {
                     currentStreak: 5,
                     longestStreak: 7,

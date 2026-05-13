@@ -35,14 +35,15 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
-    const client = createClient({ baseUrl, anonKey });
+    const serverKey = Deno.env.get('API_KEY') || Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
+    const client = createClient({ baseUrl, anonKey: serverKey });
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
 
     // Fetch all ruler logs for the user
     const { data: logs, error: logsError } = await client.database
-      .from('ruler_logs')
+      .from(isUuid ? 'ruler_logs' : 'agent_ruler_logs')
       .select('emotions, is_full_flow')
-      .eq('user_id', userId);
+      .eq(isUuid ? 'user_id' : 'app_user_id', userId);
 
     if (logsError) {
       return new Response(
@@ -52,11 +53,11 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Fetch streak data
-    const { data: streakData, error: streakError } = await client.database
+    const { data: streakData, error: streakError } = isUuid ? await client.database
       .from('streaks')
       .select('current_streak')
       .eq('user_id', userId)
-      .maybeSingle();
+      .maybeSingle() : { data: null, error: null };
 
     if (streakError) {
       return new Response(
@@ -94,6 +95,19 @@ export default async function (req: Request): Promise<Response> {
       { key: 'emotions_10', check: (s) => s.uniqueEmotions >= 10 },
       { key: 'full_ruler_5', check: (s) => s.fullFlowCount >= 5 },
     ];
+
+    if (!isUuid) {
+      return new Response(
+        JSON.stringify({
+          data: {
+            newly_unlocked: [],
+            stats,
+          },
+          error: null,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Get already unlocked achievements
     const { data: existingAchievements, error: achievementsError } = await client.database

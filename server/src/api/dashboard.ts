@@ -41,4 +41,29 @@ export const dashboardRoutes = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+
+  async claimLineBinding(req: Request, res: Response): Promise<void> {
+    const { code, appUserId } = req.body ?? {};
+    if (typeof code !== 'string' || typeof appUserId !== 'string') {
+      res.status(400).json({ error: 'Missing code or appUserId' });
+      return;
+    }
+
+    if (!db.claimLineBindingCode) {
+      res.status(501).json({ error: 'Line binding is not supported' });
+      return;
+    }
+
+    try {
+      const binding = await db.claimLineBindingCode(code, appUserId);
+      if (!binding) {
+        res.status(404).json({ error: 'Binding code not found or expired' });
+        return;
+      }
+
+      res.json({ lineUserId: binding.lineUserId });
+    } catch {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
 };

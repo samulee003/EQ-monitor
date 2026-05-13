@@ -1,6 +1,6 @@
 import pg from 'pg';
 import { RulerData } from '../types.js';
-import type { DbSession, DbUser } from './memoryAdapter.js';
+import type { DbSession, DbUser, LineBindingCode } from './memoryAdapter.js';
 
 /**
  * InsForge PostgreSQL 適配器
@@ -12,6 +12,10 @@ const { Pool } = pg;
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function generateBindingCode(): string {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
 function rulerDataToColumns(data: RulerData): { columns: string[]; values: unknown[] } {
@@ -40,6 +44,36 @@ function rulerDataFromRow(row: Record<string, unknown>): RulerData {
     expressionText: (row.expression_text as string | null) ?? undefined,
     regulationTechnique: (row.regulation_technique as 'breathing' | 'grounding54321' | 'mindfulness' | null) ?? undefined,
     postMood: (row.post_mood as string | null) ?? undefined,
+  };
+}
+
+function agentLogPayload(
+  appUserId: string,
+  lineUserId: string,
+  data: RulerData
+): Record<string, unknown> {
+  return {
+    app_user_id: appUserId,
+    line_user_id: lineUserId,
+    source: 'line',
+    emotions: [
+      {
+        name: data.emotionName ?? '未命名情緒',
+        quadrant: data.emotionQuadrant ?? 'blue',
+      },
+    ],
+    intensity: data.emotionIntensity ?? 5,
+    body_scan: data.bodyPart ? { location: data.bodyPart } : null,
+    understanding: {
+      trigger: data.trigger ?? '',
+      need: data.need ?? null,
+    },
+    expressing: data.expressionText ? { expression: data.expressionText, mode: 'line' } : null,
+    regulating: data.regulationTechnique
+      ? { selectedStrategies: [data.regulationTechnique] }
+      : null,
+    post_mood: data.postMood ?? null,
+    is_full_flow: true,
   };
 }
 
@@ -248,6 +282,39 @@ export function createInsforgeAdapter(connectionString: string) {
             lineUserId,
           ]
         );
+
+        const bindingResult = await pool.query(
+          `SELECT app_user_id FROM line_user_bindings
+           WHERE line_user_id = $1 AND status = 'claimed' AND app_user_id IS NOT NULL
+           ORDER BY claimed_at DESC NULLS LAST, created_at DESC
+           LIMIT 1`,
+          [lineUserId]
+        );
+        const appUserId = bindingResult.rows[0]?.app_user_id as string | undefined;
+        if (appUserId) {
+          const payload = agentLogPayload(appUserId, lineUserId, { ...rulerDataFromRow(sessionRow), ...data });
+          await pool.query(
+            `INSERT INTO agent_ruler_logs (
+              app_user_id, line_user_id, source, emotions, intensity,
+              body_scan, understanding, expressing, regulating,
+              post_mood, is_full_flow
+            )
+            VALUES ($1, $2, $3, $4::jsonb, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11)`,
+            [
+              payload.app_user_id,
+              payload.line_user_id,
+              payload.source,
+              JSON.stringify(payload.emotions),
+              payload.intensity,
+              JSON.stringify(payload.body_scan),
+              JSON.stringify(payload.understanding),
+              JSON.stringify(payload.expressing),
+              JSON.stringify(payload.regulating),
+              payload.post_mood,
+              payload.is_full_flow,
+            ]
+          );
+        }
       } catch (err) {
         console.error('[InsForge] completeSession error:', err);
       }
@@ -341,6 +408,56 @@ export function createInsforgeAdapter(connectionString: string) {
       } catch (err) {
         console.error('[InsForge] getAllSessions error:', err);
         return [];
+      }
+    },
+
+    async createLineBindingCode(lineUserId: string): Promise<LineBindingCode> {
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const code = generateBindingCode();
+        try {
+          const result = await pool.query(
+            `INSERT INTO line_user_bindings (code, line_user_id, status, expires_at)
+             VALUES ($1, $2, 'pending', $3)
+             RETURNING code, line_user_id, app_user_id, expires_at, claimed_at`,
+            [code, lineUserId, expiresAt.toISOString()]
+          );
+          const row = result.rows[0];
+          return {
+            code: row.code,
+            lineUserId: row.line_user_id,
+            appUserId: row.app_user_id ?? undefined,
+            expiresAt: new Date(row.expires_at).getTime(),
+            claimedAt: row.claimed_at ? new Date(row.claimed_at).getTime() : undefined,
+          };
+        } catch (err) {
+          if (attempt === 4) throw err;
+        }
+      }
+      throw new Error('無法建立 LINE 綁定碼');
+    },
+
+    async claimLineBindingCode(code: string, appUserId: string): Promise<LineBindingCode | null> {
+      try {
+        const result = await pool.query(
+          `UPDATE line_user_bindings
+           SET app_user_id = $1, status = 'claimed', claimed_at = NOW()
+           WHERE code = $2 AND status = 'pending' AND expires_at > NOW()
+           RETURNING code, line_user_id, app_user_id, expires_at, claimed_at`,
+          [appUserId, code.trim().toUpperCase()]
+        );
+        const row = result.rows[0];
+        if (!row) return null;
+        return {
+          code: row.code,
+          lineUserId: row.line_user_id,
+          appUserId: row.app_user_id ?? undefined,
+          expiresAt: new Date(row.expires_at).getTime(),
+          claimedAt: row.claimed_at ? new Date(row.claimed_at).getTime() : undefined,
+        };
+      } catch (err) {
+        console.error('[InsForge] claimLineBindingCode error:', err);
+        return null;
       }
     },
   };

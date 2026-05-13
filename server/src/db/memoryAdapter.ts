@@ -23,8 +23,33 @@ export interface DbUser {
   createdAt: number;
 }
 
+export interface LineBindingCode {
+  code: string;
+  lineUserId: string;
+  appUserId?: string;
+  expiresAt: number;
+  claimedAt?: number;
+}
+
+export interface AgentRulerLog {
+  appUserId: string;
+  lineUserId?: string;
+  source: 'line' | 'coach' | 'pwa';
+  emotions: Array<{ name: string; quadrant: string }>;
+  intensity: number;
+  bodyScan: Record<string, unknown> | null;
+  understanding: Record<string, unknown> | null;
+  expressing: Record<string, unknown> | null;
+  regulating: Record<string, unknown> | null;
+  postMood: string | null;
+  isFullFlow: boolean;
+  createdAt: number;
+}
+
 const users = new Map<string, DbUser>();
 const sessions = new Map<string, DbSession>();
+const bindingCodes = new Map<string, LineBindingCode>();
+const agentLogs: AgentRulerLog[] = [];
 const messages: Array<{
   id: string;
   lineUserId: string;
@@ -36,6 +61,38 @@ const messages: Array<{
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function generateBindingCode(): string {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function mapRulerDataToAgentLog(
+  appUserId: string,
+  lineUserId: string,
+  data: RulerData
+): AgentRulerLog {
+  const emotionName = data.emotionName ?? '未命名情緒';
+  const quadrant = data.emotionQuadrant ?? 'blue';
+  return {
+    appUserId,
+    lineUserId,
+    source: 'line',
+    emotions: [{ name: emotionName, quadrant }],
+    intensity: data.emotionIntensity ?? 5,
+    bodyScan: data.bodyPart ? { location: data.bodyPart } : null,
+    understanding: {
+      trigger: data.trigger ?? '',
+      need: data.need ?? null,
+    },
+    expressing: data.expressionText ? { expression: data.expressionText, mode: 'line' } : null,
+    regulating: data.regulationTechnique
+      ? { selectedStrategies: [data.regulationTechnique] }
+      : null,
+    postMood: data.postMood ?? null,
+    isFullFlow: true,
+    createdAt: Date.now(),
+  };
 }
 
 export const memoryAdapter = {
@@ -98,6 +155,12 @@ export const memoryAdapter = {
         }
         user.lastSessionDate = today;
       }
+
+      const binding = Array.from(bindingCodes.values())
+        .find((item) => item.lineUserId === session.lineUserId && item.appUserId && item.claimedAt);
+      if (binding?.appUserId) {
+        agentLogs.push(mapRulerDataToAgentLog(binding.appUserId, session.lineUserId, session.data));
+      }
     }
   },
 
@@ -141,10 +204,37 @@ export const memoryAdapter = {
     return Array.from(sessions.values());
   },
 
+  async createLineBindingCode(lineUserId: string): Promise<LineBindingCode> {
+    let code = generateBindingCode();
+    while (bindingCodes.has(code)) code = generateBindingCode();
+    const binding: LineBindingCode = {
+      code,
+      lineUserId,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+    bindingCodes.set(code, binding);
+    return binding;
+  },
+
+  async claimLineBindingCode(code: string, appUserId: string): Promise<LineBindingCode | null> {
+    const normalized = code.trim().toUpperCase();
+    const binding = bindingCodes.get(normalized);
+    if (!binding || binding.expiresAt < Date.now()) return null;
+    binding.appUserId = appUserId;
+    binding.claimedAt = Date.now();
+    return binding;
+  },
+
+  async getAgentLogs(appUserId: string): Promise<AgentRulerLog[]> {
+    return agentLogs.filter((log) => log.appUserId === appUserId);
+  },
+
   // 測試用
   resetStore(): void {
     users.clear();
     sessions.clear();
+    bindingCodes.clear();
+    agentLogs.length = 0;
     messages.length = 0;
   },
 };

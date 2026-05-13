@@ -126,6 +126,45 @@ describe('memoryAdapter', () => {
       const stats = await memoryAdapter.getWeeklyStats('user-1');
       expect(stats.streakDays).toBe(1);
     });
+
+    it('LINE 已綁定時同步完整練習到 agent 日誌', async () => {
+      await memoryAdapter.getOrCreateUser('U123');
+      const code = await memoryAdapter.createLineBindingCode('U123');
+      await memoryAdapter.claimLineBindingCode(code.code, 'user_local_001');
+
+      const session = await memoryAdapter.createSession('U123');
+      await memoryAdapter.completeSession(session.id, {
+        bodyPart: '胸口',
+        emotionName: '焦慮',
+        emotionQuadrant: 'red',
+        emotionIntensity: 8,
+        need: '安全感',
+        regulationTechnique: 'breathing',
+        postMood: '平靜一些',
+      });
+
+      const logs = await memoryAdapter.getAgentLogs('user_local_001');
+      expect(logs).toHaveLength(1);
+      expect(logs[0].lineUserId).toBe('U123');
+      expect(logs[0].emotions[0]).toEqual({ name: '焦慮', quadrant: 'red' });
+      expect(logs[0].isFullFlow).toBe(true);
+    });
+  });
+
+  describe('LINE 綁定碼', () => {
+    it('建立並認領綁定碼', async () => {
+      const code = await memoryAdapter.createLineBindingCode('U123');
+      expect(code.code).toHaveLength(6);
+
+      const claimed = await memoryAdapter.claimLineBindingCode(code.code, 'user_local_001');
+
+      expect(claimed?.lineUserId).toBe('U123');
+      expect(claimed?.appUserId).toBe('user_local_001');
+    });
+
+    it('不可認領不存在的綁定碼', async () => {
+      await expect(memoryAdapter.claimLineBindingCode('NOPE00', 'user_local_001')).resolves.toBeNull();
+    });
   });
 
   describe('saveMessage', () => {

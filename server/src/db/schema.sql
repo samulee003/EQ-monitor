@@ -49,6 +49,39 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON ruler_sessions(line_user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_chat_user ON chat_messages(line_user_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS line_user_bindings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  line_user_id TEXT NOT NULL,
+  app_user_id TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'claimed', 'expired')),
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  claimed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS agent_ruler_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  app_user_id TEXT NOT NULL,
+  line_user_id TEXT,
+  source TEXT NOT NULL DEFAULT 'coach' CHECK (source IN ('coach', 'line', 'pwa')),
+  emotions JSONB NOT NULL DEFAULT '[]',
+  intensity INT NOT NULL CHECK (intensity BETWEEN 1 AND 10),
+  body_scan JSONB,
+  understanding JSONB,
+  expressing JSONB,
+  regulating JSONB,
+  physical_context JSONB,
+  post_mood TEXT,
+  is_full_flow BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_line_bindings_code ON line_user_bindings(code);
+CREATE INDEX IF NOT EXISTS idx_line_bindings_app ON line_user_bindings(app_user_id, claimed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_logs_app ON agent_ruler_logs(app_user_id, created_at DESC);
+
 -- RLS for Supabase
 ALTER TABLE bot_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ruler_sessions ENABLE ROW LEVEL SECURITY;

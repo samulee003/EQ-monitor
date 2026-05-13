@@ -23,17 +23,18 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
-    const anonKey = Deno.env.get('ANON_KEY') || '';
-    const client = createClient({ baseUrl, anonKey });
+    const serverKey = Deno.env.get('API_KEY') || Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('ANON_KEY') || '';
+    const client = createClient({ baseUrl, anonKey: serverKey });
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const since = sevenDaysAgo.toISOString();
 
     const { data: logs, error: logsError } = await client.database
-      .from('ruler_logs')
+      .from(isUuid ? 'ruler_logs' : 'agent_ruler_logs')
       .select('emotions, intensity, created_at')
-      .eq('user_id', userId)
+      .eq(isUuid ? 'user_id' : 'app_user_id', userId)
       .gte('created_at', since)
       .order('created_at', { ascending: false });
 

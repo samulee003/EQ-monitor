@@ -51,6 +51,81 @@
   line-height: 1.4;
 }
 
+.bindingPanel {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.bindingTitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.bindingHint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.bindingForm {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.bindingLabel {
+  flex: 1;
+}
+
+.bindingInput {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bindingButton {
+  min-height: 40px;
+  padding: 0 var(--s-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--text-primary);
+  color: var(--bg-color);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bindingMessage {
+  margin: 0;
+  color: var(--color-green);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .chatArea {
   flex: 1;
   overflow-y: auto;

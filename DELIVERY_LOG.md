@@ -249,16 +249,10 @@ server/src/
 
 ```env
 # 前端環境變量
-# 優先使用代理端點（更安全，API Key 不暴露於客戶端）
-VITE_API_PROXY_URL=http://localhost:3000/api/ai
-
-# 直連模式（僅在無代理時使用，Key 會打包進客戶端，生產環境不推薦）
-VITE_ZEABUR_AI_API_URL=https://gateway.zeabur.com/api/v1/projects/.../proxy
-VITE_ZEABUR_AI_API_KEY=your_zeabur_api_key
+# AI Key 一律留在後端或 Edge Function，前端只設定端點。
+VITE_COACH_API_URL=https://b88egxiz.functions.insforge.app/coach
 
 # 後端環境變量
-ZEABUR_AI_API_URL=https://gateway.zeabur.com/api/v1/projects/.../proxy
-ZEABUR_AI_API_KEY=your_zeabur_api_key
 LINE_CHANNEL_ACCESS_TOKEN=your_line_token
 LINE_CHANNEL_SECRET=your_line_secret
 PORT=3000
@@ -286,8 +280,8 @@ npm run dev
 
 ### 生產環境檢查清單
 
-- [ ] 設置 `VITE_API_PROXY_URL` 指向後端 `/api/ai`
-- [ ] 後端配置 `ZEABUR_AI_API_URL` 和 `ZEABUR_AI_API_KEY`
+- [ ] 設置 `VITE_COACH_API_URL` 指向已部署的 Coach Edge Function
+- [ ] 後端或 Edge Function 已配置必要 AI secret，且不暴露於前端
 - [ ] 配置 `LINE_CHANNEL_ACCESS_TOKEN` 和 `LINE_CHANNEL_SECRET`
 - [ ] 啟用 HTTPS（PWA 要求）
 - [ ] 配置 CORS（限制為前端域名）

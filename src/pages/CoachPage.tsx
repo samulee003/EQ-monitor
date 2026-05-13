@@ -8,6 +8,7 @@ import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { WelcomeCard } from '../components/coach/WelcomeCard';
 import { useAuth } from '../services/AuthContext';
+import { botSyncService } from '../services/BotSyncService';
 import { useAppStore } from '../stores/appStore';
 import styles from './CoachPage.module.css';
 
@@ -68,21 +69,25 @@ export default function CoachPage() {
   const [showBreathing, setShowBreathing] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ action: CoachAction; reason?: string } | null>(null);
   const [error, setError] = useState<{ type: ErrorType; retryText: string } | null>(null);
+  const [bindingCode, setBindingCode] = useState('');
+  const [bindingMessage, setBindingMessage] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
 
   // Load history on mount
   useEffect(() => {
-    const history = loadChatHistory();
+    const history = loadChatHistory(userId);
     if (history && history.length > 0) {
       setMessages(history);
+    } else {
+      setMessages([WELCOME_MSG]);
     }
-  }, []);
+  }, [userId]);
 
   // Persist on change
   useEffect(() => {
-    saveChatHistory(messages);
-  }, [messages]);
+    saveChatHistory(messages, userId);
+  }, [messages, userId]);
 
   // Auto scroll
   useEffect(() => {
@@ -180,6 +185,23 @@ export default function CoachPage() {
     [handleSend]
   );
 
+  const handleClaimBinding = useCallback(async () => {
+    const code = bindingCode.trim().toUpperCase();
+    if (!code) {
+      setBindingMessage('請輸入 LINE Bot 給你的綁定碼');
+      return;
+    }
+
+    const result = await botSyncService.claimLineBinding(code, userId);
+    if (result.error) {
+      setBindingMessage(`綁定失敗：${result.error.message}`);
+      return;
+    }
+
+    setBindingMessage(`已綁定 LINE Bot：${result.data.lineUserId}`);
+    setBindingCode('');
+  }, [bindingCode, userId]);
+
   const showWelcome = messages.length <= 1;
 
   return (
@@ -192,6 +214,30 @@ export default function CoachPage() {
         </div>
         <span className={styles.headerSubtitle}>AI 陪伴你的情緒旅程</span>
       </header>
+
+      <section className={styles.bindingPanel} aria-label="LINE Bot 綁定">
+        <div>
+          <p className={styles.bindingTitle}>LINE Bot 同步</p>
+          <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
+        </div>
+        <div className={styles.bindingForm}>
+          <label className={styles.bindingLabel}>
+            <span className={styles.visuallyHidden}>LINE 綁定碼</span>
+            <input
+              aria-label="LINE 綁定碼"
+              value={bindingCode}
+              onChange={(event) => setBindingCode(event.target.value.toUpperCase())}
+              maxLength={6}
+              className={styles.bindingInput}
+              placeholder="ABC123"
+            />
+          </label>
+          <button type="button" className={styles.bindingButton} onClick={handleClaimBinding}>
+            綁定
+          </button>
+        </div>
+        {bindingMessage && <p className={styles.bindingMessage}>{bindingMessage}</p>}
+      </section>
 
       {/* Chat Area */}
       <div className={styles.chatArea}>

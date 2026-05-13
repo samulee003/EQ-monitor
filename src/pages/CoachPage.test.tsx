@@ -2,9 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
+import { saveChatHistory } from '../lib/adk/storage';
 
 vi.mock('../services/AuthContext', () => ({
-  useAuth: () => ({ user: null }),
+  useAuth: () => ({ user: { id: 'user_local_001' } }),
+}));
+
+const appStoreMock = vi.hoisted(() => ({
+  setView: vi.fn(),
+}));
+
+vi.mock('../stores/appStore', () => ({
+  useAppStore: { getState: () => appStoreMock },
 }));
 
 describe('CoachPage', () => {
@@ -133,7 +142,7 @@ describe('CoachPage', () => {
       { id: '1', role: 'model' as const, content: '歡迎', timestamp: new Date().toISOString() },
       { id: '2', role: 'user' as const, content: '你好', timestamp: new Date().toISOString() },
     ];
-    localStorage.setItem('imxin_coach_chat_v1', JSON.stringify(history));
+    saveChatHistory(history, 'user_local_001');
 
     render(<CoachPage />);
     expect(screen.getByText('你好')).toBeInTheDocument();
@@ -144,5 +153,59 @@ describe('CoachPage', () => {
 
     fireEvent.click(screen.getByText('幫我啟動 Meta-Moment'));
     expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+  });
+
+  it('Agent 回傳 open_sos action 時開啟 Meta-Moment 覆蓋層', async () => {
+    vi.spyOn(client, 'sendMessage').mockResolvedValue({
+      response: '我陪你一起穩下來。',
+      action: 'open_sos',
+      actionReason: '偵測到你需要緊急協助',
+    });
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '我快撐不住了' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+    });
+  });
+
+  it('Agent 回傳 show_growth action 時切到成長頁', async () => {
+    vi.spyOn(client, 'sendMessage').mockResolvedValue({
+      response: '我幫你打開成長趨勢。',
+      action: 'show_growth',
+    });
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '我最近有進步嗎' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    await waitFor(() => {
+      expect(appStoreMock.setView).toHaveBeenCalledWith('growth');
+    });
+  });
+
+  it('可以提交 LINE Bot 綁定碼', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ lineUserId: 'U123' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
+    fireEvent.click(screen.getByText('綁定'));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/api/line-binding/claim'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ code: 'ABC123', appUserId: 'user_local_001' }),
+        })
+      );
+    });
+    expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
   });
 });
