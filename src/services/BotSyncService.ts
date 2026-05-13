@@ -72,6 +72,27 @@ class BotSyncService {
     return this.baseUrl;
   }
 
+  private formatApiError(response: Response, errorBody: string): string {
+    const fallback = response.statusText || `HTTP ${response.status}`;
+    const trimmedBody = errorBody.trim();
+    if (!trimmedBody) return `API 錯誤: ${fallback}`;
+
+    try {
+      const parsed = JSON.parse(trimmedBody) as { error?: unknown; message?: unknown };
+      const detail =
+        typeof parsed.error === 'string'
+          ? parsed.error
+          : typeof parsed.message === 'string'
+            ? parsed.message
+            : null;
+      if (detail) return `API 錯誤: ${detail}`;
+    } catch {
+      return `API 錯誤: ${trimmedBody}`;
+    }
+
+    return `API 錯誤: ${fallback}`;
+  }
+
   private async request<T>(endpoint: string): Promise<BotSyncResult<T>> {
     const url = `${this.baseUrl}${endpoint}`;
 
@@ -93,7 +114,7 @@ class BotSyncService {
         return {
           data: null,
           error: {
-            message: `API 錯誤: ${response.statusText}`,
+            message: this.formatApiError(response, errorBody),
             status: response.status,
           },
         };
@@ -138,7 +159,7 @@ class BotSyncService {
         return {
           data: null,
           error: {
-            message: `API 錯誤: ${response.statusText}`,
+            message: this.formatApiError(response, errorBody),
             status: response.status,
           },
         };

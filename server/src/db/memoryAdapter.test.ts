@@ -155,6 +155,7 @@ describe('memoryAdapter', () => {
     it('建立並認領綁定碼', async () => {
       const code = await memoryAdapter.createLineBindingCode('U123');
       expect(code.code).toHaveLength(6);
+      expect(code.code).toMatch(/^[A-HJ-NP-Z]{6}$/);
 
       const claimed = await memoryAdapter.claimLineBindingCode(code.code, 'user_local_001');
 
@@ -164,6 +165,13 @@ describe('memoryAdapter', () => {
 
     it('不可認領不存在的綁定碼', async () => {
       await expect(memoryAdapter.claimLineBindingCode('NOPE00', 'user_local_001')).resolves.toBeNull();
+    });
+
+    it('建立的綁定碼不包含容易混淆的字元', async () => {
+      for (let i = 0; i < 50; i++) {
+        const code = await memoryAdapter.createLineBindingCode(`U${i}`);
+        expect(code.code).not.toMatch(/[IO01]/);
+      }
     });
   });
 

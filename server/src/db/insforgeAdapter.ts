@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { RulerData } from '../types.js';
+import { generateBindingCode } from './bindingCode.js';
 import type { DbSession, DbUser, LineBindingCode } from './memoryAdapter.js';
 
 /**
@@ -12,10 +13,6 @@ const { Pool } = pg;
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function generateBindingCode(): string {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
 function rulerDataToColumns(data: RulerData): { columns: string[]; values: unknown[] } {
