@@ -215,7 +215,7 @@ export default function CoachPage() {
         <span className={styles.headerSubtitle}>AI 陪伴你的情緒旅程</span>
       </header>
 
-      <section className={styles.bindingPanel} aria-label="LINE Bot 綁定">
+      <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
         <div>
           <p className={styles.bindingTitle}>LINE Bot 同步</p>
           <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
@@ -230,13 +230,23 @@ export default function CoachPage() {
               maxLength={6}
               className={styles.bindingInput}
               placeholder="ABC123"
+              data-testid="line-binding-input"
             />
           </label>
-          <button type="button" className={styles.bindingButton} onClick={handleClaimBinding}>
+          <button
+            type="button"
+            className={styles.bindingButton}
+            onClick={handleClaimBinding}
+            data-testid="line-binding-submit"
+          >
             綁定
           </button>
         </div>
-        {bindingMessage && <p className={styles.bindingMessage}>{bindingMessage}</p>}
+        {bindingMessage && (
+          <p className={styles.bindingMessage} data-testid="line-binding-message">
+            {bindingMessage}
+          </p>
+        )}
       </section>
 
       {/* Chat Area */}
