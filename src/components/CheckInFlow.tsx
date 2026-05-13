@@ -68,6 +68,11 @@ const CheckInFlow: React.FC = () => {
 
     const navigateToCoach = () => {
         if (typeof window !== 'undefined') {
+            try {
+                window.sessionStorage.setItem('imxin_focus_line_binding', '1');
+            } catch {
+                // 隱私模式可能阻擋 sessionStorage；仍然帶使用者前往教練頁。
+            }
             window.location.hash = 'coach';
         }
     };

@@ -230,7 +230,7 @@ describe('CoachPage', () => {
 
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
-    fireEvent.click(screen.getByText('綁定'));
+    fireEvent.click(screen.getByText('貼上後綁定'));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -255,8 +255,29 @@ describe('CoachPage', () => {
 
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
-    fireEvent.click(screen.getByText('綁定'));
+    fireEvent.click(screen.getByText('貼上後綁定'));
 
     expect(await screen.findByText('綁定失敗：API 錯誤: Binding code not found or expired')).toBeInTheDocument();
+  });
+
+  it('LINE Bot 綁定卡片應該清楚指出綁定位置與步驟', () => {
+    render(<CoachPage />);
+
+    const panel = screen.getByTestId('line-binding-panel');
+    expect(within(panel).getByText('把 LINE 給你的 6 位碼貼在這裡')).toBeInTheDocument();
+    expect(within(panel).getByText('1. 打開 LINE，對今心輸入「綁定」')).toBeInTheDocument();
+    expect(within(panel).getByText('2. 複製 LINE 回覆的 6 位碼')).toBeInTheDocument();
+    expect(within(panel).getByText('3. 貼到下方欄位，按「貼上後綁定」')).toBeInTheDocument();
+    expect(within(panel).getByPlaceholderText('輸入 6 位碼')).toBeInTheDocument();
+  });
+
+  it('從首頁前往綁定時應自動聚焦 LINE 綁定碼輸入框', async () => {
+    sessionStorage.setItem('imxin_focus_line_binding', '1');
+    render(<CoachPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('LINE 綁定碼')).toHaveFocus();
+    });
+    expect(sessionStorage.getItem('imxin_focus_line_binding')).toBeNull();
   });
 });

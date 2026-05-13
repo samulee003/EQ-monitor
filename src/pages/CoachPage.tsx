@@ -84,6 +84,8 @@ export default function CoachPage() {
   const [bindingCode, setBindingCode] = useState('');
   const [bindingMessage, setBindingMessage] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const bindingPanelRef = useRef<HTMLElement>(null);
+  const bindingInputRef = useRef<HTMLInputElement>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
 
   // Load history on mount
@@ -107,6 +109,24 @@ export default function CoachPage() {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, loading]);
+
+  // 從首頁 LINE Bot 入口進來時，直接把人帶到綁定碼欄位。
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const shouldFocusBinding = window.sessionStorage.getItem('imxin_focus_line_binding') === '1';
+      if (!shouldFocusBinding) return;
+
+      window.sessionStorage.removeItem('imxin_focus_line_binding');
+      window.setTimeout(() => {
+        bindingPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        bindingInputRef.current?.focus();
+      }, 0);
+    } catch {
+      // sessionStorage 不可用時維持一般教練頁體驗。
+    }
+  }, []);
 
   /** 處理 Agent 回傳的 action */
   const handleAction = useCallback((action: CoachAction | undefined, reason?: string) => {
@@ -249,6 +269,52 @@ export default function CoachPage() {
           <span>{getTodayLabel()}</span>
         </div>
 
+        <section
+          ref={bindingPanelRef}
+          className={styles.bindingPanel}
+          aria-label="LINE Bot 綁定"
+          data-testid="line-binding-panel"
+        >
+          <div className={styles.bindingHeader}>
+            <span className={styles.bindingEyebrow}>LINE Bot 綁定</span>
+            <h2 className={styles.bindingTitle}>把 LINE 給你的 6 位碼貼在這裡</h2>
+            <p className={styles.bindingHint}>綁定後，LINE 完成的覺察會同步給今心教練參考。</p>
+          </div>
+          <ol className={styles.bindingSteps} aria-label="LINE Bot 綁定步驟">
+            <li>1. 打開 LINE，對今心輸入「綁定」</li>
+            <li>2. 複製 LINE 回覆的 6 位碼</li>
+            <li>3. 貼到下方欄位，按「貼上後綁定」</li>
+          </ol>
+          <div className={styles.bindingForm}>
+            <label className={styles.bindingLabel}>
+              <span className={styles.visuallyHidden}>LINE 綁定碼</span>
+              <input
+                ref={bindingInputRef}
+                aria-label="LINE 綁定碼"
+                value={bindingCode}
+                onChange={(event) => setBindingCode(event.target.value.toUpperCase())}
+                maxLength={6}
+                className={styles.bindingInput}
+                placeholder="輸入 6 位碼"
+                data-testid="line-binding-input"
+              />
+            </label>
+            <button
+              type="button"
+              className={styles.bindingButton}
+              onClick={handleClaimBinding}
+              data-testid="line-binding-submit"
+            >
+              貼上後綁定
+            </button>
+          </div>
+          {bindingMessage && (
+            <p className={styles.bindingMessage} data-testid="line-binding-message">
+              {bindingMessage}
+            </p>
+          )}
+        </section>
+
         {showWelcome && (
           <section className={styles.stitchOpening} aria-label="AI 教練引導">
             <div className={styles.coachAvatar} aria-hidden="true">
@@ -279,40 +345,6 @@ export default function CoachPage() {
             </div>
           </section>
         )}
-
-        <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
-          <div>
-            <p className={styles.bindingTitle}>LINE Bot 同步</p>
-            <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
-          </div>
-          <div className={styles.bindingForm}>
-            <label className={styles.bindingLabel}>
-              <span className={styles.visuallyHidden}>LINE 綁定碼</span>
-              <input
-                aria-label="LINE 綁定碼"
-                value={bindingCode}
-                onChange={(event) => setBindingCode(event.target.value.toUpperCase())}
-                maxLength={6}
-                className={styles.bindingInput}
-                placeholder="ABC123"
-                data-testid="line-binding-input"
-              />
-            </label>
-            <button
-              type="button"
-              className={styles.bindingButton}
-              onClick={handleClaimBinding}
-              data-testid="line-binding-submit"
-            >
-              綁定
-            </button>
-          </div>
-          {bindingMessage && (
-            <p className={styles.bindingMessage} data-testid="line-binding-message">
-              {bindingMessage}
-            </p>
-          )}
-        </section>
 
         {visibleMessages.map((m) => (
           <ChatBubble key={m.id} message={m} />

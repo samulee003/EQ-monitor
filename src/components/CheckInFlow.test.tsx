@@ -206,11 +206,13 @@ describe('CheckInFlow', () => {
 
     it('應該從首頁 LINE Bot 說明前往教練綁定', () => {
         window.location.hash = '';
+        sessionStorage.clear();
         render(<CheckInFlow />);
 
         fireEvent.click(screen.getByRole('button', { name: '前往教練綁定' }));
 
         expect(window.location.hash).toBe('#coach');
+        expect(sessionStorage.getItem('imxin_focus_line_binding')).toBe('1');
     });
 
     it('應該進入快速記錄模式', () => {
