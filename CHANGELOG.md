@@ -4,6 +4,48 @@
 
 ---
 
+## [4.2.2] - 2026-05-13 — Stitch UI 發佈候選 + 封閉內測整理
+
+### PM 狀態
+
+- **發佈判斷**：可合併後做 1-3 人封閉內測；不建議公開宣傳或大量開放。
+- **發佈候選**：PR #20 `codex/stitch-ui-release-clean-20260513`，乾淨接在 `origin/main` 後，只包含 UI/Coach/SOS 相關變更。
+
+### 已完成
+
+- **Stitch / Luminous Morandi 視覺整合**
+  - 套用新視覺語言到 Coach、打卡、歷史時間軸、成長洞察、成就頁與全域導覽。
+  - Coach 採 Stitch 聊天畫布、快速回覆、LINE 綁定卡、固定輸入欄與底部導覽。
+  - 手機底部導覽與主要卡片已做瀏覽器 smoke，避免選中狀態與輸入列在小螢幕失焦。
+- **Coach 安全與信任修正**
+  - 移除首屏「讀到睡眠資料」的暗示，避免未授權資料來源造成隱私信任風險。
+  - Coach SOS 按鈕改為明確顯示 `SOS`。
+  - Meta-Moment 覆蓋層補回安心專線 `1925` 與生命線 `1909`。
+- **發佈衛生**
+  - 已排除 schedule commit、`memory.md` 與 Stitch 原始匯出素材。
+  - 原本混有 `feat(schedule)` 的本地分支不作為今晚發佈來源；今晚只使用乾淨分支 / PR #20。
+
+### 驗證
+
+- 乾淨 release worktree：
+  - `git diff --check` ✅
+  - `./node_modules/.bin/tsc --noEmit` ✅
+  - `npm run test:run -- src/pages/CoachPage.test.tsx src/components/coach/ChatInput.test.tsx` ✅ 20 tests / 2 files
+  - `npm run build` ✅
+- 原工作區補驗：
+  - `npm run test:run` ✅ 338 tests / 32 files
+  - `npm run test:e2e` ✅ 4 Playwright tests
+  - `cd server && npm run test:run` ✅ 133 tests / 10 files
+  - `cd server && npm run build` ✅
+
+### 剩餘風險
+
+- 真 LINE 帳號完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
+- Production PWA 目前仍需合併 PR #20 並重新部署；部署後要確認線上 asset hash 已更新。
+- 認證 / LocalStorage → InsForge 完整遷移與主動推送仍不可作為本次公開能力宣傳。
+
+---
+
 ## [4.2.1] - 2026-05-13 — Agentic Coach 內測收尾 + LINE/PWA 生產鏈路驗證
 
 ### PM 狀態
