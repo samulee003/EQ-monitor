@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- 測試需要覆寫 AIService 私有設定並檢查 fetch mock 呼叫。 */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { aiService, type AIInsight } from './AIService';
 

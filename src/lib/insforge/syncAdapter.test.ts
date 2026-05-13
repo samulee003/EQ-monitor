@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- 測試離線同步私有快取與 mock adapter 需要觸碰內部欄位。 */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { InsForgeSyncAdapter, syncAdapter } from './_deprecated/syncAdapter';

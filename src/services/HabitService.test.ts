@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- 測試使用 Vitest mock 呼叫紀錄檢查 storageService。 */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { habitService } from './HabitService';
 import { storageService } from '../adapters/storage';
