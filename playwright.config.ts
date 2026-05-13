@@ -9,6 +9,8 @@ import { defineConfig, devices } from '@playwright/test';
  * - 報告：list + html（artifact 上傳於 CI workflow）
  */
 const isCI = !!process.env.CI;
+const devPort = process.env.PLAYWRIGHT_PORT || '4173';
+const devUrl = `http://127.0.0.1:${devPort}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -24,7 +26,7 @@ export default defineConfig({
     ? [['list'], ['html', { open: 'never' }]]
     : [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: devUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -36,9 +38,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !isCI,
+    command: `npm run dev -- --host 127.0.0.1 --port ${devPort}`,
+    url: devUrl,
+    reuseExistingServer: false,
     timeout: 120_000,
     stdout: 'pipe',
     stderr: 'pipe',
