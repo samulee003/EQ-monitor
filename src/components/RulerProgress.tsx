@@ -66,7 +66,7 @@ const RulerProgress: React.FC<RulerProgressProps> = ({ currentStep, isFullFlow, 
     };
 
     return (
-        <div className="ruler-progress">
+        <div className="ruler-progress" data-testid="ruler-progress" data-current-step={currentStep}>
             <div className="progress-track">
                 <div className="progress-track-bg" />
                 <div
