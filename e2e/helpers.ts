@@ -22,6 +22,7 @@ export async function bypassSplashViaSession(page: Page): Promise<void> {
   await page.addInitScript(() => {
     try {
       sessionStorage.setItem('splashPlayed', '1');
+      localStorage.setItem('imxin_onboarding_completed', 'true');
     } catch {
       /* ignore */
     }
