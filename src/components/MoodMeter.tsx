@@ -74,6 +74,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
             aria-pressed={selectedQs.includes(q.id)}
             aria-label={`${q.label.replace(/\s*\/\s*/g, '')} - ${q.id === 'red' ? '紅色' : q.id === 'yellow' ? '黃色' : q.id === 'blue' ? '藍色' : '綠色'}象限`}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleQuadrant(q.id)}
+            data-testid={`mood-quadrant-${q.id}`}
           >
             <div className="sphere-orbital">
               <div className="sphere">
@@ -93,6 +94,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
         className="morandi-main-btn confirm-btn"
         disabled={selectedQs.length === 0}
         onClick={() => onSelectQuadrants(selectedQs)}
+        data-testid="mood-confirm"
       >
         {t('確認選擇')}
       </button>

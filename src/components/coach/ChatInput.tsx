@@ -32,6 +32,7 @@ export function ChatInput({ onSend, onSOS, disabled }: Props) {
         aria-label="SOS 緊急協助"
         className={styles.sosButton}
         title="SOS 緊急協助"
+        data-testid="coach-sos-button"
       >
         🆘
       </button>
