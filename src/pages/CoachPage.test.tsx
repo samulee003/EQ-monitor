@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
 import { saveChatHistory } from '../lib/adk/storage';
@@ -48,6 +48,24 @@ describe('CoachPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '好的，一起試試' }));
     expect(screen.getByText('跟著教練一起呼吸')).toBeInTheDocument();
+  });
+
+  it('底部導覽應該使用繁體中文標籤', () => {
+    render(<CoachPage />);
+
+    const nav = screen.getByRole('navigation', { name: 'Coach 頁面導覽' });
+    expect(within(nav).getByRole('button', { name: /安定室/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /紀錄/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /教練/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /洞察/ })).toBeInTheDocument();
+    expect(screen.queryByText('Sanctuary')).not.toBeInTheDocument();
+    expect(screen.queryByText('Insights')).not.toBeInTheDocument();
+  });
+
+  it('不應該顯示沒有功能的個人設定按鈕', () => {
+    render(<CoachPage />);
+
+    expect(screen.queryByRole('button', { name: '個人設定' })).not.toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {

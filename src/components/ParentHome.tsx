@@ -187,6 +187,7 @@ const ParentHome: React.FC = () => {
     if (mode === 'quick') {
         return (
             <QuickCheckIn 
+                variant="parent"
                 onComplete={handleQuickComplete}
                 onBack={() => setMode('home')}
             />

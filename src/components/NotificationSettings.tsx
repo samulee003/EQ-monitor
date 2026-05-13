@@ -54,7 +54,7 @@ const NotificationSettingsPanel: React.FC<NotificationSettingsProps> = ({ onClos
         notificationService.setReminderTime(newSettings.hour, newSettings.minute);
     };
 
-const handleTest = () => {
+    const handleTest = () => {
         notificationService.sendTestNotification();
     };
 
@@ -215,14 +215,23 @@ const handleTest = () => {
                     }
 
                     .notification-settings-panel {
-                        background: var(--glass-bg);
-                        backdrop-filter: var(--glass-blur);
-                        border: 1px solid var(--glass-border);
+                        background: rgba(32, 31, 29, 0.94);
+                        color: #f5f3ef;
+                        backdrop-filter: blur(24px);
+                        -webkit-backdrop-filter: blur(24px);
+                        border: 1px solid rgba(255, 255, 255, 0.12);
                         border-radius: 20px;
                         width: 90%;
                         max-width: 400px;
                         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
                         animation: slideUp 0.3s ease;
+                    }
+
+                    :root[data-theme="light"] .notification-settings-panel {
+                        background: rgba(255, 252, 247, 0.96);
+                        color: #2d2d2d;
+                        border-color: rgba(0, 0, 0, 0.14);
+                        box-shadow: 0 22px 70px rgba(58, 48, 38, 0.2);
                     }
 
                     @keyframes slideUp {
@@ -255,7 +264,7 @@ const handleTest = () => {
                         border: none;
                         font-size: 1.2rem;
                         cursor: pointer;
-                        color: var(--text-muted);
+                        color: var(--text-secondary);
                         padding: var(--s-2);
                         transition: color 0.2s;
                     }
@@ -311,7 +320,7 @@ const handleTest = () => {
 
                     .setting-description {
                         font-size: 0.85rem;
-                        color: var(--text-muted);
+                        color: var(--text-secondary);
                     }
 
                     .toggle-switch {
@@ -380,7 +389,7 @@ const handleTest = () => {
                     .time-separator {
                         font-size: 1.2rem;
                         font-weight: bold;
-                        color: var(--text-muted);
+                        color: var(--text-secondary);
                     }
 
                     .test-btn {

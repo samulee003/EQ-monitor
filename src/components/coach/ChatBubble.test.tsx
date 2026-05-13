@@ -54,18 +54,20 @@ describe('ChatBubble', () => {
     expect(screen.getByText('剛剛')).toBeInTheDocument();
   });
 
-  it('應該顯示技能調用資訊', () => {
+  it('不應該把內部技能與工具名稱顯示給使用者', () => {
     render(
       <ChatBubble
         message={{
           id: '1',
           role: 'model',
-          content: '測試',
+          content: '已為您執行 `save_ruler_log`，我會陪你把這段感受整理下來。',
           timestamp: new Date().toISOString(),
           metadata: { skillInvoked: 'MetaMoment' },
         }}
       />
     );
-    expect(screen.getByText('🛟 MetaMoment')).toBeInTheDocument();
+    expect(screen.queryByText(/MetaMoment/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/save_ruler_log/)).not.toBeInTheDocument();
+    expect(screen.getByText(/我會陪你把這段感受整理下來/)).toBeInTheDocument();
   });
 });

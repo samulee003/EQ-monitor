@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CheckInFlow from './CheckInFlow';
 
 // Mock LanguageContext
@@ -8,7 +8,15 @@ vi.mock('../services/LanguageContext', () => ({
 }));
 
 // Mock settings store
+const { mockCreateLog } = vi.hoisted(() => ({
+    mockCreateLog: vi.fn(),
+}));
 vi.mock('../adapters', () => ({
+    dataAdapter: {
+        logs: {
+            create: mockCreateLog,
+        },
+    },
     settingsStore: {
         getUserRole: vi.fn(() => 'user'),
     },
@@ -136,9 +144,22 @@ vi.mock('./QuickStats', () => ({
 }));
 
 vi.mock('./QuickCheckIn', () => ({
-    default: ({ onComplete, onCancel }: { onComplete: () => void; onCancel: () => void }) => (
+    default: ({ onComplete, onCancel }: { onComplete: (data: unknown) => void; onCancel: () => void }) => (
         <div data-testid="quick-check-in">
-            <button onClick={onComplete}>快速完成</button>
+            <button onClick={() => onComplete({
+                emotion: {
+                    id: 'anxious',
+                    name: '焦慮的',
+                    quadrant: 'red',
+                    energy: 2,
+                    pleasantness: 1,
+                    description: '擔心接下來的狀況',
+                },
+                intensity: 6,
+                scenarioTag: '工作',
+                note: '今天事情很多，有點緊繃。',
+                timestamp: '2026-05-13T13:00:00.000Z',
+            })}>快速完成</button>
             <button onClick={onCancel}>取消</button>
         </div>
     ),
@@ -160,6 +181,17 @@ describe('CheckInFlow', () => {
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
+        mockCreateLog.mockResolvedValue({
+            id: 'quick-log-1',
+            emotions: [],
+            intensity: 6,
+            bodyScan: null,
+            understanding: null,
+            expressing: null,
+            regulating: null,
+            postMood: '',
+            timestamp: '2026-05-13T13:00:00.000Z',
+        });
     });
 
     it('應該在初始步驟渲染 MoodMeter 與快捷入口', () => {
@@ -177,13 +209,45 @@ describe('CheckInFlow', () => {
         expect(screen.getByTestId('quick-check-in')).toBeInTheDocument();
     });
 
-    it('應該從快速記錄返回並重置流程', () => {
+    it('應該從快速記錄返回並重置流程', async () => {
         render(<CheckInFlow />);
 
         fireEvent.click(screen.getByText('快速記錄'));
         fireEvent.click(screen.getByText('快速完成'));
 
-        expect(mockResetFlow).toHaveBeenCalled();
+        await waitFor(() => expect(mockResetFlow).toHaveBeenCalled());
+    });
+
+    it('快速記錄完成後應該保存到情緒紀錄', async () => {
+        render(<CheckInFlow />);
+
+        fireEvent.click(screen.getByText('快速記錄'));
+        fireEvent.click(screen.getByText('快速完成'));
+
+        expect(mockCreateLog).toHaveBeenCalledWith(expect.objectContaining({
+            emotions: [expect.objectContaining({
+                id: 'anxious',
+                name: '焦慮的',
+                quadrant: 'red',
+            })],
+            intensity: 6,
+            bodyScan: null,
+            understanding: expect.objectContaining({
+                trigger: '工作',
+                what: '工作',
+                who: '',
+                where: '',
+                need: null,
+            }),
+            expressing: expect.objectContaining({
+                expression: '今天事情很多，有點緊繃。',
+                mode: 'quick',
+            }),
+            regulating: null,
+            postMood: '',
+            timestamp: '2026-05-13T13:00:00.000Z',
+            isFullFlow: false,
+        }));
     });
 
     it('應該處理 MoodMeter 完成並呼叫 handleMoodComplete', () => {

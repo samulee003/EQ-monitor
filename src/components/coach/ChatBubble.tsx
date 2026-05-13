@@ -13,6 +13,14 @@ function formatCoachTimestamp(iso: string): string {
   return formatRelativeTime(target);
 }
 
+function sanitizeCoachContent(content: string): string {
+  return content
+    .replace(/`?(?:save_ruler_log|get_ruler_history|analyze_emotion_trend|trigger_action)`?/g, '這段覺察紀錄')
+    .replace(/已為您執行\s*/g, '')
+    .replace(/已為你執行\s*/g, '')
+    .trim();
+}
+
 export function ChatBubble({ message }: Props) {
   const isUser = message.role === 'user';
   return (
@@ -31,16 +39,10 @@ export function ChatBubble({ message }: Props) {
         <div
           className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleModel}`}
         >
-          {message.content}
+          {isUser ? message.content : sanitizeCoachContent(message.content)}
         </div>
 
-        {/* Metadata */}
         <div className={styles.metadata}>
-          {message.metadata?.skillInvoked && (
-            <span className={styles.skillBadge}>
-              🛟 {message.metadata.skillInvoked}
-            </span>
-          )}
           <span className={styles.timestamp}>
             {formatCoachTimestamp(message.timestamp)}
           </span>

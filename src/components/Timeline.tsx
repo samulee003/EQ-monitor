@@ -54,6 +54,7 @@ const Timeline: React.FC = () => {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [importResult, setImportResult] = useState<ImportResult | null>(null);
     const [showExport, setShowExport] = useState(false);
+    const [activeQuadrant, setActiveQuadrant] = useState<QuadrantKey | 'all'>('all');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const listTopRef = useRef<HTMLDivElement>(null);
 
@@ -207,34 +208,45 @@ const Timeline: React.FC = () => {
         }, { red: 0, yellow: 0, blue: 0, green: 0, gray: 0 });
 
         return [
-            { key: 'all', label: t('全部'), count: logs.length, active: true },
-            { key: 'red', label: t('高能低悅'), count: counts.red, active: false },
-            { key: 'yellow', label: t('高能高悅'), count: counts.yellow, active: false },
-            { key: 'blue', label: t('低能低悅'), count: counts.blue, active: false },
-            { key: 'green', label: t('低能高悅'), count: counts.green, active: false }
+            { key: 'all' as const, label: t('全部'), count: logs.length, active: activeQuadrant === 'all' },
+            { key: 'red' as const, label: t('高能低悅'), count: counts.red, active: activeQuadrant === 'red' },
+            { key: 'yellow' as const, label: t('高能高悅'), count: counts.yellow, active: activeQuadrant === 'yellow' },
+            { key: 'blue' as const, label: t('低能低悅'), count: counts.blue, active: activeQuadrant === 'blue' },
+            { key: 'green' as const, label: t('低能高悅'), count: counts.green, active: activeQuadrant === 'green' }
         ];
-    }, [logs, t]);
+    }, [activeQuadrant, logs, t]);
 
-    const totalPages = Math.ceil(logs.length / ITEMS_PER_PAGE);
+    const visibleLogs = useMemo(() => {
+        if (activeQuadrant === 'all') return logs;
+        return logs.filter((log) => getQuadrantKey(log) === activeQuadrant);
+    }, [activeQuadrant, logs]);
+
+    const totalPages = Math.ceil(visibleLogs.length / ITEMS_PER_PAGE);
     const paginatedLogs = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return logs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [logs, currentPage]);
+        return visibleLogs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [visibleLogs, currentPage]);
 
     const narrativeStats = useMemo(() => {
         const currentPageStart = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-        const currentPageEnd = Math.min(currentPage * ITEMS_PER_PAGE, logs.length);
+        const currentPageEnd = Math.min(currentPage * ITEMS_PER_PAGE, visibleLogs.length);
         const expressiveCount = logs.filter((log) => Boolean(log.expressing?.expression?.trim())).length;
         return {
             total: logs.length,
-            pageRange: logs.length > 0 ? `${currentPageStart}-${currentPageEnd}` : '0',
+            pageRange: visibleLogs.length > 0 ? `${currentPageStart}-${currentPageEnd}` : '0',
             expressiveCount
         };
-    }, [currentPage, logs]);
+    }, [currentPage, logs, visibleLogs]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        listTopRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    };
+
+    const handleQuadrantFilter = (key: QuadrantKey | 'all') => {
+        setActiveQuadrant(key);
+        setCurrentPage(1);
+        listTopRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     };
 
     if (isLoading) {
@@ -295,6 +307,9 @@ const Timeline: React.FC = () => {
                     <button className="timeline-import-prompt" onClick={handleImportClick}>
                         <span className="timeline-import-icon">📥</span>
                         <span>{t('匯入備份檔案')}</span>
+                    </button>
+                    <button className="timeline-start-prompt" onClick={() => { window.location.hash = 'home'; }}>
+                        <span>{t('開始第一筆紀錄')}</span>
                     </button>
                 </section>
 
@@ -410,7 +425,7 @@ const Timeline: React.FC = () => {
                     .timeline-import-prompt {
                         position: relative;
                         z-index: 1;
-                        margin: 0 auto;
+                        margin: 0.5rem auto 0;
                         display: inline-flex;
                         align-items: center;
                         gap: 0.65rem;
@@ -427,6 +442,27 @@ const Timeline: React.FC = () => {
                         transform: translateY(-1px);
                         background: rgba(255,255,255,0.44);
                         border-color: rgba(170, 176, 155, 1);
+                    }
+                    .timeline-start-prompt {
+                        position: relative;
+                        z-index: 1;
+                        margin: 1rem auto 0;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 52px;
+                        padding: 0.9rem 1.5rem;
+                        border: 0;
+                        border-radius: 999px;
+                        background: var(--text-primary);
+                        color: var(--bg-color);
+                        cursor: pointer;
+                        font-weight: 700;
+                        transition: transform 0.25s ease, opacity 0.25s ease;
+                    }
+                    .timeline-start-prompt:hover {
+                        transform: translateY(-1px);
+                        opacity: 0.9;
                     }
                     .timeline-import-icon { font-size: 1rem; }
                     .import-toast {
@@ -500,6 +536,7 @@ const Timeline: React.FC = () => {
                             type="button"
                             className={`timeline-chip ${chip.active ? 'active' : ''}`}
                             aria-pressed={chip.active}
+                            onClick={() => handleQuadrantFilter(chip.key)}
                         >
                             {palette && <span className="timeline-chip-dot" style={{ background: palette.dot }}></span>}
                             <span>{chip.label}</span>
@@ -522,6 +559,11 @@ const Timeline: React.FC = () => {
 
             <div ref={listTopRef} className="timeline-stream">
                 <div className="timeline-stream-line"></div>
+                {paginatedLogs.length === 0 && (
+                    <div className="timeline-filter-empty">
+                        {t('目前沒有符合這個象限的紀錄。')}
+                    </div>
+                )}
                 {paginatedLogs.map((log, index) => {
                     const quadrantKey = getQuadrantKey(log);
                     const palette = quadrantPalette[quadrantKey];
@@ -816,6 +858,16 @@ const Timeline: React.FC = () => {
                     flex-direction: column;
                     gap: 1rem;
                     padding-top: 0.35rem;
+                }
+                .timeline-filter-empty {
+                    padding: 1rem 1.2rem;
+                    border-radius: 20px;
+                    background: rgba(255,255,255,0.24);
+                    border: 1px solid var(--glass-border);
+                    color: var(--text-secondary);
+                    text-align: center;
+                    position: relative;
+                    z-index: 1;
                 }
                 .timeline-stream-line {
                     position: absolute;

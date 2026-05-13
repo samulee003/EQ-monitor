@@ -1,16 +1,28 @@
 import { logger } from '../utils/logger';
 import React, { useState } from 'react';
 import './QuickCheckIn.css';
-import { type ParentingEmotion, type Quadrant, quickEmotions, parentScenarioTags } from '../data/parentingEmotionData';
+import { emotions, type Quadrant } from '../data/emotionData';
+import { quickEmotions as parentQuickEmotions, parentScenarioTags } from '../data/parentingEmotionData';
 
 interface QuickCheckInProps {
+    variant?: 'general' | 'parent';
     onComplete?: (data: QuickCheckInData) => void;
     onBack?: () => void;
     onCancel?: () => void;
 }
 
+interface QuickEmotion {
+    id: string;
+    name: string;
+    quadrant: Quadrant;
+    energy?: number;
+    pleasantness?: number;
+    description?: string;
+    parentScenario?: string;
+}
+
 export interface QuickCheckInData {
-    emotion: ParentingEmotion;
+    emotion: QuickEmotion;
     intensity: number;
     scenarioTag?: string;
     note?: string;
@@ -26,10 +38,38 @@ const quadrantConfig: Record<Quadrant, { emoji: string; label: string; color: st
     green: { emoji: '○', label: '低能量', color: '#AAB09B', desc: '平靜' }
 };
 
-const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
+const generalQuickEmotionIds: Record<Quadrant, string[]> = {
+    red: ['anxious', 'stressed', 'angry'],
+    yellow: ['happy', 'hopeful', 'proud'],
+    blue: ['tired_low', 'sad', 'lonely'],
+    green: ['at_ease', 'calm', 'relaxed'],
+};
+
+const generalScenarioTags = [
+    '工作',
+    '家庭',
+    '關係',
+    '健康',
+    '學習',
+    '金錢',
+    '通勤',
+    '睡眠',
+    '生活瑣事',
+    '其他',
+];
+
+const generalQuickEmotions = (Object.keys(generalQuickEmotionIds) as Quadrant[]).reduce<Record<Quadrant, QuickEmotion[]>>((acc, quadrant) => {
+    acc[quadrant] = generalQuickEmotionIds[quadrant]
+        .map((id) => emotions.find((emotion) => emotion.id === id))
+        .filter((emotion) => emotion !== undefined)
+        .map((emotion) => ({ ...emotion }));
+    return acc;
+}, { red: [], yellow: [], blue: [], green: [] });
+
+const QuickCheckIn: React.FC<QuickCheckInProps> = ({ variant = 'general', onComplete, onBack }) => {
     const [step, setStep] = useState<QuickStep>('quadrant');
     const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null);
-    const [selectedEmotion, setSelectedEmotion] = useState<ParentingEmotion | null>(null);
+    const [selectedEmotion, setSelectedEmotion] = useState<QuickEmotion | null>(null);
     const [intensity, setIntensity] = useState<number>(5);
     const [selectedTag, setSelectedTag] = useState<string>('');
     const [note, setNote] = useState<string>('');
@@ -41,7 +81,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
         setStep('emotion');
     };
 
-    const handleEmotionSelect = (emotion: ParentingEmotion) => {
+    const handleEmotionSelect = (emotion: QuickEmotion) => {
         setSelectedEmotion(emotion);
         setStep('intensity');
     };
@@ -82,6 +122,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
     const generateAIFeedback = async (data: QuickCheckInData): Promise<string> => {
         // 根據情緒和強度生成個性化回饋
         const { emotion, intensity, scenarioTag } = data;
+        const isParentMode = variant === 'parent';
         
         let feedback = '';
         
@@ -89,7 +130,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
         switch (emotion.quadrant) {
             case 'red':
                 feedback = `你記錄的是「${emotion.name}」（強度 ${intensity}/10）。`;
-                feedback += `\\n\\n${emotion.description}。`;
+                feedback += `\\n\\n${emotion.description || '這是一個提醒你先照顧自己的訊號'}。`;
                 if (intensity >= 7) {
                     feedback += '\\n\\n這個強度很高，記得先照顧好自己的狀態。試試 SOS 緊急救援的呼吸練習？';
                 } else {
@@ -99,10 +140,10 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                 
             case 'blue':
                 feedback = `你記錄的是「${emotion.name}」（強度 ${intensity}/10）。`;
-                feedback += `\\n\\n${emotion.description}。`;
-                if (emotion.id === 'blue_guilty') {
+                feedback += `\\n\\n${emotion.description || '這份低落是真實的，也值得被看見'}。`;
+                if (emotion.id === 'blue_guilty' || emotion.id === 'parental_guilt') {
                     feedback += '\\n\\n愧疚代表你在乎，但修復比完美更重要。你已經在學習和改變了。';
-                } else if (emotion.id === 'blue_burnout') {
+                } else if (emotion.id === 'blue_burnout' || emotion.id === 'parental_burnout') {
                     feedback += '\\n\\n倦怠是身體在求救。哪怕每天 5 分鐘給自己，都是重要的。';
                 } else {
                     feedback += '\\n\\n這種低落的感受很真實，不需要急著「振作」。允許自己現在就是這樣。';
@@ -111,20 +152,22 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                 
             case 'yellow':
                 feedback = `你記錄的是「${emotion.name}」（強度 ${intensity}/10）。`;
-                feedback += `\\n\\n${emotion.description}。`;
-                feedback += '\\n\\n記得這個美好的時刻，它是你育兒路上的養分。';
+                feedback += `\\n\\n${emotion.description || '這份明亮可以被好好收下'}。`;
+                feedback += isParentMode
+                    ? '\\n\\n記得這個美好的時刻，它是你育兒路上的養分。'
+                    : '\\n\\n記得這個美好的時刻，它也是你日常裡的養分。';
                 break;
                 
             case 'green':
                 feedback = `你記錄的是「${emotion.name}」（強度 ${intensity}/10）。`;
-                feedback += `\\n\\n${emotion.description}。`;
+                feedback += `\\n\\n${emotion.description || '這份穩定感可以成為今天的一個小錨點'}。`;
                 feedback += '\\n\\n享受這份平靜，這是你應得的時刻。';
                 break;
         }
         
         // 如果有情境標籤，加入具體建議
         if (scenarioTag) {
-            const scenarioAdvice: Record<string, string> = {
+            const parentAdvice: Record<string, string> = {
                 '睡覺': '睡眠問題是育兒最大的挑戰之一。記得：這個階段會過去的。',
                 '吃飯': '吃飯的權力戰很消耗人。孩子不會餓壞自己，放鬆一點。',
                 '哭鬧': '哭鬧是孩子表達需求的方式（雖然很吵）。深呼吸，這會過去的。',
@@ -136,6 +179,19 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                 '生病': '孩子生病時父母的身心俱疲。記得你也需要休息。',
                 '學校狀況': '學校的事情會引發很多焦慮。必要時尋求老師的合作。'
             };
+            const generalAdvice: Record<string, string> = {
+                '工作': '工作壓力會佔據很多注意力。先把今天最小的一步寫下來就好。',
+                '家庭': '家庭裡的情緒常常很近也很重，先允許自己慢一點回應。',
+                '關係': '關係裡的感受需要被聽見，也需要安全的表達方式。',
+                '健康': '身體狀態會影響情緒，先照顧睡眠、飲水或一點點伸展。',
+                '學習': '學習遇到卡點不代表你不夠好，只代表需要換一個節奏。',
+                '金錢': '金錢壓力很容易讓人緊繃，先把擔心拆成可處理的小項目。',
+                '通勤': '通勤中的煩躁很常見，可以用呼吸把注意力帶回身體。',
+                '睡眠': '睡眠不足會放大情緒，今晚先把休息放在優先順序前面。',
+                '生活瑣事': '瑣事累積起來也會很重，完成一件小事就已經值得肯定。',
+                '其他': '先記下來就很好，之後回看時你可能會看見更清楚的線索。',
+            };
+            const scenarioAdvice = isParentMode ? parentAdvice : generalAdvice;
             
             if (scenarioAdvice[scenarioTag]) {
                 feedback += `\\n\\n💡 ${scenarioAdvice[scenarioTag]}`;
@@ -189,7 +245,8 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
 
     const renderEmotionStep = () => {
         if (!selectedQuadrant) return null;
-        const emotions = quickEmotions[selectedQuadrant];
+        const emotionsForMode = variant === 'parent' ? parentQuickEmotions : generalQuickEmotions;
+        const emotions = emotionsForMode[selectedQuadrant];
 
         return (
             <div className="quick-step">
@@ -206,7 +263,9 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                             onClick={() => handleEmotionSelect(emotion)}
                         >
                             <span className="emotion-name">{emotion.name}</span>
-                            <span className="emotion-scenario">{emotion.parentScenario}</span>
+                            {emotion.parentScenario && (
+                                <span className="emotion-scenario">{emotion.parentScenario}</span>
+                            )}
                         </button>
                     ))}
                 </div>
@@ -260,7 +319,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
             </div>
 
             <div className="scenario-tags">
-                {parentScenarioTags.map(tag => (
+                {(variant === 'parent' ? parentScenarioTags : generalScenarioTags).map(tag => (
                     <button
                         key={tag}
                         className={`scenario-tag ${selectedTag === tag ? 'selected' : ''}`}
@@ -276,7 +335,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                 <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="例如：孩子不肯睡覺，我已經很累了..."
+                    placeholder={variant === 'parent' ? '例如：孩子不肯睡覺，我已經很累了...' : '例如：今天事情很多，我有點緊繃...'}
                     rows={3}
                     className="note-input"
                 />

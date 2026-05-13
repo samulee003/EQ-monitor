@@ -11,12 +11,14 @@ import SummaryStep from './steps/SummaryStep';
 import NeuroCheckStep from './steps/NeuroCheckStep';
 import CenteringStep from './steps/CenteringStep';
 import QuickStats from './QuickStats';
-import QuickCheckIn from './QuickCheckIn';
+import QuickCheckIn, { type QuickCheckInData } from './QuickCheckIn';
 import ParentScenarios from './ParentScenarios';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 import { type Emotion } from '../data/emotionData';
-import { settingsStore } from '../adapters';
+import { dataAdapter, settingsStore } from '../adapters';
+import { logger } from '../utils/logger';
+import { type RulerLogEntry } from '../types/RulerTypes';
 
 // 高風險情緒 ID：選擇時提供安全資源
 const HIGH_RISK_EMOTION_IDS = new Set([
@@ -71,12 +73,52 @@ const CheckInFlow: React.FC = () => {
         }
     };
 
+    const handleQuickComplete = async (data: QuickCheckInData) => {
+        const quickLog: Omit<RulerLogEntry, 'id'> = {
+            emotions: [{
+                id: data.emotion.id,
+                name: data.emotion.name,
+                quadrant: data.emotion.quadrant,
+                energy: data.emotion.energy ?? 3,
+                pleasantness: data.emotion.pleasantness ?? 3,
+            }],
+            intensity: data.intensity,
+            bodyScan: null,
+            understanding: {
+                trigger: data.scenarioTag || '',
+                what: data.scenarioTag || '',
+                who: '',
+                where: '',
+                need: null,
+                message: '',
+            },
+            expressing: data.note ? {
+                expression: data.note,
+                prompt: '快速紀錄',
+                mode: 'quick',
+            } : null,
+            regulating: null,
+            postMood: '',
+            timestamp: data.timestamp,
+            isFullFlow: false,
+        };
+
+        try {
+            await dataAdapter.logs.create(quickLog);
+        } catch (error) {
+            logger.error('[CheckInFlow] Quick check-in save failed', { error: String(error) });
+        } finally {
+            setQuickMode(null);
+            await resetFlow();
+        }
+    };
+
     return (
         <div className="check-in-flow fade-in">
             {/* Quick mode views */}
             {quickMode === 'quick' && (
                 <QuickCheckIn
-                    onComplete={() => { setQuickMode(null); resetFlow(); }}
+                    onComplete={handleQuickComplete}
                     onCancel={() => setQuickMode(null)}
                 />
             )}
