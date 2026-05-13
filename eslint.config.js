@@ -66,6 +66,8 @@ export default defineConfig([
         allowExpressions: true,
         allowTypedFunctionExpressions: true,
         allowHigherOrderFunctions: true,
+        allowFunctionsWithoutTypeParameters: true,
+        allowConciseArrowFunctionExpressionsStartingWithVoid: true,
       }],
       '@typescript-eslint/consistent-type-imports': ['error', {
         prefer: 'type-imports',

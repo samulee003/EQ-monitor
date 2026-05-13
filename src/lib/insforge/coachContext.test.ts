@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { extractRecentQuadrants, extractRecentNeeds, buildCoachContextPatch } from './coachContext';
+import { type Quadrant } from '@/data/emotionData';
 import { type RulerLogEntry } from '@/types/RulerTypes';
 
 const makeLog = (quadrant: string, need: string | null, intensity: number): RulerLogEntry => ({
   id: `id_${quadrant}`,
   timestamp: new Date().toISOString(),
-  emotions: [{ id: '1', name: 'test', quadrant: quadrant as any, energy: 0, pleasantness: 0 }],
+  emotions: [{ id: '1', name: 'test', quadrant: quadrant as Quadrant, energy: 0, pleasantness: 0 }],
   intensity,
   bodyScan: null,
   understanding: need ? {

@@ -197,7 +197,7 @@ describe('dateUtils', () => {
             const morning = new Date('2026-01-15T08:00:00');
             vi.setSystemTime(morning);
             
-            const result = getGreeting('unknown-locale' as any);
+            const result = getGreeting('unknown-locale');
             
             expect(result).toBe('早安');
         });
