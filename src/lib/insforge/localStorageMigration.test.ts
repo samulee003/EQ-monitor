@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { extractCoachMetaFromLogs, isMigrationNeeded } from './localStorageMigration';
+import { type Quadrant } from '@/data/emotionData';
 import { type RulerLogEntry } from '@/types/RulerTypes';
 
 const makeLog = (quadrant: string, need: string | null, intensity: number): RulerLogEntry => ({
   id: `id_${Math.random()}`,
   timestamp: new Date().toISOString(),
-  emotions: [{ id: '1', name: 'test', quadrant: quadrant as any, energy: 0, pleasantness: 0 }],
+  emotions: [{ id: '1', name: 'test', quadrant: quadrant as Quadrant, energy: 0, pleasantness: 0 }],
   intensity,
   bodyScan: null,
   understanding: need ? { trigger: '', message: '', what: '', who: '', where: '', need } : null,

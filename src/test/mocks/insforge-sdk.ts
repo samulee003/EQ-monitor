@@ -1,16 +1,29 @@
 import { vi } from 'vitest';
 
-const createQueryBuilder = (): any => {
+type QueryBuilder = {
+  select: ReturnType<typeof vi.fn>;
+  insert: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  upsert: ReturnType<typeof vi.fn>;
+  eq: ReturnType<typeof vi.fn>;
+  maybeSingle: ReturnType<typeof vi.fn>;
+  order: ReturnType<typeof vi.fn>;
+  limit: ReturnType<typeof vi.fn>;
+  single: ReturnType<typeof vi.fn>;
+};
+
+const createQueryBuilder = (): QueryBuilder => {
   return {
-    select: vi.fn(function(this: any) { return this; }),
-    insert: vi.fn(function(this: any) { return this; }),
-    delete: vi.fn(function(this: any) { return this; }),
-    update: vi.fn(function(this: any) { return this; }),
+    select: vi.fn(function(this: QueryBuilder) { return this; }),
+    insert: vi.fn(function(this: QueryBuilder) { return this; }),
+    delete: vi.fn(function(this: QueryBuilder) { return this; }),
+    update: vi.fn(function(this: QueryBuilder) { return this; }),
     upsert: vi.fn().mockResolvedValue({ error: null }),
-    eq: vi.fn(function(this: any) { return this; }),
+    eq: vi.fn(function(this: QueryBuilder) { return this; }),
     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-    order: vi.fn(function(this: any) { return this; }),
-    limit: vi.fn(function(this: any) { return this; }),
+    order: vi.fn(function(this: QueryBuilder) { return this; }),
+    limit: vi.fn(function(this: QueryBuilder) { return this; }),
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
   };
 };

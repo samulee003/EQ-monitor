@@ -101,7 +101,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           // npm 套件分割
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) return 'react-vendor';
             if (id.includes('opencc-js')) return 'i18n';
             return 'vendor';
           }
