@@ -51,6 +51,16 @@ const lineClient = CHANNEL_ACCESS_TOKEN
 const app = express();
 
 // ── 全局中間件（順序：rate limit -> request log -> body parser -> routes -> error handler）
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-line-signature');
+  if (req.method === 'OPTIONS') {
+    res.status(204).send();
+    return;
+  }
+  next();
+});
 app.use(rateLimiter);
 app.use(requestLogger);
 // 注意：全局 JSON 解析器需排除 /webhook，該路徑使用獨立的 rawBody 解析器
@@ -99,6 +109,7 @@ app.get('/metrics', (_req: Request, res: Response) => {
 // 儀表盤 API（供 PWA 調用）
 app.get('/api/dashboard/:lineUserId/summary', asyncHandler(dashboardRoutes.getSummary));
 app.get('/api/dashboard/:lineUserId/weekly-report', asyncHandler(dashboardRoutes.getWeeklyReport));
+app.post('/api/line-binding/claim', asyncHandler(dashboardRoutes.claimLineBinding));
 
 // AI Coach API（ADK Agent）
 app.use('/api/coach', coachRoutes);
@@ -125,22 +136,30 @@ app.use(
 app.post(
   '/webhook',
   asyncHandler(async (req: RequestWithRawBody, res: Response) => {
-    // 立即回應 200（LINE 要求 1 秒內回應）
-    res.status(200).send('OK');
-
-    // 驗證簽名（僅在生產環境）
+    // 驗證簽名（生產環境必須拒絕缺少或無效簽名的請求）
     const signature = req.get('x-line-signature') || '';
-    if (CHANNEL_SECRET && signature && req.rawBody) {
+    const channelSecret = process.env.LINE_CHANNEL_SECRET || CHANNEL_SECRET;
+    if (channelSecret) {
+      if (!signature || !req.rawBody) {
+        logger.warn('Missing LINE signature');
+        res.status(401).send('Invalid signature');
+        return;
+      }
+
       const isValid = validateSignature(
         req.rawBody,
-        CHANNEL_SECRET,
+        channelSecret,
         signature
       );
       if (!isValid) {
         logger.warn('Invalid LINE signature');
+        res.status(401).send('Invalid signature');
         return;
       }
     }
+
+    // LINE 要求快速回應；驗簽成功後先回 200，再處理事件。
+    res.status(200).send('OK');
 
     const events: WebhookEvent[] = req.body.events || [];
 

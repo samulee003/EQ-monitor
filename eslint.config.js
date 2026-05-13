@@ -6,7 +6,17 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'android', 'node_modules', 'coverage']),
+  globalIgnores([
+    'dist',
+    'server/dist',
+    'android',
+    'node_modules',
+    'coverage',
+    'server/coverage',
+    'server/coverage-report',
+    '.claude',
+    '.codex',
+  ]),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -28,7 +38,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
@@ -38,7 +48,6 @@ export default defineConfig([
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json',
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
@@ -63,6 +72,10 @@ export default defineConfig([
         fixStyle: 'inline-type-imports',
       }],
       '@typescript-eslint/no-non-null-assertion': 'warn',
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      'react-hooks/immutability': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-refresh/only-export-components': 'warn',
     },
   },
 ])

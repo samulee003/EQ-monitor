@@ -2,9 +2,13 @@ import type { CoachMessage } from './types';
 
 const CHAT_STORAGE_KEY = 'imxin_coach_chat_v1';
 
-export function loadChatHistory(): CoachMessage[] | null {
+function chatStorageKey(userId?: string | null): string {
+  return userId ? `${CHAT_STORAGE_KEY}_${userId}` : CHAT_STORAGE_KEY;
+}
+
+export function loadChatHistory(userId?: string | null): CoachMessage[] | null {
   try {
-    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    const raw = localStorage.getItem(chatStorageKey(userId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CoachMessage[];
     if (!Array.isArray(parsed)) return null;
@@ -14,14 +18,14 @@ export function loadChatHistory(): CoachMessage[] | null {
   }
 }
 
-export function saveChatHistory(messages: CoachMessage[]): void {
+export function saveChatHistory(messages: CoachMessage[], userId?: string | null): void {
   try {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    localStorage.setItem(chatStorageKey(userId), JSON.stringify(messages));
   } catch {
     // Ignore quota errors
   }
 }
 
-export function clearChatHistory(): void {
-  localStorage.removeItem(CHAT_STORAGE_KEY);
+export function clearChatHistory(userId?: string | null): void {
+  localStorage.removeItem(chatStorageKey(userId));
 }

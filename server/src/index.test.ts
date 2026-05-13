@@ -158,6 +158,40 @@ describe('Express app', () => {
     expect(res.status).toBe(200);
   });
 
+  it('POST /webhook 在生產簽名缺失時拒絕請求', async () => {
+    process.env.LINE_CHANNEL_SECRET = 'test-secret';
+    const res = await request(app).post('/webhook').send({ events: [] });
+    process.env.LINE_CHANNEL_SECRET = '';
+
+    expect(res.status).toBe(401);
+    expect(res.text).toBe('Invalid signature');
+  });
+
+  it('POST /webhook 在簽名無效時拒絕請求且不處理事件', async () => {
+    process.env.LINE_CHANNEL_SECRET = 'test-secret';
+    mockValidateSignature.mockReturnValueOnce(false);
+    const beforeCalls = mockProcessMessage.mock.calls.length;
+
+    const res = await request(app)
+      .post('/webhook')
+      .send({
+        events: [
+          {
+            type: 'message',
+            message: { type: 'text', text: '你好' },
+            source: { userId: 'Ubad' },
+            replyToken: 'bad-token',
+          },
+        ],
+      })
+      .set('x-line-signature', 'bad-signature');
+    process.env.LINE_CHANNEL_SECRET = '';
+
+    expect(res.status).toBe(401);
+    expect(res.text).toBe('Invalid signature');
+    expect(mockProcessMessage.mock.calls.length).toBe(beforeCalls);
+  });
+
   it('不存在的路由返回 404', async () => {
     const res = await request(app).get('/nonexistent-route');
     expect(res.status).toBe(404);

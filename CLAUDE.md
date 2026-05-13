@@ -101,7 +101,7 @@ Express 5 + TypeScript. Entry: `server/src/index.ts`.
 
 **LINE Webhook** → `rulerBot.ts` (RULER state machine, 30-min session context).
 
-**DB adapter** (`server/src/db/index.ts`): switches between `memoryAdapter` (dev/test, no env vars needed) and `supabaseAdapter` (production, requires `SUPABASE_URL` + `SUPABASE_SERVICE_KEY`). The server currently uses Supabase credentials pointing at InsForge's PostgreSQL.
+**DB adapter** (`server/src/db/index.ts`): switches between `memoryAdapter` (dev/test, no env vars needed) and `insforgeAdapter` (production, requires `DATABASE_URL`). Production uses InsForge PostgreSQL.
 
 **InsForge infrastructure** (`server/insforge/`):
 - `schema/` — SQL migrations (run via direct PostgreSQL or `npx @insforge/cli db query`)
@@ -114,6 +114,47 @@ Express 5 + TypeScript. Entry: `server/src/index.ts`.
 2 storage buckets (private): `voice-recordings`, `exports`.
 1 active edge function: `coach` (AI coach REST API using Gemini).
 Auth trigger: `on_auth_user_created` auto-creates `profiles` row.
+
+---
+
+## Zeabur Deployment
+
+### 架構（2026-05-12 整合後）
+
+| 服務 | Zeabur 專案 | 位置 | Domain | Service ID |
+|------|------------|------|--------|------------|
+| eq-monitor (PWA) | `today-mood` | Shared | `today-mood.zeabur.app` | `6958b4f0b8dd347fac234e9f` |
+| imxin-bot-server (LINE Bot) | `imxin` | Tencent Tokyo 專用伺服器 | `imxin-bot.zeabur.app` | `6a032e7f5e7e3bf5e93f155e` |
+
+### Zeabur 專案 ID
+
+| 專案 | ID |
+|------|----|
+| `today-mood` | `6958b4dd85bfb0039750b2f4` |
+| `imxin` (專用伺服器) | `6a032e42dd502f86055b3f22` |
+
+### 專用伺服器
+
+- **名稱**: Tencent Tokyo 2C 2GB
+- **Server ID**: `6a02e30fdd50c05e554d2537`
+- **IP**: `43.167.10.6`
+
+### 重新部署指令
+
+```bash
+# PWA (eq-monitor) — 從專案根目錄
+npx zeabur@latest deploy --project-id 6958b4dd85bfb0039750b2f4 --service-id 6958b4f0b8dd347fac234e9f --json -i=false
+
+# Bot Server — 從 server/ 目錄
+cd server && npx zeabur@latest deploy --project-id 6a032e42dd502f86055b3f22 --service-id 6a032e7f5e7e3bf5e93f155e --json -i=false
+```
+
+### 健康檢查
+
+```bash
+curl https://imxin-bot.zeabur.app/health   # 確認 "adapter":"insforge"
+curl https://today-mood.zeabur.app         # 確認 PWA 正常
+```
 
 ---
 

@@ -30,6 +30,7 @@ dist-ssr
 
 # AI IDE / Tool directories
 .workbuddy/
+.codex/
 .claude/
 .Jules/
 .jules/

@@ -2,9 +2,9 @@ import { memoryAdapter } from './memoryAdapter.js';
 import { createSupabaseAdapter } from './supabaseAdapter.js';
 import { createInsforgeAdapter } from './insforgeAdapter.js';
 import type { RulerData } from '../types.js';
-import type { DbSession, DbUser } from './memoryAdapter.js';
+import type { AgentRulerLog, DbSession, DbUser, LineBindingCode } from './memoryAdapter.js';
 
-export type { DbSession, DbUser };
+export type { AgentRulerLog, DbSession, DbUser, LineBindingCode };
 
 export interface DatabaseAdapter {
   getOrCreateUser(lineUserId: string, displayName?: string): Promise<DbUser>;
@@ -16,6 +16,9 @@ export interface DatabaseAdapter {
   getWeeklyStats(lineUserId: string): Promise<{ totalSessions: number; streakDays: number }>;
   getAllUsers(): Promise<DbUser[]>;
   getAllSessions(): Promise<DbSession[]>;
+  createLineBindingCode?(lineUserId: string): Promise<LineBindingCode>;
+  claimLineBindingCode?(code: string, appUserId: string): Promise<LineBindingCode | null>;
+  getAgentLogs?(appUserId: string): Promise<AgentRulerLog[]>;
 }
 
 const DATABASE_URL = process.env.DATABASE_URL || '';

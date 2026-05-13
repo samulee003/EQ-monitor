@@ -166,9 +166,8 @@ import { RulerLogEntry } from '@/types/RulerTypes';
 ## 環境變量
 
 ```bash
-# .env (可選，用於 AI 功能)
-VITE_ZEABUR_AI_API_URL=https://gateway.zeabur.com/...
-VITE_ZEABUR_AI_API_KEY=your_api_key
+# .env.local（可選，用於覆蓋已部署的 AI 教練端點）
+VITE_COACH_API_URL=https://b88egxiz.functions.insforge.app/coach
 ```
 
 ---

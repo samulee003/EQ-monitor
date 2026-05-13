@@ -4,6 +4,58 @@
 
 ---
 
+## [4.2.1] - 2026-05-13 — Agentic Coach 內測收尾 + LINE/PWA 生產鏈路驗證
+
+### PM 狀態
+
+- **內測判斷**：黃燈偏綠，可進入 1-3 人封閉內測；暫不建議公開宣傳或大量開放。
+- **內測目標**：驗證真實使用者是否能順利完成 LINE 綁定、RULER 情緒紀錄、AI Coach 對話與 Meta-Moment SOS。
+
+### 已完成
+
+- **Agentic Coach 生產鏈路收斂**
+  - `coach`、`weekly-report`、`achievement-checker` 三個 InsForge Edge Functions 已重新部署。
+  - 危機語句會回 `skillInvoked: "MetaMomentSkill"` 並觸發 `action: "open_sos"`。
+  - 明確「請幫我記錄 + 情緒 + 強度」時，Edge Function 會確定寫入 `agent_ruler_logs`，週報與成就可讀到。
+- **LINE Bot / PWA 橋接**
+  - 新增並套用 `008_agentic_coach_bridge.sql`：`line_user_bindings`、`agent_ruler_logs`。
+  - 兩張橋接表已啟用 RLS，採 service role only 存取。
+  - Production PWA 的 LINE 綁定 UI 已能呼叫 production Bot Server `/api/line-binding/claim`。
+- **Bot Server 生產部署**
+  - Bot Server 已部署至 `https://imxin-bot.zeabur.app`，health 顯示 adapter 為 `insforge`。
+  - `/webhook` 已補 LINE 簽名保護：缺少或無效 `x-line-signature` 回 401。
+  - 使用 Zeabur container 內 `LINE_CHANNEL_SECRET` 計算有效簽名，production 空 events webhook 回 200 / `OK`，未輸出密鑰。
+- **PWA 生產部署**
+  - PWA 已部署至 `https://today-mood.zeabur.app`。
+  - Production Coach 頁已確認有 `LINE Bot 同步`、`LINE 綁定碼` 與 Meta-Moment 快捷入口。
+
+### 驗證
+
+- 前端：
+  - `npx tsc --noEmit` ✅
+  - `npm run test:run` ✅ 336 tests / 32 files
+  - `npm run build` ✅（仍有既有 circular chunk warning）
+  - `npm run lint` ✅ 0 errors / 299 warnings
+- 後端：
+  - `cd server && npm run test:run` ✅ 117 tests / 9 files
+  - `cd server && npm run build` ✅
+  - `cd server && npm run test:run -- src/index.test.ts --reporter=verbose` ✅ 10 tests
+- 線上 smoke：
+  - Coach crisis → `open_sos` ✅
+  - Coach 明確記錄 → 週報/成就讀取 ✅
+  - PWA LINE 綁定 UI → Bot Server claim ✅
+  - Bot webhook 無簽名 → 401 ✅
+  - Bot webhook 有效簽名空事件 → 200 ✅
+
+### 剩餘風險
+
+- 真 LINE 使用者訊息尚未完整 E2E：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
+- `main` 仍落後 `origin/main` 2 commits，且工作樹尚未整理成 commit/PR；不要在髒工作樹直接 pull。
+- 本機沒有 `deno`，Edge Functions 本地 `deno check` 未跑，主要依賴線上 smoke。
+- 既有 ESLint warnings 與 Vite circular chunk warning 仍需另排技術債整理。
+
+---
+
 ## [4.2.0] - 2026-05-12 — Agentic AI 工具升級 + Edge Functions 擴展
 
 ### 🎯 重大變更
