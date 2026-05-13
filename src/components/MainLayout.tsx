@@ -14,6 +14,34 @@ interface MainLayoutProps {
   onNavigate: (view: 'home' | 'history' | 'growth' | 'achievement' | 'coach') => void;
 }
 
+const headerIcons = {
+  achievement: (
+    <svg className="header-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M7 4h10v5.4a5 5 0 0 1-10 0V4Z" />
+      <path d="M7 6H4.5a1 1 0 0 0-1 1v1.2A3.8 3.8 0 0 0 7 12" />
+      <path d="M17 6h2.5a1 1 0 0 1 1 1v1.2A3.8 3.8 0 0 1 17 12" />
+      <path d="M12 14.5v3.2" />
+      <path d="M8.8 20h6.4" />
+    </svg>
+  ),
+  theme: (
+    <svg className="header-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M10.5 4.2a6.8 6.8 0 0 0 8.9 8.9 7.5 7.5 0 1 1-8.9-8.9Z" />
+      <path d="M17.8 3.5v2.2" />
+      <path d="M17.8 10.3v2.2" />
+      <path d="M13.3 8h2.2" />
+      <path d="M20.1 8h2.2" />
+    </svg>
+  ),
+  reminder: (
+    <svg className="header-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M18 10.7a6 6 0 0 0-12 0c0 3.8-1.5 5.2-2.4 6.1h16.8C19.5 15.9 18 14.5 18 10.7Z" />
+      <path d="M9.6 19a2.6 2.6 0 0 0 4.8 0" />
+      <path d="M12 3V2" />
+    </svg>
+  ),
+};
+
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { t } = useLanguage();
   const { theme, actualTheme, toggleTheme } = useTheme();
@@ -75,7 +103,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             title={t('我的成就')}
             aria-label={t('我的成就')}
           >
-            <span className="header-action-label">{t('成就')}</span>
+            {headerIcons.achievement}
           </button>
           <button
             className="theme-toggle"
@@ -83,7 +111,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
             aria-label={t('切換主題')}
           >
-            <span className="header-action-label">{t('主題')}</span>
+            {headerIcons.theme}
           </button>
           <button
             className="settings-btn"
@@ -91,7 +119,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             title={t('提醒設定')}
             aria-label={t('提醒設定')}
           >
-            <span className="header-action-label">{t('提醒')}</span>
+            {headerIcons.reminder}
           </button>
         </div>
       </header>
@@ -227,7 +255,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 58px;
+          width: 44px;
+          min-width: 44px;
           height: 44px;
           font-size: 0.92rem;
           cursor: pointer;
@@ -235,8 +264,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.35rem;
-          padding: 0 0.85rem;
+          padding: 0;
           flex-shrink: 0;
         }
         .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
@@ -247,7 +275,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 58px;
+          width: 44px;
+          min-width: 44px;
           height: 44px;
           font-size: 0.92rem;
           cursor: pointer;
@@ -255,8 +284,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.35rem;
-          padding: 0 0.85rem;
+          padding: 0;
           flex-shrink: 0;
         }
 
@@ -275,7 +303,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 58px;
+          width: 44px;
+          min-width: 44px;
           height: 44px;
           font-size: 0.92rem;
           cursor: pointer;
@@ -283,8 +312,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.35rem;
-          padding: 0 0.85rem;
+          padding: 0;
           flex-shrink: 0;
         }
 
@@ -310,10 +338,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           gap: 0.25rem;
         }
 
-        .header-action-label {
-          font-size: 0.82rem;
-          font-weight: 700;
-          letter-spacing: 0.02em;
+        .header-action-icon {
+          width: 19px;
+          height: 19px;
+          color: var(--text-primary);
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 1.65;
+          stroke-linecap: round;
+          stroke-linejoin: round;
         }
 
         @media (max-width: 768px) {
@@ -360,12 +393,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            min-width: 48px;
+            width: 40px;
+            min-width: 40px;
             height: 40px;
-            padding: 0 0.55rem;
+            padding: 0;
             border-radius: 999px;
           }
-          .header-action-label { font-size: 0.74rem; }
+          .header-action-icon { width: 18px; height: 18px; }
         }
 
         .footer-main {
@@ -416,9 +450,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            min-width: 44px;
+            width: 40px;
+            min-width: 40px;
             height: 40px;
-            padding: 0 0.45rem;
+            padding: 0;
           }
         }
 
@@ -432,9 +467,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            min-width: 40px;
+            width: 36px;
+            min-width: 36px;
             height: 36px;
-            padding: 0 0.35rem;
+            padding: 0;
           }
         }
       `}</style>

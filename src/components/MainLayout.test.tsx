@@ -78,5 +78,11 @@ describe('MainLayout', () => {
     expect(screen.queryByText('勳')).not.toBeInTheDocument();
     expect(screen.queryByText('亮')).not.toBeInTheDocument();
     expect(screen.queryByText('訊')).not.toBeInTheDocument();
+    expect(screen.queryByText('成就')).not.toBeInTheDocument();
+    expect(screen.queryByText('主題')).not.toBeInTheDocument();
+    expect(screen.queryByText('提醒')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我的成就' }).querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '切換主題' }).querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '提醒設定' }).querySelector('svg')).toBeInTheDocument();
   });
 });
