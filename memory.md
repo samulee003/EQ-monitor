@@ -4,55 +4,62 @@
 
 ---
 
-## 目前主線（2026-05-13 晚）
+## 目前主線（2026-05-14）
 
-- 今晚可做 **1-3 人封閉內測**，不建議公開宣傳或大量開放。
-- Stitch UI 發佈候選已整理為 PR #20：`https://github.com/samulee003/EQ-monitor/pull/20`。
-- 乾淨發佈分支：`codex/stitch-ui-release-clean-20260513`。
-- 發佈候選 commit：`f4030b3 feat: 套用 Stitch UI 視覺更新`。
-- PR #20 只接在 `origin/main` 後加 1 個 UI commit，不包含 schedule commit、`memory.md` 舊草稿或 Stitch 原始匯出素材。
+- 最新可測版本已部署到 production PWA：`https://today-mood.zeabur.app/`。
+- 目前工作分支：`codex/stitch-ui-polish-20260513`。
+- 最新已推 commit：
+  - `c21e588 fix: 補上 LINE 官方帳號入口`
+  - `584e907 fix: 明確化 LINE Bot 綁定入口`
+  - `25dcca1 fix: 將首頁右上角改為純圖示`
+  - `7dd80d1 fix: 收回原版首頁並補 LINE Bot 綁定入口`
+  - `440c380 fix: 收斂朋友試玩前的 UI 信任問題`
+- PM 狀態：可發給 1-3 位朋友封閉試玩；仍不要公開大量宣傳。
 
-## PR #20 內容
+## 朋友試玩入口
 
-- 套用 Stitch / Luminous Morandi 視覺語言到 Coach、打卡、歷史時間軸、成長洞察、成就頁與全域導覽。
-- Coach 頁加入 Stitch 聊天畫布、快速回覆、LINE 綁定卡、固定輸入欄與底部導覽。
-- 修正安全信任風險：
-  - 首屏不再暗示讀到睡眠資料。
-  - SOS 按鈕明確顯示 `SOS`。
-  - Meta-Moment 補回安心專線 `1925` 與生命線 `1909`。
+- PWA：`https://today-mood.zeabur.app/`
+- LINE 官方帳號：
+  - 顯示名稱：`鋅鋰師拔麻的小小額葉養成手札`
+  - Basic ID：`@980pqrhn`
+  - 加入連結：`https://line.me/R/ti/p/@980pqrhn`
+- 目前這個 LINE 帳號名稱不是「今心」，朋友可能會疑惑；正式公開前建議在 LINE 後台改名或補品牌說明。
+
+## 這輪已完成
+
+- 首頁回到使用者偏好的原版安靜風格，保留快速記錄、LINE Bot 說明與心情矩陣。
+- 右上角「勳 / 系 / 訊」已改成無文字 SVG 圖示；無障礙標籤仍保留功能語意。
+- 首頁 LINE Bot 卡片已顯示正式 LINE 帳號名稱、`@980pqrhn` 與「加入 LINE 官方帳號」連結。
+- Coach 頁 LINE 綁定卡移到第一屏，清楚寫出：
+  - 先加入上方 LINE 官方帳號
+  - 在 LINE 對它輸入「綁定」
+  - 複製 LINE 回覆的 6 位碼，貼到 APP
+- 從首頁「前往教練綁定」會寫入 `sessionStorage.imxin_focus_line_binding`，到 Coach 後自動聚焦 `LINE 綁定碼` 輸入框。
+- LINE 帳號資訊集中在 `src/constants/lineBot.ts`，首頁與 Coach 共用。
 
 ## 已驗證
 
-- 乾淨 release worktree：
-  - `git diff --check`
-  - `./node_modules/.bin/tsc --noEmit`
-  - `npm run test:run -- src/pages/CoachPage.test.tsx src/components/coach/ChatInput.test.tsx` → 20/20 passed
-  - `npm run build`
-- 原工作區完整補驗：
-  - `npm run test:run` → 338/338 passed
-  - `npm run test:e2e` → 4/4 passed
-  - `cd server && npm run test:run` → 133/133 passed
-  - `cd server && npm run build`
-- Bot / production smoke 由 agent team 驗證：
-  - `https://imxin-bot.zeabur.app/health` → 200 healthy，adapter=`insforge`
-  - `/api/line-binding/claim {}` → 400，不寫入資料
-  - `/webhook` 無簽名 / 假簽名 → 401
+- `npm run test:run` → 348/348 passed
+- `npx tsc --noEmit` → passed
+- `npm run build` → passed
+- `npm run lint` → 0 errors / 31 existing warnings
+- `git diff --check` → passed
+- Production live smoke：
+  - 首頁可看到 `鋅鋰師拔麻的小小額葉養成手札` 與 `@980pqrhn`
+  - 首頁與 Coach 的 LINE 加入連結皆為 `https://line.me/R/ti/p/@980pqrhn`
+  - 點首頁「前往教練綁定」後進入 `#coach` 並聚焦 `LINE 綁定碼`
 
-## 今晚最短發布路線
+## 下一步最短清單
 
-1. 合併 PR #20 到 `main`。
-2. 讓 Zeabur 從 `main` 重新部署 PWA。
-3. 驗證 `https://today-mood.zeabur.app/` 已載入新 asset hash。
-4. 驗證 `https://imxin-bot.zeabur.app/health` 仍為 healthy。
-5. 用真 LINE 帳號跑一次完整 E2E：
-   - LINE 輸入「綁定」
-   - PWA 貼 6 位碼
-   - LINE 完成 RULER
-   - Coach / 週報讀到該次資料
+1. 用真 LINE 帳號加入 `@980pqrhn`。
+2. 在 LINE 對 Bot 輸入「綁定」。
+3. 把 LINE 回覆的 6 位碼貼到 PWA Coach 頁。
+4. 在 LINE 完成一次 RULER。
+5. 回 PWA 確認 Coach / 週報能讀到該次資料。
+6. 如果朋友看見 LINE 顯示名稱覺得怪，先不要公開宣傳，改 LINE 官方帳號名稱後再推。
 
-## 不要混入今晚 PR
+## 不要混入今晚版本
 
-- `server/insforge/functions/_shared/scheduleHelpers.ts`：屬於 schedule / 主動推送線，不在 PR #20。
-- `stitch_design_system_implementation/`：Stitch 原始匯出素材，不進 production commit。
-- 舊本地分支 `codex/stitch-ui-release-20260513`：含 schedule commit ancestry，不作為今晚正式發佈來源。
-
+- 主動推送 / schedule 相關功能尚未納入本次 production PWA polish，若要發佈需另跑 pg_cron / fallback smoke。
+- 認證 / LocalStorage → InsForge 遷移仍未完成，不要宣傳跨裝置正式同步。
+- 舊 PR #20 / `codex/stitch-ui-release-clean-20260513` 是先前 Stitch UI 發佈候選記錄；現在 production smoke 以 `codex/stitch-ui-polish-20260513` 為準。

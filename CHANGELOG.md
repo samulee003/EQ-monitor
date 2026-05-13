@@ -4,6 +4,47 @@
 
 ---
 
+## [4.2.3] - 2026-05-14 — 朋友試玩前 UI 收斂 + LINE 官方帳號入口補齊
+
+### PM 狀態
+
+- **發佈判斷**：可提供 1-3 位朋友封閉試玩；仍不建議公開宣傳或大量開放。
+- **正式站**：`https://today-mood.zeabur.app/` 已由 `codex/stitch-ui-polish-20260513` 重新部署。
+- **LINE Bot 帳號**：正式 Bot 目前顯示名稱為 `鋅鋰師拔麻的小小額葉養成手札`，Basic ID 為 `@980pqrhn`，加入連結為 `https://line.me/R/ti/p/@980pqrhn`。
+
+### 已完成
+
+- **首頁收斂**
+  - 回到使用者偏好的原版安靜首頁節奏。
+  - 保留快速記錄入口與 LINE Bot 說明，不再用過度陌生的 Stitch 首屏取代原版心情矩陣。
+  - LINE Bot 卡片明確顯示要加入的官方帳號、Basic ID 與「加入 LINE 官方帳號」連結。
+- **頁首信任修正**
+  - 右上角功能從「勳 / 系 / 訊」文字改為無文字 SVG 圖示按鈕。
+  - 按鈕仍保留無障礙標籤：我的成就、切換主題、提醒設定。
+- **LINE 綁定導引**
+  - Coach 頁第一屏新增醒目的 LINE Bot 綁定卡。
+  - 綁定流程改為：先加入 LINE 官方帳號 → 在 LINE 對它輸入「綁定」→ 複製 6 位碼貼回 APP。
+  - 從首頁「前往教練綁定」會自動跳到 Coach 頁並聚焦 `LINE 綁定碼` 輸入框。
+  - LINE Bot 帳號資訊集中在 `src/constants/lineBot.ts`，避免首頁與 Coach 文案不同步。
+
+### 驗證
+
+- `npm run test:run` ✅ 348 tests / 34 files
+- `npx tsc --noEmit` ✅
+- `npm run build` ✅
+- `npm run lint` ✅ 0 errors / 31 existing warnings
+- `git diff --check` ✅
+- Production live smoke ✅
+  - 首頁可看到 `鋅鋰師拔麻的小小額葉養成手札` 與 `@980pqrhn`
+  - 首頁與 Coach 的加入連結皆為 `https://line.me/R/ti/p/@980pqrhn`
+  - 點「前往教練綁定」後 URL 進入 `#coach` 並聚焦 `LINE 綁定碼`
+
+### 剩餘風險
+
+- 真 LINE 帳號完整 E2E 仍未跑：加入 `@980pqrhn` → LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
+- LINE 官方帳號顯示名稱目前不是「今心」，正式公開前建議改名或補品牌說明，避免朋友以為加錯帳號。
+- 認證 / LocalStorage → InsForge 完整遷移與主動推送仍不可作為本次公開能力宣傳。
+
 ## [4.2.2] - 2026-05-13 — Stitch UI 發佈候選 + 封閉內測整理
 
 ### PM 狀態
