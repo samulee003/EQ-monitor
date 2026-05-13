@@ -11,7 +11,7 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'login' }) => {
     const { t } = useLanguage();
-    const { login, register } = useAuth();
+    const { login, register, continueAsGuest } = useAuth();
     const [mode, setMode] = useState<'login' | 'register'>(defaultMode);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -92,20 +92,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
         }
     };
 
-    const handleGuestLogin = async () => {
+    const handleGuestLogin = () => {
         setIsLoading(true);
         setError('');
         try {
-            const guestEmail = `guest_${Date.now()}@imxin.app`;
-            const guestPassword = (typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 12);
-            const result = await register(guestEmail, guestPassword, t('訪客用戶'));
-            if (result.success) {
-                onClose();
-            } else {
-                setError(result.error || '訪客登錄失敗');
-            }
+            continueAsGuest(t('訪客用戶'));
+            onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : '訪客登錄失敗，請稍後再試');
         } finally {
