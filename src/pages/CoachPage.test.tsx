@@ -27,27 +27,48 @@ describe('CoachPage', () => {
     vi.restoreAllMocks();
   });
 
-  it('應該顯示 Stitch 預設開場訊息', () => {
+  it('應該顯示主動教練預設開場訊息', () => {
     render(<CoachPage />);
-    expect(screen.getByText('早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。')).toBeInTheDocument();
+    expect(screen.getByText('我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。')).toBeInTheDocument();
   });
 
-  it('應該顯示 Stitch 開場訊息與建議提示', () => {
+  it('應該顯示主動教練開場訊息與建議提示', () => {
     render(<CoachPage />);
-    expect(screen.getByText('早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。')).toBeInTheDocument();
+    expect(screen.getByText('你不需要先想好怎麼說。只要留下一句話，我會主動判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。')).toBeInTheDocument();
     expect(screen.getByText('我現在只想聊聊')).toBeInTheDocument();
   });
 
-  it('應該顯示 Stitch AI 教練畫面骨架與快速回覆', () => {
+  it('應該顯示主動 AI 教練畫面骨架與快速回覆', () => {
     render(<CoachPage />);
 
-    expect(screen.getByRole('region', { name: 'Stitch AI 情緒教練畫布' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: '今心主動 AI 教練畫布' })).toBeInTheDocument();
     expect(screen.getByText(/今日/)).toBeInTheDocument();
+    expect(screen.getByText('主動提下一步')).toBeInTheDocument();
+    expect(screen.getByText('串起 LINE 與 APP')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '好的，一起試試' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '我現在只想聊聊' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '好的，一起試試' }));
     expect(screen.getByText('跟著教練一起呼吸')).toBeInTheDocument();
+  });
+
+  it('Coach 頁底部導覽使用一般使用者看得懂的中文標籤', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByRole('navigation', { name: 'Coach 頁面導覽' })).toBeInTheDocument();
+    expect(screen.getByText('安定室')).toBeInTheDocument();
+    expect(screen.getByText('紀錄')).toBeInTheDocument();
+    expect(screen.getByText('主動教練')).toBeInTheDocument();
+    expect(screen.getByText('洞察')).toBeInTheDocument();
+  });
+
+  it('Coach 空狀態應該提供三個主動教練情境入口', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByText('你現在可能想找我做什麼')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我最近晚上都很焦慮' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我剛對孩子發脾氣' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我想看教練觀察到什麼' })).toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {

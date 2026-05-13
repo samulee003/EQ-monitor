@@ -170,6 +170,17 @@ describe('CheckInFlow', () => {
         expect(screen.getByText('快速記錄')).toBeInTheDocument();
     });
 
+    it('首頁應該呈現主動教練今日建議並可前往 Coach', () => {
+        render(<CheckInFlow />);
+
+        expect(screen.getByText('今日教練建議')).toBeInTheDocument();
+        expect(screen.getByText('你不用等情緒爆滿才來找我。')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('找主動教練整理'));
+
+        expect(window.location.hash).toBe('#coach');
+    });
+
     it('應該進入快速記錄模式', () => {
         render(<CheckInFlow />);
 

@@ -23,7 +23,7 @@ export function pickActiveUsers(
   const key = options.userIdKey ?? 'user_id';
   const seen = new Set<string>();
   for (const row of logs) {
-    const id = (row as Record<string, unknown>)[key];
+    const id = (row as unknown as Record<string, unknown>)[key];
     if (typeof id === 'string' && id.length > 0 && !seen.has(id)) {
       seen.add(id);
       if (seen.size >= limit) break;
@@ -54,7 +54,7 @@ export function findRedStreakUsers(
   const key = options.userIdKey ?? 'user_id';
   const byUser = new Map<string, Set<string>>();
   for (const row of logs) {
-    const id = (row as Record<string, unknown>)[key];
+    const id = (row as unknown as Record<string, unknown>)[key];
     if (typeof id !== 'string' || id.length === 0) continue;
     const isRed = (row.emotions ?? []).some((e) => e?.quadrant === 'red');
     if (!isRed) continue;
