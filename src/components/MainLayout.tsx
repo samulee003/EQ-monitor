@@ -20,13 +20,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
   const [showSettings, setShowSettings] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // 主題圖標
-  const themeIcon = {
-    dark: '暗',
-    light: '亮',
-    system: '系'
-  }[theme];
-
   // Initialize notification service and check onboarding
   useEffect(() => {
     notificationService.initialize();
@@ -54,19 +47,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => onNavigate('home')}
           >
-            {t('安定室')}
+            {t('今日心情')}
           </button>
           <button
             className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
             onClick={() => onNavigate('history')}
           >
-            {t('紀錄')}
+            {t('記錄回顧')}
           </button>
           <button
             className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
             onClick={() => onNavigate('growth')}
           >
-            {t('洞察')}
+            {t('成長看板')}
           </button>
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
@@ -80,24 +73,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
+            aria-label={t('我的成就')}
           >
-            <span aria-hidden="true">勳</span>
             <span className="header-action-label">{t('成就')}</span>
           </button>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
             title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
+            aria-label={t('切換主題')}
           >
-            <span aria-hidden="true">{themeIcon}</span>
             <span className="header-action-label">{t('主題')}</span>
           </button>
           <button
             className="settings-btn"
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
+            aria-label={t('提醒設定')}
           >
-            <span aria-hidden="true">訊</span>
             <span className="header-action-label">{t('提醒')}</span>
           </button>
         </div>
@@ -234,9 +227,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 68px;
+          min-width: 58px;
           height: 44px;
-          font-size: 1.1rem;
+          font-size: 0.92rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
@@ -254,9 +247,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 68px;
+          min-width: 58px;
           height: 44px;
-          font-size: 1rem;
+          font-size: 0.92rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
@@ -282,9 +275,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
           border-radius: 999px;
-          min-width: 68px;
+          min-width: 58px;
           height: 44px;
-          font-size: 1rem;
+          font-size: 0.92rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
@@ -367,12 +360,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            width: 40px;
-            min-width: 40px;
-            padding: 0;
-            border-radius: 50%;
+            min-width: 48px;
+            height: 40px;
+            padding: 0 0.55rem;
+            border-radius: 999px;
           }
-          .header-action-label { display: none; }
+          .header-action-label { font-size: 0.74rem; }
         }
 
         .footer-main {
@@ -423,12 +416,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            width: 40px;
-            min-width: 40px;
+            min-width: 44px;
             height: 40px;
-            font-size: 0.95rem;
-            padding: 0;
-            border-radius: 50%;
+            padding: 0 0.45rem;
           }
         }
 
@@ -442,10 +432,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           .settings-btn,
           .achievement-nav-btn,
           .theme-toggle {
-            width: 36px;
-            min-width: 36px;
+            min-width: 40px;
             height: 36px;
-            font-size: 0.9rem;
+            padding: 0 0.35rem;
           }
         }
       `}</style>

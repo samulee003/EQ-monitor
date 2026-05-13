@@ -42,7 +42,7 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     expect(screen.getByRole('region', { name: 'Stitch AI 情緒教練畫布' })).toBeInTheDocument();
-    expect(screen.getByText(/今日/)).toBeInTheDocument();
+    expect(screen.getAllByText(/今日/).length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: '好的，一起試試' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '我現在只想聊聊' })).toBeInTheDocument();
 
@@ -54,10 +54,13 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     const nav = screen.getByRole('navigation', { name: 'Coach 頁面導覽' });
-    expect(within(nav).getByRole('button', { name: /安定室/ })).toBeInTheDocument();
-    expect(within(nav).getByRole('button', { name: /紀錄/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /今日心情/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /記錄回顧/ })).toBeInTheDocument();
     expect(within(nav).getByRole('button', { name: /教練/ })).toBeInTheDocument();
-    expect(within(nav).getByRole('button', { name: /洞察/ })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: /成長看板/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '回到今日心情' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '回到安定室' })).not.toBeInTheDocument();
+    expect(screen.queryByText('安定室')).not.toBeInTheDocument();
     expect(screen.queryByText('Sanctuary')).not.toBeInTheDocument();
     expect(screen.queryByText('Insights')).not.toBeInTheDocument();
   });

@@ -192,13 +192,13 @@ const Timeline: React.FC = () => {
         });
     };
 
-    const getQuadrantKey = (log: RulerLogEntry): QuadrantKey => {
+    const getQuadrantKey = useCallback((log: RulerLogEntry): QuadrantKey => {
         const quadrant = log.emotions?.[0]?.quadrant;
         if (quadrant === 'red' || quadrant === 'yellow' || quadrant === 'blue' || quadrant === 'green') {
             return quadrant;
         }
         return 'gray';
-    };
+    }, []);
 
     const quadrantSummary = useMemo(() => {
         const counts = logs.reduce<Record<QuadrantKey, number>>((acc, log) => {
@@ -214,12 +214,12 @@ const Timeline: React.FC = () => {
             { key: 'blue' as const, label: t('低能低悅'), count: counts.blue, active: activeQuadrant === 'blue' },
             { key: 'green' as const, label: t('低能高悅'), count: counts.green, active: activeQuadrant === 'green' }
         ];
-    }, [activeQuadrant, logs, t]);
+    }, [activeQuadrant, getQuadrantKey, logs, t]);
 
     const visibleLogs = useMemo(() => {
         if (activeQuadrant === 'all') return logs;
         return logs.filter((log) => getQuadrantKey(log) === activeQuadrant);
-    }, [activeQuadrant, logs]);
+    }, [activeQuadrant, getQuadrantKey, logs]);
 
     const totalPages = Math.ceil(visibleLogs.length / ITEMS_PER_PAGE);
     const paginatedLogs = useMemo(() => {

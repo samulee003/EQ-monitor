@@ -198,8 +198,19 @@ describe('CheckInFlow', () => {
         render(<CheckInFlow />);
 
         expect(screen.getByTestId('mood-meter')).toBeInTheDocument();
-        expect(screen.getByTestId('quick-stats')).toBeInTheDocument();
+        expect(screen.queryByText('快速統計')).not.toBeInTheDocument();
         expect(screen.getByText('快速記錄')).toBeInTheDocument();
+        expect(screen.getByText('LINE Bot 也可以使用今心')).toBeInTheDocument();
+        expect(screen.getByText(/在 LINE 對今心輸入「綁定」/)).toBeInTheDocument();
+    });
+
+    it('應該從首頁 LINE Bot 說明前往教練綁定', () => {
+        window.location.hash = '';
+        render(<CheckInFlow />);
+
+        fireEvent.click(screen.getByRole('button', { name: '前往教練綁定' }));
+
+        expect(window.location.hash).toBe('#coach');
     });
 
     it('應該進入快速記錄模式', () => {
