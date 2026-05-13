@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { dataAdapter } from '../adapters';
 import { upsertCoachContext } from '@/lib/insforge/coachContext';
 import { isMigrationNeeded } from '@/lib/insforge/localStorageMigration';
 import { getCoachContext } from '@/lib/insforge/coachContext';
+import { insforgeAuthService } from './InsForgeAuthService';
+import { type UserProfile } from '@/adapters/types';
 
 export interface User {
     id: string;
@@ -19,7 +20,8 @@ export interface AuthContextType {
     isLoading: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     register: (email: string, password: string, displayName: string, coachOptIn?: boolean) => Promise<{ success: boolean; error?: string }>;
-    logout: () => void;
+    continueAsGuest: (displayName?: string) => void;
+    logout: () => Promise<void>;
     updateProfile: (data: Partial<User>) => Promise<boolean>;
     changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
     deleteAccount: () => Promise<boolean>;
@@ -28,6 +30,15 @@ export interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const toContextUser = (profile: UserProfile): User => ({
+    id: profile.id,
+    email: profile.email || '',
+    displayName: profile.displayName || '',
+    avatar: profile.avatar,
+    createdAt: profile.createdAt || '',
+    lastLoginAt: profile.updatedAt || '',
+});
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -38,16 +49,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const currentUser = await dataAdapter.auth.getUser();
+                const currentUser = await insforgeAuthService.getUser();
                 if (currentUser) {
-                    setUser({
-                        id: currentUser.id,
-                        email: currentUser.email || '',
-                        displayName: currentUser.displayName || '',
-                        avatar: currentUser.avatar,
-                        createdAt: currentUser.createdAt || '',
-                        lastLoginAt: currentUser.updatedAt || '',
-                    });
+                    setUser(toContextUser(currentUser));
                 }
             } catch {
                 setUser(null);
@@ -59,16 +63,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-        const result = await dataAdapter.auth.signIn(email, password);
+        const result = await insforgeAuthService.signIn(email, password);
         if (result.success && result.user) {
-            setUser({
-                id: result.user.id,
-                email: result.user.email || '',
-                displayName: result.user.displayName || '',
-                avatar: result.user.avatar,
-                createdAt: result.user.createdAt || '',
-                lastLoginAt: result.user.updatedAt || '',
-            });
+            setUser(toContextUser(result.user));
             getCoachContext(result.user.id)
                 .then(ctx => {
                     if (isMigrationNeeded(ctx?.migration_completed_at ?? null)) {
@@ -86,16 +83,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         displayName: string,
         coachOptIn: boolean = false
     ): Promise<{ success: boolean; error?: string }> => {
-        const result = await dataAdapter.auth.signUp(email, password, { displayName });
+        const result = await insforgeAuthService.signUp(email, password, displayName);
         if (result.success && result.user) {
-            setUser({
-                id: result.user.id,
-                email: result.user.email || '',
-                displayName: result.user.displayName || '',
-                avatar: result.user.avatar,
-                createdAt: result.user.createdAt || '',
-                lastLoginAt: result.user.updatedAt || '',
-            });
+            setUser(toContextUser(result.user));
 
             // Initialize coach_context (fire-and-forget)
             upsertCoachContext({
@@ -114,8 +104,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return result;
     };
 
-    const logout = () => {
-        dataAdapter.auth.signOut();
+    const continueAsGuest = (displayName: string = '訪客用戶') => {
+        const now = new Date().toISOString();
+        setUser({
+            id: `guest_${Date.now()}`,
+            email: '',
+            displayName,
+            createdAt: now,
+            lastLoginAt: now,
+        });
+    };
+
+    const logout = async () => {
+        if (user?.email) {
+            try {
+                await insforgeAuthService.signOut();
+            } catch {
+                // 登出即使遠端失敗，也先清除本地 UI 狀態，避免卡在已登入畫面。
+            }
+        }
         setUser(null);
     };
 
@@ -123,15 +130,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!user) return false;
 
         try {
-            const updated = await dataAdapter.profile.update(data);
-            setUser({
-                id: updated.id,
-                email: updated.email || user.email,
-                displayName: updated.displayName || user.displayName,
-                avatar: updated.avatar,
-                createdAt: user.createdAt,
-                lastLoginAt: updated.updatedAt || user.lastLoginAt,
-            });
+            const updated = await insforgeAuthService.updateProfile(data);
+            setUser(toContextUser(updated));
             return true;
         } catch {
             return false;
@@ -139,18 +139,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const changePassword = async (
-        oldPassword: string,
-        newPassword: string
+        _oldPassword: string,
+        _newPassword: string
     ): Promise<{ success: boolean; error?: string }> => {
-        return await dataAdapter.auth.updatePassword(oldPassword, newPassword);
+        return { success: false, error: '請使用忘記密碼流程重設密碼' };
     };
 
     const deleteAccount = async (): Promise<boolean> => {
-        const success = await dataAdapter.auth.deleteAccount();
-        if (success) {
-            setUser(null);
-        }
-        return success;
+        return false;
     };
 
     const value: AuthContextType = {
@@ -159,6 +155,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         register,
+        continueAsGuest,
         logout,
         updateProfile,
         changePassword,
