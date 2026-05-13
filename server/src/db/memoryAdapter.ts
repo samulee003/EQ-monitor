@@ -1,4 +1,5 @@
 import { RulerData } from '../types.js';
+import { generateBindingCode } from './bindingCode.js';
 
 /**
  * 內存數據庫適配器 — 開發/演示用
@@ -61,10 +62,6 @@ const messages: Array<{
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function generateBindingCode(): string {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
 function mapRulerDataToAgentLog(

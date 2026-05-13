@@ -208,4 +208,20 @@ describe('CoachPage', () => {
     });
     expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
   });
+
+  it('LINE Bot 綁定失敗時顯示後端原因', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: '',
+      text: async () => JSON.stringify({ error: 'Binding code not found or expired' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
+    fireEvent.click(screen.getByText('綁定'));
+
+    expect(await screen.findByText('綁定失敗：API 錯誤: Binding code not found or expired')).toBeInTheDocument();
+  });
 });
