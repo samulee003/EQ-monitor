@@ -71,6 +71,12 @@ const CheckInFlow: React.FC = () => {
         }
     };
 
+    const navigateToCoach = () => {
+        if (typeof window !== 'undefined') {
+            window.location.hash = 'coach';
+        }
+    };
+
     return (
         <div className="check-in-flow fade-in">
             {/* Quick mode views */}
@@ -97,6 +103,17 @@ const CheckInFlow: React.FC = () => {
                         <div className="sanctuary-copy">
                             <h1>{t('現在的你，感覺如何？')}</h1>
                             <p>{t('撥開思緒的雲霧，聽聽心底的聲音。')}</p>
+                        </div>
+                        <div className="coach-suggestion-card" aria-label={t('今日教練建議')}>
+                            <div className="coach-suggestion-copy">
+                                <p>{t('今日教練建議')}</p>
+                                <strong>{t('你不用等情緒爆滿才來找我。')}</strong>
+                                <span>{t('如果你只知道「有點卡」，主動教練可以先陪你整理現在最需要的一小步。')}</span>
+                            </div>
+                            <button type="button" onClick={navigateToCoach}>
+                                <span className="action-icon">教</span>
+                                <span>{t('找主動教練整理')}</span>
+                            </button>
                         </div>
                         <div className="sanctuary-pulse-grid" aria-hidden="true">
                             <div className="sanctuary-pulse-card pulse-red">

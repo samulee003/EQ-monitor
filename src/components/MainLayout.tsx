@@ -7,6 +7,9 @@ import AchievementToast from './AchievementToast';
 import OnboardingFlow from './OnboardingFlow';
 import { settingsStore } from '../adapters';
 import { CoachFAB } from './coach/CoachFAB';
+import AuthModal from './AuthModal';
+import UserProfile from './UserProfile';
+import { useAuth } from '../services/AuthContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,8 +20,11 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { t } = useLanguage();
   const { theme, actualTheme, toggleTheme } = useTheme();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   // 主題圖標
   const themeIcon = {
@@ -41,6 +47,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     settingsStore.setOnboardingCompleted(true);
     setShowOnboarding(false);
   };
+
+  const handleAccountClick = () => {
+    if (isAuthenticated) {
+      setShowProfile(true);
+      return;
+    }
+    setShowAuth(true);
+  };
+
+  const accountLabel = isAuthenticated ? t('帳號設定') : t('登入');
+  const accountText = isLoading
+    ? '…'
+    : isAuthenticated
+      ? (user?.displayName || user?.email || t('帳號')).slice(0, 1)
+      : t('登入');
 
   return (
     <div className="app-container">
@@ -71,8 +92,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
             onClick={() => onNavigate('coach')}
+            title={t('今心主動 AI 教練')}
           >
-            {t('教練')}
+            {t('主動教練')}
           </button>
         </nav>
         <div className="header-actions">
@@ -97,6 +119,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           >
             訊
           </button>
+          <button
+            className="account-btn"
+            onClick={handleAccountClick}
+            title={accountLabel}
+            aria-label={accountLabel}
+            disabled={isLoading}
+          >
+            {accountText}
+          </button>
         </div>
       </header>
 
@@ -117,7 +148,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
       <footer>
         <div className="footer-main">
-          {t('每日情緒覺察 • 打造平穩心靈')}
+          {t('每日情緒覺察 • 主動教練陪你整理下一步')}
         </div>
         <div className="footer-disclaimer">
           {t('本工具非醫療器材，不能取代專業心理治療。')}
@@ -131,6 +162,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
       {showSettings && (
         <NotificationSettingsPanel onClose={() => setShowSettings(false)} />
       )}
+
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      {showProfile && <UserProfile onClose={() => setShowProfile(false)} />}
 
       <style>{`
         .glass-header {
@@ -297,6 +331,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           transform: scale(0.95);
         }
 
+        .account-btn {
+          min-width: 52px;
+          height: 44px;
+          padding: 0 14px;
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
+          border-radius: 999px;
+          color: var(--text-primary);
+          font-size: 0.92rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .account-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+          background: var(--surface-hover);
+        }
+
+        .account-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+
+        .account-btn:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
         footer {
           padding: 0.75rem 1rem 0.5rem;
           text-align: center;
@@ -398,8 +462,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           }
           .settings-btn,
           .achievement-nav-btn,
-          .theme-toggle {
+          .theme-toggle,
+          .account-btn {
             width: 40px;
+            min-width: 40px;
+            padding: 0;
             height: 40px;
             font-size: 0.95rem;
           }
@@ -414,8 +481,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           }
           .settings-btn,
           .achievement-nav-btn,
-          .theme-toggle {
+          .theme-toggle,
+          .account-btn {
             width: 36px;
+            min-width: 36px;
+            padding: 0;
             height: 36px;
             font-size: 0.9rem;
           }

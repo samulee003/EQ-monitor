@@ -15,7 +15,7 @@ const WELCOME_MSG: CoachMessage = {
   id: 'welcome',
   role: 'model',
   content:
-    '你好，我是今心教練。我在這裡陪伴你，無論你現在的感受是什麼，都可以跟我說說。',
+    '你好，我是今心主動教練。我會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。',
   timestamp: new Date().toISOString(),
 };
 
@@ -23,6 +23,20 @@ type ErrorType = 'network' | 'api' | 'timeout';
 type CoachView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
 
 const QUICK_REPLIES = ['好的，一起試試', '我現在只想聊聊'];
+const COACH_SCENARIOS = [
+  {
+    label: '我最近晚上都很焦慮',
+    prompt: '我最近晚上都很焦慮，想請你用主動教練的方式陪我整理可能的模式和下一步。',
+  },
+  {
+    label: '我剛對孩子發脾氣',
+    prompt: '我剛對孩子發脾氣，現在有點後悔，也想知道接下來可以怎麼修復。',
+  },
+  {
+    label: '我想看教練觀察到什麼',
+    prompt: '我想看你作為主動教練，根據我最近的情緒線索觀察到什麼。',
+  },
+];
 
 function getErrorMessage(type: ErrorType): string {
   switch (type) {
@@ -228,7 +242,7 @@ export default function CoachPage() {
     : messages;
 
   return (
-    <div className={styles.coachPage} role="region" aria-label="Stitch AI 情緒教練畫布">
+    <div className={styles.coachPage} role="region" aria-label="今心主動 AI 教練畫布">
       <div className={styles.emotionalGlow} />
 
       <header className={styles.header}>
@@ -256,16 +270,37 @@ export default function CoachPage() {
         </div>
 
         {showWelcome && (
-          <section className={styles.stitchOpening} aria-label="AI 教練引導">
+          <section className={styles.stitchOpening} aria-label="主動 AI 教練引導">
             <div className={styles.coachAvatar} aria-hidden="true">
               ✦
             </div>
             <div className={styles.openingStack}>
-              <div className={styles.modelBubble}>
-                <p>早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。</p>
+              <div className={styles.agentIntro}>
+                <p className={styles.agentEyebrow}>主動 AI 情緒教練</p>
+                <h2>你不用自己想下一步</h2>
+                <p className={styles.agentDescription}>
+                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。
+                </p>
+                <div className={styles.agentFeatureGrid} aria-label="主動教練特色">
+                  <div className={styles.agentFeature}>
+                    <strong>主動提下一步</strong>
+                    <span>聊天、記錄、呼吸或緊急安定，我會幫你判斷先做什麼。</span>
+                  </div>
+                  <div className={styles.agentFeature}>
+                    <strong>串起 LINE 與 APP</strong>
+                    <span>日常在 LINE 留下片段，回到 APP 就能看見脈絡。</span>
+                  </div>
+                  <div className={styles.agentFeature}>
+                    <strong>看懂你的模式</strong>
+                    <span>把最近的情緒、強度與需求整理成更容易行動的提醒。</span>
+                  </div>
+                </div>
               </div>
               <div className={styles.modelBubble}>
-                <p>我聽到了。焦慮在面對壓力時是很自然的情緒反應。它就像是一個警報系統，告訴我們有重要的事情需要處理。</p>
+                <p>你不需要先想好怎麼說。只要留下一句話，我會主動判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。</p>
+              </div>
+              <div className={styles.modelBubble}>
+                <p>例如你說「我今天很焦慮」，我會先陪你釐清觸發點，再把它轉成可以完成的一小步。</p>
               </div>
               <div className={styles.modelBubble}>
                 <p>我們試著先深呼吸幾次，把注意力帶回當下。你願意和我一起做個簡短的呼吸練習嗎？</p>
@@ -282,14 +317,29 @@ export default function CoachPage() {
                   </button>
                 ))}
               </div>
+              <div className={styles.scenarioPanel} aria-label="主動教練情境入口">
+                <p>你現在可能想找我做什麼</p>
+                <div className={styles.scenarioGrid}>
+                  {COACH_SCENARIOS.map(({ label, prompt }) => (
+                    <button
+                      type="button"
+                      key={label}
+                      className={styles.scenarioButton}
+                      onClick={() => handleSend(prompt)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
-            <p className={styles.bindingTitle}>LINE Bot 同步</p>
-            <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
+            <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
+            <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。之後你在 LINE 留下的覺察，也會成為教練理解你的線索。</p>
           </div>
           <div className={styles.bindingForm}>
             <label className={styles.bindingLabel}>
@@ -352,19 +402,19 @@ export default function CoachPage() {
       <nav className={styles.bottomNav} aria-label="Coach 頁面導覽">
         <button type="button" onClick={() => handleNavigate('home')}>
           <span aria-hidden="true">♧</span>
-          <span>Sanctuary</span>
+          <span>安定室</span>
         </button>
         <button type="button" onClick={() => handleNavigate('history')}>
           <span aria-hidden="true">≋</span>
-          <span>Log</span>
+          <span>紀錄</span>
         </button>
         <button type="button" className={styles.activeNav} aria-current="page">
           <span aria-hidden="true">✦</span>
-          <span>Coach</span>
+          <span>主動教練</span>
         </button>
         <button type="button" onClick={() => handleNavigate('growth')}>
           <span aria-hidden="true">▥</span>
-          <span>Insights</span>
+          <span>洞察</span>
         </button>
       </nav>
 
