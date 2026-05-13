@@ -35,10 +35,10 @@ export interface RulerDraftRow {
   selected_quadrants: string[];
   selected_emotions: Array<{ id: string; name: string; quadrant: string }>;
   emotion_intensity: number | null;
-  body_scan: any;
-  understanding: any;
-  expressing: any;
-  regulating: any;
+  body_scan: unknown;
+  understanding: unknown;
+  expressing: unknown;
+  regulating: unknown;
   is_full_flow: boolean;
   post_regulation_mood: string | null;
   updated_at: string;
