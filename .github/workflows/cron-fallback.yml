@@ -1,0 +1,52 @@
+name: Cron Fallback (主動推送備援)
+
+# 備援用途：若 InsForge 雲端不允許 pg_cron extension，由 GitHub Actions 觸發 Edge Functions。
+# 預設不啟用，避免與 pg_cron 雙重觸發。啟用方式：移除下方 `if: false`。
+
+on:
+  schedule:
+    # 每週日 13:00 UTC（台北 21:00） — 週報批次
+    - cron: '0 13 * * 0'
+    # 每日 02:00 UTC（台北 10:00） — 主動關懷掃描
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 手動觸發目標
+        required: true
+        default: weekly-report
+        type: choice
+        options:
+          - weekly-report
+          - achievement-checker
+
+jobs:
+  weekly-report:
+    if: false # 預設關閉。確認啟用後改為 ${{ github.event.schedule == '0 13 * * 0' || github.event.inputs.target == 'weekly-report' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly-report batch
+        env:
+          INSFORGE_BASE_URL: https://b88egxiz.ap-southeast.insforge.app
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          curl -fsS -X POST "$INSFORGE_BASE_URL/functions/v1/weekly-report" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch"}'
+
+  care-scan:
+    if: false # 預設關閉。確認啟用後改為 ${{ github.event.schedule == '0 2 * * *' || github.event.inputs.target == 'achievement-checker' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger achievement-checker scan
+        env:
+          INSFORGE_BASE_URL: https://b88egxiz.ap-southeast.insforge.app
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          curl -fsS -X POST "$INSFORGE_BASE_URL/functions/v1/achievement-checker" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"scan"}'
