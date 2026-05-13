@@ -57,7 +57,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 <source src="/intro.mp4" type="video/mp4" />
             </video>
 
-            <button className="skip-splash-btn" onClick={onComplete} aria-label={t('跳過動畫')}>
+            <button
+                className="skip-splash-btn"
+                onClick={onComplete}
+                aria-label={t('跳過動畫')}
+                data-testid="splash-skip"
+            >
                 {t('跳過動畫')}
             </button>
 

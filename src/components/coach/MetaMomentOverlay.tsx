@@ -58,6 +58,8 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="meta-moment-title"
+      data-testid="meta-moment-overlay"
+      data-step={step}
     >
       {/* Header */}
       <div className={styles.header}>
@@ -81,7 +83,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
 
       {/* Content */}
       <div className={styles.content}>
-        <div className={styles.stepLabel}>
+        <div className={styles.stepLabel} data-testid="meta-moment-step-title">
           {STEPS[step].title}
         </div>
         <p className={styles.stepContent}>
@@ -123,6 +125,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
           <button
             onClick={handleNext}
             className={styles.nextButton}
+            data-testid="meta-moment-next"
           >
             {step === 0
               ? '我準備好了，開始呼吸'
