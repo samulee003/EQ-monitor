@@ -31,10 +31,10 @@ export function ChatInput({ onSend, onSOS, disabled }: Props) {
         disabled={disabled}
         aria-label="SOS 緊急協助"
         className={styles.sosButton}
-        title="SOS 緊急協助"
+        title="SOS 緊急協助：安心專線 1925，生命線 1909"
         data-testid="coach-sos-button"
       >
-        🆘
+        <span className={styles.sosText}>SOS</span>
       </button>
 
       {/* Text Input */}
@@ -43,29 +43,29 @@ export function ChatInput({ onSend, onSOS, disabled }: Props) {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="跟今心教練說說話..."
+          placeholder="告訴我你的感受..."
           disabled={disabled}
           aria-label="輸入訊息"
           className={styles.textInput}
         />
-      </div>
 
-      {/* Send Button */}
-      <button
-        type="submit"
-        disabled={disabled || !hasText}
-        aria-label="送出訊息"
-        className={`${styles.sendButton} ${hasText ? styles.sendButtonActive : styles.sendButtonInactive}`}
-      >
-        {disabled ? (
-          <span className={styles.spinner} />
-        ) : (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        )}
-      </button>
+        {/* Send Button */}
+        <button
+          type="submit"
+          disabled={disabled || !hasText}
+          aria-label="送出訊息"
+          className={`${styles.sendButton} ${hasText ? styles.sendButtonActive : styles.sendButtonInactive}`}
+        >
+          {disabled ? (
+            <span className={styles.spinner} />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          )}
+        </button>
+      </div>
     </form>
   );
 }

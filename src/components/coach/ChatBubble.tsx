@@ -23,7 +23,7 @@ export function ChatBubble({ message }: Props) {
       <div
         className={`${styles.avatar} ${isUser ? styles.avatarUser : styles.avatarModel}`}
       >
-        {isUser ? '👤' : '🤖'}
+        {isUser ? '人' : '✦'}
       </div>
 
       {/* Bubble */}
