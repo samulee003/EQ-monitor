@@ -6,7 +6,6 @@ import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
 import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
-import { WelcomeCard } from '../components/coach/WelcomeCard';
 import { useAuth } from '../services/AuthContext';
 import { botSyncService } from '../services/BotSyncService';
 import { useAppStore } from '../stores/appStore';
@@ -21,6 +20,9 @@ const WELCOME_MSG: CoachMessage = {
 };
 
 type ErrorType = 'network' | 'api' | 'timeout';
+type CoachView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
+
+const QUICK_REPLIES = ['好的，一起試試', '我現在只想聊聊'];
 
 function getErrorMessage(type: ErrorType): string {
   switch (type) {
@@ -31,6 +33,16 @@ function getErrorMessage(type: ErrorType): string {
     case 'timeout':
       return '連線有點慢，請稍後再試';
   }
+}
+
+function getTodayLabel(): string {
+  const time = new Intl.DateTimeFormat('zh-TW', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date());
+
+  return `今日，${time}`;
 }
 
 /** 執行 Agent 觸發的前端動作 */
@@ -91,7 +103,9 @@ export default function CoachPage() {
 
   // Auto scroll
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 1 || loading) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, loading]);
 
   /** 處理 Agent 回傳的 action */
@@ -174,16 +188,22 @@ export default function CoachPage() {
     }
   }, [error, doSend]);
 
-  const handlePromptClick = useCallback(
+  const handleQuickReply = useCallback(
     (prompt: string) => {
-      if (prompt === '幫我啟動 Meta-Moment') {
-        setShowSOS(true);
+      if (prompt === '好的，一起試試') {
+        setPendingAction({ action: 'start_breathing', reason: '跟著教練一起呼吸' });
+        setShowBreathing(true);
         return;
       }
+
       handleSend(prompt);
     },
     [handleSend]
   );
+
+  const handleNavigate = useCallback((view: CoachView) => {
+    useAppStore.getState().setView(view);
+  }, []);
 
   const handleClaimBinding = useCallback(async () => {
     const code = bindingCode.trim().toUpperCase();
@@ -203,63 +223,110 @@ export default function CoachPage() {
   }, [bindingCode, userId]);
 
   const showWelcome = messages.length <= 1;
+  const visibleMessages = showWelcome
+    ? messages.filter((message) => message.id !== WELCOME_MSG.id)
+    : messages;
 
   return (
-    <div className={styles.coachPage}>
-      {/* Header */}
+    <div className={styles.coachPage} role="region" aria-label="Stitch AI 情緒教練畫布">
+      <div className={styles.emotionalGlow} />
+
       <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.headerIcon}>教</div>
-          <h1 className={styles.headerTitle}>今心教練</h1>
-        </div>
-        <span className={styles.headerSubtitle}>AI 陪伴你的情緒旅程</span>
+        <button
+          type="button"
+          className={styles.headerIconButton}
+          aria-label="回到安定室"
+          onClick={() => handleNavigate('home')}
+        >
+          心
+        </button>
+        <h1 className={styles.headerTitle}>今心</h1>
+        <button
+          type="button"
+          className={styles.profileButton}
+          aria-label="個人設定"
+        >
+          人
+        </button>
       </header>
 
-      <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
-        <div>
-          <p className={styles.bindingTitle}>LINE Bot 同步</p>
-          <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
+      <main className={styles.chatArea}>
+        <div className={styles.dateDivider}>
+          <span>{getTodayLabel()}</span>
         </div>
-        <div className={styles.bindingForm}>
-          <label className={styles.bindingLabel}>
-            <span className={styles.visuallyHidden}>LINE 綁定碼</span>
-            <input
-              aria-label="LINE 綁定碼"
-              value={bindingCode}
-              onChange={(event) => setBindingCode(event.target.value.toUpperCase())}
-              maxLength={6}
-              className={styles.bindingInput}
-              placeholder="ABC123"
-              data-testid="line-binding-input"
-            />
-          </label>
-          <button
-            type="button"
-            className={styles.bindingButton}
-            onClick={handleClaimBinding}
-            data-testid="line-binding-submit"
-          >
-            綁定
-          </button>
-        </div>
-        {bindingMessage && (
-          <p className={styles.bindingMessage} data-testid="line-binding-message">
-            {bindingMessage}
-          </p>
-        )}
-      </section>
 
-      {/* Chat Area */}
-      <div className={styles.chatArea}>
-        {showWelcome && <WelcomeCard onPromptClick={handlePromptClick} />}
-        {messages.map((m) => (
+        {showWelcome && (
+          <section className={styles.stitchOpening} aria-label="AI 教練引導">
+            <div className={styles.coachAvatar} aria-hidden="true">
+              ✦
+            </div>
+            <div className={styles.openingStack}>
+              <div className={styles.modelBubble}>
+                <p>早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。</p>
+              </div>
+              <div className={styles.modelBubble}>
+                <p>我聽到了。焦慮在面對壓力時是很自然的情緒反應。它就像是一個警報系統，告訴我們有重要的事情需要處理。</p>
+              </div>
+              <div className={styles.modelBubble}>
+                <p>我們試著先深呼吸幾次，把注意力帶回當下。你願意和我一起做個簡短的呼吸練習嗎？</p>
+              </div>
+              <div className={styles.quickReplies} aria-label="快速回覆">
+                {QUICK_REPLIES.map((prompt) => (
+                  <button
+                    type="button"
+                    key={prompt}
+                    className={styles.quickReply}
+                    onClick={() => handleQuickReply(prompt)}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
+          <div>
+            <p className={styles.bindingTitle}>LINE Bot 同步</p>
+            <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。</p>
+          </div>
+          <div className={styles.bindingForm}>
+            <label className={styles.bindingLabel}>
+              <span className={styles.visuallyHidden}>LINE 綁定碼</span>
+              <input
+                aria-label="LINE 綁定碼"
+                value={bindingCode}
+                onChange={(event) => setBindingCode(event.target.value.toUpperCase())}
+                maxLength={6}
+                className={styles.bindingInput}
+                placeholder="ABC123"
+                data-testid="line-binding-input"
+              />
+            </label>
+            <button
+              type="button"
+              className={styles.bindingButton}
+              onClick={handleClaimBinding}
+              data-testid="line-binding-submit"
+            >
+              綁定
+            </button>
+          </div>
+          {bindingMessage && (
+            <p className={styles.bindingMessage} data-testid="line-binding-message">
+              {bindingMessage}
+            </p>
+          )}
+        </section>
+
+        {visibleMessages.map((m) => (
           <ChatBubble key={m.id} message={m} />
         ))}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
-      </div>
+      </main>
 
-      {/* Error Banner */}
       {error && (
         <div className={styles.errorBanner}>
           <span className={styles.errorMessage}>
@@ -274,11 +341,32 @@ export default function CoachPage() {
         </div>
       )}
 
-      <ChatInput
-        onSend={handleSend}
-        onSOS={() => setShowSOS(true)}
-        disabled={loading}
-      />
+      <div className={styles.inputDock}>
+        <ChatInput
+          onSend={handleSend}
+          onSOS={() => setShowSOS(true)}
+          disabled={loading}
+        />
+      </div>
+
+      <nav className={styles.bottomNav} aria-label="Coach 頁面導覽">
+        <button type="button" onClick={() => handleNavigate('home')}>
+          <span aria-hidden="true">♧</span>
+          <span>Sanctuary</span>
+        </button>
+        <button type="button" onClick={() => handleNavigate('history')}>
+          <span aria-hidden="true">≋</span>
+          <span>Log</span>
+        </button>
+        <button type="button" className={styles.activeNav} aria-current="page">
+          <span aria-hidden="true">✦</span>
+          <span>Coach</span>
+        </button>
+        <button type="button" onClick={() => handleNavigate('growth')}>
+          <span aria-hidden="true">▥</span>
+          <span>Insights</span>
+        </button>
+      </nav>
 
       {showSOS && (
         <MetaMomentOverlay
@@ -292,56 +380,22 @@ export default function CoachPage() {
         />
       )}
 
-      {/* TODO: Breathing overlay triggered by agent action */}
       {showBreathing && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 50,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--surface-mask)',
-            backdropFilter: 'blur(12px)',
-          }}
+          className={styles.breathingOverlay}
           onClick={() => setShowBreathing(false)}
         >
           <div
-            style={{
-              background: 'var(--bg-secondary)',
-              borderRadius: 'var(--radius-luxe)',
-              padding: '2rem',
-              maxWidth: '360px',
-              textAlign: 'center',
-              border: '1px solid var(--glass-border)',
-            }}
+            className={styles.breathingCard}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                width: '120px',
-                height: '120px',
-                borderRadius: '50%',
-                background: 'var(--grad-blue)',
-                margin: '0 auto 1.5rem',
-                animation: 'breatheLuxe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              }}
-            />
-            <p style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+            <div className={styles.breathingOrb} />
+            <p className={styles.breathingText}>
               {pendingAction?.reason || '跟著教練一起呼吸'}
             </p>
             <button
               onClick={() => setShowBreathing(false)}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: 'var(--text-primary)',
-                color: 'var(--bg-color)',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
+              className={styles.breathingButton}
             >
               完成
             </button>

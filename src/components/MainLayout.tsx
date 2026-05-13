@@ -54,19 +54,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => onNavigate('home')}
           >
-            {t('今日心情')}
+            {t('安定室')}
           </button>
           <button
             className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
             onClick={() => onNavigate('history')}
           >
-            {t('紀錄回顧')}
+            {t('紀錄')}
           </button>
           <button
             className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
             onClick={() => onNavigate('growth')}
           >
-            {t('成長看板')}
+            {t('洞察')}
           </button>
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
@@ -137,13 +137,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           position: sticky;
           top: 0;
           z-index: 100;
-          background: var(--glass-bg);
-          backdrop-filter: var(--glass-blur);
-          border-bottom: 1px solid var(--glass-border);
+          background: var(--shell-panel);
+          backdrop-filter: blur(28px);
+          -webkit-backdrop-filter: blur(28px);
+          border-bottom: 1px solid var(--shell-border);
+          box-shadow: var(--shell-highlight), 0 10px 28px rgba(0, 0, 0, 0.08);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--s-4) var(--s-6);
+          padding: calc(var(--s-3) + 2px) var(--s-6);
         }
 
         .logo-section {
@@ -165,10 +167,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .logo-text {
-          font-size: 1.6rem;
+          font-size: 1.45rem;
           font-weight: 900;
-          letter-spacing: 3px;
-          background: linear-gradient(135deg, var(--color-red) 0%, var(--color-yellow) 50%, var(--color-green) 100%);
+          letter-spacing: 0.18em;
+          background: linear-gradient(135deg, var(--text-primary) 0%, var(--color-yellow) 58%, var(--color-green) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -185,23 +187,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: none;
           border: none;
           color: var(--text-secondary);
-          font-size: 0.95rem;
-          font-weight: 500;
+          font-size: 0.92rem;
+          font-weight: 600;
           cursor: pointer;
-          padding: var(--s-2) var(--s-2);
+          padding: 10px 14px;
           position: relative;
           transition: var(--transition);
           white-space: nowrap;
           flex-shrink: 0;
+          border-radius: 999px;
         }
 
         .nav-link:hover {
           color: var(--text-primary);
+          background: var(--surface-elevated);
         }
 
         .nav-link.active {
           color: var(--text-primary);
-          font-weight: 600;
+          font-weight: 700;
+          background: var(--surface-elevated);
+          box-shadow: inset 0 0 0 1px var(--glass-border);
         }
 
         .nav-link.active::after {
@@ -222,8 +228,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .achievement-nav-btn {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
           border-radius: 50%;
           width: 44px;
           height: 44px;
@@ -235,13 +241,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           justify-content: center;
           flex-shrink: 0;
         }
-        .achievement-nav-btn:hover { transform: scale(1.1); background: var(--glass-border); }
+        .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
         .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
-        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: var(--surface-hover); }
+        .achievement-nav-btn.active { border-color: rgba(212, 184, 122, 0.45); box-shadow: 0 0 0 1px rgba(212, 184, 122, 0.15), 0 8px 20px rgba(212, 184, 122, 0.12); background: rgba(212, 184, 122, 0.12); }
 
         .settings-btn {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
           border-radius: 50%;
           width: 44px;
           height: 44px;
@@ -255,8 +261,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .settings-btn:hover {
-          transform: scale(1.1);
-          background: var(--glass-border);
+          transform: translateY(-1px) scale(1.05);
+          background: var(--surface-hover);
         }
 
         .settings-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
@@ -266,8 +272,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .theme-toggle {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
           border-radius: 50%;
           width: 44px;
           height: 44px;
@@ -281,8 +287,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .theme-toggle:hover {
-          transform: scale(1.1) rotate(15deg);
-          background: var(--glass-border);
+          transform: translateY(-1px) scale(1.05) rotate(10deg);
+          background: var(--surface-hover);
         }
 
         .theme-toggle:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
@@ -304,7 +310,45 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
         @media (max-width: 768px) {
           .footer-disclaimer { display: none; }
-          footer { padding: 0.5rem 1rem 0.5rem; }
+          footer { padding: 0.5rem 1rem 5.75rem; }
+          .main-content { padding-bottom: 5.25rem; }
+          .glass-header {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+          }
+          .glass-header nav {
+            position: fixed;
+            left: 50%;
+            bottom: var(--s-3);
+            z-index: 120;
+            width: min(calc(100vw - 24px), 420px);
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0;
+            padding: 6px;
+            background: var(--shell-panel);
+            border: 1px solid var(--shell-border);
+            border-radius: 28px;
+            box-shadow: var(--shell-highlight), 0 16px 34px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+          }
+          .glass-header .nav-link {
+            min-height: 44px;
+            padding: 10px 8px;
+            border-radius: 22px;
+            font-size: 0.76rem;
+            text-align: center;
+          }
+          .glass-header .nav-link.active {
+            color: #1f1b16;
+            background: linear-gradient(135deg, rgba(245, 243, 239, 0.9), rgba(213, 193, 165, 0.55));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 18px rgba(0, 0, 0, 0.14);
+          }
+          .glass-header .nav-link.active::after {
+            display: none;
+          }
         }
 
         .footer-main {
