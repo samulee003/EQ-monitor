@@ -27,15 +27,27 @@ describe('CoachPage', () => {
     vi.restoreAllMocks();
   });
 
-  it('應該顯示預設歡迎訊息', () => {
+  it('應該顯示 Stitch 預設開場訊息', () => {
     render(<CoachPage />);
-    expect(screen.getByText('你好，我是今心教練。我在這裡陪伴你，無論你現在的感受是什麼，都可以跟我說說。')).toBeInTheDocument();
+    expect(screen.getByText('早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。')).toBeInTheDocument();
   });
 
-  it('應該顯示歡迎卡片與建議提示', () => {
+  it('應該顯示 Stitch 開場訊息與建議提示', () => {
     render(<CoachPage />);
-    expect(screen.getByText('歡迎來到今心教練')).toBeInTheDocument();
-    expect(screen.getByText('我今天有點煩，想找人聊聊')).toBeInTheDocument();
+    expect(screen.getByText('早安。今天感覺如何？你可以只說一個詞，或描述身體現在最明顯的感覺。')).toBeInTheDocument();
+    expect(screen.getByText('我現在只想聊聊')).toBeInTheDocument();
+  });
+
+  it('應該顯示 Stitch AI 教練畫面骨架與快速回覆', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByRole('region', { name: 'Stitch AI 情緒教練畫布' })).toBeInTheDocument();
+    expect(screen.getByText(/今日/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '好的，一起試試' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我現在只想聊聊' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '好的，一起試試' }));
+    expect(screen.getByText('跟著教練一起呼吸')).toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {
@@ -148,11 +160,13 @@ describe('CoachPage', () => {
     expect(screen.getByText('你好')).toBeInTheDocument();
   });
 
-  it('點擊「幫我啟動 Meta-Moment」應該開啟 SOS 覆蓋層', () => {
+  it('點擊 SOS 按鈕應該開啟 SOS 覆蓋層', () => {
     render(<CoachPage />);
 
-    fireEvent.click(screen.getByText('幫我啟動 Meta-Moment'));
+    fireEvent.click(screen.getByLabelText('SOS 緊急協助'));
     expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+    expect(screen.getByText('安心專線 1925')).toBeInTheDocument();
+    expect(screen.getByText('生命線 1909')).toBeInTheDocument();
   });
 
   it('Agent 回傳 open_sos action 時開啟 Meta-Moment 覆蓋層', async () => {

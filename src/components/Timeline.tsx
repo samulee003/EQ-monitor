@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
 import { dataAdapter } from '../adapters';
@@ -7,7 +7,42 @@ import { type RulerLogEntry } from '../types/RulerTypes';
 import ExportPanel from './ExportPanel';
 import Skeleton from './Skeleton';
 
-const ITEMS_PER_PAGE = 10; // 每頁顯示數量
+const ITEMS_PER_PAGE = 10;
+
+const quadrantPalette = {
+    red: {
+        dot: '#C58B8A',
+        soft: 'rgba(197, 139, 138, 0.18)',
+        line: 'rgba(197, 139, 138, 0.42)',
+        glow: '0 0 0 6px rgba(197, 139, 138, 0.12)'
+    },
+    yellow: {
+        dot: '#D5C1A5',
+        soft: 'rgba(213, 193, 165, 0.2)',
+        line: 'rgba(213, 193, 165, 0.44)',
+        glow: '0 0 0 6px rgba(213, 193, 165, 0.14)'
+    },
+    blue: {
+        dot: '#97A6B4',
+        soft: 'rgba(151, 166, 180, 0.2)',
+        line: 'rgba(151, 166, 180, 0.42)',
+        glow: '0 0 0 6px rgba(151, 166, 180, 0.14)'
+    },
+    green: {
+        dot: '#AAB09B',
+        soft: 'rgba(170, 176, 155, 0.2)',
+        line: 'rgba(170, 176, 155, 0.44)',
+        glow: '0 0 0 6px rgba(170, 176, 155, 0.14)'
+    },
+    gray: {
+        dot: 'rgba(148, 148, 148, 0.8)',
+        soft: 'rgba(148, 148, 148, 0.14)',
+        line: 'rgba(148, 148, 148, 0.25)',
+        glow: '0 0 0 6px rgba(148, 148, 148, 0.08)'
+    }
+} as const;
+
+type QuadrantKey = keyof typeof quadrantPalette;
 
 const Timeline: React.FC = () => {
     const { t } = useLanguage();
@@ -22,27 +57,25 @@ const Timeline: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const listTopRef = useRef<HTMLDivElement>(null);
 
+    const loadLogs = useCallback(async () => {
+        const data = await dataAdapter.logs.export();
+        setLogs(data);
+    }, []);
+
     useEffect(() => {
-        // Simulate loading for smoother UX
         const timer = setTimeout(() => {
-            loadLogs();
+            void loadLogs();
             setIsLoading(false);
         }, 300);
         return () => clearTimeout(timer);
-    }, []);
+    }, [loadLogs]);
 
-    // Auto-hide import result after 5 seconds
     useEffect(() => {
         if (importResult) {
             const timer = setTimeout(() => setImportResult(null), 5000);
             return () => clearTimeout(timer);
         }
     }, [importResult]);
-
-    const loadLogs = async () => {
-        const data = await dataAdapter.logs.export();
-        setLogs(data);
-    };
 
     const handleDeleteClick = (id: string) => {
         setDeleteConfirmId(id);
@@ -55,7 +88,6 @@ const Timeline: React.FC = () => {
             if (targetLog && targetLog.id) {
                 await dataAdapter.logs.delete(targetLog.id);
             } else {
-                // 兼容舊數據（無 id）：按 timestamp 覆寫全部
                 const updated = allLogs.filter((log: RulerLogEntry) => log.timestamp !== deleteConfirmId);
                 await dataAdapter.logs.import(updated);
             }
@@ -86,7 +118,6 @@ const Timeline: React.FC = () => {
                 }
             });
         } else {
-            // 兼容舊數據（無 id）：按 timestamp 覆寫全部
             const updated = allLogs.map((log: RulerLogEntry) => {
                 if (log.timestamp === id) {
                     return {
@@ -134,7 +165,7 @@ const Timeline: React.FC = () => {
             setImportResult(result);
 
             if (result.success && result.imported > 0) {
-                await loadLogs(); // Refresh the list
+                await loadLogs();
             }
         };
         reader.onerror = () => {
@@ -146,8 +177,6 @@ const Timeline: React.FC = () => {
             });
         };
         reader.readAsText(file);
-
-        // Reset file input so same file can be selected again
         event.target.value = '';
     };
 
@@ -162,34 +191,66 @@ const Timeline: React.FC = () => {
         });
     };
 
-    // 分頁邏輯
+    const getQuadrantKey = (log: RulerLogEntry): QuadrantKey => {
+        const quadrant = log.emotions?.[0]?.quadrant;
+        if (quadrant === 'red' || quadrant === 'yellow' || quadrant === 'blue' || quadrant === 'green') {
+            return quadrant;
+        }
+        return 'gray';
+    };
+
+    const quadrantSummary = useMemo(() => {
+        const counts = logs.reduce<Record<QuadrantKey, number>>((acc, log) => {
+            const key = getQuadrantKey(log);
+            acc[key] += 1;
+            return acc;
+        }, { red: 0, yellow: 0, blue: 0, green: 0, gray: 0 });
+
+        return [
+            { key: 'all', label: t('全部'), count: logs.length, active: true },
+            { key: 'red', label: t('高能低悅'), count: counts.red, active: false },
+            { key: 'yellow', label: t('高能高悅'), count: counts.yellow, active: false },
+            { key: 'blue', label: t('低能低悅'), count: counts.blue, active: false },
+            { key: 'green', label: t('低能高悅'), count: counts.green, active: false }
+        ];
+    }, [logs, t]);
+
     const totalPages = Math.ceil(logs.length / ITEMS_PER_PAGE);
     const paginatedLogs = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         return logs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     }, [logs, currentPage]);
 
+    const narrativeStats = useMemo(() => {
+        const currentPageStart = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+        const currentPageEnd = Math.min(currentPage * ITEMS_PER_PAGE, logs.length);
+        const expressiveCount = logs.filter((log) => Boolean(log.expressing?.expression?.trim())).length;
+        return {
+            total: logs.length,
+            pageRange: logs.length > 0 ? `${currentPageStart}-${currentPageEnd}` : '0',
+            expressiveCount
+        };
+    }, [currentPage, logs]);
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        // 滾動到列表頂部
         listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
-    // Loading state
     if (isLoading) {
         return (
-            <div className="timeline-container fade-in">
-                <div className="timeline-header">
+            <div className="timeline-shell fade-in">
+                <div className="timeline-loading-hero">
                     <Skeleton type="text" />
                     <Skeleton type="text" className="short" />
                 </div>
-                <div className="timeline-list">
+                <div className="timeline-loading-list">
                     <Skeleton type="card" />
                     <Skeleton type="card" />
                 </div>
                 <style>{`
-                    .timeline-header { margin-bottom: 2.5rem; }
-                    .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
+                    .timeline-loading-hero { margin-bottom: 2rem; }
+                    .timeline-loading-list { display: flex; flex-direction: column; gap: 1.25rem; }
                 `}</style>
             </div>
         );
@@ -197,167 +258,189 @@ const Timeline: React.FC = () => {
 
     if (logs.length === 0) {
         return (
-            <div className="empty-state fade-in">
-                <div className="empty-illustration">
-                    <div className="floating-leaf leaf-1">{uiIcons.leaf}</div>
-                    <div className="floating-leaf leaf-2">{uiIcons.leaf}</div>
-                    <div className="empty-circle-outer">
-                        <div className="empty-circle-inner">
-                            <span className="empty-emoji">+</span>
+            <div className="timeline-shell fade-in">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".json"
+                    onChange={handleImportJSON}
+                    style={{ display: 'none' }}
+                />
+                <section className="timeline-empty-hero">
+                    <div className="timeline-empty-orb timeline-empty-orb-red"></div>
+                    <div className="timeline-empty-orb timeline-empty-orb-blue"></div>
+                    <div className="timeline-empty-orb timeline-empty-orb-green"></div>
+                    <div className="timeline-empty-mark">
+                        <span className="timeline-empty-plus">+</span>
+                    </div>
+                    <span className="timeline-kicker">{t('歷史時間軸')}</span>
+                    <h2>{t('第一筆情緒紀錄，會為之後的洞察打開入口。')}</h2>
+                    <p>{t('當你開始留下情緒與情境，這裡會逐步長出屬於你的敘事軌跡、象限分布與回顧節奏。')}</p>
+
+                    <div className="timeline-empty-feature-grid">
+                        <div className="timeline-empty-feature">
+                            <strong>{t('情緒節點')}</strong>
+                            <span>{t('保留每次高低起伏的時間與脈絡')}</span>
+                        </div>
+                        <div className="timeline-empty-feature">
+                            <strong>{t('回顧線索')}</strong>
+                            <span>{t('從事件、人物與地點整理出重複模式')}</span>
+                        </div>
+                        <div className="timeline-empty-feature">
+                            <strong>{t('備份匯入')}</strong>
+                            <span>{t('若你已有 JSON 備份，也能在這裡平滑接回紀錄')}</span>
                         </div>
                     </div>
-                </div>
-                <h2>{t('開始你的情緒覺察之旅')}</h2>
-                <p>{t('記錄你的第一個情緒，邁向自我成長的第一步。')}</p>
-                
-                <div className="empty-features">
-                    <div className="feature-item">
-                        <span className="feature-icon">📊</span>
-                        <span>{t('追蹤情緒趨勢')}</span>
-                    </div>
-                    <div className="feature-item">
-                        <span className="feature-icon">🧘</span>
-                        <span>{t('學習情緒調節')}</span>
-                    </div>
-                    <div className="feature-item">
-                        <span className="feature-icon">💡</span>
-                        <span>{t('獲得個人洞察')}</span>
-                    </div>
-                </div>
 
-                <div className="import-empty-action">
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        accept=".json"
-                        onChange={handleImportJSON}
-                        style={{ display: 'none' }}
-                    />
-                    <button className="import-btn-empty" onClick={handleImportClick}>
-                        📥 {t('匯入備份檔案')}
+                    <button className="timeline-import-prompt" onClick={handleImportClick}>
+                        <span className="timeline-import-icon">📥</span>
+                        <span>{t('匯入備份檔案')}</span>
                     </button>
-                </div>
+                </section>
+
                 {importResult && (
                     <div className={`import-toast ${importResult.success ? 'success' : 'error'}`}>
                         {t(importResult.message)}
                     </div>
                 )}
+
                 <style>{`
-                    .empty-state { 
-                        text-align: center; 
-                        padding: 4rem 2rem; 
-                        color: var(--text-secondary);
-                        max-width: 400px;
-                        margin: 0 auto;
-                    }
-                    .empty-illustration {
+                    .timeline-shell {
                         position: relative;
-                        width: 160px;
-                        height: 160px;
-                        margin: 0 auto 2rem;
-                    }
-                    .empty-circle-outer {
-                        width: 120px;
-                        height: 120px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, var(--color-green) 0%, var(--color-blue) 100%);
-                        opacity: 0.2;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin: 0 auto;
-                        animation: pulse 3s ease-in-out infinite;
-                    }
-                    .empty-circle-inner {
-                        width: 80px;
-                        height: 80px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, var(--color-green) 0%, var(--color-blue) 100%);
-                        opacity: 0.4;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    .empty-emoji {
-                        font-size: 2.5rem;
-                        animation: float 3s ease-in-out infinite;
-                    }
-                    .floating-leaf {
-                        position: absolute;
-                        width: 32px;
-                        height: 32px;
-                        opacity: 0.4;
-                        animation: floatLeaf 4s ease-in-out infinite;
-                    }
-                    .leaf-1 { top: 0; right: 10px; animation-delay: 0s; }
-                    .leaf-2 { bottom: 20px; left: 0; animation-delay: 2s; }
-                    @keyframes pulse {
-                        0%, 100% { transform: scale(1); opacity: 0.2; }
-                        50% { transform: scale(1.05); opacity: 0.3; }
-                    }
-                    @keyframes float {
-                        0%, 100% { transform: translateY(0); }
-                        50% { transform: translateY(-8px); }
-                    }
-                    @keyframes floatLeaf {
-                        0%, 100% { transform: translateY(0) rotate(0deg); }
-                        50% { transform: translateY(-10px) rotate(10deg); }
-                    }
-                    .empty-state h2 {
-                        font-size: 1.5rem;
-                        color: var(--text-primary);
-                        margin-bottom: 0.5rem;
-                        font-weight: 700;
-                    }
-                    .empty-state p {
-                        font-size: 0.95rem;
-                        line-height: 1.6;
-                        margin-bottom: 2rem;
-                    }
-                    .empty-features {
-                        display: flex;
-                        justify-content: center;
-                        gap: 1.5rem;
-                        margin-bottom: 2rem;
-                        flex-wrap: wrap;
-                    }
-                    .feature-item {
                         display: flex;
                         flex-direction: column;
+                        gap: 1.5rem;
+                    }
+                    .timeline-empty-hero {
+                        position: relative;
+                        overflow: hidden;
+                        padding: 3.5rem 1.5rem;
+                        border-radius: 32px;
+                        text-align: center;
+                        background:
+                            radial-gradient(circle at top left, rgba(213, 193, 165, 0.22), transparent 35%),
+                            radial-gradient(circle at right center, rgba(151, 166, 180, 0.2), transparent 32%),
+                            linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.18));
+                        border: 1px solid var(--glass-border);
+                        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+                    }
+                    .timeline-empty-orb {
+                        position: absolute;
+                        border-radius: 999px;
+                        filter: blur(18px);
+                        opacity: 0.75;
+                    }
+                    .timeline-empty-orb-red { width: 120px; height: 120px; top: -24px; left: -28px; background: rgba(197, 139, 138, 0.2); }
+                    .timeline-empty-orb-blue { width: 160px; height: 160px; right: -42px; top: 22%; background: rgba(151, 166, 180, 0.18); }
+                    .timeline-empty-orb-green { width: 120px; height: 120px; bottom: -24px; left: 22%; background: rgba(170, 176, 155, 0.16); }
+                    .timeline-empty-mark {
+                        position: relative;
+                        z-index: 1;
+                        width: 96px;
+                        height: 96px;
+                        margin: 0 auto 1.5rem;
+                        border-radius: 28px;
+                        display: flex;
                         align-items: center;
-                        gap: 0.5rem;
-                        font-size: 0.8rem;
-                        color: var(--text-secondary);
+                        justify-content: center;
+                        background: linear-gradient(135deg, rgba(245, 243, 239, 0.78), rgba(255,255,255,0.32));
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 18px 32px rgba(0,0,0,0.08);
                     }
-                    .feature-icon {
-                        font-size: 1.5rem;
-                    }
-                    .import-empty-action { margin-top: 1.5rem; }
-                    .import-btn-empty {
-                        background: var(--glass-bg);
-                        border: 1px dashed var(--glass-border);
-                        border-radius: var(--radius-sm);
-                        padding: 12px 24px;
-                        color: var(--text-secondary);
-                        font-size: 0.9rem;
-                        cursor: pointer;
-                        transition: var(--transition);
-                    }
-                    .import-btn-empty:hover {
-                        background: var(--surface-hover);
+                    .timeline-empty-plus {
+                        font-size: 2.6rem;
+                        line-height: 1;
                         color: var(--text-primary);
-                        border-color: var(--text-secondary);
                     }
+                    .timeline-kicker {
+                        position: relative;
+                        z-index: 1;
+                        display: inline-flex;
+                        padding: 0.45rem 0.9rem;
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.38);
+                        border: 1px solid rgba(255,255,255,0.5);
+                        font-size: 0.78rem;
+                        letter-spacing: 0.08em;
+                        color: var(--text-secondary);
+                        margin-bottom: 1rem;
+                    }
+                    .timeline-empty-hero h2 {
+                        position: relative;
+                        z-index: 1;
+                        margin: 0 0 0.75rem;
+                        color: var(--text-primary);
+                        font-size: clamp(1.7rem, 5vw, 2.3rem);
+                        line-height: 1.18;
+                    }
+                    .timeline-empty-hero p {
+                        position: relative;
+                        z-index: 1;
+                        max-width: 34rem;
+                        margin: 0 auto;
+                        color: var(--text-secondary);
+                        line-height: 1.75;
+                    }
+                    .timeline-empty-feature-grid {
+                        position: relative;
+                        z-index: 1;
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                        gap: 0.9rem;
+                        margin: 2rem 0;
+                    }
+                    .timeline-empty-feature {
+                        text-align: left;
+                        padding: 1rem;
+                        border-radius: 22px;
+                        background: rgba(255,255,255,0.26);
+                        border: 1px solid rgba(255,255,255,0.38);
+                        backdrop-filter: blur(18px);
+                    }
+                    .timeline-empty-feature strong {
+                        display: block;
+                        margin-bottom: 0.35rem;
+                        color: var(--text-primary);
+                    }
+                    .timeline-empty-feature span {
+                        display: block;
+                        color: var(--text-secondary);
+                        font-size: 0.88rem;
+                        line-height: 1.6;
+                    }
+                    .timeline-import-prompt {
+                        position: relative;
+                        z-index: 1;
+                        margin: 0 auto;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.65rem;
+                        min-height: 52px;
+                        padding: 0.9rem 1.35rem;
+                        border-radius: 999px;
+                        border: 1px dashed rgba(170, 176, 155, 0.75);
+                        background: rgba(255,255,255,0.32);
+                        color: var(--text-primary);
+                        cursor: pointer;
+                        transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+                    }
+                    .timeline-import-prompt:hover {
+                        transform: translateY(-1px);
+                        background: rgba(255,255,255,0.44);
+                        border-color: rgba(170, 176, 155, 1);
+                    }
+                    .timeline-import-icon { font-size: 1rem; }
                     .import-toast {
                         position: fixed;
-                        bottom: 24px;
                         left: 50%;
+                        bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
                         transform: translateX(-50%);
                         padding: 12px 24px;
-                        border-radius: var(--radius-sm);
+                        border-radius: 999px;
                         font-size: 0.9rem;
                         animation: slideUp 0.3s ease;
                         z-index: 1000;
+                        box-shadow: 0 14px 30px rgba(0,0,0,0.16);
+                        white-space: nowrap;
                     }
                     .import-toast.success { background: var(--color-green); color: var(--text-primary); }
                     .import-toast.error { background: var(--color-red); color: var(--text-primary); }
@@ -371,8 +454,7 @@ const Timeline: React.FC = () => {
     }
 
     return (
-        <div className="timeline-container fade-in">
-            {/* Hidden file input for import */}
+        <div className="timeline-shell fade-in">
             <input
                 type="file"
                 ref={fileInputRef}
@@ -381,107 +463,173 @@ const Timeline: React.FC = () => {
                 style={{ display: 'none' }}
             />
 
-            <div className="timeline-header">
-                <div>
-                    <h2>{t('數據洞察')}</h2>
-                    <p>{t('回顧你的情緒旅程與成長點滴。')}</p>
+            <section className="timeline-hero">
+                <div className="timeline-hero-copy">
+                    <span className="timeline-kicker">{t('歷史 / Timeline')}</span>
+                    <h2>{t('把情緒記錄整理成一條能回看的內在敘事。')}</h2>
+                    <p>{t('你已累積 {{count}} 筆紀錄；這一頁將時間、情緒象限與事件線索收進同一條光感時間軸，幫你更安靜地回看自己。').replace('{{count}}', String(narrativeStats.total))}</p>
                 </div>
-                <div className="export-actions-group">
-                    <button className="export-btn import" onClick={handleImportClick} title={t('匯入 JSON 備份')}>
-                        📥 {t('匯入')}
-                    </button>
-                    <button className="export-btn primary" onClick={() => setShowExport(true)} title={t('導出記錄')}>
-                        <span className="export-icon">{uiIcons.folder}</span> {t('導出')}
-                    </button>
-                </div>
-            </div>
 
-            {/* Import Result Toast */}
+                <div className="timeline-hero-panel">
+                    <div className="timeline-hero-metric">
+                        <span className="timeline-hero-label">{t('目前頁面')}</span>
+                        <strong>{narrativeStats.pageRange}</strong>
+                    </div>
+                    <div className="timeline-hero-metric">
+                        <span className="timeline-hero-label">{t('已寫下表達')}</span>
+                        <strong>{narrativeStats.expressiveCount}</strong>
+                    </div>
+                    <div className="timeline-hero-actions">
+                        <button className="timeline-action secondary" onClick={handleImportClick} title={t('匯入 JSON 備份')}>
+                            <span>{t('匯入')}</span>
+                        </button>
+                        <button className="timeline-action primary" onClick={() => setShowExport(true)} title={t('導出記錄')}>
+                            <span className="export-icon">{uiIcons.folder}</span>
+                            <span>{t('導出')}</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section className="timeline-chip-row" aria-label={t('情緒象限摘要')}>
+                {quadrantSummary.map((chip) => {
+                    const palette = chip.key === 'all' ? null : quadrantPalette[chip.key as QuadrantKey];
+                    return (
+                        <button
+                            key={chip.key}
+                            type="button"
+                            className={`timeline-chip ${chip.active ? 'active' : ''}`}
+                            aria-pressed={chip.active}
+                        >
+                            {palette && <span className="timeline-chip-dot" style={{ background: palette.dot }}></span>}
+                            <span>{chip.label}</span>
+                            <strong>{chip.count}</strong>
+                        </button>
+                    );
+                })}
+            </section>
+
             {importResult && (
                 <div className={`import-toast ${importResult.success ? 'success' : 'error'}`}>
                     {t(importResult.message)}
                 </div>
             )}
 
-            <div ref={listTopRef} className="timeline-list">
-                {paginatedLogs.map((log, index) => (
-                    <div key={log.id || index} className="timeline-card">
-                        <div className="card-top">
-                            <span className="card-date">{formatDate(log.timestamp)}</span>
-                            <div className="card-actions">
-                                <div
-                                    className="card-emotion-dot"
-                                    style={{ backgroundColor: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})`, color: `var(--color-${log.emotions?.[0]?.quadrant || 'gray'})` }}
-                                ></div>
-                                {editingId !== log.id && (
-                                    <>
-                                        <button className="edit-btn" aria-label="編輯" onClick={() => handleEditStart(log)}>✎</button>
-                                        <button className="delete-btn" aria-label="刪除" onClick={() => handleDeleteClick(log.id || log.timestamp)}>✕</button>
-                                    </>
-                                )}
+            <div className="timeline-inline-import-note">
+                <span className="timeline-inline-import-badge">{t('備份')}</span>
+                <p>{t('可隨時匯入既有 JSON 紀錄，新的資料會沿用目前的列表與分頁流程呈現。')}</p>
+            </div>
+
+            <div ref={listTopRef} className="timeline-stream">
+                <div className="timeline-stream-line"></div>
+                {paginatedLogs.map((log, index) => {
+                    const quadrantKey = getQuadrantKey(log);
+                    const palette = quadrantPalette[quadrantKey];
+                    const tags = [log.understanding?.what, log.understanding?.who, log.understanding?.where].filter(Boolean);
+
+                    return (
+                        <article
+                            key={log.id || index}
+                            className="timeline-entry"
+                            style={
+                                {
+                                    '--entry-accent': palette.dot,
+                                    '--entry-soft': palette.soft,
+                                    '--entry-line': palette.line,
+                                    '--entry-glow': palette.glow
+                                } as React.CSSProperties
+                            }
+                        >
+                            <div className="timeline-entry-anchor">
+                                <span className="timeline-entry-date">{formatDate(log.timestamp)}</span>
                             </div>
-                        </div>
 
-                        <div className="card-body">
-                            <h3 className="card-emotion-name">{(log.emotions || []).map(e => t(e.name)).join('、')}</h3>
+                            <div className="timeline-entry-node">
+                                <span className="timeline-entry-dot"></span>
+                            </div>
 
-                            <div className="card-context">
-                                {log.understanding && (
-                                    <div className="context-item">
-                                        <span className="context-label">{t('事件：')}</span>
-                                        <span className="context-value">{t(log.understanding.trigger || '未填寫')}</span>
+                            <div className="timeline-card">
+                                <div className="timeline-card-glow"></div>
+                                <div className="timeline-card-top">
+                                    <div className="timeline-card-heading">
+                                        <div className="timeline-card-emotion-mark">
+                                            <span className="timeline-card-emotion-core"></span>
+                                        </div>
+                                        <div>
+                                            <h3 className="card-emotion-name">{(log.emotions || []).map((emotion) => t(emotion.name)).join('、')}</h3>
+                                            <div className="timeline-card-meta">
+                                                <span>{t('強度')} {log.intensity}/10</span>
+                                                {log.understanding?.trigger && (
+                                                    <>
+                                                        <span className="timeline-meta-separator">•</span>
+                                                        <span>{t('事件')}{t('：')}{t(log.understanding.trigger)}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
-                                <div className="card-tags">
-                                    {log.understanding && (
-                                        <>
-                                            <span className="mini-tag">#{t(log.understanding.what)}</span>
-                                            <span className="mini-tag">#{t(log.understanding.who)}</span>
-                                            <span className="mini-tag">#{t(log.understanding.where)}</span>
-                                        </>
+
+                                    <div className="card-actions">
+                                        {editingId !== log.id && (
+                                            <>
+                                                <button className="edit-btn" aria-label="編輯" onClick={() => handleEditStart(log)}>✎</button>
+                                                <button className="delete-btn" aria-label="刪除" onClick={() => handleDeleteClick(log.id || log.timestamp)}>✕</button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="timeline-card-body">
+                                    {tags.length > 0 && (
+                                        <div className="card-tags">
+                                            {tags.map((tag) => (
+                                                <span key={`${log.id}-${tag}`} className="mini-tag">#{t(tag || '')}</span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {editingId === log.id ? (
+                                        <div className="edit-area">
+                                            <textarea
+                                                value={editText}
+                                                onChange={(e) => setEditText(e.target.value)}
+                                                className="edit-textarea"
+                                                placeholder={t('更新你的感受表達...')}
+                                            />
+                                            <div className="edit-actions">
+                                                <button className="save-btn" onClick={() => handleEditSave(log.id || log.timestamp)}>{t('儲存')}</button>
+                                                <button className="cancel-btn" onClick={() => setEditingId(null)}>{t('取消')}</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="timeline-story-block">
+                                            {log.expressing?.expression ? (
+                                                <p className="card-note">
+                                                    {t('「')} {t(log.expressing.expression)} {t('」')}
+                                                </p>
+                                            ) : (
+                                                <p className="timeline-story-placeholder">{t('這筆紀錄尚未寫下表達內容，但情緒與情境已被保留下來。')}</p>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>
-
-                            {editingId === log.id ? (
-                                <div className="edit-area">
-                                    <textarea
-                                        value={editText}
-                                        onChange={(e) => setEditText(e.target.value)}
-                                        className="edit-textarea"
-                                        placeholder={t('更新你的感受表達...')}
-                                    />
-                                    <div className="edit-actions">
-                                        <button className="save-btn" onClick={() => handleEditSave(log.id || log.timestamp)}>{t('儲存')}</button>
-                                        <button className="cancel-btn" onClick={() => setEditingId(null)}>{t('取消')}</button>
-                                    </div>
-                                </div>
-                            ) : (
-                                (log.expressing && log.expressing.expression) && (
-                                    <div className="card-note">
-                                        {t('「')} {t(log.expressing.expression)} {t(' 」')}
-                                    </div>
-                                )
-                            )}
-                        </div>
-                    </div>
-                ))}
+                        </article>
+                    );
+                })}
             </div>
 
-            {/* 分頁控制 */}
             {totalPages > 1 && (
                 <div className="pagination">
-                    <button 
+                    <button
                         className="page-btn"
                         disabled={currentPage === 1}
                         onClick={() => handlePageChange(currentPage - 1)}
                     >
                         ← {t('上一頁')}
                     </button>
-                    <span className="page-info">
-                        {currentPage} / {totalPages}
-                    </span>
-                    <button 
+                    <span className="page-info">{currentPage} / {totalPages}</span>
+                    <button
                         className="page-btn"
                         disabled={currentPage === totalPages}
                         onClick={() => handlePageChange(currentPage + 1)}
@@ -492,250 +640,569 @@ const Timeline: React.FC = () => {
             )}
 
             <style>{`
-                .timeline-header { margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
-                .timeline-header h2 { font-size: 1.6rem; margin: 0 0 0.5rem 0; }
-                .timeline-header p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
-
-                .export-actions-group {
+                .timeline-shell {
+                    position: relative;
                     display: flex;
-                    gap: 8px;
+                    flex-direction: column;
+                    gap: 1rem;
                 }
-
-                .export-btn {
-                    padding: 8px 16px;
-                    background: var(--glass-bg);
+                .timeline-hero {
+                    position: relative;
+                    overflow: hidden;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.95fr);
+                    gap: 1rem;
+                    padding: 1.35rem;
+                    border-radius: 32px;
+                    background:
+                        radial-gradient(circle at top left, rgba(213, 193, 165, 0.28), transparent 30%),
+                        radial-gradient(circle at right center, rgba(151, 166, 180, 0.22), transparent 32%),
+                        radial-gradient(circle at bottom left, rgba(170, 176, 155, 0.18), transparent 26%),
+                        linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0.18));
                     border: 1px solid var(--glass-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--text-secondary);
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    transition: var(--transition);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
+                    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
                 }
-                .export-btn.primary {
+                .timeline-hero-copy,
+                .timeline-hero-panel {
+                    position: relative;
+                    z-index: 1;
+                }
+                .timeline-kicker {
+                    display: inline-flex;
+                    padding: 0.45rem 0.9rem;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.34);
+                    border: 1px solid rgba(255,255,255,0.48);
+                    font-size: 0.78rem;
+                    letter-spacing: 0.08em;
+                    color: var(--text-secondary);
+                    margin-bottom: 1rem;
+                }
+                .timeline-hero-copy h2 {
+                    margin: 0 0 0.8rem;
+                    font-size: clamp(1.8rem, 4vw, 2.5rem);
+                    line-height: 1.15;
+                    color: var(--text-primary);
+                }
+                .timeline-hero-copy p {
+                    margin: 0;
+                    max-width: 38rem;
+                    color: var(--text-secondary);
+                    line-height: 1.75;
+                }
+                .timeline-hero-panel {
+                    align-self: stretch;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.9rem;
+                    padding: 1rem;
+                    border-radius: 26px;
+                    background: rgba(255,255,255,0.24);
+                    border: 1px solid rgba(255,255,255,0.38);
+                    backdrop-filter: blur(18px);
+                }
+                .timeline-hero-metric {
+                    padding-bottom: 0.85rem;
+                    border-bottom: 1px solid rgba(0,0,0,0.08);
+                }
+                .timeline-hero-metric:last-of-type {
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+                .timeline-hero-label {
+                    display: block;
+                    margin-bottom: 0.25rem;
+                    color: var(--text-secondary);
+                    font-size: 0.82rem;
+                }
+                .timeline-hero-metric strong {
+                    color: var(--text-primary);
+                    font-size: 1.5rem;
+                    line-height: 1.1;
+                }
+                .timeline-hero-actions {
+                    margin-top: auto;
+                    display: flex;
+                    gap: 0.75rem;
+                    flex-wrap: wrap;
+                }
+                .timeline-action {
+                    min-height: 46px;
+                    padding: 0.82rem 1.15rem;
+                    border-radius: 999px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.55rem;
+                    cursor: pointer;
+                    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+                    font-size: 0.92rem;
+                }
+                .timeline-action:hover { transform: translateY(-1px); }
+                .timeline-action.primary {
+                    border: none;
                     background: var(--text-primary);
                     color: var(--bg-color);
+                }
+                .timeline-action.secondary {
+                    border: 1px dashed rgba(170, 176, 155, 0.8);
+                    background: rgba(255,255,255,0.34);
+                    color: var(--text-primary);
+                }
+                .timeline-chip-row {
+                    display: flex;
+                    gap: 0.75rem;
+                    overflow-x: auto;
+                    padding: 0.15rem 0 0.4rem;
+                    scrollbar-width: none;
+                }
+                .timeline-chip-row::-webkit-scrollbar { display: none; }
+                .timeline-chip {
+                    flex-shrink: 0;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.55rem;
+                    min-height: 44px;
+                    padding: 0.75rem 1rem;
+                    border-radius: 999px;
+                    border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.24);
+                    color: var(--text-secondary);
+                    backdrop-filter: blur(18px);
+                }
+                .timeline-chip.active {
+                    background: var(--text-primary);
+                    color: var(--bg-color);
+                    border-color: var(--text-primary);
+                }
+                .timeline-chip strong {
+                    font-size: 0.8rem;
+                    opacity: 0.9;
+                }
+                .timeline-chip-dot {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 999px;
+                }
+                .timeline-inline-import-note {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.9rem 1rem;
+                    border-radius: 22px;
+                    background: rgba(255,255,255,0.22);
+                    border: 1px solid var(--glass-border);
+                    color: var(--text-secondary);
+                }
+                .timeline-inline-import-note p {
+                    margin: 0;
+                    line-height: 1.6;
+                }
+                .timeline-inline-import-badge {
+                    flex-shrink: 0;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 52px;
+                    min-height: 32px;
+                    padding: 0 0.8rem;
+                    border-radius: 999px;
+                    background: rgba(170, 176, 155, 0.16);
+                    color: var(--text-primary);
+                }
+                .timeline-stream {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    padding-top: 0.35rem;
+                }
+                .timeline-stream-line {
+                    position: absolute;
+                    left: 144px;
+                    top: 0;
+                    bottom: 0;
+                    width: 2px;
+                    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.1) 10%, rgba(0,0,0,0.1) 90%, transparent);
+                }
+                .timeline-entry {
+                    position: relative;
+                    display: grid;
+                    grid-template-columns: 128px 32px minmax(0, 1fr);
+                    gap: 0.9rem;
+                    align-items: start;
+                }
+                .timeline-entry-anchor {
+                    padding-top: 1rem;
+                    text-align: right;
+                }
+                .timeline-entry-date {
+                    font-size: 0.78rem;
+                    line-height: 1.5;
+                    color: var(--text-secondary);
+                    letter-spacing: 0.03em;
+                }
+                .timeline-entry-node {
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    justify-content: center;
+                    padding-top: 1rem;
+                }
+                .timeline-entry-dot {
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 999px;
+                    background: var(--entry-accent);
+                    box-shadow: var(--entry-glow);
+                    border: 2px solid rgba(255,255,255,0.9);
+                }
+                .timeline-card {
+                    position: relative;
+                    overflow: hidden;
+                    padding: 1.2rem;
+                    border-radius: 28px;
+                    background: rgba(255,255,255,0.24);
+                    border: 1px solid rgba(255,255,255,0.34);
+                    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+                    backdrop-filter: blur(18px);
+                }
+                .timeline-card::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0 auto 0 0;
+                    width: 4px;
+                    background: var(--entry-accent);
+                }
+                .timeline-card-glow {
+                    position: absolute;
+                    inset: auto -40px -40px auto;
+                    width: 140px;
+                    height: 140px;
+                    border-radius: 999px;
+                    background: radial-gradient(circle, var(--entry-soft) 0%, transparent 72%);
+                    pointer-events: none;
+                }
+                .timeline-card-top {
+                    position: relative;
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                }
+                .timeline-card-heading {
+                    display: flex;
+                    gap: 0.85rem;
+                    align-items: flex-start;
+                    min-width: 0;
+                }
+                .timeline-card-emotion-mark {
+                    flex-shrink: 0;
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: var(--entry-soft);
+                }
+                .timeline-card-emotion-core {
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 999px;
+                    background: var(--entry-accent);
+                }
+                .card-emotion-name {
+                    margin: 0;
+                    color: var(--text-primary);
+                    font-size: 1.12rem;
+                    line-height: 1.35;
+                }
+                .timeline-card-meta {
+                    margin-top: 0.35rem;
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 0.35rem;
+                    color: var(--text-secondary);
+                    font-size: 0.84rem;
+                    line-height: 1.6;
+                }
+                .timeline-meta-separator { opacity: 0.65; }
+                .card-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    flex-shrink: 0;
+                }
+                .edit-btn, .delete-btn {
+                    width: 36px;
+                    height: 36px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
                     border: none;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.3);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
                 }
-                .export-btn:hover { background: var(--surface-hover); color: var(--text-primary); border-color: var(--text-secondary); }
-                .export-btn.primary:hover { filter: brightness(0.9); transform: translateY(-1px); }
-                .export-btn.secondary { padding: 8px 12px; opacity: 0.6; }
-                .export-btn.secondary:hover { opacity: 1; }
-                .export-btn.import { 
-                    border-style: dashed; 
-                    background: transparent;
+                .edit-btn:hover, .delete-btn:hover { transform: translateY(-1px); }
+                .edit-btn:hover { color: var(--text-primary); background: rgba(213, 193, 165, 0.22); }
+                .delete-btn:hover { color: var(--color-red); background: rgba(197, 139, 138, 0.18); }
+                .timeline-card-body {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.95rem;
                 }
-                .export-btn.import:hover { 
-                    background: rgba(167,183,160,0.15); 
-                    border-color: var(--color-green);
-                    color: var(--color-green);
+                .card-tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.55rem;
                 }
-
+                .mini-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    min-height: 30px;
+                    padding: 0.35rem 0.8rem;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.28);
+                    border: 1px solid rgba(255,255,255,0.34);
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                }
+                .timeline-story-block {
+                    border-radius: 22px;
+                    padding: 1rem;
+                    background: rgba(255,255,255,0.28);
+                    border: 1px solid rgba(255,255,255,0.36);
+                }
+                .card-note {
+                    margin: 0;
+                    color: var(--text-primary);
+                    line-height: 1.8;
+                }
+                .timeline-story-placeholder {
+                    margin: 0;
+                    color: var(--text-secondary);
+                    line-height: 1.7;
+                }
+                .edit-area {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                .edit-textarea {
+                    width: 100%;
+                    min-height: 96px;
+                    border-radius: 18px;
+                    border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.4);
+                    color: var(--text-primary);
+                    padding: 0.9rem 1rem;
+                    font-family: inherit;
+                    font-size: 0.92rem;
+                    line-height: 1.7;
+                    resize: vertical;
+                    outline: none;
+                }
+                .edit-textarea:focus {
+                    border-color: var(--color-yellow);
+                    box-shadow: 0 0 0 3px rgba(213, 193, 165, 0.18);
+                }
+                .edit-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 0.65rem;
+                }
+                .save-btn, .cancel-btn {
+                    min-height: 40px;
+                    padding: 0.65rem 1rem;
+                    border-radius: 999px;
+                    cursor: pointer;
+                    transition: transform 0.25s ease, background 0.25s ease;
+                }
+                .save-btn {
+                    border: none;
+                    background: var(--text-primary);
+                    color: var(--bg-color);
+                }
+                .cancel-btn {
+                    border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.28);
+                    color: var(--text-secondary);
+                }
+                .save-btn:hover, .cancel-btn:hover { transform: translateY(-1px); }
+                .pagination {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 0.9rem;
+                    margin-top: 0.5rem;
+                    padding: 0.6rem 0 0;
+                }
+                .page-btn {
+                    min-height: 44px;
+                    padding: 0.75rem 1.15rem;
+                    border-radius: 999px;
+                    border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.26);
+                    color: var(--text-primary);
+                    cursor: pointer;
+                }
+                .page-btn:disabled {
+                    opacity: 0.35;
+                    cursor: not-allowed;
+                }
+                .page-info {
+                    min-width: 64px;
+                    text-align: center;
+                    color: var(--text-secondary);
+                }
                 .import-toast {
                     position: fixed;
-                    bottom: env(safe-area-inset-bottom, 80px);
-                    bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
                     left: 50%;
+                    bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
                     transform: translateX(-50%);
                     padding: 12px 24px;
-                    border-radius: var(--radius-sm);
+                    border-radius: 999px;
                     font-size: 0.9rem;
                     animation: slideUp 0.3s ease;
                     z-index: 1000;
-                    box-shadow: var(--shadow-luxe);
+                    box-shadow: 0 14px 30px rgba(0,0,0,0.16);
                     white-space: nowrap;
                 }
                 .import-toast.success { background: var(--color-green); color: var(--text-primary); }
                 .import-toast.error { background: var(--color-red); color: var(--text-primary); }
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-                    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                .export-icon {
+                    width: 16px;
+                    height: 16px;
+                    display: inline-flex;
                 }
-
-                .timeline-list { display: flex; flex-direction: column; gap: 1.5rem; }
-                @media (min-width: 768px) {
-                    .timeline-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-                }
-                .timeline-card { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1.5rem; transition: var(--transition); position: relative; overflow: hidden; }
-                .timeline-card:hover { border-color: var(--glass-border); background: var(--glass-bg); }
-                
-                .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-                .card-date { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-                
-                .card-actions { display: flex; align-items: center; gap: 12px; }
-                .card-emotion-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
-                
-                .edit-btn, .delete-btn {
-                    background: none;
-                    border: none;
-                    color: var(--text-secondary);
-                    font-size: 1rem;
-                    cursor: pointer;
-                    opacity: 0.5;
-                    transition: var(--transition);
-                    padding: 8px;
-                    border-radius: 6px;
-                    min-width: 36px;
-                    min-height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .timeline-card:hover .edit-btn, .timeline-card:hover .delete-btn { opacity: 0.75; background: var(--glass-bg); }
-                .edit-btn:hover, .delete-btn:hover { opacity: 1 !important; }
-                .delete-btn:hover { color: var(--color-red) !important; background: hsla(0, 40%, 65%, 0.12) !important; }
-                .edit-btn:hover { color: var(--color-yellow) !important; background: hsla(43, 40%, 70%, 0.12) !important; }
-                
-                .card-emotion-name { margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600; }
-                
-                .card-context { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-                .context-item { font-size: 0.85rem; display: flex; gap: 0.5rem; }
-                .context-label { color: var(--text-secondary); flex-shrink: 0; }
-                .context-value { color: var(--text-primary); }
-                
-                .card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-                .mini-tag { font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--glass-border); }
-
-                .card-note { font-size: 0.9rem; color: var(--text-primary); font-style: italic; opacity: 0.9; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); border-left: 2px solid var(--text-secondary); position: relative; }
-
-                .edit-area { display: flex; flex-direction: column; gap: 10px; }
-                .edit-textarea {
+                .export-icon svg {
                     width: 100%;
-                    min-height: 80px;
-                    background: var(--bg-secondary);
-                    border: 1px solid var(--glass-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--text-primary);
-                    padding: 10px;
-                    font-family: inherit;
-                    font-size: 0.9rem;
-                    resize: vertical;
-                    outline: none;
-                    transition: border-color 0.2s ease;
+                    height: 100%;
                 }
-                .edit-textarea:focus { border-color: var(--color-yellow); box-shadow: 0 0 0 3px hsla(43, 40%, 70%, 0.1); }
-                .edit-actions { display: flex; gap: 10px; justify-content: flex-end; }
-                .save-btn, .cancel-btn {
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    transition: var(--transition);
-                    min-height: 36px;
-                }
-                .save-btn { background: var(--text-primary); color: var(--bg-color); border: none; }
-                .cancel-btn { background: transparent; border: 1px solid var(--glass-border); color: var(--text-secondary); }
-                .save-btn:hover { filter: brightness(0.9); }
-                .cancel-btn:hover { background: var(--glass-bg); }
-
-                .empty-state { text-align: center; padding: 5rem 2rem; color: var(--text-secondary); }
-                .empty-icon { 
-                    width: 64px; 
-                    height: 64px; 
-                    margin: 0 auto 1rem; 
-                    color: var(--text-secondary); 
-                    opacity: 0.5; 
-                }
-                .empty-icon svg { width: 100%; height: 100%; }
-                .export-icon { width: 16px; height: 16px; display: inline-flex; }
-                .export-icon svg { width: 100%; height: 100%; }
-
                 .delete-modal-overlay {
                     position: fixed;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.6);
+                    background: rgba(0, 0, 0, 0.55);
                     backdrop-filter: blur(4px);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 1000;
-                    animation: fadeIn 0.2s ease;
                 }
                 .delete-modal {
-                    background: var(--bg-secondary);
-                    border: 1px solid var(--glass-border);
-                    border-radius: var(--radius-md);
-                    padding: 2rem;
                     max-width: 360px;
+                    padding: 2rem;
+                    border-radius: 28px;
+                    background: rgba(255,255,255,0.72);
+                    border: 1px solid rgba(255,255,255,0.46);
                     text-align: center;
-                    animation: scaleIn 0.2s ease;
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.16);
                 }
-                .delete-modal-icon { 
-                    width: 48px; 
-                    height: 48px; 
-                    margin: 0 auto 1rem; 
-                    color: var(--color-red); 
-                    opacity: 0.8;
+                .delete-modal-icon {
+                    width: 48px;
+                    height: 48px;
+                    margin: 0 auto 1rem;
+                    color: var(--color-red);
+                    opacity: 0.85;
                 }
-                .delete-modal-icon svg { width: 100%; height: 100%; }
-                .delete-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
-                .delete-modal p { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 1.5rem 0; }
-                .delete-modal-actions { display: flex; gap: 12px; justify-content: center; }
+                .delete-modal-icon svg {
+                    width: 100%;
+                    height: 100%;
+                }
+                .delete-modal h3 {
+                    margin: 0 0 0.5rem;
+                    color: var(--text-primary);
+                }
+                .delete-modal p {
+                    margin: 0 0 1.5rem;
+                    color: var(--text-secondary);
+                    line-height: 1.7;
+                }
+                .delete-modal-actions {
+                    display: flex;
+                    justify-content: center;
+                    gap: 0.75rem;
+                }
                 .delete-confirm-btn, .delete-cancel-btn {
-                    padding: 12px 28px;
-                    border-radius: var(--radius-sm);
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: var(--transition);
-                    border: none;
                     min-height: 44px;
+                    padding: 0.8rem 1.2rem;
+                    border-radius: 999px;
+                    cursor: pointer;
                 }
                 .delete-confirm-btn {
+                    border: none;
                     background: var(--color-red);
                     color: var(--text-primary);
                 }
-                .delete-confirm-btn:hover { filter: brightness(1.1); }
                 .delete-cancel-btn {
-                    background: var(--glass-bg);
                     border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.26);
                     color: var(--text-secondary);
                 }
-                .delete-cancel-btn:hover { background: var(--glass-border); color: var(--text-primary); }
-
-                @keyframes scaleIn {
-                    from { transform: scale(0.9); opacity: 0; }
-                    to { transform: scale(1); opacity: 1; }
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                    to { opacity: 1; transform: translateX(-50%) translateY(0); }
                 }
-
-                /* 分頁樣式 */
-                .pagination {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 1rem;
-                    margin-top: 2rem;
-                    padding: 1rem;
+                @media (max-width: 820px) {
+                    .timeline-hero {
+                        grid-template-columns: 1fr;
+                    }
+                    .timeline-stream-line {
+                        left: 14px;
+                    }
+                    .timeline-entry {
+                        grid-template-columns: 24px minmax(0, 1fr);
+                    }
+                    .timeline-entry-anchor {
+                        grid-column: 2;
+                        order: -1;
+                        padding-top: 0;
+                        text-align: left;
+                        padding-left: 0.2rem;
+                    }
+                    .timeline-entry-node {
+                        grid-column: 1;
+                        grid-row: 1 / span 2;
+                        padding-top: 0.2rem;
+                    }
+                    .timeline-card {
+                        grid-column: 2;
+                    }
                 }
-                .page-btn {
-                    padding: 0.75rem 1.25rem;
-                    background: var(--glass-bg);
-                    border: 1px solid var(--glass-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--text-primary);
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: var(--transition);
-                    min-height: 44px;
-                }
-                .page-btn:hover:not(:disabled) {
-                    background: var(--glass-border);
-                    border-color: var(--text-secondary);
-                }
-                .page-btn:disabled {
-                    opacity: 0.3;
-                    cursor: not-allowed;
-                }
-                .page-info {
-                    color: var(--text-secondary);
-                    font-size: 0.9rem;
-                    min-width: 60px;
-                    text-align: center;
+                @media (max-width: 640px) {
+                    .timeline-shell {
+                        gap: 0.85rem;
+                    }
+                    .timeline-hero,
+                    .timeline-card,
+                    .timeline-empty-hero {
+                        border-radius: 24px;
+                    }
+                    .timeline-inline-import-note {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                    .timeline-hero-actions,
+                    .delete-modal-actions,
+                    .edit-actions {
+                        flex-direction: column;
+                    }
+                    .timeline-action,
+                    .save-btn,
+                    .cancel-btn,
+                    .delete-confirm-btn,
+                    .delete-cancel-btn {
+                        width: 100%;
+                    }
                 }
             `}</style>
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirmId && (
                 <div className="delete-modal-overlay" onClick={handleDeleteCancel}>
                     <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
@@ -750,7 +1217,6 @@ const Timeline: React.FC = () => {
                 </div>
             )}
 
-            {/* Export Panel */}
             {showExport && (
                 <ExportPanel logs={logs} onClose={() => setShowExport(false)} />
             )}
@@ -758,6 +1224,4 @@ const Timeline: React.FC = () => {
     );
 };
 
-
 export default Timeline;
-

@@ -87,10 +87,45 @@
 
 .stepContent {
   font-size: 1.125rem;
-  margin-bottom: var(--s-8);
+  margin-bottom: var(--s-4);
   max-width: 28rem;
   line-height: 1.75;
   color: var(--text-primary);
+}
+
+.crisisCard {
+  width: min(100%, 28rem);
+  margin-bottom: var(--s-6);
+  padding: var(--s-3);
+  border: 1px solid rgba(197, 139, 138, 0.32);
+  border-radius: var(--radius-md);
+  background: rgba(197, 139, 138, 0.1);
+  color: var(--text-primary);
+}
+
+.crisisCard p {
+  margin: 0 0 var(--s-2);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.hotlineRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-2);
+}
+
+.hotlineRow a {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--color-red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(197, 139, 138, 0.28);
 }
 
 .bestSelfInput {
