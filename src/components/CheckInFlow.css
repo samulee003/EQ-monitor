@@ -36,7 +36,8 @@
 }
 
 .quick-record-strip:focus-visible,
-.line-bot-link-btn:focus-visible {
+.line-bot-link-btn:focus-visible,
+.line-bot-secondary-btn:focus-visible {
     outline: 2px solid var(--color-yellow);
     outline-offset: 3px;
 }
@@ -111,11 +112,47 @@
     line-height: 1.65;
 }
 
+.line-bot-account {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    margin-top: var(--s-3);
+    color: var(--text-primary);
+    font-size: 0.86rem;
+    line-height: 1.4;
+}
+
+.line-bot-account strong {
+    font-weight: 850;
+}
+
+.line-bot-account span {
+    padding: 3px 8px;
+    color: var(--color-green);
+    background: rgba(170, 176, 155, 0.16);
+    border: 1px solid rgba(170, 176, 155, 0.28);
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.line-bot-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    flex-shrink: 0;
+}
+
 .line-bot-link-btn {
     flex-shrink: 0;
     min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 var(--s-4);
     color: var(--bg-color);
+    text-align: center;
+    text-decoration: none;
     font-weight: 800;
     border: 0;
     border-radius: 999px;
@@ -127,6 +164,23 @@
 .line-bot-link-btn:hover {
     transform: translateY(-1px);
     opacity: 0.9;
+}
+
+.line-bot-secondary-btn {
+    min-height: 38px;
+    padding: 0 var(--s-4);
+    color: var(--text-primary);
+    font-weight: 800;
+    border: 1px solid var(--shell-border);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.line-bot-secondary-btn:hover {
+    border-color: rgba(213, 193, 165, 0.42);
+    transform: translateY(-1px);
 }
 
 .parent-entry-row {
@@ -481,7 +535,9 @@
         align-items: stretch;
         flex-direction: column;
     }
-    .line-bot-link-btn {
+    .line-bot-actions,
+    .line-bot-link-btn,
+    .line-bot-secondary-btn {
         width: 100%;
     }
     .sanctuary-hero {

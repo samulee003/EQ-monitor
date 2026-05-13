@@ -201,7 +201,14 @@ describe('CheckInFlow', () => {
         expect(screen.queryByText('快速統計')).not.toBeInTheDocument();
         expect(screen.getByText('快速記錄')).toBeInTheDocument();
         expect(screen.getByText('LINE Bot 也可以使用今心')).toBeInTheDocument();
-        expect(screen.getByText(/在 LINE 對今心輸入「綁定」/)).toBeInTheDocument();
+        expect(screen.getByText('鋅鋰師拔麻的小小額葉養成手札')).toBeInTheDocument();
+        expect(screen.getByText('@980pqrhn')).toBeInTheDocument();
+        expect(screen.getByText(/再對它輸入「綁定」取得 6 位碼/)).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: '加入 LINE 官方帳號' })).toHaveAttribute(
+            'href',
+            'https://line.me/R/ti/p/@980pqrhn'
+        );
     });
 
     it('應該從首頁 LINE Bot 說明前往教練綁定', () => {

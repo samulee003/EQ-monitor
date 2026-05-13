@@ -264,10 +264,17 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     const panel = screen.getByTestId('line-binding-panel');
+    expect(within(panel).getByText('LINE 官方帳號')).toBeInTheDocument();
+    expect(within(panel).getByText('鋅鋰師拔麻的小小額葉養成手札')).toBeInTheDocument();
+    expect(within(panel).getByText('@980pqrhn')).toBeInTheDocument();
+    expect(within(panel).getByRole('link', { name: '先加入 LINE 官方帳號' })).toHaveAttribute(
+      'href',
+      'https://line.me/R/ti/p/@980pqrhn'
+    );
     expect(within(panel).getByText('把 LINE 給你的 6 位碼貼在這裡')).toBeInTheDocument();
-    expect(within(panel).getByText('1. 打開 LINE，對今心輸入「綁定」')).toBeInTheDocument();
-    expect(within(panel).getByText('2. 複製 LINE 回覆的 6 位碼')).toBeInTheDocument();
-    expect(within(panel).getByText('3. 貼到下方欄位，按「貼上後綁定」')).toBeInTheDocument();
+    expect(within(panel).getByText('1. 先加入上方 LINE 官方帳號')).toBeInTheDocument();
+    expect(within(panel).getByText('2. 在 LINE 對它輸入「綁定」')).toBeInTheDocument();
+    expect(within(panel).getByText('3. 複製 LINE 回覆的 6 位碼，貼到下方欄位')).toBeInTheDocument();
     expect(within(panel).getByPlaceholderText('輸入 6 位碼')).toBeInTheDocument();
   });
 

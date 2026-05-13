@@ -8,6 +8,7 @@ import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { useAuth } from '../services/AuthContext';
 import { botSyncService } from '../services/BotSyncService';
+import { LINE_BOT_ADD_FRIEND_URL, LINE_BOT_BASIC_ID, LINE_BOT_DISPLAY_NAME } from '../constants/lineBot';
 import { useAppStore } from '../stores/appStore';
 import styles from './CoachPage.module.css';
 
@@ -279,11 +280,24 @@ export default function CoachPage() {
             <span className={styles.bindingEyebrow}>LINE Bot 綁定</span>
             <h2 className={styles.bindingTitle}>把 LINE 給你的 6 位碼貼在這裡</h2>
             <p className={styles.bindingHint}>綁定後，LINE 完成的覺察會同步給今心教練參考。</p>
+            <div className={styles.bindingAccount} aria-label="目前使用的 LINE 官方帳號">
+              <span>LINE 官方帳號</span>
+              <strong>{LINE_BOT_DISPLAY_NAME}</strong>
+              <code>{LINE_BOT_BASIC_ID}</code>
+            </div>
+            <a
+              className={styles.bindingAddFriendLink}
+              href={LINE_BOT_ADD_FRIEND_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              先加入 LINE 官方帳號
+            </a>
           </div>
           <ol className={styles.bindingSteps} aria-label="LINE Bot 綁定步驟">
-            <li>1. 打開 LINE，對今心輸入「綁定」</li>
-            <li>2. 複製 LINE 回覆的 6 位碼</li>
-            <li>3. 貼到下方欄位，按「貼上後綁定」</li>
+            <li>1. 先加入上方 LINE 官方帳號</li>
+            <li>2. 在 LINE 對它輸入「綁定」</li>
+            <li>3. 複製 LINE 回覆的 6 位碼，貼到下方欄位</li>
           </ol>
           <div className={styles.bindingForm}>
             <label className={styles.bindingLabel}>

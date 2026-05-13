@@ -16,6 +16,7 @@ import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 import { type Emotion } from '../data/emotionData';
 import { dataAdapter, settingsStore } from '../adapters';
+import { LINE_BOT_ADD_FRIEND_URL, LINE_BOT_BASIC_ID, LINE_BOT_DISPLAY_NAME } from '../constants/lineBot';
 import { logger } from '../utils/logger';
 import { type RulerLogEntry } from '../types/RulerTypes';
 
@@ -145,11 +146,25 @@ const CheckInFlow: React.FC = () => {
                         <div className="line-bot-copy">
                             <span className="line-bot-eyebrow">{t('LINE Bot')}</span>
                             <h2>{t('LINE Bot 也可以使用今心')}</h2>
-                            <p>{t('在 LINE 對今心輸入「綁定」，取得 6 位碼後到「教練」頁貼上，就能把 LINE 完成的覺察同步給 AI 教練參考。')}</p>
+                            <p>{t('先加入這個 LINE 官方帳號，再對它輸入「綁定」取得 6 位碼。')}</p>
+                            <div className="line-bot-account" aria-label={t('目前使用的 LINE 官方帳號')}>
+                                <strong>{LINE_BOT_DISPLAY_NAME}</strong>
+                                <span>{LINE_BOT_BASIC_ID}</span>
+                            </div>
                         </div>
-                        <button type="button" className="line-bot-link-btn" onClick={navigateToCoach}>
-                            {t('前往教練綁定')}
-                        </button>
+                        <div className="line-bot-actions">
+                            <a
+                                className="line-bot-link-btn"
+                                href={LINE_BOT_ADD_FRIEND_URL}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {t('加入 LINE 官方帳號')}
+                            </a>
+                            <button type="button" className="line-bot-secondary-btn" onClick={navigateToCoach}>
+                                {t('前往教練綁定')}
+                            </button>
+                        </div>
                     </article>
 
                     {isParentRole && (
