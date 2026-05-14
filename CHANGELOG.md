@@ -4,6 +4,55 @@
 
 ---
 
+## [V1.0.0] - 2026-05-14 — 今心產品起點版
+
+### PM 狀態
+
+- **這版定為今心 V1.0 產品起點**：`main` / `origin/main` 已指向 `cc21e8d fix: 補齊公開前刪帳與推送守門`，後續功能、設計與營運都以此版為基線往後迭代。
+- **可發給小圈朋友試玩**：技術 blocker 已清，適合 1-3 人或熟人封閉試玩；不建議用正式醫療、療癒服務或大規模公開宣傳語氣推出。
+- **入口策略定版**：PWA 網頁是所有朋友都能使用的共同入口；LINE 是已驗證的對話入口；WeChat 朋友先走 PWA 網頁，不在 V1.0 做 WeChat Bot。
+
+### 已完成
+
+- **PWA / 主動教練**
+  - 首頁與 Coach 首屏已以一般使用者能理解的語言呈現「主動 AI 教練」。
+  - 主導覽維持原版文案：`今日心情`、`記錄回顧`、`成長看板`、`教練`。
+  - 右上角成就、主題、提醒、帳號入口均為純 SVG 圖示。
+- **LINE Bot / RULER 資料流**
+  - 首頁與 Coach 綁定區顯示 LINE 官方帳號 `鋅鋰師拔麻的小小額葉養成手札`、Basic ID `@980pqrhn` 與加好友連結。
+  - 真 LINE 綁定流程已驗：LINE 取碼、PWA Coach 貼碼、畫面顯示已綁定。
+  - Production LINE RULER 完整資料流已驗：有效簽名 webhook、完整 RULER、寫入 `agent_ruler_logs`、`weekly-report` 與 Coach 讀到同一筆資料。
+- **帳號 / 資料 / 安全**
+  - PWA 已接 InsForge Auth，登入、註冊、重新整理保留 session 與 `coach_context` 初始化均已驗。
+  - 刪除帳號流程已補齊：`delete-account` 會清除 app/public 資料、寫入 `account_deletions` 最小刪除紀錄，前端會阻擋已刪帳號再次進入產品。
+  - `privacy.html` 與 `account-deletion.html` 已補上資料刪除範圍與最小刪除紀錄說明。
+  - Bot `/webhook` 已啟用 LINE 簽名驗證，缺少或無效簽名回 401。
+- **主動推送 / 排程**
+  - Production InsForge PostgreSQL 已啟用 `pg_cron` 與 `pg_net`。
+  - `weekly-report-batch` 與 `care-scan-daily` 均為 active；推送前會檢查必要的 LINE 綁定與 opt-in 條件。
+- **AI 教練 soul**
+  - `server/insforge/agents/soul.md` 作為教練人格、語氣、安全邊界與危機處理規格。
+  - Node ADK agent、InsForge agent 參考實作與 production `coach-simple.ts` 已用契約測試避免 prompt 分裂。
+
+### 驗證
+
+- 前端測試：`npm run test:run` ✅ 372 tests / 40 files
+- 後端測試：`cd server && npm run test:run` ✅ 160 tests / 16 files
+- TypeScript：`npx tsc --noEmit` ✅
+- 前端 build：`npm run build` ✅
+- 後端 build：`cd server && npm run build` ✅
+- lint：`npm run lint` ✅ 0 errors / 31 warnings
+- `git diff --check` ✅
+- Production smoke：PWA、LINE 綁定、LINE RULER、Coach、週報、主動排程、刪帳流程均已跑過並清理測試資料 ✅
+
+### V1.0 後續方向
+
+- P0：找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
+- P1：依朋友回饋補 LINE 綁定三步驟圖解、首頁入口分流或 Coach 首屏文案，不預先加太多說明。
+- P2：WeChat Bot、LINE Push quota 長期監控、主動推送 opt-in 設定頁、更多手機 viewport E2E、正式法律式隱私與免責審稿。
+
+---
+
 ## [4.3.2] - 2026-05-14 — LINE RULER 資料流與主動推送排程驗收
 
 ### PM 狀態
