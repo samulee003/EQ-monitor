@@ -67,21 +67,46 @@ describe('MainLayout 帳號入口', () => {
       </MainLayout>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '登入' }));
+    fireEvent.click(screen.getByRole('button', { name: '登入或註冊帳號' }));
 
     expect(screen.getByText('登入表單')).toBeInTheDocument();
   });
 
-  it('頁首行動按鈕在桌面版提供清楚文字', () => {
+  it('頁首行動按鈕使用純圖示並保留清楚可及名稱', () => {
     render(
       <MainLayout currentView="home" onNavigate={vi.fn()}>
         <div>主要內容</div>
       </MainLayout>
     );
 
-    expect(screen.getByRole('button', { name: '我的成就' })).toHaveTextContent('成就');
-    expect(screen.getByRole('button', { name: '切換主題：系統' })).toHaveTextContent('系統');
-    expect(screen.getByRole('button', { name: '提醒設定' })).toHaveTextContent('提醒');
-    expect(screen.getByRole('button', { name: '登入' })).toHaveTextContent('登入');
+    const buttons = [
+      screen.getByRole('button', { name: '我的成就' }),
+      screen.getByRole('button', { name: '切換主題：系統' }),
+      screen.getByRole('button', { name: '提醒設定' }),
+      screen.getByRole('button', { name: '登入或註冊帳號' }),
+    ];
+
+    buttons.forEach((button) => {
+      expect(button).toHaveTextContent(/^$/);
+      expect(button.querySelector('svg')).not.toBeNull();
+    });
+  });
+
+  it('已登入時帳號圖示會開啟個人中心', () => {
+    (useAuth as ReturnType<typeof vi.fn>).mockReturnValue({
+      user: { id: 'user_1', email: 'sam@example.com', displayName: 'Sam' },
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
+    render(
+      <MainLayout currentView="home" onNavigate={vi.fn()}>
+        <div>主要內容</div>
+      </MainLayout>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '帳號設定：Sam' }));
+
+    expect(screen.getByText('帳號設定')).toBeInTheDocument();
   });
 });
