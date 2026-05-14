@@ -119,7 +119,7 @@ describe('Timeline', () => {
         expect(screen.queryByText(/原本的表達/)).not.toBeInTheDocument();
     });
 
-    it('空狀態點開始第一筆紀錄會導回安定室', async () => {
+    it('空狀態點開始第一筆紀錄會導回今日心情', async () => {
         vi.mocked(dataAdapter.logs.export).mockResolvedValue([]);
 
         await renderLoadedTimeline();
