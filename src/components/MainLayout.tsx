@@ -17,6 +17,95 @@ interface MainLayoutProps {
   onNavigate: (view: 'home' | 'history' | 'growth' | 'achievement' | 'coach') => void;
 }
 
+type HeaderIconType = 'achievement' | 'moon' | 'sun' | 'system' | 'bell' | 'account' | 'loading';
+
+const HeaderActionIcon: React.FC<{ type: HeaderIconType }> = ({ type }) => {
+  const sharedProps = {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+    focusable: false,
+  };
+
+  if (type === 'achievement') {
+    return (
+      <svg {...sharedProps}>
+        <path d="M8 4h8v3.5a4 4 0 0 1-8 0V4Z" />
+        <path d="M6 5H4.75A1.75 1.75 0 0 0 3 6.75C3 9 4.6 10.6 7.1 11" />
+        <path d="M18 5h1.25A1.75 1.75 0 0 1 21 6.75c0 2.25-1.6 3.85-4.1 4.25" />
+        <path d="M12 12v4" />
+        <path d="M8.5 20h7" />
+        <path d="M10 16h4" />
+      </svg>
+    );
+  }
+
+  if (type === 'moon') {
+    return (
+      <svg {...sharedProps}>
+        <path d="M20 14.2A7.3 7.3 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2Z" />
+      </svg>
+    );
+  }
+
+  if (type === 'sun') {
+    return (
+      <svg {...sharedProps}>
+        <circle cx="12" cy="12" r="3.4" />
+        <path d="M12 2.8v2.1" />
+        <path d="M12 19.1v2.1" />
+        <path d="M4.2 4.2l1.5 1.5" />
+        <path d="M18.3 18.3l1.5 1.5" />
+        <path d="M2.8 12h2.1" />
+        <path d="M19.1 12h2.1" />
+        <path d="M4.2 19.8l1.5-1.5" />
+        <path d="M18.3 5.7l1.5-1.5" />
+      </svg>
+    );
+  }
+
+  if (type === 'system') {
+    return (
+      <svg {...sharedProps}>
+        <rect x="4" y="5" width="16" height="11" rx="2.2" />
+        <path d="M9 20h6" />
+        <path d="M12 16v4" />
+        <path d="M8.4 9.4h7.2" />
+        <path d="M8.4 12.2h4.8" />
+      </svg>
+    );
+  }
+
+  if (type === 'bell') {
+    return (
+      <svg {...sharedProps}>
+        <path d="M6.8 10.3a5.2 5.2 0 0 1 10.4 0c0 5 2 5.8 2 5.8H4.8s2-.8 2-5.8Z" />
+        <path d="M10 19a2.4 2.4 0 0 0 4 0" />
+        <path d="M12 3.4V2.8" />
+      </svg>
+    );
+  }
+
+  if (type === 'loading') {
+    return (
+      <svg {...sharedProps}>
+        <path d="M12 4a8 8 0 1 0 8 8" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...sharedProps}>
+      <circle cx="12" cy="8" r="3.4" />
+      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+    </svg>
+  );
+};
+
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { t } = useLanguage();
   const { theme, actualTheme, toggleTheme } = useTheme();
@@ -26,12 +115,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
   const [showAuth, setShowAuth] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // 主題圖標
   const themeIcon = {
-    dark: '暗',
-    light: '亮',
-    system: '系'
-  }[theme];
+    dark: 'moon',
+    light: 'sun',
+    system: 'system',
+  }[theme] as HeaderIconType;
   const themeLabel = {
     dark: t('深色'),
     light: t('淺色'),
@@ -61,17 +149,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     setShowAuth(true);
   };
 
-  const accountLabel = isAuthenticated ? t('帳號設定') : t('登入');
-  const accountText = isLoading
-    ? '…'
-    : isAuthenticated
-      ? (user?.displayName || user?.email || t('帳號')).slice(0, 1)
-      : '人';
-  const accountFullText = isLoading
+  const accountLabel = isLoading
     ? t('載入中')
     : isAuthenticated
-      ? t('帳號設定')
-      : t('登入帳號');
+      ? `${t('帳號設定')}：${user?.displayName || user?.email || t('帳號')}`
+      : t('登入或註冊帳號');
 
   return (
     <div className="app-container">
@@ -107,43 +189,48 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             {t('主動教練')}
           </button>
         </nav>
-        <div className="header-actions">
+        <div className="header-actions" aria-label={t('快捷操作')}>
           <button
-            className={`achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
+            className={`header-icon-button achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
             aria-label={t('我的成就')}
           >
-            <span className="header-action-icon" aria-hidden="true">勳</span>
-            <span className="header-action-text">{t('成就')}</span>
+            <span className="header-action-icon">
+              <HeaderActionIcon type="achievement" />
+            </span>
           </button>
           <button
-            className="theme-toggle"
+            className="header-icon-button theme-toggle"
             onClick={toggleTheme}
             title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
             aria-label={`${t('切換主題')}：${themeLabel}`}
           >
-            <span className="header-action-icon" aria-hidden="true">{themeIcon}</span>
-            <span className="header-action-text">{themeLabel}</span>
+            <span className="header-action-icon">
+              <HeaderActionIcon type={themeIcon} />
+            </span>
           </button>
           <button
-            className="settings-btn"
+            className="header-icon-button settings-btn"
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
             aria-label={t('提醒設定')}
           >
-            <span className="header-action-icon" aria-hidden="true">訊</span>
-            <span className="header-action-text">{t('提醒')}</span>
+            <span className="header-action-icon">
+              <HeaderActionIcon type="bell" />
+            </span>
           </button>
           <button
-            className="account-btn"
+            className={`header-icon-button account-btn ${isAuthenticated ? 'signed-in' : 'signed-out'}`}
             onClick={handleAccountClick}
             title={accountLabel}
             aria-label={accountLabel}
             disabled={isLoading}
           >
-            <span className="header-action-icon" aria-hidden="true">{accountText}</span>
-            <span className="header-action-text">{accountFullText}</span>
+            <span className="header-action-icon">
+              <HeaderActionIcon type={isLoading ? 'loading' : 'account'} />
+            </span>
+            {isAuthenticated && <span className="account-status-dot" aria-hidden="true" />}
           </button>
         </div>
       </header>
@@ -275,45 +362,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .header-actions {
           display: flex;
           align-items: center;
-          gap: var(--s-3);
+          gap: var(--s-2);
         }
 
-        .achievement-nav-btn {
+        .header-icon-button {
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
-          border-radius: 999px;
-          min-width: 78px;
-          height: 44px;
-          padding: 0 14px;
-          font-size: 1.1rem;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          flex-shrink: 0;
-        }
-        .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
-        .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
-        .achievement-nav-btn.active { border-color: rgba(212, 184, 122, 0.45); box-shadow: 0 0 0 1px rgba(212, 184, 122, 0.15), 0 8px 20px rgba(212, 184, 122, 0.12); background: rgba(212, 184, 122, 0.12); }
-
-        .settings-btn {
-          background: var(--surface-elevated);
-          border: 1px solid var(--shell-border);
-          border-radius: 999px;
-          min-width: 78px;
-          height: 44px;
-          padding: 0 14px;
+          border-radius: 50%;
+          width: 48px;
+          min-width: 48px;
+          height: 48px;
+          padding: 0;
+          color: var(--text-primary);
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 0;
           flex-shrink: 0;
+          position: relative;
         }
+
+        .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
+        .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+        .achievement-nav-btn.active { border-color: rgba(212, 184, 122, 0.45); box-shadow: 0 0 0 1px rgba(212, 184, 122, 0.15), 0 8px 20px rgba(212, 184, 122, 0.12); background: rgba(212, 184, 122, 0.12); }
 
         .settings-btn:hover {
           transform: translateY(-1px) scale(1.05);
@@ -324,23 +398,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
         .settings-btn:active {
           transform: scale(0.95);
-        }
-
-        .theme-toggle {
-          background: var(--surface-elevated);
-          border: 1px solid var(--shell-border);
-          border-radius: 999px;
-          min-width: 78px;
-          height: 44px;
-          padding: 0 14px;
-          font-size: 1rem;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          flex-shrink: 0;
         }
 
         .theme-toggle:hover {
@@ -355,38 +412,41 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .account-btn {
-          min-width: 86px;
-          height: 44px;
-          padding: 0 14px;
-          background: var(--surface-elevated);
-          border: 1px solid var(--shell-border);
-          border-radius: 999px;
-          color: var(--text-primary);
-          font-size: 0.92rem;
           font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          flex-shrink: 0;
+        }
+
+        .account-btn.signed-out {
+          background: linear-gradient(135deg, var(--surface-elevated), rgba(151, 166, 180, 0.14));
+        }
+
+        .account-btn.signed-in {
+          border-color: rgba(170, 176, 155, 0.55);
+          background: linear-gradient(135deg, rgba(170, 176, 155, 0.18), var(--surface-elevated));
         }
 
         .header-action-icon {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-width: 1.15em;
-          font-weight: 800;
+          width: 24px;
+          height: 24px;
         }
 
-        .header-action-text {
-          display: inline-flex;
-          align-items: center;
-          white-space: nowrap;
-          font-size: 0.86rem;
-          font-weight: 700;
+        .header-action-icon svg {
+          width: 24px;
+          height: 24px;
+          display: block;
+        }
+
+        .account-status-dot {
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          background: var(--color-green);
+          box-shadow: 0 0 0 2px var(--shell-panel);
         }
 
         .account-btn:hover:not(:disabled) {
@@ -488,17 +548,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             min-width: 44px;
             padding: 0;
             gap: 0;
-          }
-          .header-action-text {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
           }
         }
 
