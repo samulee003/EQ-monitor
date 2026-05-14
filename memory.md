@@ -8,12 +8,13 @@
 
 - 目前分支：`codex/stitch-ui-release-20260513`。
 - 目前分支已推上 GitHub，最新重要 commits：
+  - `3fb5759 fix: 清理 onboarding 舊圖示文案`
   - `61f61fd fix: 將頁首帳號入口改為純圖示`
   - `9a5c5c3 fix: 恢復原版導覽文案`
   - `9219bc3 fix: 補上 LINE 官方帳號入口`
 - Production PWA 已驗證版本：`https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home`
 - 內測判斷仍是黃燈偏綠：可以給 1-3 人／小圈朋友封閉試玩，不建議大量公開或投放式宣傳。
-- 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過；剩下要確認的是已綁定 LINE 完成 RULER 後，Coach / 週報是否讀到資料。
+- 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過；production LINE RULER 資料流也已用一次性已綁定測試帳號驗過：`/webhook` 有效簽名 → 完整 RULER → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
 
 ## 本輪最新修正
 
@@ -48,9 +49,16 @@
   - `document.body` 不再包含 `安定室`
   - 首頁與 Coach 綁定區都顯示 `鋅鋰師拔麻的小小額葉養成手札`、`@980pqrhn`、LINE 加好友連結
   - session `019e242d-7d68-7580-bfa2-6c612b61529f` 已驗真 LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定
+  - production `/webhook` 有效 LINE 簽名送 7 則完整 RULER 訊息 → `agent_ruler_logs` 寫入 1 筆 `source: line` / `is_full_flow: true` / 情緒「焦慮」
+  - `weekly-report` 對同一 app user 回 `total_sessions: 1`、`dominant_quadrant: red`
+  - Coach 對同一 app user 可讀到最近一筆 LINE RULER：「焦慮」、強度 `7`
+  - 上述一次性測試 binding、bot user、session、chat message、agent log、ADK session/event 均已清理
+  - production DB 已啟用 `pg_cron` / `pg_net`，`weekly-report-batch` 與 `care-scan-daily` 均為 active
 
 ## 最新驗證
 
+- Production LINE RULER 資料流 smoke → passed（測試資料已清理）
+- Production schedule smoke → `pg_cron` / `pg_net` installed，兩個 cron job active
 - `npm run test:run -- src/components/CheckInFlow.test.tsx src/pages/CoachPage.test.tsx` → 27 tests passed
 - `npm run test:run -- src/components/MainLayout.auth.test.tsx src/pages/CoachPage.test.tsx` → 24 tests passed（前一輪導覽／帳號入口驗證）
 - `npx tsc --noEmit` → passed
@@ -75,6 +83,6 @@
 
 ## 明確剩餘事項
 
-1. 真 LINE RULER 資料流：已綁定 LINE 帳號完成 RULER → Coach / 週報讀到資料。
+1. 技術 blocker 目前已清：LINE 綁定、LINE RULER 資料流、Coach / 週報讀取、production cron 均已驗。
 2. `codex/stitch-ui-release-20260513`、`main`、`origin/main` 已對齊；若後續再新增 commit，記得同步推到正式部署來源。
-3. 若要合併 schedule 相關變更，仍需用真實資料庫環境檢查 pg_cron / schedule。
+3. 非阻塞 PM 驗收：找朋友用手機跑一次完整體驗，確認一般使用者也看得懂 LINE 加好友與綁定流程。
