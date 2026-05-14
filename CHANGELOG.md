@@ -40,10 +40,12 @@
   - `npm run build` ✅
   - `git diff --check` ✅
 - 線上 smoke：
-  - `https://today-mood.zeabur.app/?v=nav-original-9a5c5c3#home` ✅
+  - `https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home` ✅
   - Header nav 顯示 `今日心情 / 記錄回顧 / 成長看板 / 教練` ✅
   - Header actions 四個按鈕均為純 SVG 且無可見文字 ✅
   - 帳號圖示可開登入 modal ✅
+  - 首頁顯示 LINE 官方帳號、`@980pqrhn` 與 `加入 LINE 官方帳號` 連結 ✅
+  - Coach 綁定區顯示 LINE 官方帳號、`@980pqrhn` 與 `先加入 LINE 官方帳號` 連結 ✅
   - 頁面文字不再包含 `安定室` ✅
 
 ### 剩餘風險

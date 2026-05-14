@@ -11,7 +11,7 @@
   - `61f61fd fix: 將頁首帳號入口改為純圖示`
   - `9a5c5c3 fix: 恢復原版導覽文案`
   - `9219bc3 fix: 補上 LINE 官方帳號入口`
-- Production PWA 目標版本：`https://today-mood.zeabur.app/?v=linebot-entry-9219bc3#home`
+- Production PWA 已驗證版本：`https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home`
 - 內測判斷仍是黃燈偏綠：可以給 1-3 人／小圈朋友封閉試玩，不建議大量公開或投放式宣傳。
 - 真 LINE 帳號完整 E2E 仍未跑。
 
@@ -46,6 +46,7 @@
   - `.header-actions` 四個按鈕都是純 SVG，沒有可見文字
   - 帳號圖示可開登入 modal
   - `document.body` 不再包含 `安定室`
+  - 首頁與 Coach 綁定區都顯示 `鋅鋰師拔麻的小小額葉養成手札`、`@980pqrhn`、LINE 加好友連結
 
 ## 最新驗證
 
