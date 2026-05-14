@@ -4,12 +4,13 @@
 
 ---
 
-## [4.3.1] - 2026-05-14 — 發布前 UI 信任收斂：原版導覽 + 純圖示帳號入口
+## [4.3.1] - 2026-05-14 — 發布前 UI 信任收斂：原版導覽 + 純圖示帳號入口 + LINE 官方帳號入口
 
 ### PM 狀態
 
 - **朋友試玩阻礙已收斂一輪**：首頁主導覽已恢復使用者指定的原版文案「今日心情／記錄回顧／成長看板／教練」，避免朋友打開後看到陌生的「安定室」而困惑。
 - **帳號入口變清楚**：右上角新增純 SVG 帳號圖示，未登入會開登入／註冊，已登入會進個人中心；同列成就、主題、提醒也全部改為純圖示，沒有「勳／系／訊」文字殘留。
+- **LINE Bot 入口變清楚**：首頁與 Coach 綁定區已顯示 LINE 官方帳號名稱、Basic ID 與加好友連結，朋友不需要猜要綁哪個帳號。
 
 ### 已完成
 
@@ -21,6 +22,10 @@
   - 成就、主題、提醒、帳號按鈕全部改為 inline SVG icon，保留清楚 aria-label。
   - 帳號 icon 未登入時開 `AuthModal`；已登入時開 `UserProfile`。
   - 新增已登入與未登入入口測試。
+- **LINE 官方帳號入口**
+  - 新增 `src/constants/lineBot.ts`，集中管理 LINE 官方帳號名稱、Basic ID 與加好友 URL。
+  - 首頁新增 LINE Bot 說明卡：`鋅鋰師拔麻的小小額葉養成手札`、`@980pqrhn`、`加入 LINE 官方帳號`、`前往教練綁定`。
+  - Coach 綁定區同步顯示官方帳號與加好友連結，再要求使用者貼 6 位碼。
 - **部署流程注意事項**
   - PWA 已部署到 Zeabur。
   - 這輪發現 Zeabur CLI 回 `Service deployed successfully` 時，最新 deployment 仍可能處於 `BUILDING`；必須等 `zeabur deployment list` 顯示 `RUNNING` 後再做線上 smoke，否則正式網址可能仍是舊 bundle。
@@ -28,9 +33,10 @@
 ### 驗證
 
 - 本機：
+  - `npm run test:run -- src/components/CheckInFlow.test.tsx src/pages/CoachPage.test.tsx` ✅ 27 tests
   - `npm run test:run -- src/components/MainLayout.auth.test.tsx src/pages/CoachPage.test.tsx` ✅ 24 tests
   - `npx tsc --noEmit` ✅
-  - `npm run test:run` ✅ 364 tests / 39 files
+  - `npm run test:run` ✅ 366 tests / 39 files
   - `npm run build` ✅
   - `git diff --check` ✅
 - 線上 smoke：
@@ -43,7 +49,6 @@
 ### 剩餘風險
 
 - 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
-- 目前主線 UI 還沒有足夠清楚地顯示 LINE 官方帳號名稱、Basic ID 或加好友連結；朋友測試前需要人工告知，或補一個明確 LINE 官方帳號入口。
 - 這些修正目前在 `codex/stitch-ui-release-20260513`，尚未合併回 `main`。
 
 ---
