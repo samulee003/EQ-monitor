@@ -1,6 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CheckInFlow from './CheckInFlow';
+
+const quickCheckInData = {
+    emotion: {
+        id: 'green_calm',
+        name: '平靜的',
+        quadrant: 'green' as const,
+        description: '覺得安定',
+    },
+    intensity: 4,
+    scenarioTag: '下班後',
+    note: '終於慢下來',
+    timestamp: '2026-05-14T10:00:00.000Z',
+};
 
 // Mock LanguageContext
 vi.mock('../services/LanguageContext', () => ({
@@ -8,7 +21,15 @@ vi.mock('../services/LanguageContext', () => ({
 }));
 
 // Mock settings store
+const { mockCreateLog } = vi.hoisted(() => ({
+    mockCreateLog: vi.fn(),
+}));
 vi.mock('../adapters', () => ({
+    dataAdapter: {
+        logs: {
+            create: mockCreateLog,
+        },
+    },
     settingsStore: {
         getUserRole: vi.fn(() => 'user'),
     },
@@ -136,9 +157,9 @@ vi.mock('./QuickStats', () => ({
 }));
 
 vi.mock('./QuickCheckIn', () => ({
-    default: ({ onComplete, onCancel }: { onComplete: () => void; onCancel: () => void }) => (
+    default: ({ onComplete, onCancel }: { onComplete: (data: typeof quickCheckInData) => void; onCancel: () => void }) => (
         <div data-testid="quick-check-in">
-            <button onClick={onComplete}>快速完成</button>
+            <button onClick={() => onComplete(quickCheckInData)}>快速完成</button>
             <button onClick={onCancel}>取消</button>
         </div>
     ),
@@ -160,6 +181,7 @@ describe('CheckInFlow', () => {
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
+        mockCreateLog.mockResolvedValue(undefined);
     });
 
     it('應該在初始步驟渲染 MoodMeter 與快捷入口', () => {
@@ -188,13 +210,31 @@ describe('CheckInFlow', () => {
         expect(screen.getByTestId('quick-check-in')).toBeInTheDocument();
     });
 
-    it('應該從快速記錄返回並重置流程', () => {
+    it('應該從快速記錄返回並重置流程', async () => {
         render(<CheckInFlow />);
 
         fireEvent.click(screen.getByText('快速記錄'));
         fireEvent.click(screen.getByText('快速完成'));
 
-        expect(mockResetFlow).toHaveBeenCalled();
+        await waitFor(() => {
+            expect(mockCreateLog).toHaveBeenCalledWith(expect.objectContaining({
+                emotions: [{
+                    id: 'green_calm',
+                    name: '平靜的',
+                    quadrant: 'green',
+                    energy: 1,
+                    pleasantness: 4,
+                }],
+                intensity: 4,
+                understanding: expect.objectContaining({
+                    trigger: '下班後',
+                    what: '終於慢下來',
+                }),
+                timestamp: '2026-05-14T10:00:00.000Z',
+                isFullFlow: false,
+            }));
+            expect(mockResetFlow).toHaveBeenCalled();
+        });
     });
 
     it('應該處理 MoodMeter 完成並呼叫 handleMoodComplete', () => {

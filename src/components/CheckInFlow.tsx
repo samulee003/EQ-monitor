@@ -11,12 +11,13 @@ import SummaryStep from './steps/SummaryStep';
 import NeuroCheckStep from './steps/NeuroCheckStep';
 import CenteringStep from './steps/CenteringStep';
 import QuickStats from './QuickStats';
-import QuickCheckIn from './QuickCheckIn';
+import QuickCheckIn, { type QuickCheckInData } from './QuickCheckIn';
 import ParentScenarios from './ParentScenarios';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 import { type Emotion } from '../data/emotionData';
-import { settingsStore } from '../adapters';
+import { dataAdapter, settingsStore } from '../adapters';
+import { type RulerLogEntry } from '../types/RulerTypes';
 
 // 高風險情緒 ID：選擇時提供安全資源
 const HIGH_RISK_EMOTION_IDS = new Set([
@@ -77,12 +78,52 @@ const CheckInFlow: React.FC = () => {
         }
     };
 
+    const handleQuickComplete = async (data: QuickCheckInData) => {
+        const quadrantDefaults: Record<string, { energy: number; pleasantness: number }> = {
+            red: { energy: 4, pleasantness: 1 },
+            yellow: { energy: 4, pleasantness: 4 },
+            blue: { energy: 1, pleasantness: 1 },
+            green: { energy: 1, pleasantness: 4 },
+        };
+        const defaults = quadrantDefaults[data.emotion.quadrant] || { energy: 3, pleasantness: 3 };
+        const logEntry: RulerLogEntry = {
+            id: crypto.randomUUID(),
+            emotions: [{
+                id: data.emotion.id,
+                name: data.emotion.name,
+                quadrant: data.emotion.quadrant,
+                energy: defaults.energy,
+                pleasantness: defaults.pleasantness,
+            }],
+            intensity: data.intensity,
+            bodyScan: null,
+            understanding: {
+                trigger: data.scenarioTag || '',
+                what: data.note || '',
+                who: '',
+                where: '',
+                need: null,
+                message: '',
+            },
+            expressing: null,
+            regulating: null,
+            physicalContext: undefined,
+            postMood: '',
+            timestamp: data.timestamp,
+            isFullFlow: false,
+        };
+
+        await dataAdapter.logs.create(logEntry);
+        setQuickMode(null);
+        resetFlow();
+    };
+
     return (
         <div className="check-in-flow fade-in">
             {/* Quick mode views */}
             {quickMode === 'quick' && (
                 <QuickCheckIn
-                    onComplete={() => { setQuickMode(null); resetFlow(); }}
+                    onComplete={handleQuickComplete}
                     onCancel={() => setQuickMode(null)}
                 />
             )}

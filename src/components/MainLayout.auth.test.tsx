@@ -71,4 +71,17 @@ describe('MainLayout 帳號入口', () => {
 
     expect(screen.getByText('登入表單')).toBeInTheDocument();
   });
+
+  it('頁首行動按鈕在桌面版提供清楚文字', () => {
+    render(
+      <MainLayout currentView="home" onNavigate={vi.fn()}>
+        <div>主要內容</div>
+      </MainLayout>
+    );
+
+    expect(screen.getByRole('button', { name: '我的成就' })).toHaveTextContent('成就');
+    expect(screen.getByRole('button', { name: '切換主題：系統' })).toHaveTextContent('系統');
+    expect(screen.getByRole('button', { name: '提醒設定' })).toHaveTextContent('提醒');
+    expect(screen.getByRole('button', { name: '登入' })).toHaveTextContent('登入');
+  });
 });

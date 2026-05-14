@@ -244,6 +244,30 @@ describe('CoachPage', () => {
     expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
   });
 
+  it('送出 LINE Bot 綁定碼時應該鎖定按鈕並顯示綁定中', async () => {
+    let resolveFetch: (value: Response) => void = () => undefined;
+    const fetchPromise = new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    });
+    const fetchMock = vi.fn().mockReturnValue(fetchPromise);
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
+    fireEvent.click(screen.getByRole('button', { name: '綁定' }));
+
+    expect(screen.getByRole('button', { name: '綁定中...' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: '綁定中...' }));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    resolveFetch({
+      ok: true,
+      json: async () => ({ lineUserId: 'U123' }),
+    } as Response);
+
+    expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
+  });
+
   it('LINE Bot 綁定失敗時顯示後端原因', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
@@ -258,5 +282,26 @@ describe('CoachPage', () => {
     fireEvent.click(screen.getByText('綁定'));
 
     expect(await screen.findByText('綁定失敗：API 錯誤: Binding code not found or expired')).toBeInTheDocument();
+  });
+
+  it('Coach 回覆不應該顯示工具名稱或工具結果痕跡', async () => {
+    vi.spyOn(client, 'sendMessage').mockResolvedValue({
+      response: '[工具 save_ruler_log 結果]\n{"success":true}\n我已經幫你記下來了，可以先喝一口水。',
+    });
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '我很焦慮 7 分' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    expect(await screen.findByText('我已經幫你記下來了，可以先喝一口水。')).toBeInTheDocument();
+    expect(screen.queryByText(/save_ruler_log/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/工具/)).not.toBeInTheDocument();
+  });
+
+  it('右上角不應該顯示無功能的個人設定按鈕', () => {
+    render(<CoachPage />);
+
+    expect(screen.queryByRole('button', { name: '個人設定' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '今心' })).toBeInTheDocument();
   });
 });

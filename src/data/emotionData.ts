@@ -140,7 +140,7 @@ export const emotions: Emotion[] = [
     { id: 'carefree', name: '無憂無慮的', quadrant: 'green', energy: 2, pleasantness: 5 },
     { id: 'sleepy', name: '昏昏欲睡的', quadrant: 'green', energy: 1, pleasantness: 1 },
     { id: 'complacent', name: '自鳴得意的', quadrant: 'green', energy: 1, pleasantness: 2 },
-    { id: 'serene', name: '平靜的', quadrant: 'green', energy: 1, pleasantness: 3 },
+    { id: 'serene', name: '安然的', quadrant: 'green', energy: 1, pleasantness: 3 },
     { id: 'cozy', name: '舒適的', quadrant: 'green', energy: 1, pleasantness: 4 },
     { id: 'placid', name: '安詳的', quadrant: 'green', energy: 1, pleasantness: 5 },
 

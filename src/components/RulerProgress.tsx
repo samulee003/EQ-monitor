@@ -14,16 +14,16 @@ const getDisplaySteps = (isFullFlow: boolean, t: (s: string) => string) => {
     if (isFullFlow) {
         return [
             { key: 'recognizing', label: t('覺察'), letter: 'N', color: 'red' },
-            { key: 'labeling', label: t('命名'), letter: 'N', color: 'yellow' },
-            { key: 'understanding', label: t('定位'), letter: 'L', color: 'blue' },
-            { key: 'expressing', label: t('需要'), letter: 'N', color: 'yellow' },
-            { key: 'regulating', label: t('選擇'), letter: 'C', color: 'green' },
+            { key: 'understanding', label: t('理解'), letter: 'U', color: 'blue' },
+            { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
+            { key: 'expressing', label: t('表達'), letter: 'E', color: 'yellow' },
+            { key: 'regulating', label: t('調節'), letter: 'R', color: 'green' },
         ];
     }
     // Quick mode
     return [
         { key: 'recognizing', label: t('覺察'), letter: 'N', color: 'red' },
-        { key: 'labeling', label: t('命名'), letter: 'N', color: 'yellow' },
+        { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
     ];
 };
 

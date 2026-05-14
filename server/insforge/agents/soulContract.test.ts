@@ -37,6 +37,8 @@ describe('今心教練 soul 契約', () => {
       '不是客服、不是占卜、不是診斷工具',
       'REST fallback',
       'trigger_action',
+      '不可提及工具名稱',
+      '不可把工具結果原樣貼給使用者',
     ]) {
       expect(productionPrompt).toContain(phrase);
       expect(promptSource).toContain(phrase);
