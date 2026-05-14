@@ -167,26 +167,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => onNavigate('home')}
           >
-            {t('安定室')}
+            {t('今日心情')}
           </button>
           <button
             className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
             onClick={() => onNavigate('history')}
           >
-            {t('紀錄')}
+            {t('記錄回顧')}
           </button>
           <button
             className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
             onClick={() => onNavigate('growth')}
           >
-            {t('洞察')}
+            {t('成長看板')}
           </button>
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
             onClick={() => onNavigate('coach')}
             title={t('今心主動 AI 教練')}
           >
-            {t('主動教練')}
+            {t('教練')}
           </button>
         </nav>
         <div className="header-actions" aria-label={t('快捷操作')}>

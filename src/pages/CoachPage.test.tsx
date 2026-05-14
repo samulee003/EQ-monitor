@@ -42,7 +42,7 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     expect(screen.getByRole('region', { name: '今心主動 AI 教練畫布' })).toBeInTheDocument();
-    expect(screen.getByText(/今日/)).toBeInTheDocument();
+    expect(screen.getByText(/^今日，/)).toBeInTheDocument();
     expect(screen.getByText('主動提下一步')).toBeInTheDocument();
     expect(screen.getByText('串起 LINE 與 APP')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '好的，一起試試' })).toBeInTheDocument();
@@ -56,10 +56,12 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     expect(screen.getByRole('navigation', { name: 'Coach 頁面導覽' })).toBeInTheDocument();
-    expect(screen.getByText('安定室')).toBeInTheDocument();
-    expect(screen.getByText('紀錄')).toBeInTheDocument();
-    expect(screen.getByText('主動教練')).toBeInTheDocument();
-    expect(screen.getByText('洞察')).toBeInTheDocument();
+    expect(screen.getByText('今日心情')).toBeInTheDocument();
+    expect(screen.getByText('記錄回顧')).toBeInTheDocument();
+    expect(screen.getByText('教練')).toBeInTheDocument();
+    expect(screen.getByText('成長看板')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '回到今日心情' })).toBeInTheDocument();
+    expect(screen.queryByText('安定室')).not.toBeInTheDocument();
   });
 
   it('Coach 空狀態應該提供三個主動教練情境入口', () => {

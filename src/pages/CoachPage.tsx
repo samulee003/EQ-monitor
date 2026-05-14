@@ -311,7 +311,7 @@ export default function CoachPage() {
         <button
           type="button"
           className={styles.headerIconButton}
-          aria-label="回到安定室"
+          aria-label="回到今日心情"
           onClick={() => handleNavigate('home')}
         >
           心
@@ -460,19 +460,19 @@ export default function CoachPage() {
       <nav className={styles.bottomNav} aria-label="Coach 頁面導覽">
         <button type="button" onClick={() => handleNavigate('home')}>
           <span aria-hidden="true">♧</span>
-          <span>安定室</span>
+          <span>今日心情</span>
         </button>
         <button type="button" onClick={() => handleNavigate('history')}>
           <span aria-hidden="true">≋</span>
-          <span>紀錄</span>
+          <span>記錄回顧</span>
         </button>
         <button type="button" className={styles.activeNav} aria-current="page">
           <span aria-hidden="true">✦</span>
-          <span>主動教練</span>
+          <span>教練</span>
         </button>
         <button type="button" onClick={() => handleNavigate('growth')}>
           <span aria-hidden="true">▥</span>
-          <span>洞察</span>
+          <span>成長看板</span>
         </button>
       </nav>
 
