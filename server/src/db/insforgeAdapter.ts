@@ -1,4 +1,4 @@
-import pg from 'pg';
+import * as pg from 'pg';
 import { RulerData } from '../types.js';
 import { generateBindingCode } from './bindingCode.js';
 import type { DbSession, DbUser, LineBindingCode } from './memoryAdapter.js';
