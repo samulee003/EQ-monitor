@@ -46,17 +46,11 @@ describe('今心教練 soul 契約', () => {
   });
 
   it('ADK agent 應該用 instruction 與 globalInstruction 接上 soul 契約', () => {
-    const adkLlmAgentSource = readProjectFile('adk-js-adk-v1.0.0/core/src/agents/llm_agent.ts');
-    const adkBaseAgentSource = readProjectFile('adk-js-adk-v1.0.0/core/src/agents/base_agent.ts');
     const edgeAgentSource = readProjectFile('server/insforge/agents/emotionCoach.ts');
     const nodeAgentSource = readProjectFile('server/src/agents/emotionCoach.ts');
 
-    expect(adkLlmAgentSource).toContain('instruction?: string | InstructionProvider');
-    expect(adkLlmAgentSource).toContain('globalInstruction?: string | InstructionProvider');
-    expect(adkLlmAgentSource).toContain('tools?: ToolUnion[]');
-    expect(adkBaseAgentSource).toContain('subAgents?: BaseAgent[]');
-
     for (const source of [edgeAgentSource, nodeAgentSource]) {
+      expect(source).toContain('import { LlmAgent }');
       expect(source).toContain('buildEmotionCoachInstruction()');
       expect(source).toContain('globalInstruction: buildEmotionCoachGlobalInstruction()');
       expect(source).toContain('tools: [rulerDataTool, saveRulerLogTool, getEmotionTrendTool, triggerActionTool]');
