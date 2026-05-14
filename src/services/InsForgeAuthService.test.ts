@@ -9,9 +9,19 @@ const authMock = vi.hoisted(() => ({
   setProfile: vi.fn(),
 }));
 
+const databaseMock = vi.hoisted(() => ({
+  from: vi.fn(),
+}));
+
+const functionsMock = vi.hoisted(() => ({
+  invoke: vi.fn(),
+}));
+
 vi.mock('@/lib/insforge/client', () => ({
   insforge: {
     auth: authMock,
+    database: databaseMock,
+    functions: functionsMock,
   },
 }));
 
@@ -28,9 +38,19 @@ const sdkUser = {
   metadata: null,
 };
 
+const createAccountDeletionQuery = (row: unknown = null) => {
+  const query = {
+    select: vi.fn(() => query),
+    eq: vi.fn(() => query),
+    maybeSingle: vi.fn().mockResolvedValue({ data: row, error: null }),
+  };
+  return query;
+};
+
 describe('InsForgeAuthService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    databaseMock.from.mockReturnValue(createAccountDeletionQuery());
   });
 
   it('註冊時應呼叫 InsForge Auth 並映射使用者資料', async () => {
@@ -79,6 +99,27 @@ describe('InsForgeAuthService', () => {
     });
   });
 
+  it('登入已刪除帳號時應立刻登出並拒絕恢復登入狀態', async () => {
+    authMock.signInWithPassword.mockResolvedValue({
+      data: { user: sdkUser, accessToken: 'token-1' },
+      error: null,
+    });
+    authMock.signOut.mockResolvedValue({ error: null });
+    databaseMock.from.mockReturnValue(createAccountDeletionQuery({
+      user_id: 'user-1',
+      deleted_at: '2026-05-14T00:00:00.000Z',
+    }));
+
+    const result = await insforgeAuthService.signIn('test@example.com', '[REDACTED]');
+
+    expect(result).toEqual({
+      success: false,
+      error: '這個帳號已完成刪除，若需要恢復請聯絡維護者',
+    });
+    expect(databaseMock.from).toHaveBeenCalledWith('account_deletions');
+    expect(authMock.signOut).toHaveBeenCalled();
+  });
+
   it('冷啟動時應從 InsForge current user 還原使用者', async () => {
     authMock.getCurrentUser.mockResolvedValue({
       data: { user: sdkUser },
@@ -90,6 +131,23 @@ describe('InsForgeAuthService', () => {
     expect(authMock.getCurrentUser).toHaveBeenCalled();
     expect(user?.id).toBe('user-1');
     expect(user?.displayName).toBe('測試用戶');
+  });
+
+  it('冷啟動遇到已刪除帳號時應登出並回到未登入', async () => {
+    authMock.getCurrentUser.mockResolvedValue({
+      data: { user: sdkUser },
+      error: null,
+    });
+    authMock.signOut.mockResolvedValue({ error: null });
+    databaseMock.from.mockReturnValue(createAccountDeletionQuery({
+      user_id: 'user-1',
+      deleted_at: '2026-05-14T00:00:00.000Z',
+    }));
+
+    const user = await insforgeAuthService.getUser();
+
+    expect(user).toBeNull();
+    expect(authMock.signOut).toHaveBeenCalled();
   });
 
   it('更新個人資料時應寫入 InsForge profile 並回傳 app 使用者格式', async () => {
@@ -115,5 +173,19 @@ describe('InsForgeAuthService', () => {
     });
     expect(updated.displayName).toBe('新名稱');
     expect(updated.avatar).toBe('https://example.com/new.png');
+  });
+
+  it('刪除帳號資料時應呼叫受保護的 Edge Function 清理雲端資料', async () => {
+    functionsMock.invoke.mockResolvedValue({
+      data: { success: true },
+      error: null,
+    });
+
+    const result = await insforgeAuthService.deleteAccountData('user-1');
+
+    expect(result).toEqual({ success: true });
+    expect(functionsMock.invoke).toHaveBeenCalledWith('delete-account', {
+      body: { userId: 'user-1' },
+    });
   });
 });

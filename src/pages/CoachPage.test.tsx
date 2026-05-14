@@ -188,6 +188,8 @@ describe('CoachPage', () => {
 
     fireEvent.click(screen.getByLabelText('SOS 緊急協助'));
     expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+    expect(screen.getByText(/今心不是緊急救援服務/)).toBeInTheDocument();
+    expect(screen.getByText(/119 或 110/)).toBeInTheDocument();
     expect(screen.getByText('安心專線 1925')).toBeInTheDocument();
     expect(screen.getByText('生命線 1909')).toBeInTheDocument();
   });

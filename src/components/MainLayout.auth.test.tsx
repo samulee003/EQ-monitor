@@ -123,4 +123,19 @@ describe('MainLayout 帳號入口', () => {
 
     expect(screen.getByText('帳號設定')).toBeInTheDocument();
   });
+
+  it('頁尾提供隱私、資料刪除與回報問題入口', () => {
+    render(
+      <MainLayout currentView="home" onNavigate={vi.fn()}>
+        <div>主要內容</div>
+      </MainLayout>
+    );
+
+    expect(screen.getByRole('link', { name: '隱私與免責聲明' })).toHaveAttribute('href', '/privacy.html');
+    expect(screen.getByRole('link', { name: '資料刪除申請' })).toHaveAttribute('href', '/account-deletion.html');
+    expect(screen.getByRole('link', { name: '回報問題' })).toHaveAttribute(
+      'href',
+      'https://github.com/samulee003/EQ-monitor/issues/new'
+    );
+  });
 });

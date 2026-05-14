@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>今心資料刪除申請</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f5f3ef;
+        --ink: #24211d;
+        --muted: #625d55;
+        --line: rgba(36, 33, 29, 0.16);
+        --panel: rgba(255, 255, 255, 0.72);
+        --accent: #8c6f48;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", serif;
+        background: linear-gradient(135deg, rgba(170, 176, 155, 0.28), transparent 38%), var(--bg);
+        color: var(--ink);
+        line-height: 1.8;
+      }
+      main {
+        width: min(820px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0 64px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 5vw, 3rem);
+        letter-spacing: 0.08em;
+      }
+      h2 {
+        margin: 28px 0 10px;
+        font-size: 1.2rem;
+      }
+      p, li {
+        color: var(--muted);
+      }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 22px;
+        margin: 18px 0;
+      }
+      a {
+        color: var(--accent);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --ink: #f2eee7;
+          --muted: #c7c0b6;
+          --line: rgba(242, 238, 231, 0.16);
+          --panel: rgba(255, 255, 255, 0.06);
+          --accent: #d5c1a5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>今心資料刪除申請</h1>
+      <p>最後更新：2026 年 5 月 14 日</p>
+
+      <section>
+        <h2>App 內刪除</h2>
+        <p>登入今心後，進入右上角帳號圖示 → 個人中心 → 數據 → 刪除帳號，即可刪除與此帳號連結的情緒記錄、教練記憶、LINE 綁定與推送紀錄。</p>
+      </section>
+
+      <section>
+        <h2>人工協助</h2>
+        <p>如果你無法登入，請到 GitHub 建立刪除申請，附上註冊 email 與可協助確認身份的資訊，不要公開貼出密碼、LINE userId 或敏感情緒內容。</p>
+        <p><a href="https://github.com/samulee003/EQ-monitor/issues/new">建立資料刪除申請</a></p>
+      </section>
+
+      <section>
+        <h2>處理範圍</h2>
+        <p>我們會刪除今心產品資料庫中與該帳號連結的情緒記錄、教練記憶、LINE 綁定與推送紀錄。系統會保留一筆最小刪除紀錄，用來防止殘留的登入身分被重新啟用；這筆紀錄不包含情緒內容。</p>
+        <p>若第三方平台仍保存登入或基礎服務紀錄，會依該平台可用工具與法規要求處理。</p>
+      </section>
+    </main>
+  </body>
+</html>

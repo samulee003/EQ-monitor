@@ -260,6 +260,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             {t('如需協助：安心專線')} <strong>1925</strong> · {t('生命線')} <strong>1909</strong>
           </span>
         </div>
+        <div className="footer-links" aria-label={t('產品資訊')}>
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">{t('隱私與免責聲明')}</a>
+          <a href="/account-deletion.html" target="_blank" rel="noopener noreferrer">{t('資料刪除申請')}</a>
+          <a href="https://github.com/samulee003/EQ-monitor/issues/new" target="_blank" rel="noopener noreferrer">{t('回報問題')}</a>
+        </div>
       </footer>
 
       {/* Notification Settings Modal */}
@@ -531,6 +536,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .footer-hotline {
           color: var(--color-yellow);
           opacity: 0.9;
+        }
+
+        .footer-links {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.65rem;
+          opacity: 0.9;
+        }
+
+        .footer-links a {
+          color: var(--text-secondary);
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+
+        .footer-links a:hover,
+        .footer-links a:focus-visible {
+          color: var(--text-primary);
         }
 
         .nav-link:focus-visible {

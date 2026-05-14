@@ -38,6 +38,18 @@ type ProfileData = {
   user?: InsForgeUser;
 } | InsForgeUser;
 
+type DeleteAccountResponse = {
+  success?: boolean;
+  error?: string;
+};
+
+type AccountDeletionRow = {
+  user_id: string;
+  deleted_at?: string;
+};
+
+const DELETED_ACCOUNT_ERROR = '這個帳號已完成刪除，若需要恢復請聯絡維護者';
+
 const getMessage = (error: InsForgeError | null | undefined, fallback: string): string =>
   error?.message || fallback;
 
@@ -70,6 +82,32 @@ const extractProfileUser = (data: ProfileData | null): InsForgeUser | null => {
 };
 
 export class InsForgeAuthService {
+  private async isAccountDeleted(userId: string): Promise<boolean> {
+    const { data, error } = await insforge.database
+      .from('account_deletions')
+      .select('user_id, deleted_at')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('account_deletions fetch failed (non-blocking):', error);
+      return false;
+    }
+    return Boolean(data as AccountDeletionRow | null);
+  }
+
+  private async discardDeletedSession(userId: string): Promise<boolean> {
+    const deleted = await this.isAccountDeleted(userId);
+    if (!deleted) return false;
+
+    try {
+      await this.signOut();
+    } catch {
+      // 已刪帳號即使遠端登出失敗，也不能恢復成本地登入狀態。
+    }
+    return true;
+  }
+
   async signUp(email: string, password: string, displayName?: string): Promise<AuthResult> {
     const name = displayName?.trim();
     const { data, error } = await insforge.auth.signUp({
@@ -103,9 +141,14 @@ export class InsForgeAuthService {
     if (error) return { success: false, error: getMessage(error, '登入失敗') };
     if (!data?.user) return { success: false, error: '登入失敗，未取得使用者資料' };
 
+    const user = data.user as InsForgeUser;
+    if (await this.discardDeletedSession(user.id)) {
+      return { success: false, error: DELETED_ACCOUNT_ERROR };
+    }
+
     return {
       success: true,
-      user: mapUser(data.user as InsForgeUser),
+      user: mapUser(user),
       token: data.accessToken,
     };
   }
@@ -118,7 +161,10 @@ export class InsForgeAuthService {
   async getUser(): Promise<UserProfile | null> {
     const { data, error } = await insforge.auth.getCurrentUser();
     if (error || !data?.user) return null;
-    return mapUser((data as CurrentUserData).user as InsForgeUser);
+
+    const user = (data as CurrentUserData).user as InsForgeUser;
+    if (await this.discardDeletedSession(user.id)) return null;
+    return mapUser(user);
   }
 
   async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
@@ -137,6 +183,16 @@ export class InsForgeAuthService {
     const user = extractProfileUser(updated as ProfileData | null);
     if (!user) throw new Error('更新個人資料失敗，未取得使用者資料');
     return mapUser(user);
+  }
+
+  async deleteAccountData(userId: string): Promise<{ success: boolean; error?: string }> {
+    const { data, error } = await insforge.functions.invoke<DeleteAccountResponse>('delete-account', {
+      body: { userId },
+    });
+
+    if (error) return { success: false, error: getMessage(error, '刪除帳號資料失敗') };
+    if (data?.success === false) return { success: false, error: data.error || '刪除帳號資料失敗' };
+    return { success: true };
   }
 }
 

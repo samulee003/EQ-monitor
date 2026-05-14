@@ -132,6 +132,18 @@ async function runScan(client: ReturnType<typeof createClient>): Promise<Record<
     if (!recentActiveSet.has(uid)) silentUsers.push(uid);
   }
 
+  const allCareCandidates = Array.from(new Set([...redStreakUsers, ...silentUsers]));
+  const { data: optedInRows, error: optInError } = allCareCandidates.length > 0
+    ? await client.database
+      .from('coach_context')
+      .select('user_id, coach_opted_in')
+      .in('user_id', allCareCandidates)
+      .eq('coach_opted_in', true)
+    : { data: [], error: null };
+  if (optInError) return { error: optInError.message };
+
+  const optedInSet = new Set((optedInRows ?? []).map((r: { user_id: string }) => r.user_id));
+
   // 撈最近 7 天 notification_log 做冷卻
   const coolDownStart = new Date(today.getTime() - COOL_DOWN_DAYS * 86_400_000);
   const { data: recentNotif } = await client.database
@@ -147,9 +159,11 @@ async function runScan(client: ReturnType<typeof createClient>): Promise<Record<
 
   const queue: Array<{ uid: string; type: 'care_red_streak' | 'care_silent' }> = [];
   for (const uid of redStreakUsers) {
+    if (!optedInSet.has(uid)) continue;
     if (!sentRecent.get(uid)?.has('care_red_streak')) queue.push({ uid, type: 'care_red_streak' });
   }
   for (const uid of silentUsers) {
+    if (!optedInSet.has(uid)) continue;
     if (!sentRecent.get(uid)?.has('care_silent')) queue.push({ uid, type: 'care_silent' });
   }
 

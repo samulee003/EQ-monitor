@@ -4,6 +4,7 @@ import {
   filterUnsentToday,
   findRedStreakUsers,
   findSilentUsers,
+  filterOptedInUsers,
   hasConsecutiveDays,
   isWithinCooldown,
   renderWeeklyReportText,
@@ -87,6 +88,21 @@ describe('findRedStreakUsers', () => {
 describe('findSilentUsers', () => {
   it('歷史 active 但近期 inactive 的用戶被選出', () => {
     expect(findSilentUsers(['u1', 'u2', 'u3'], ['u2'])).toEqual(['u1', 'u3']);
+  });
+});
+
+describe('filterOptedInUsers', () => {
+  it('只保留明確同意主動教練推送的使用者', () => {
+    expect(
+      filterOptedInUsers(
+        ['u1', 'u2', 'u3'],
+        [
+          { user_id: 'u1', coach_opted_in: true },
+          { user_id: 'u2', coach_opted_in: false },
+          { user_id: 'u3', coach_opted_in: null },
+        ]
+      )
+    ).toEqual(['u1']);
   });
 });
 

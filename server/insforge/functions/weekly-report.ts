@@ -188,6 +188,18 @@ async function runBatch(client: ReturnType<typeof createClient>): Promise<Record
     }
   }
 
+  const { data: optedInRows, error: optInError } = userIds.length > 0
+    ? await client.database
+      .from('coach_context')
+      .select('user_id, coach_opted_in')
+      .in('user_id', userIds)
+      .eq('coach_opted_in', true)
+    : { data: [], error: null };
+
+  if (optInError) return { processed: 0, error: optInError.message };
+
+  const optedInSet = new Set((optedInRows ?? []).map((r: { user_id: string }) => r.user_id));
+
   // 撈今日已發送紀錄做冪等過濾
   const { data: sentToday } = await client.database
     .from('notification_log')
@@ -196,7 +208,7 @@ async function runBatch(client: ReturnType<typeof createClient>): Promise<Record
     .eq('run_date', runDate);
   const sentSet = new Set((sentToday ?? []).map((r: { user_id: string }) => r.user_id));
 
-  const candidates = userIds.filter((id) => !sentSet.has(id)).slice(0, BATCH_LIMIT);
+  const candidates = userIds.filter((id) => optedInSet.has(id) && !sentSet.has(id)).slice(0, BATCH_LIMIT);
 
   const results: Array<{ userId: string; pushed: boolean; reason?: string }> = [];
   for (const uid of candidates) {
@@ -241,10 +253,10 @@ async function runBatch(client: ReturnType<typeof createClient>): Promise<Record
 
   return {
     processed: results.length,
-    total_candidates: userIds.length,
+    total_candidates: optedInSet.size,
     pushed: results.filter((r) => r.pushed).length,
     results,
-    remaining: Math.max(0, userIds.length - sentSet.size - results.length),
+    remaining: Math.max(0, optedInSet.size - sentSet.size - results.length),
     run_date: runDate,
   };
 }

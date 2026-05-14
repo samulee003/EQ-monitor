@@ -91,7 +91,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
         </p>
 
         <div className={styles.crisisCard} aria-label="緊急求助資訊">
-          <p>如果你或身邊的人有立即危險，請先離開危險環境並聯絡當地緊急服務。</p>
+          <p>今心不是緊急救援服務。如果你或身邊的人有立即危險，請先離開危險環境並聯絡當地緊急服務，台灣可撥 119 或 110。</p>
           <div className={styles.hotlineRow}>
             <a href="tel:1925">安心專線 1925</a>
             <a href="tel:1909">生命線 1909</a>

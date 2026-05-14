@@ -314,6 +314,43 @@ function getClient() {
   return createClient({ baseUrl, anonKey: serverKey });
 }
 
+function getAuthClient(req: Request) {
+  const baseUrl = Deno.env.get('INSFORGE_BASE_URL') || Deno.env.get('INSFORGE_URL') || '';
+  const authHeader = req.headers.get('Authorization');
+  const userToken = authHeader ? authHeader.replace('Bearer ', '') : '';
+  return createClient({ baseUrl, edgeFunctionToken: userToken });
+}
+
+async function assertAuthorizedUser(req: Request, userId: string): Promise<Response | null> {
+  if (!isUuid(userId)) return null;
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({ data: null, error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const { data, error } = await getAuthClient(req).auth.getCurrentUser();
+  const authUser = data?.user;
+  if (error || !authUser?.id) {
+    return new Response(
+      JSON.stringify({ data: null, error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  if (authUser.id !== userId) {
+    return new Response(
+      JSON.stringify({ data: null, error: 'Forbidden' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  return null;
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(value: string): boolean {
@@ -521,14 +558,14 @@ async function executeTool(name: string, args: Record<string, unknown>, userId: 
   try {
     switch (name) {
       case 'get_user_emotion_summary': {
-        return await getUserEmotionSummary(args.userId as string || userId);
+        return await getUserEmotionSummary(userId);
       }
       case 'get_emotion_trend': {
-        return await getEmotionTrend(args.userId as string || userId, (args.days as number) || 7);
+        return await getEmotionTrend(userId, (args.days as number) || 7);
       }
       case 'save_ruler_log': {
         return await saveRulerLog({
-          userId: args.userId as string || userId,
+          userId,
           emotions: args.emotions as Array<{ name: string; quadrant: string }>,
           intensity: args.intensity as number,
           notes: args.notes as string | undefined,
@@ -616,6 +653,9 @@ export default async function (req: Request): Promise<Response> {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const authorizationError = await assertAuthorizedUser(req, userId);
+    if (authorizationError) return authorizationError;
 
     const apiKey = Deno.env.get('GOOGLE_API_KEY');
     if (!apiKey) {

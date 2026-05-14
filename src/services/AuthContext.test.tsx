@@ -12,6 +12,7 @@ vi.mock('./InsForgeAuthService', () => ({
         signUp: vi.fn(),
         signOut: vi.fn(),
         updateProfile: vi.fn(),
+        deleteAccountData: vi.fn(),
     },
 }));
 
@@ -170,6 +171,32 @@ describe('AuthContext', () => {
                 error: '請使用忘記密碼流程重設密碼',
             });
         });
+    });
+
+    it('刪除帳號資料時應清除雲端資料、登出並重置登入狀態', async () => {
+        vi.mocked(insforgeAuthService.signIn).mockResolvedValue({
+            success: true,
+            user: mockUser,
+        });
+        vi.mocked(insforgeAuthService.deleteAccountData).mockResolvedValue({ success: true });
+        vi.mocked(insforgeAuthService.signOut).mockResolvedValue(undefined);
+
+        const { result } = renderHook(() => useAuth(), { wrapper });
+
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await act(async () => {
+            await result.current.login('test@example.com', '[REDACTED]');
+        });
+
+        await act(async () => {
+            const deleted = await result.current.deleteAccount();
+            expect(deleted).toBe(true);
+        });
+
+        expect(insforgeAuthService.deleteAccountData).toHaveBeenCalledWith('user_1');
+        expect(insforgeAuthService.signOut).toHaveBeenCalled();
+        expect(result.current.user).toBeNull();
+        expect(result.current.isAuthenticated).toBe(false);
     });
 
     it('初始化時應恢復已登入用戶', async () => {

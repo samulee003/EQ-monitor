@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const getHeadersMock = vi.hoisted(() => vi.fn(() => ({ Authorization: 'Bearer user-token' })));
+
+vi.mock('@/lib/insforge/client', () => ({
+  insforge: {
+    getHttpClient: () => ({
+      getHeaders: getHeadersMock,
+    }),
+  },
+}));
+
 describe('AI 教練 client', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -18,7 +28,10 @@ describe('AI 教練 client', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://b88egxiz.functions.insforge.app/coach',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ Authorization: 'Bearer user-token' }),
+      })
     );
   });
 });
