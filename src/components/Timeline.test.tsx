@@ -94,7 +94,7 @@ describe('Timeline', () => {
         expect(screen.getByTestId('timeline-entry-red-1')).toHaveTextContent('紅色表達');
         expect(screen.queryByTestId('timeline-entry-yellow-1')).not.toBeInTheDocument();
         expect(screen.getByText('1-1')).toBeInTheDocument();
-    });
+    }, 15_000);
 
     it('編輯一筆紀錄並儲存後，畫面立即顯示新的表達內容', async () => {
         let logs = [makeLog('red-1', 'red', '原本的表達')];

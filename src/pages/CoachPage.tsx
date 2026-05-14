@@ -82,8 +82,9 @@ function sanitizeCoachResponse(content: string): string {
     }
 
     if (skippingToolPayload) {
-      const opens = (trimmed.match(/[\{\[]/g) ?? []).length;
-      const closes = (trimmed.match(/[\}\]]/g) ?? []).length;
+      const chars = [...trimmed];
+      const opens = chars.filter((char) => char === '{' || char === '[').length;
+      const closes = chars.filter((char) => char === '}' || char === ']').length;
       const looksLikePayload =
         trimmed === '' ||
         trimmed.startsWith('{') ||
