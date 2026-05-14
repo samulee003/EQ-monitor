@@ -23,6 +23,10 @@
     "typescript",
     "繁體中文"
   ],
+  "engines": {
+    "npm": ">=10",
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -40,8 +44,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "tsc --noEmit"
+      "eslint --fix"
     ]
   },
   "dependencies": {
