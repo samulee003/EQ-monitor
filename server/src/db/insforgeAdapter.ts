@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import pg from 'pg';
 import { RulerData } from '../types.js';
 import { generateBindingCode } from './bindingCode.js';
