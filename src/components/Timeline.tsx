@@ -66,11 +66,19 @@ const Timeline: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            void loadLogs();
-            setIsLoading(false);
-        }, 300);
-        return () => clearTimeout(timer);
+        let isMounted = true;
+
+        const loadInitialLogs = async () => {
+            await loadLogs();
+            if (isMounted) {
+                setIsLoading(false);
+            }
+        };
+
+        void loadInitialLogs();
+        return () => {
+            isMounted = false;
+        };
     }, [loadLogs]);
 
     useEffect(() => {

@@ -215,7 +215,7 @@ const handleTest = () => {
                     }
 
                     .notification-settings-panel {
-                        background: color-mix(in srgb, var(--shell-panel) 92%, var(--bg-primary) 8%);
+                        background: color-mix(in srgb, var(--shell-panel) 92%, var(--bg-color) 8%);
                         backdrop-filter: blur(18px);
                         border: 1px solid color-mix(in srgb, var(--shell-border) 70%, var(--text-primary) 30%);
                         border-radius: 16px;
