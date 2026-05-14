@@ -13,7 +13,7 @@
   - `9219bc3 fix: 補上 LINE 官方帳號入口`
 - Production PWA 已驗證版本：`https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home`
 - 內測判斷仍是黃燈偏綠：可以給 1-3 人／小圈朋友封閉試玩，不建議大量公開或投放式宣傳。
-- 真 LINE 帳號完整 E2E 仍未跑。
+- 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過；剩下要確認的是已綁定 LINE 完成 RULER 後，Coach / 週報是否讀到資料。
 
 ## 本輪最新修正
 
@@ -47,6 +47,7 @@
   - 帳號圖示可開登入 modal
   - `document.body` 不再包含 `安定室`
   - 首頁與 Coach 綁定區都顯示 `鋅鋰師拔麻的小小額葉養成手札`、`@980pqrhn`、LINE 加好友連結
+  - session `019e242d-7d68-7580-bfa2-6c612b61529f` 已驗真 LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定
 
 ## 最新驗證
 
@@ -74,6 +75,6 @@
 
 ## 明確剩餘事項
 
-1. 真 LINE 帳號完整 E2E：LINE「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach / 週報讀到資料。
-2. 若要把本分支正式合併回 `main`，先確認 GitHub PR/merge 策略，不要 reset 或覆蓋目前發布修正。
+1. 真 LINE RULER 資料流：已綁定 LINE 帳號完成 RULER → Coach / 週報讀到資料。
+2. `codex/stitch-ui-release-20260513`、`main`、`origin/main` 已對齊；若後續再新增 commit，記得同步推到正式部署來源。
 3. 若要合併 schedule 相關變更，仍需用真實資料庫環境檢查 pg_cron / schedule。
