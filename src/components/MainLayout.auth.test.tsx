@@ -72,6 +72,20 @@ describe('MainLayout 帳號入口', () => {
     expect(screen.getByText('登入表單')).toBeInTheDocument();
   });
 
+  it('主導覽保留原版首頁文案', () => {
+    render(
+      <MainLayout currentView="home" onNavigate={vi.fn()}>
+        <div>主要內容</div>
+      </MainLayout>
+    );
+
+    expect(screen.getByRole('button', { name: '今日心情' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '記錄回顧' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '成長看板' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '教練' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '安定室' })).not.toBeInTheDocument();
+  });
+
   it('頁首行動按鈕使用純圖示並保留清楚可及名稱', () => {
     render(
       <MainLayout currentView="home" onNavigate={vi.fn()}>
