@@ -67,10 +67,10 @@
 - PWA、Bot Server、`coach`、`weekly-report`、`achievement-checker` 均已部署。
 - Coach 危機語句會回 `MetaMomentSkill` 並觸發 `open_sos`。
 - 首頁與 Coach 首屏已強化為「Agentic AI 主動教練」導覽：首頁有「今日教練建議」，Coach 空狀態有焦慮、親子修復、教練觀察三個情境入口。
-- Production PWA 最新目標版本：`https://today-mood.zeabur.app/?v=linebot-entry-9219bc3#home`。線上 smoke 已確認主導覽為原版文案「今日心情／記錄回顧／成長看板／教練」，頁首右上為純 SVG 圖示列（成就、主題、提醒、帳號），沒有再顯示「勳／系／訊」或「安定室」。
+- Production PWA 最新驗證版本：`https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home`。線上 smoke 已確認主導覽為原版文案「今日心情／記錄回顧／成長看板／教練」，頁首右上為純 SVG 圖示列（成就、主題、提醒、帳號），沒有再顯示「勳／系／訊」或「安定室」。
 - Header 帳號入口已接 InsForge Auth：未登入時帳號圖示開啟登入／註冊 modal；已登入時打開個人中心。
 - 重要 UI 約束：`MainLayout` 主導覽與 `CoachPage` 底部導覽必須保留原版文案「今日心情／記錄回顧／成長看板／教練」，不要改回「安定室／紀錄／洞察／主動教練」。
-- LINE 官方帳號入口已補回首頁與 Coach 綁定區：顯示「鋅鋰師拔麻的小小額葉養成手札」、Basic ID `@980pqrhn`、加好友連結 `https://line.me/R/ti/p/@980pqrhn`，共用 `src/constants/lineBot.ts`。
+- LINE 官方帳號入口已補回首頁與 Coach 綁定區並完成線上 smoke：顯示「鋅鋰師拔麻的小小額葉養成手札」、Basic ID `@980pqrhn`、加好友連結 `https://line.me/R/ti/p/@980pqrhn`，共用 `src/constants/lineBot.ts`。
 - AI 教練 soul 已落地：`server/insforge/agents/soul.md` 是人格與安全邊界規格；ADK agent 使用 `globalInstruction + instruction`；production `coach-simple.ts` 使用同一套核心 prompt 組裝並已重新部署。
 - LINE 綁定碼從 production PWA 到 production Bot Server 已 smoke 通過。
 - Bot `/webhook` 已補簽名保護：缺少或無效 `x-line-signature` 回 401；有效簽名空事件回 200。
