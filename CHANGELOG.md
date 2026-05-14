@@ -46,12 +46,13 @@
   - 帳號圖示可開登入 modal ✅
   - 首頁顯示 LINE 官方帳號、`@980pqrhn` 與 `加入 LINE 官方帳號` 連結 ✅
   - Coach 綁定區顯示 LINE 官方帳號、`@980pqrhn` 與 `先加入 LINE 官方帳號` 連結 ✅
+  - 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過：LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定 ✅
   - 頁面文字不再包含 `安定室` ✅
 
 ### 剩餘風險
 
-- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
-- 這些修正目前在 `codex/stitch-ui-release-20260513`，尚未合併回 `main`。
+- 真 LINE 綁定已驗；仍需用已綁定真 LINE 帳號完成一次 RULER，確認 Coach / 週報讀到資料。
+- 這些修正已推到 `main` 與 `codex/stitch-ui-release-20260513`，正式 Zeabur 來源已可部署到同一版。
 
 ---
 

@@ -57,7 +57,7 @@
 | PWA 前端 | Zeabur（靜態託管） | `zeabur.toml` | ✅ 已上線 |
 | Bot 後端 | Zeabur（Node.js） | `server/zeabur.toml` | ✅ 已上線 |
 | Edge Functions | InsForge Functions | `server/insforge/functions/` | ✅ 已上線 |
-| LINE Bot Webhook | Zeabur Bot Server | — | 🟡 已部署並驗簽通過，待真 LINE 帳號 E2E |
+| LINE Bot Webhook | Zeabur Bot Server | — | 🟡 已部署並驗簽通過；真 LINE 綁定 E2E 已驗，待完整 RULER 事件驗收 |
 
 ### 2.5 內測狀態（2026-05-14）
 
@@ -71,6 +71,7 @@
 - Header 帳號入口已接 InsForge Auth：未登入時帳號圖示開啟登入／註冊 modal；已登入時打開個人中心。
 - 重要 UI 約束：`MainLayout` 主導覽與 `CoachPage` 底部導覽必須保留原版文案「今日心情／記錄回顧／成長看板／教練」，不要改回「安定室／紀錄／洞察／主動教練」。
 - LINE 官方帳號入口已補回首頁與 Coach 綁定區並完成線上 smoke：顯示「鋅鋰師拔麻的小小額葉養成手札」、Basic ID `@980pqrhn`、加好友連結 `https://line.me/R/ti/p/@980pqrhn`，共用 `src/constants/lineBot.ts`。
+- 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過：LINE 取得 6 位綁定碼後，production PWA Coach 貼碼成功並顯示已綁定。
 - AI 教練 soul 已落地：`server/insforge/agents/soul.md` 是人格與安全邊界規格；ADK agent 使用 `globalInstruction + instruction`；production `coach-simple.ts` 使用同一套核心 prompt 組裝並已重新部署。
 - LINE 綁定碼從 production PWA 到 production Bot Server 已 smoke 通過。
 - Bot `/webhook` 已補簽名保護：缺少或無效 `x-line-signature` 回 401；有效簽名空事件回 200。
@@ -80,8 +81,8 @@
 - 最近一次完整本機驗證：前端 `366 tests / 39 files` 通過，後端 `156 tests / 15 files` 通過；前端 `npm run build`、`npx tsc --noEmit`、`git diff --check` 通過。
 
 仍需 PM/QA 實測：
-- 用真 LINE 帳號跑一次完整流程：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
-- LINE 官方帳號 UI 已補齊，但仍需用真朋友手機確認 LINE 加好友連結、輸入「綁定」、PWA 貼碼三段體驗都順。
+- 用已綁定的真 LINE 帳號跑一次完整 RULER 資料流：LINE 完成 RULER → Coach / 週報讀到資料。
+- LINE 官方帳號 UI 已補齊；若要擴大分享，建議再用朋友手機重跑一次加好友與貼碼，確認一般使用者也能順。
 - Production Zeabur PWA 已重部署，但部署驗證要等 `zeabur deployment list` 顯示最新 deployment `RUNNING` 後再 smoke；CLI 回 `Service deployed successfully` 時可能仍在 `BUILDING`，此時正式網址會暫時吐舊 bundle。
 - 目前工作分支為 `codex/stitch-ui-release-20260513`，包含 `61f61fd`（純圖示帳號入口）、`9a5c5c3`（恢復原版導覽文案）與 `9219bc3`（補上 LINE 官方帳號入口）；不要 reset / checkout 覆蓋。
 
@@ -532,17 +533,17 @@ LocalStorage → InsForge 的 RULER 日誌遷移已在本機實作：
 | 問題 | 狀態 | 繞過方式 / 備註 |
 |---|---|---|
 | Husky pre-commit hook 壞掉 | 未修 | commit 加 `--no-verify` |
-| 工作分支 ahead of `origin/main` | 待 PR / merge | 目前在 `codex/stitch-ui-release-20260513`；不要 reset / checkout 覆蓋 `61f61fd`、`9a5c5c3` 之後的發布修正 |
-| 真 LINE E2E | 待實測 | UI 已顯示官方帳號、Basic ID 與加好友連結；仍需真 LINE 帳號完整跑「加好友 → 綁定碼 → PWA 貼碼 → LINE 完成 RULER」 |
+| 工作分支與 `main` | 已對齊 | `codex/stitch-ui-release-20260513`、`main`、`origin/main` 目前同版；不要 reset / checkout 覆蓋發布修正 |
+| 真 LINE 綁定 E2E | 已驗收 | session `019e242d-7d68-7580-bfa2-6c612b61529f` 已驗 LINE 取碼 → PWA Coach 貼碼 → 顯示已綁定；不在公開文件記錄 LINE userId |
 | ESLint warnings | 已知 | `npm run lint` 目前 0 errors / 31 warnings |
 | 本機無 `deno` | 已知 | Edge Functions 靠部署與線上 smoke 驗證；本機 `deno check` 未跑 |
 | ADK JS 無法在 Deno 部署 | 已繞過 | ADK agent 已同步 soul；production 使用純 REST API fallback（`coach-simple.ts`），且因 InsForge 打包限制需自包含 prompt builder |
 | Edge Function session 不持久 | 已解決 | PostgreSQL `adk_sessions` / `adk_events` 跨請求持久化 |
 | Data migration（LocalStorage → InsForge）| 已實作，待更多真資料驗證 | 已會寫入 `ruler_logs` 並標記 `coach_context.migration_completed_at` |
 | 認證架構（本地 ↔ InsForge Auth）| 本機已整合，待部署確認 | `AuthContext` 已改走 `InsForgeAuthService`；production PWA 需確認 env + redeploy |
-| 真 LINE E2E | 待實測 | Webhook 簽名接受/拒絕已驗；仍需真 LINE 帳號跑完整事件 |
+| 真 LINE RULER 完整事件 | 待實測 | Webhook 簽名接受/拒絕與真 LINE 綁定已驗；仍需已綁定真 LINE 帳號完成一次 RULER，確認 Coach / 週報能讀到資料 |
 | 主動推送（Proactive AI / Cron）| 分支已實作，待部署/資料庫驗證 | `feature/insforge-schedule` 已進入當前分支；仍需真實 `DATABASE_URL` / cron 檢查 |
-| Playwright E2E 基線 | 已引入 | 關鍵路徑測試已存在；真 LINE E2E 仍需人工實測 |
+| Playwright E2E 基線 | 已引入 | 關鍵路徑測試已存在；真 LINE RULER 完整事件仍需人工實測 |
 | `ik_` instance key 無法 schema mutation | 平台限制 | 用 direct PostgreSQL connection 執行 DDL |
 
 ---
