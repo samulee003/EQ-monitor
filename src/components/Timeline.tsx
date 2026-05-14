@@ -4,6 +4,7 @@ import { useLanguage } from '../services/LanguageContext';
 import { dataAdapter } from '../adapters';
 import { type ImportResult } from '../adapters/types';
 import { type RulerLogEntry } from '../types/RulerTypes';
+import { useAppStore } from '../stores/appStore';
 import ExportPanel from './ExportPanel';
 import Skeleton from './Skeleton';
 
@@ -43,6 +44,7 @@ const quadrantPalette = {
 } as const;
 
 type QuadrantKey = keyof typeof quadrantPalette;
+type TimelineFilterKey = 'all' | Exclude<QuadrantKey, 'gray'>;
 
 const Timeline: React.FC = () => {
     const { t } = useLanguage();
@@ -54,6 +56,7 @@ const Timeline: React.FC = () => {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [importResult, setImportResult] = useState<ImportResult | null>(null);
     const [showExport, setShowExport] = useState(false);
+    const [activeFilter, setActiveFilter] = useState<TimelineFilterKey>('all');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const listTopRef = useRef<HTMLDivElement>(null);
 
@@ -142,6 +145,10 @@ const Timeline: React.FC = () => {
         fileInputRef.current?.click();
     };
 
+    const handleEmptyStartClick = () => {
+        useAppStore.getState().setView('home');
+    };
+
     const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -207,34 +214,44 @@ const Timeline: React.FC = () => {
         }, { red: 0, yellow: 0, blue: 0, green: 0, gray: 0 });
 
         return [
-            { key: 'all', label: t('全部'), count: logs.length, active: true },
-            { key: 'red', label: t('高能低悅'), count: counts.red, active: false },
-            { key: 'yellow', label: t('高能高悅'), count: counts.yellow, active: false },
-            { key: 'blue', label: t('低能低悅'), count: counts.blue, active: false },
-            { key: 'green', label: t('低能高悅'), count: counts.green, active: false }
+            { key: 'all' as const, label: t('全部'), count: logs.length, active: activeFilter === 'all' },
+            { key: 'red' as const, label: t('高能低悅'), count: counts.red, active: activeFilter === 'red' },
+            { key: 'yellow' as const, label: t('高能高悅'), count: counts.yellow, active: activeFilter === 'yellow' },
+            { key: 'blue' as const, label: t('低能低悅'), count: counts.blue, active: activeFilter === 'blue' },
+            { key: 'green' as const, label: t('低能高悅'), count: counts.green, active: activeFilter === 'green' }
         ];
-    }, [logs, t]);
+    }, [activeFilter, logs, t]);
 
-    const totalPages = Math.ceil(logs.length / ITEMS_PER_PAGE);
+    const filteredLogs = useMemo(() => {
+        if (activeFilter === 'all') return logs;
+        return logs.filter((log) => getQuadrantKey(log) === activeFilter);
+    }, [activeFilter, logs]);
+
+    const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
     const paginatedLogs = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return logs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [logs, currentPage]);
+        return filteredLogs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [filteredLogs, currentPage]);
 
     const narrativeStats = useMemo(() => {
         const currentPageStart = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-        const currentPageEnd = Math.min(currentPage * ITEMS_PER_PAGE, logs.length);
-        const expressiveCount = logs.filter((log) => Boolean(log.expressing?.expression?.trim())).length;
+        const currentPageEnd = Math.min(currentPage * ITEMS_PER_PAGE, filteredLogs.length);
+        const expressiveCount = filteredLogs.filter((log) => Boolean(log.expressing?.expression?.trim())).length;
         return {
-            total: logs.length,
-            pageRange: logs.length > 0 ? `${currentPageStart}-${currentPageEnd}` : '0',
+            total: filteredLogs.length,
+            pageRange: filteredLogs.length > 0 ? `${currentPageStart}-${currentPageEnd}` : '0',
             expressiveCount
         };
-    }, [currentPage, logs]);
+    }, [currentPage, filteredLogs]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const handleFilterChange = (filter: TimelineFilterKey) => {
+        setActiveFilter(filter);
+        setCurrentPage(1);
     };
 
     if (isLoading) {
@@ -292,10 +309,20 @@ const Timeline: React.FC = () => {
                         </div>
                     </div>
 
-                    <button className="timeline-import-prompt" onClick={handleImportClick}>
-                        <span className="timeline-import-icon">📥</span>
-                        <span>{t('匯入備份檔案')}</span>
-                    </button>
+                    <div className="timeline-empty-actions">
+                        <button
+                            className="timeline-empty-start"
+                            type="button"
+                            onClick={handleEmptyStartClick}
+                            data-testid="timeline-empty-start"
+                        >
+                            <span>{t('開始第一筆紀錄')}</span>
+                        </button>
+                        <button className="timeline-import-prompt" type="button" onClick={handleImportClick}>
+                            <span className="timeline-import-icon">📥</span>
+                            <span>{t('匯入備份檔案')}</span>
+                        </button>
+                    </div>
                 </section>
 
                 {importResult && (
@@ -410,7 +437,6 @@ const Timeline: React.FC = () => {
                     .timeline-import-prompt {
                         position: relative;
                         z-index: 1;
-                        margin: 0 auto;
                         display: inline-flex;
                         align-items: center;
                         gap: 0.65rem;
@@ -423,8 +449,32 @@ const Timeline: React.FC = () => {
                         cursor: pointer;
                         transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
                     }
-                    .timeline-import-prompt:hover {
+                    .timeline-empty-actions {
+                        position: relative;
+                        z-index: 1;
+                        display: flex;
+                        justify-content: center;
+                        gap: 0.75rem;
+                        flex-wrap: wrap;
+                    }
+                    .timeline-empty-start {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 52px;
+                        padding: 0.9rem 1.35rem;
+                        border-radius: 999px;
+                        border: none;
+                        background: var(--text-primary);
+                        color: var(--bg-color);
+                        cursor: pointer;
+                        transition: transform 0.25s ease, background 0.25s ease;
+                    }
+                    .timeline-import-prompt:hover,
+                    .timeline-empty-start:hover {
                         transform: translateY(-1px);
+                    }
+                    .timeline-import-prompt:hover {
                         background: rgba(255,255,255,0.44);
                         border-color: rgba(170, 176, 155, 1);
                     }
@@ -500,6 +550,8 @@ const Timeline: React.FC = () => {
                             type="button"
                             className={`timeline-chip ${chip.active ? 'active' : ''}`}
                             aria-pressed={chip.active}
+                            onClick={() => handleFilterChange(chip.key)}
+                            data-testid={`timeline-chip-${chip.key}`}
                         >
                             {palette && <span className="timeline-chip-dot" style={{ background: palette.dot }}></span>}
                             <span>{chip.label}</span>
@@ -531,6 +583,7 @@ const Timeline: React.FC = () => {
                         <article
                             key={log.id || index}
                             className="timeline-entry"
+                            data-testid={`timeline-entry-${log.id || index}`}
                             style={
                                 {
                                     '--entry-accent': palette.dot,

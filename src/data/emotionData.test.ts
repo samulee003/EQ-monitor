@@ -45,6 +45,19 @@ describe('EmotionData', () => {
             const uniqueIds = new Set(ids);
             expect(uniqueIds.size).toBe(ids.length);
         });
+
+        it('同一象限內情緒名稱不應該重複', () => {
+            const quadrants = ['red', 'yellow', 'blue', 'green'] as const;
+
+            quadrants.forEach(quadrant => {
+                const names = emotions
+                    .filter(emotion => emotion.quadrant === quadrant)
+                    .map(emotion => emotion.name);
+                const uniqueNames = new Set(names);
+
+                expect(uniqueNames.size).toBe(names.length);
+            });
+        });
     });
 
     describe('psychologicalNeeds', () => {

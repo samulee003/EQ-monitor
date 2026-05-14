@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { sendMessage } from '../lib/adk/client';
 import { loadChatHistory, saveChatHistory } from '../lib/adk/storage';
-import type { CoachMessage, CoachAction } from '../lib/adk/types';
+import { type CoachMessage, type CoachAction } from '../lib/adk/types';
 import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
 import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
@@ -38,6 +38,13 @@ const COACH_SCENARIOS = [
   },
 ];
 
+const TOOL_TRACE_NAMES = [
+  'save_ruler_log',
+  'get_user_emotion_summary',
+  'get_emotion_trend',
+  'trigger_action',
+];
+
 function getErrorMessage(type: ErrorType): string {
   switch (type) {
     case 'network':
@@ -57,6 +64,52 @@ function getTodayLabel(): string {
   }).format(new Date());
 
   return `今日，${time}`;
+}
+
+function sanitizeCoachResponse(content: string): string {
+  const toolNamePattern = TOOL_TRACE_NAMES.join('|');
+  const toolHeaderPattern = new RegExp(`\\[\\s*工具\\s*(?:${toolNamePattern})?\\s*結果\\s*\\]`);
+  const sanitizedLines: string[] = [];
+  let skippingToolPayload = false;
+  let braceDepth = 0;
+
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (toolHeaderPattern.test(trimmed)) {
+      skippingToolPayload = true;
+      braceDepth = 0;
+      continue;
+    }
+
+    if (skippingToolPayload) {
+      const opens = (trimmed.match(/[\{\[]/g) ?? []).length;
+      const closes = (trimmed.match(/[\}\]]/g) ?? []).length;
+      const looksLikePayload =
+        trimmed === '' ||
+        trimmed.startsWith('{') ||
+        trimmed.startsWith('[') ||
+        /^[}\]",]/.test(trimmed) ||
+        braceDepth > 0;
+
+      if (looksLikePayload) {
+        braceDepth += opens - closes;
+        if (braceDepth <= 0 && (trimmed.endsWith('}') || trimmed.endsWith(']'))) {
+          skippingToolPayload = false;
+        }
+        continue;
+      }
+
+      skippingToolPayload = false;
+    }
+
+    sanitizedLines.push(line);
+  }
+
+  return sanitizedLines
+    .join('\n')
+    .replace(new RegExp(`\\b(?:${toolNamePattern})\\b`, 'g'), '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /** 執行 Agent 觸發的前端動作 */
@@ -97,6 +150,7 @@ export default function CoachPage() {
   const [error, setError] = useState<{ type: ErrorType; retryText: string } | null>(null);
   const [bindingCode, setBindingCode] = useState('');
   const [bindingMessage, setBindingMessage] = useState('');
+  const [bindingSubmitting, setBindingSubmitting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
 
@@ -168,7 +222,7 @@ export default function CoachPage() {
       const modelMsg: CoachMessage = {
         id: crypto.randomUUID(),
         role: 'model',
-        content: res.response,
+        content: sanitizeCoachResponse(res.response),
         timestamp: new Date().toISOString(),
         metadata: {
           skillInvoked: res.skillInvoked,
@@ -220,21 +274,28 @@ export default function CoachPage() {
   }, []);
 
   const handleClaimBinding = useCallback(async () => {
+    if (bindingSubmitting) return;
+
     const code = bindingCode.trim().toUpperCase();
     if (!code) {
       setBindingMessage('請輸入 LINE Bot 給你的綁定碼');
       return;
     }
 
-    const result = await botSyncService.claimLineBinding(code, userId);
-    if (result.error) {
-      setBindingMessage(`綁定失敗：${result.error.message}`);
-      return;
-    }
+    setBindingSubmitting(true);
+    try {
+      const result = await botSyncService.claimLineBinding(code, userId);
+      if (result.error) {
+        setBindingMessage(`綁定失敗：${result.error.message}`);
+        return;
+      }
 
-    setBindingMessage(`已綁定 LINE Bot：${result.data.lineUserId}`);
-    setBindingCode('');
-  }, [bindingCode, userId]);
+      setBindingMessage(`已綁定 LINE Bot：${result.data.lineUserId}`);
+      setBindingCode('');
+    } finally {
+      setBindingSubmitting(false);
+    }
+  }, [bindingCode, bindingSubmitting, userId]);
 
   const showWelcome = messages.length <= 1;
   const visibleMessages = showWelcome
@@ -255,13 +316,7 @@ export default function CoachPage() {
           心
         </button>
         <h1 className={styles.headerTitle}>今心</h1>
-        <button
-          type="button"
-          className={styles.profileButton}
-          aria-label="個人設定"
-        >
-          人
-        </button>
+        <div className={styles.headerSpacer} aria-hidden="true" />
       </header>
 
       <main className={styles.chatArea}>
@@ -352,6 +407,7 @@ export default function CoachPage() {
                 className={styles.bindingInput}
                 placeholder="ABC123"
                 data-testid="line-binding-input"
+                disabled={bindingSubmitting}
               />
             </label>
             <button
@@ -359,8 +415,9 @@ export default function CoachPage() {
               className={styles.bindingButton}
               onClick={handleClaimBinding}
               data-testid="line-binding-submit"
+              disabled={bindingSubmitting}
             >
-              綁定
+              {bindingSubmitting ? '綁定中...' : '綁定'}
             </button>
           </div>
           {bindingMessage && (

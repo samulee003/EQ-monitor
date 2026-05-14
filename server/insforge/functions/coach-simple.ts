@@ -54,6 +54,7 @@ function buildEmotionCoachInstruction(): string {
 - get_emotion_trend：使用者問「最近怎麼樣」「有沒有進步」「我是不是常常...」時，先查趨勢，不憑感覺回答。
 - save_ruler_log：使用者提供明確情緒、強度、觸發點時，主動整理成 RULER 紀錄。
 - trigger_action：建議呼吸、記錄、SOS、歷史或成長功能時，用工具觸發前端動作。
+- 內部可以使用工具，但使用者可見回覆不可提及工具名稱，也不可把工具結果原樣貼給使用者；請把查到的結果轉成自然、簡短、可理解的教練回覆。
 
 ## 主動存日誌的時機
 當使用者明確描述了：
@@ -96,8 +97,61 @@ ${buildEmotionCoachInstruction()}
 - 使用者明確提供情緒、強度與觸發點時，優先呼叫 save_ruler_log；資訊不足時只問一個最小問題。
 - 需要前端協助呼吸、紀錄、SOS、歷史或成長頁時，呼叫 trigger_action。
 - 危機語句出現時，直接進入 Meta-Moment 語氣，並呼叫 trigger_action(open_sos)。
-- 最終回覆仍維持「同理 → 觀察 → 下一步」，不要把工具結果原封不動貼給使用者。
+- 最終回覆仍維持「同理 → 觀察 → 下一步」，不可提及工具名稱，也不可把工具結果原樣貼給使用者。
 `.trim();
+}
+
+const TOOL_TRACE_NAMES = [
+  'save_ruler_log',
+  'get_user_emotion_summary',
+  'get_emotion_trend',
+  'trigger_action',
+];
+
+function sanitizeCoachResponse(content: string): string {
+  const toolNamePattern = TOOL_TRACE_NAMES.join('|');
+  const toolHeaderPattern = new RegExp(`\\[\\s*工具\\s*(?:${toolNamePattern})?\\s*結果\\s*\\]`);
+  const sanitizedLines: string[] = [];
+  let skippingToolPayload = false;
+  let braceDepth = 0;
+
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (toolHeaderPattern.test(trimmed)) {
+      skippingToolPayload = true;
+      braceDepth = 0;
+      continue;
+    }
+
+    if (skippingToolPayload) {
+      const opens = (trimmed.match(/[\{\[]/g) ?? []).length;
+      const closes = (trimmed.match(/[\}\]]/g) ?? []).length;
+      const looksLikePayload =
+        trimmed === '' ||
+        trimmed.startsWith('{') ||
+        trimmed.startsWith('[') ||
+        /^[}\]",]/.test(trimmed) ||
+        braceDepth > 0;
+
+      if (looksLikePayload) {
+        braceDepth += opens - closes;
+        if (braceDepth <= 0 && (trimmed.endsWith('}') || trimmed.endsWith(']'))) {
+          skippingToolPayload = false;
+        }
+        continue;
+      }
+
+      skippingToolPayload = false;
+    }
+
+    sanitizedLines.push(line);
+  }
+
+  return sanitizedLines
+    .join('\n')
+    .replace(new RegExp(`\\b(?:${toolNamePattern})\\b`, 'g'), '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 const SYSTEM_PROMPT = buildProductionCoachSystemPrompt();
@@ -649,11 +703,11 @@ export default async function (req: Request): Promise<Response> {
       const secondCandidate = secondRes?.candidates?.[0];
       const secondParts = secondCandidate?.content?.parts ?? [];
       const textPart = secondParts.find((p: { text?: string }) => p.text);
-      responseText = textPart?.text ?? '抱歉，我無法回應。';
+      responseText = sanitizeCoachResponse(textPart?.text ?? '抱歉，我無法回應。');
     } else {
       // 直接文字回覆
       const textPart = parts.find((p: { text?: string }) => p.text);
-      responseText = textPart?.text ?? '抱歉，我無法回應。';
+      responseText = sanitizeCoachResponse(textPart?.text ?? '抱歉，我無法回應。');
     }
 
     if (crisis) {

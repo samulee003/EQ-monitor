@@ -32,6 +32,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     light: '亮',
     system: '系'
   }[theme];
+  const themeLabel = {
+    dark: t('深色'),
+    light: t('淺色'),
+    system: t('系統')
+  }[theme];
 
   // Initialize notification service and check onboarding
   useEffect(() => {
@@ -61,7 +66,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     ? '…'
     : isAuthenticated
       ? (user?.displayName || user?.email || t('帳號')).slice(0, 1)
-      : t('登入');
+      : '人';
+  const accountFullText = isLoading
+    ? t('載入中')
+    : isAuthenticated
+      ? t('帳號設定')
+      : t('登入帳號');
 
   return (
     <div className="app-container">
@@ -102,22 +112,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
+            aria-label={t('我的成就')}
           >
-            勳
+            <span className="header-action-icon" aria-hidden="true">勳</span>
+            <span className="header-action-text">{t('成就')}</span>
           </button>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
             title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
+            aria-label={`${t('切換主題')}：${themeLabel}`}
           >
-            {themeIcon}
+            <span className="header-action-icon" aria-hidden="true">{themeIcon}</span>
+            <span className="header-action-text">{themeLabel}</span>
           </button>
           <button
             className="settings-btn"
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
+            aria-label={t('提醒設定')}
           >
-            訊
+            <span className="header-action-icon" aria-hidden="true">訊</span>
+            <span className="header-action-text">{t('提醒')}</span>
           </button>
           <button
             className="account-btn"
@@ -126,7 +142,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             aria-label={accountLabel}
             disabled={isLoading}
           >
-            {accountText}
+            <span className="header-action-icon" aria-hidden="true">{accountText}</span>
+            <span className="header-action-text">{accountFullText}</span>
           </button>
         </div>
       </header>
@@ -264,15 +281,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .achievement-nav-btn {
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
-          border-radius: 50%;
-          width: 44px;
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1.1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
         .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
@@ -282,15 +301,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .settings-btn {
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
-          border-radius: 50%;
-          width: 44px;
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
 
@@ -308,15 +329,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         .theme-toggle {
           background: var(--surface-elevated);
           border: 1px solid var(--shell-border);
-          border-radius: 50%;
-          width: 44px;
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
 
@@ -332,7 +355,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .account-btn {
-          min-width: 52px;
+          min-width: 86px;
           height: 44px;
           padding: 0 14px;
           background: var(--surface-elevated);
@@ -346,7 +369,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
+        }
+
+        .header-action-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 1.15em;
+          font-weight: 800;
+        }
+
+        .header-action-text {
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          font-size: 0.86rem;
+          font-weight: 700;
         }
 
         .account-btn:hover:not(:disabled) {
@@ -439,6 +479,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           border-radius: 4px;
         }
 
+        @media (max-width: 1023px) {
+          .settings-btn,
+          .achievement-nav-btn,
+          .theme-toggle,
+          .account-btn {
+            width: 44px;
+            min-width: 44px;
+            padding: 0;
+            gap: 0;
+          }
+          .header-action-text {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+          }
+        }
+
         @media (max-width: 480px) {
           .glass-header {
             padding: var(--s-3) var(--s-4);
@@ -469,6 +532,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             padding: 0;
             height: 40px;
             font-size: 0.95rem;
+            gap: 0;
           }
         }
 
