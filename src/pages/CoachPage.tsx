@@ -8,6 +8,7 @@ import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { useAuth } from '../services/AuthContext';
 import { botSyncService } from '../services/BotSyncService';
+import { LINE_BOT_ADD_FRIEND_URL, LINE_BOT_BASIC_ID, LINE_BOT_DISPLAY_NAME } from '../constants/lineBot';
 import { useAppStore } from '../stores/appStore';
 import styles from './CoachPage.module.css';
 
@@ -395,8 +396,21 @@ export default function CoachPage() {
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
             <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
-            <p className={styles.bindingHint}>在 LINE 對今心輸入「綁定」，再把 6 位碼貼到這裡。之後你在 LINE 留下的覺察，也會成為教練理解你的線索。</p>
+            <p className={styles.bindingHint}>先加入下方 LINE 官方帳號，對它輸入「綁定」，再把 6 位碼貼到這裡。之後你在 LINE 留下的覺察，也會成為教練理解你的線索。</p>
           </div>
+          <div className={styles.bindingAccount} aria-label="目前使用的 LINE 官方帳號">
+            <span>LINE 官方帳號</span>
+            <strong>{LINE_BOT_DISPLAY_NAME}</strong>
+            <code>{LINE_BOT_BASIC_ID}</code>
+          </div>
+          <a
+            className={styles.bindingAddFriendLink}
+            href={LINE_BOT_ADD_FRIEND_URL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            先加入 LINE 官方帳號
+          </a>
           <div className={styles.bindingForm}>
             <label className={styles.bindingLabel}>
               <span className={styles.visuallyHidden}>LINE 綁定碼</span>

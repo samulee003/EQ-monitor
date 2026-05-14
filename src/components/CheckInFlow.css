@@ -175,6 +175,115 @@
     box-shadow: var(--shadow-sm);
 }
 
+.line-bot-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s-4);
+    background:
+        linear-gradient(135deg, rgba(170, 176, 155, 0.14), rgba(213, 193, 165, 0.1)),
+        rgba(255, 255, 255, 0.04);
+}
+
+.line-bot-copy {
+    display: grid;
+    gap: var(--s-2);
+}
+
+.line-bot-eyebrow {
+    color: var(--color-green);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.line-bot-copy h2,
+.line-bot-copy p {
+    margin: 0;
+}
+
+.line-bot-copy h2 {
+    color: var(--text-primary);
+    font-size: 1.08rem;
+    line-height: 1.35;
+}
+
+.line-bot-copy p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.line-bot-account {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    color: var(--text-primary);
+    font-size: 0.86rem;
+    line-height: 1.4;
+}
+
+.line-bot-account strong {
+    font-weight: 850;
+}
+
+.line-bot-account span {
+    padding: 3px 8px;
+    color: var(--color-green);
+    background: rgba(170, 176, 155, 0.16);
+    border: 1px solid rgba(170, 176, 155, 0.28);
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.line-bot-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    flex-shrink: 0;
+}
+
+.line-bot-link-btn,
+.line-bot-secondary-btn {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--s-4);
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 850;
+    text-align: center;
+    text-decoration: none;
+    transition: var(--transition-luxe);
+}
+
+.line-bot-link-btn {
+    color: #f5f3ef;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+}
+
+.line-bot-secondary-btn {
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--shell-border);
+    cursor: pointer;
+}
+
+.line-bot-link-btn:hover,
+.line-bot-secondary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.line-bot-link-btn:focus-visible,
+.line-bot-secondary-btn:focus-visible {
+    outline: 2px solid var(--color-yellow);
+    outline-offset: 3px;
+}
+
 .sanctuary-pulse-grid {
     position: relative;
     z-index: 1;
@@ -414,6 +523,14 @@
         grid-template-columns: 1fr;
     }
     .coach-suggestion-card button {
+        width: 100%;
+    }
+    .line-bot-panel {
+        grid-template-columns: 1fr;
+    }
+    .line-bot-actions,
+    .line-bot-link-btn,
+    .line-bot-secondary-btn {
         width: 100%;
     }
     .sanctuary-actions {
