@@ -24,7 +24,7 @@ describe('OnboardingFlow', () => {
         render(<OnboardingFlow onComplete={vi.fn()} />);
 
         expect(screen.getByText('歡迎來到 今心')).toBeInTheDocument();
-        expect(screen.getByText('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的 AI 教練。')).toBeInTheDocument();
+        expect(screen.getByText('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的教練。')).toBeInTheDocument();
         expect(screen.getByText('你可以把它想成隨身情緒教練：看見你的紀錄、提醒你回到當下，必要時帶你做呼吸或緊急安定練習。')).toBeInTheDocument();
     });
 });

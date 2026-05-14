@@ -6,7 +6,7 @@ interface Props {
 
 const SUGGESTED_PROMPTS = [
   { text: '我今天有點煩，想找人聊聊', icon: '💭' },
-  { text: '幫我啟動 Meta-Moment', icon: '🛟' },
+  { text: '幫我啟動緊急安定練習', icon: '🛟' },
   { text: '看看我最近的情緒趨勢', icon: '📊' },
 ];
 
@@ -23,7 +23,7 @@ export function WelcomeCard({ onPromptClick }: Props) {
           歡迎來到今心教練
         </h2>
         <p className={styles.description}>
-          我是你的 AI 情緒教練，在這裡陪伴你覺察情緒、練習回應策略，找回內在的平穩。
+          我是你的主動情緒教練，在這裡陪伴你覺察情緒、練習回應策略，找回內在的平穩。
         </p>
 
         <div className={styles.promptList}>

@@ -9,12 +9,12 @@ interface Props {
 
 const STEPS = [
   {
-    title: 'Step 1: 感知 (Sense)',
+    title: 'Step 1: 感知',
     content:
       '先暫停一下，感受一下你的身體。你的心跳如何？肩膀緊嗎？肚子有什麼感覺？',
   },
   {
-    title: 'Step 2: 暫停 (Stop)',
+    title: 'Step 2: 暫停',
     content: '讓我們一起深呼吸，給情緒一些空間。',
   },
   {
@@ -69,7 +69,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
             id="meta-moment-title"
             className={styles.headerTitle}
           >
-            Meta-Moment 緊急協助
+            緊急安定練習
           </h2>
         </div>
         <button

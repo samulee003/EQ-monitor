@@ -38,10 +38,10 @@ describe('CoachPage', () => {
     expect(screen.getByText('我現在只想聊聊')).toBeInTheDocument();
   });
 
-  it('應該顯示主動 AI 教練畫面骨架與快速回覆', () => {
+  it('應該顯示主動教練畫面骨架與快速回覆', () => {
     render(<CoachPage />);
 
-    expect(screen.getByRole('region', { name: '今心主動 AI 教練畫布' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: '今心主動教練畫布' })).toBeInTheDocument();
     expect(screen.getByText(/^今日，/)).toBeInTheDocument();
     expect(screen.getByText('主動提下一步')).toBeInTheDocument();
     expect(screen.getByText('串起 LINE 與 APP')).toBeInTheDocument();
@@ -187,14 +187,14 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     fireEvent.click(screen.getByLabelText('SOS 緊急協助'));
-    expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /緊急安定練習/ })).toBeInTheDocument();
     expect(screen.getByText(/今心不是緊急救援服務/)).toBeInTheDocument();
     expect(screen.getByText(/119 或 110/)).toBeInTheDocument();
     expect(screen.getByText('安心專線 1925')).toBeInTheDocument();
     expect(screen.getByText('生命線 1909')).toBeInTheDocument();
   });
 
-  it('Agent 回傳 open_sos action 時開啟 Meta-Moment 覆蓋層', async () => {
+  it('Agent 回傳 open_sos action 時開啟緊急安定練習覆蓋層', async () => {
     vi.spyOn(client, 'sendMessage').mockResolvedValue({
       response: '我陪你一起穩下來。',
       action: 'open_sos',
@@ -206,7 +206,7 @@ describe('CoachPage', () => {
     fireEvent.click(screen.getByLabelText('送出訊息'));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Meta-Moment 緊急協助/ })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /緊急安定練習/ })).toBeInTheDocument();
     });
   });
 

@@ -8,7 +8,7 @@
 import { create } from 'zustand';
 import { settingsStore } from '../adapters';
 
-export type AppView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
+export type AppView = 'landing' | 'home' | 'history' | 'growth' | 'achievement' | 'coach';
 
 interface AppState {
   // 視圖路由
@@ -36,13 +36,14 @@ interface AppState {
   clearImportToast: () => void;
 }
 
-const VALID_APP_VIEWS: AppView[] = ['home', 'history', 'growth', 'achievement', 'coach'];
+const VALID_APP_VIEWS: AppView[] = ['landing', 'home', 'history', 'growth', 'achievement', 'coach'];
 
 function getValidViewFromHash(): AppView {
-  if (typeof window === 'undefined') return 'home';
+  if (typeof window === 'undefined') return 'landing';
   const hash = location.hash.slice(1);
+  if (!hash) return 'landing';
   if (hash === 'checkin') return 'home';
-  return VALID_APP_VIEWS.includes(hash as AppView) ? (hash as AppView) : 'home';
+  return VALID_APP_VIEWS.includes(hash as AppView) ? (hash as AppView) : 'landing';
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -102,6 +103,9 @@ if (typeof window !== 'undefined') {
     const hash = location.hash.slice(1) as AppView;
     if (VALID_APP_VIEWS.includes(hash)) {
       useAppStore.setState({ currentView: hash });
+    }
+    if (!hash) {
+      useAppStore.setState({ currentView: 'landing' });
     }
   });
 }

@@ -11,7 +11,7 @@ describe('WelcomeCard', () => {
   it('應該顯示建議提示', () => {
     render(<WelcomeCard onPromptClick={vi.fn()} />);
     expect(screen.getByText('我今天有點煩，想找人聊聊')).toBeInTheDocument();
-    expect(screen.getByText('幫我啟動 Meta-Moment')).toBeInTheDocument();
+    expect(screen.getByText('幫我啟動緊急安定練習')).toBeInTheDocument();
     expect(screen.getByText('看看我最近的情緒趨勢')).toBeInTheDocument();
   });
 
