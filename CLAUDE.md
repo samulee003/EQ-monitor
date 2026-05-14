@@ -24,11 +24,15 @@ npm run build        # Production build → dist/
 npm run preview      # Preview production build
 npm run test         # Vitest watch mode
 npm run test:run     # Single run (265 tests)
+npm run test:e2e     # Playwright E2E (4 critical paths)
+npm run test:e2e:ui  # Playwright interactive UI
+npx vitest run src/path/to/file.test.ts  # Run single test file
 npm run test:coverage
 npm run lint
 npx tsc --noEmit     # Type check
 npm run cap:sync     # Build + sync Capacitor (Android)
 npm run cap:open     # Open Android Studio
+npm run migrate      # Run InsForge LocalStorage→InsForge data migration
 ```
 
 ### Backend Bot Server (cd server/)
