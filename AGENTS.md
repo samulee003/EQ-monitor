@@ -59,33 +59,41 @@
 | Edge Functions | InsForge Functions | `server/insforge/functions/` | ✅ 已上線 |
 | LINE Bot Webhook | Zeabur Bot Server | — | ✅ 已部署並驗簽通過；LINE 綁定與完整 RULER 資料流已驗 |
 
-### 2.5 內測狀態（2026-05-14）
+### 2.5 V1.0 起點狀態（2026-05-14）
 
-**PM 判斷**：黃燈偏綠，可進入 1-3 人／小圈朋友封閉試玩；暫不建議大量公開或投放式宣傳。
+**版本基線**：`V1.0.0` 定為今心產品起點。`main` / `origin/main` 目前指向 `cc21e8d fix: 補齊公開前刪帳與推送守門`，後續功能、文件、測試與發布都以這版為基準往後迭代。
+
+**PM 判斷**：技術 blocker 已清，可發給 1-3 人／小圈朋友封閉試玩；暫不建議大量公開投放，也不要用醫療、治療或正式療癒服務語氣宣傳。
 
 已收斂：
-- PWA、Bot Server、`coach`、`weekly-report`、`achievement-checker` 均已部署。
+- PWA、Bot Server、`coach`、`weekly-report`、`achievement-checker`、`delete-account` 均已部署或完成 production smoke。
 - Coach 危機語句會回 `MetaMomentSkill` 並觸發 `open_sos`。
-- 首頁與 Coach 首屏已強化為「Agentic AI 主動教練」導覽：首頁有「今日教練建議」，Coach 空狀態有焦慮、親子修復、教練觀察三個情境入口。
-- Production PWA 最新驗證版本：`https://today-mood.zeabur.app/?v=linebot-entry-70313a2#home`。線上 smoke 已確認主導覽為原版文案「今日心情／記錄回顧／成長看板／教練」，頁首右上為純 SVG 圖示列（成就、主題、提醒、帳號），沒有再顯示「勳／系／訊」或「安定室」。
+- 首頁與 Coach 首屏已強化為「主動 AI 教練」導覽：首頁有「今日教練建議」，Coach 空狀態有焦慮、親子修復、教練觀察三個情境入口。
+- Production PWA 已線上 smoke：主導覽為原版文案「今日心情／記錄回顧／成長看板／教練」，頁首右上為純 SVG 圖示列（成就、主題、提醒、帳號），沒有再顯示「勳／系／訊」或「安定室」。
 - Header 帳號入口已接 InsForge Auth：未登入時帳號圖示開啟登入／註冊 modal；已登入時打開個人中心。
 - 重要 UI 約束：`MainLayout` 主導覽與 `CoachPage` 底部導覽必須保留原版文案「今日心情／記錄回顧／成長看板／教練」，不要改回「安定室／紀錄／洞察／主動教練」。
 - LINE 官方帳號入口已補回首頁與 Coach 綁定區並完成線上 smoke：顯示「鋅鋰師拔麻的小小額葉養成手札」、Basic ID `@980pqrhn`、加好友連結 `https://line.me/R/ti/p/@980pqrhn`，共用 `src/constants/lineBot.ts`。
 - 真 LINE 綁定 E2E 已在 session `019e242d-7d68-7580-bfa2-6c612b61529f` 驗過：LINE 取得 6 位綁定碼後，production PWA Coach 貼碼成功並顯示已綁定。
 - Production LINE RULER 資料流已驗：用一次性已綁定測試帳號透過 production `/webhook` + 有效 LINE 簽名送完整 RULER 7 則訊息，確認寫入 `agent_ruler_logs`，`weekly-report` 讀到 `total_sessions: 1`，Coach 讀到「焦慮、強度 7」；測試資料已清理。
 - 主動推送排程已補齊：production InsForge PostgreSQL 已啟用 `pg_cron` 與 `pg_net`，`weekly-report-batch`（週日 13:00 UTC / 台北 21:00）與 `care-scan-daily`（每日 02:00 UTC / 台北 10:00）均為 active。
+- 主動推送守門已補齊：batch function 會檢查使用者是否有 LINE 綁定與 opt-in，不會對未授權或未綁定使用者推送。
 - AI 教練 soul 已落地：`server/insforge/agents/soul.md` 是人格與安全邊界規格；ADK agent 使用 `globalInstruction + instruction`；production `coach-simple.ts` 使用同一套核心 prompt 組裝並已重新部署。
-- LINE 綁定碼從 production PWA 到 production Bot Server 已 smoke 通過。
 - Bot `/webhook` 已補簽名保護：缺少或無效 `x-line-signature` 回 401；有效簽名空事件回 200。
-- 本機 PWA 已接上 InsForge Auth：`AuthContext` 走 `InsForgeAuthService`，不再使用本機假登入。
-- 測試帳號 `samlei@apm.org.mo` 已在 InsForge Auth 建立並完成 email verification；UI 登入與重新整理保持登入已通過。
+- PWA 已接上 InsForge Auth：`AuthContext` 走 `InsForgeAuthService`，不再使用本機假登入。
 - `coach_context` 會在登入/註冊時自動初始化，已回查 InsForge 確認 user / profile / coach context 都落庫。
-- 最近一次完整本機驗證：前端 `366 tests / 39 files` 通過，後端 `156 tests / 15 files` 通過；前端 `npm run build`、`npx tsc --noEmit`、`git diff --check` 通過。
+- 刪除帳號流程已補齊：`delete-account` 清理 app/public 資料並寫入 `account_deletions` 最小刪除紀錄；前端登入與 cold-start 會阻擋已刪帳號重新進入產品。
+- `privacy.html` 與 `account-deletion.html` 已補上資料刪除範圍與最小刪除紀錄說明。
+- 最近一次完整本機驗證：前端 `372 tests / 40 files` 通過，後端 `160 tests / 16 files` 通過；`npx tsc --noEmit`、前後端 build、`npm run lint`、`git diff --check` 均通過。
+
+入口策略：
+- PWA 網頁是所有朋友的共同入口：LINE、WeChat 或其他通訊軟體的使用者都可以直接打開 `https://today-mood.zeabur.app/` 使用網頁版記錄與 Coach。
+- LINE 是 V1.0 已驗證的對話入口：可加官方帳號、綁定 PWA、在 LINE 完成 RULER 並同步給 Coach / 週報。
+- WeChat 朋友目前先走 PWA 網頁；WeChat Bot / Official Account 屬於 P2，不放入 V1.0 blocker，避免被微信帳號、openid 綁定、審核與跨區推送規則拖慢。
 
 仍需 PM/QA 實測：
-- 若要擴大分享，建議再用朋友手機重跑一次「加 LINE 官方帳號 → 輸入綁定 → PWA 貼碼 → 完成 RULER」，確認一般使用者也能順；這是體驗驗收，不是目前的技術 blocker。
-- Production Zeabur PWA 已重部署，但部署驗證要等 `zeabur deployment list` 顯示最新 deployment `RUNNING` 後再 smoke；CLI 回 `Service deployed successfully` 時可能仍在 `BUILDING`，此時正式網址會暫時吐舊 bundle。
-- 目前工作分支為 `codex/stitch-ui-release-20260513`，包含 `61f61fd`（純圖示帳號入口）、`9a5c5c3`（恢復原版導覽文案）與 `9219bc3`（補上 LINE 官方帳號入口）；不要 reset / checkout 覆蓋。
+- 找 1 位非開發者用手機重跑一次「打開 PWA → 加 LINE 官方帳號（若有 LINE）→ 輸入綁定 → PWA 貼碼 → 完成 RULER → 回 Coach 問最近記錄」，確認一般使用者也能順。
+- 找 1 位主要用 WeChat 的朋友直接打開 PWA 網頁，確認不依賴 LINE 也能完成記錄與 Coach 對話。
+- 記錄朋友在哪一句文案、哪個按鈕或哪個畫面卡住；P1 再依真回饋補三步驟圖解或首頁分流。
 
 ### 2.6 AI 教練 Soul / ADK / Production Prompt
 
@@ -180,7 +188,7 @@
 │   │       ├── logger.ts         # 結構化日誌
 │   │       └── metrics.ts        # 指標統計
 │   ├── insforge/                 # InsForge 基礎設施
-│   │   ├── schema/               # SQL migration（001-008）
+│   │   ├── schema/               # SQL migration（001-010）
 │   │   │   ├── 001_profiles.sql
 │   │   │   ├── 002_ruler_logs.sql
 │   │   │   ├── 003_ruler_drafts.sql
@@ -188,11 +196,14 @@
 │   │   │   ├── 005_streaks.sql
 │   │   │   ├── 006_coach_messages.sql
 │   │   │   ├── 007_coach_context.sql
-│   │   │   └── 008_agentic_coach_bridge.sql
+│   │   │   ├── 008_agentic_coach_bridge.sql
+│   │   │   ├── 009_notification_log.sql
+│   │   │   └── 010_account_deletions.sql
 │   │   ├── functions/            # Edge Functions（Deno/TS）
 │   │   │   ├── coach-simple.ts   # ✅ 已部署 AI 教練 API（REST fallback）
 │   │   │   ├── weekly-report.ts  # ✅ 已部署週報生成
-│   │   │   └── achievement-checker.ts # ✅ 已部署成就檢查
+│   │   │   ├── achievement-checker.ts # ✅ 已部署成就檢查／主動關懷掃描
+│   │   │   └── delete-account.ts # ✅ 已部署帳號資料刪除
 │   │   └── agents/               # ADK agent 定義 + soul.md + 契約測試
 │   ├── src/agents/               # Node ADK agent + canonical soulInstruction
 │   ├── test-bot.cjs              # Bot 端到端測試腳本
@@ -237,7 +248,7 @@ npm run preview
 
 # 測試
 npm run test              # 監視模式
-npm run test:run          # 單次執行（366 測試通過）
+npm run test:run          # 單次執行（372 測試通過）
 npm run test:coverage     # 覆蓋率報告
 
 # 代碼檢查
@@ -268,7 +279,7 @@ npm run start             # 運行編譯後代碼
 
 # 測試
 npm run test              # 監視模式
-npm run test:run          # 單次執行（156 測試通過）
+npm run test:run          # 單次執行（160 測試通過）
 npm run test:coverage     # 覆蓋率報告（門檻 80%）
 
 # 端到端測試
@@ -388,7 +399,7 @@ type View = 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
 - Setup：`src/test/setup.ts`
 - 別名：`@` → `./src`，`@insforge/sdk` → `./src/test/mocks/insforge-sdk.ts`
 
-**當前覆蓋**（366 測試，39 文件全通）：
+**當前覆蓋**（372 測試，40 文件全通）：
 
 | 文件 | 測試數 | 覆蓋範圍 |
 |------|--------|----------|
@@ -416,7 +427,7 @@ type View = 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
 - 覆蓋率門檻：lines/functions/branches/statements 均 80%
 - 排除：middleware、api、logger、insforgeAdapter
 
-當前狀態：156 測試通過（15 文件），`npm run build` 通過。
+當前狀態：160 測試通過（16 文件），`npm run build` 通過。
 
 ### 7.3 測試陷阱與解決方案
 
@@ -516,6 +527,8 @@ import { encryptData, decryptData, isEncrypted } from '@/utils/crypto';
 | `adk_events` | AI 教練對話事件流 | full CRUD own |
 | `line_user_bindings` | LINE Bot 與 PWA 本地使用者綁定碼 | service_role only |
 | `agent_ruler_logs` | 內測期非 UUID 使用者的 Agentic Coach / LINE 日誌橋接 | service_role only |
+| `notification_log` | 主動推送冪等與紀錄 | service_role only |
+| `account_deletions` | 帳號刪除最小 tombstone，不含情緒內容 | select own + service_role full access |
 
 **Auth Trigger**：`on_auth_user_created` 自動建立 `profiles` 列。
 
@@ -541,9 +554,11 @@ LocalStorage → InsForge 的 RULER 日誌遷移已在本機實作：
 | ADK JS 無法在 Deno 部署 | 已繞過 | ADK agent 已同步 soul；production 使用純 REST API fallback（`coach-simple.ts`），且因 InsForge 打包限制需自包含 prompt builder |
 | Edge Function session 不持久 | 已解決 | PostgreSQL `adk_sessions` / `adk_events` 跨請求持久化 |
 | Data migration（LocalStorage → InsForge）| 已實作，待更多真資料驗證 | 已會寫入 `ruler_logs` 並標記 `coach_context.migration_completed_at` |
-| 認證架構（本地 ↔ InsForge Auth）| 本機已整合，待部署確認 | `AuthContext` 已改走 `InsForgeAuthService`；production PWA 需確認 env + redeploy |
+| 認證架構（本地 ↔ InsForge Auth）| 已整合並驗證 | `AuthContext` 已改走 `InsForgeAuthService`；登入、註冊、session 保留與 `coach_context` 初始化已驗 |
+| 帳號刪除 | 已部署並 smoke | `delete-account` 清理 app/public 資料並寫入 `account_deletions`；前端會阻擋已刪帳號再次進入產品 |
 | 真 LINE RULER 完整事件 | 已驗收 | 以 production `/webhook` + 有效 LINE 簽名 + 一次性已綁定測試帳號完成 RULER，確認 `agent_ruler_logs`、`weekly-report`、Coach 讀取；測試資料已清理 |
 | 主動推送（Proactive AI / Cron）| 已部署 | production DB 已啟用 `pg_cron` / `pg_net`，`weekly-report-batch` 與 `care-scan-daily` 已 active；GitHub Actions fallback 仍保留 |
+| WeChat / 微信入口 | V1.0 不做 Bot | WeChat 朋友直接走 PWA 網頁；WeChat Official Account / Bot 放 P2 |
 | Playwright E2E 基線 | 已引入 | 關鍵路徑測試已存在；真 LINE 使用體驗仍建議用朋友手機做一次非阻塞驗收 |
 | `ik_` instance key 無法 schema mutation | 平台限制 | 用 direct PostgreSQL connection 執行 DDL |
 
