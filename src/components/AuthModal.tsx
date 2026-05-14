@@ -208,7 +208,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                 <span>
                                     {t('我同意將情緒輪廓備份至雲端，數據僅用於提供個人化 AI 教練功能，不作商業用途。')}
                                     {' '}
-                                    <a href="/privacy" target="_blank" rel="noopener noreferrer">{t('隱私聲明')}</a>
+                                    <a href="/privacy.html" target="_blank" rel="noopener noreferrer">{t('隱私聲明')}</a>
                                 </span>
                             </label>
                             <label className={styles.checkboxLabel}>

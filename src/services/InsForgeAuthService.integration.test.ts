@@ -6,6 +6,17 @@ vi.mock('@/lib/insforge/client', () => ({
   insforge: {
     auth: {
       signInWithPassword: vi.fn(),
+      signOut: vi.fn(),
+    },
+    database: {
+      from: vi.fn(() => {
+        const query = {
+          select: vi.fn(() => query),
+          eq: vi.fn(() => query),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+        return query;
+      }),
     },
   },
 }));

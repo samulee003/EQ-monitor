@@ -27,6 +27,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
     // Data state
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [deleteMessage, setDeleteMessage] = useState('');
 
     if (!isAuthenticated || !user) {
         return (
@@ -119,7 +120,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
         const success = await deleteAccount();
         if (success) {
             onClose();
+            return;
         }
+        setDeleteMessage(t('刪除失敗，請稍後再試或使用資料刪除申請。'));
     };
 
     const getInitials = (name: string) => {
@@ -304,7 +307,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                             {!showDeleteConfirm ? (
                                 <button
                                     className="profile-btn danger"
-                                    onClick={() => setShowDeleteConfirm(true)}
+                                    onClick={() => {
+                                        setDeleteMessage('');
+                                        setShowDeleteConfirm(true);
+                                    }}
                                 >
                                     🗑️ {t('刪除帳號')}
                                 </button>
@@ -332,11 +338,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                                             onClick={() => {
                                                 setShowDeleteConfirm(false);
                                                 setDeleteConfirmText('');
+                                                setDeleteMessage('');
                                             }}
                                         >
                                             {t('取消')}
                                         </button>
                                     </div>
+                                    {deleteMessage && <div className="message error">{deleteMessage}</div>}
                                 </div>
                             )}
                         </div>

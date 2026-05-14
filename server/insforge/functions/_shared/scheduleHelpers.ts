@@ -14,6 +14,11 @@ export interface NotificationLogRow {
   run_date: string;
 }
 
+export interface CoachContextOptInRow {
+  user_id: string;
+  coach_opted_in?: boolean | null;
+}
+
 /** 從近 7 天 ruler_logs 收斂 active user 清單（去重，限制批次大小）。 */
 export function pickActiveUsers(
   logs: RulerLogRow[],
@@ -43,6 +48,19 @@ export function filterUnsentToday(
     sentToday.filter((r) => r.type === type && r.run_date === runDate).map((r) => r.user_id)
   );
   return candidates.filter((id) => !sent.has(id));
+}
+
+/** 僅保留明確同意主動教練推送的使用者。 */
+export function filterOptedInUsers(
+  candidates: string[],
+  coachContexts: CoachContextOptInRow[]
+): string[] {
+  const optedIn = new Set(
+    coachContexts
+      .filter((row) => row.coach_opted_in === true)
+      .map((row) => row.user_id)
+  );
+  return candidates.filter((id) => optedIn.has(id));
 }
 
 /** 找出「連續 N 天紅象限」用戶。 */

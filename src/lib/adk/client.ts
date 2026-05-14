@@ -1,4 +1,5 @@
-import type { CoachRequest, CoachResponse } from './types';
+import { insforge } from '@/lib/insforge/client';
+import { type CoachRequest, type CoachResponse } from './types';
 
 const COACH_API_URL =
   import.meta.env.VITE_COACH_API_URL ||
@@ -12,7 +13,10 @@ export async function sendMessage(req: CoachRequest): Promise<CoachResponse> {
   try {
     const res = await fetch(COACH_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...insforge.getHttpClient().getHeaders(),
+      },
       body: JSON.stringify(req),
       signal: controller.signal,
     });

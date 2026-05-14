@@ -154,7 +154,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const deleteAccount = async (): Promise<boolean> => {
-        return false;
+        if (!user) return false;
+
+        if (!user.email) {
+            setUser(null);
+            setMigrationNeeded(false);
+            return true;
+        }
+
+        const result = await insforgeAuthService.deleteAccountData(user.id);
+        if (!result.success) return false;
+
+        await logout();
+        setMigrationNeeded(false);
+        return true;
     };
 
     const value: AuthContextType = {
