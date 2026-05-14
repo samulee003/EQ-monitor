@@ -194,7 +194,6 @@ InsForge SDK is mocked in tests via alias: `@insforge/sdk` → `src/test/mocks/i
 
 | Issue | Workaround |
 |-------|-----------|
-| Husky pre-commit hook broken | `git commit --no-verify` |
 | `server/src/env.ts` test fails (dotenv) | Affects 1 test file; other 52 pass |
 | Edge Function sessions not persistent | `InMemoryRunner` — each request is stateless |
 | LocalStorage → InsForge migration | Not implemented |
