@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
 import { saveChatHistory } from '../lib/adk/storage';
@@ -244,6 +244,19 @@ describe('CoachPage', () => {
       );
     });
     expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
+  });
+
+  it('LINE Bot 綁定區顯示官方帳號與加好友入口', () => {
+    render(<CoachPage />);
+
+    const panel = screen.getByTestId('line-binding-panel');
+    expect(within(panel).getByText('LINE 官方帳號')).toBeInTheDocument();
+    expect(within(panel).getByText('鋅鋰師拔麻的小小額葉養成手札')).toBeInTheDocument();
+    expect(within(panel).getByText('@980pqrhn')).toBeInTheDocument();
+    expect(within(panel).getByRole('link', { name: '先加入 LINE 官方帳號' })).toHaveAttribute(
+      'href',
+      'https://line.me/R/ti/p/@980pqrhn'
+    );
   });
 
   it('送出 LINE Bot 綁定碼時應該鎖定按鈕並顯示綁定中', async () => {

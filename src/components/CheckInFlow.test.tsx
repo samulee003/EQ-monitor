@@ -203,6 +203,22 @@ describe('CheckInFlow', () => {
         expect(window.location.hash).toBe('#coach');
     });
 
+    it('首頁應該清楚顯示 LINE 官方帳號與加好友入口', () => {
+        render(<CheckInFlow />);
+
+        expect(screen.getByText('LINE Bot 也可以使用今心')).toBeInTheDocument();
+        expect(screen.getByText('鋅鋰師拔麻的小小額葉養成手札')).toBeInTheDocument();
+        expect(screen.getByText('@980pqrhn')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: '加入 LINE 官方帳號' })).toHaveAttribute(
+            'href',
+            'https://line.me/R/ti/p/@980pqrhn'
+        );
+
+        fireEvent.click(screen.getByText('前往教練綁定'));
+
+        expect(window.location.hash).toBe('#coach');
+    });
+
     it('應該進入快速記錄模式', () => {
         render(<CheckInFlow />);
 
