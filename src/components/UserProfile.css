@@ -1,0 +1,396 @@
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: hsla(0, 0%, 10%, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6);
+}
+
+.profile-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-luxe);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-luxe);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s-6);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.profile-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+}
+
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--s-4);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--color-yellow);
+  border-radius: 2px;
+}
+
+.profile-tab-content {
+  padding: var(--s-6);
+}
+
+.avatar-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--s-6);
+}
+
+.avatar-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-yellow), var(--color-red));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: hsla(0, 0%, 0%, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-overlay span {
+  font-size: 1.5rem;
+}
+
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.profile-field {
+  margin-bottom: var(--s-4);
+}
+
+.profile-field label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--s-2);
+}
+
+.display-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s-3);
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.display-field span {
+  color: var(--text-primary);
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--color-yellow);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: var(--s-1) var(--s-2);
+}
+
+.edit-field {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.edit-field input {
+  flex: 1;
+  padding: var(--s-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: var(--s-2) var(--s-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: var(--color-green);
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+}
+
+.cancel-btn {
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+}
+
+.form-group {
+  margin-bottom: var(--s-4);
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--s-2);
+}
+
+.form-group input {
+  width: 100%;
+  padding: var(--s-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-yellow);
+}
+
+.profile-btn {
+  width: 100%;
+  padding: var(--s-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: var(--s-3);
+}
+
+.profile-btn:hover {
+  background: var(--glass-border);
+}
+
+.profile-btn.primary {
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border: none;
+  font-weight: 600;
+}
+
+.profile-btn.danger {
+  background: hsla(0, 50%, 50%, 0.1);
+  border-color: hsla(0, 50%, 50%, 0.3);
+  color: var(--color-red);
+}
+
+.profile-btn.danger:hover {
+  background: hsla(0, 50%, 50%, 0.2);
+}
+
+.profile-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: var(--s-3);
+  background: hsla(0, 0%, 100%, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: var(--s-4);
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: hsla(0, 0%, 100%, 0.1);
+  color: var(--text-primary);
+}
+
+.success-message {
+  padding: var(--s-3);
+  background: hsla(120, 50%, 40%, 0.1);
+  border: 1px solid hsla(120, 50%, 40%, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-green);
+  text-align: center;
+  margin-bottom: var(--s-4);
+}
+
+.message {
+  padding: var(--s-3);
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: var(--s-4);
+  font-size: 0.9rem;
+}
+
+.message.success {
+  background: hsla(120, 50%, 40%, 0.1);
+  border: 1px solid hsla(120, 50%, 40%, 0.2);
+  color: var(--color-green);
+}
+
+.message.error {
+  background: hsla(0, 50%, 50%, 0.1);
+  border: 1px solid hsla(0, 50%, 50%, 0.2);
+  color: var(--color-red);
+}
+
+.data-section {
+  padding: var(--s-4);
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--s-4);
+}
+
+.data-section h3 {
+  margin: 0 0 var(--s-2);
+  font-size: 1rem;
+}
+
+.data-section p {
+  margin: 0 0 var(--s-4);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.data-section.danger {
+  border: 1px solid hsla(0, 50%, 50%, 0.2);
+}
+
+.delete-confirm {
+  margin-top: var(--s-3);
+}
+
+.warning-text {
+  color: var(--color-red);
+  font-size: 0.85rem;
+  margin-bottom: var(--s-3);
+}
+
+.delete-confirm input {
+  width: 100%;
+  padding: var(--s-3);
+  background: var(--glass-bg);
+  border: 1px solid hsla(0, 50%, 50%, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  margin-bottom: var(--s-3);
+  box-sizing: border-box;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.confirm-actions .profile-btn {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
