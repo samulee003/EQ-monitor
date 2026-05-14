@@ -1,38 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import CheckInFlow from './CheckInFlow';
-
-const quickCheckInData = {
-    emotion: {
-        id: 'green_calm',
-        name: '平靜的',
-        quadrant: 'green' as const,
-        description: '覺得安定',
-    },
-    intensity: 4,
-    scenarioTag: '下班後',
-    note: '終於慢下來',
-    timestamp: '2026-05-14T10:00:00.000Z',
-};
 
 // Mock LanguageContext
 vi.mock('../services/LanguageContext', () => ({
     useLanguage: () => ({ t: (s: string) => s, language: 'zh-TW' as const, toggleLanguage: vi.fn() }),
-}));
-
-// Mock settings store
-const { mockCreateLog } = vi.hoisted(() => ({
-    mockCreateLog: vi.fn(),
-}));
-vi.mock('../adapters', () => ({
-    dataAdapter: {
-        logs: {
-            create: mockCreateLog,
-        },
-    },
-    settingsStore: {
-        getUserRole: vi.fn(() => 'user'),
-    },
 }));
 
 // Mock useRulerFlow hook
@@ -152,27 +124,6 @@ vi.mock('./steps/CenteringStep', () => ({
     default: () => <div data-testid="centering-step">Centering</div>,
 }));
 
-vi.mock('./QuickStats', () => ({
-    default: () => <div data-testid="quick-stats">QuickStats</div>,
-}));
-
-vi.mock('./QuickCheckIn', () => ({
-    default: ({ onComplete, onCancel }: { onComplete: (data: typeof quickCheckInData) => void; onCancel: () => void }) => (
-        <div data-testid="quick-check-in">
-            <button onClick={() => onComplete(quickCheckInData)}>快速完成</button>
-            <button onClick={onCancel}>取消</button>
-        </div>
-    ),
-}));
-
-vi.mock('./ParentScenarios', () => ({
-    default: ({ onDismiss }: { onDismiss: () => void }) => (
-        <div data-testid="parent-scenarios">
-            <button onClick={onDismiss}>關閉</button>
-        </div>
-    ),
-}));
-
 vi.mock('./RulerProgress', () => ({
     default: () => <div data-testid="ruler-progress">RulerProgress</div>,
 }));
@@ -181,76 +132,17 @@ describe('CheckInFlow', () => {
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
-        mockCreateLog.mockResolvedValue(undefined);
     });
 
-    it('應該在初始步驟渲染 MoodMeter 與快捷入口', () => {
+    it('初始首頁只渲染 MoodMeter 四象限，不顯示額外入口', () => {
         render(<CheckInFlow />);
 
         expect(screen.getByTestId('mood-meter')).toBeInTheDocument();
-        expect(screen.getByTestId('quick-stats')).toBeInTheDocument();
-        expect(screen.getByText('快速記錄')).toBeInTheDocument();
-    });
-
-    it('首頁應該呈現主動教練今日建議並可前往 Coach', () => {
-        render(<CheckInFlow />);
-
-        expect(screen.getByText('今日教練建議')).toBeInTheDocument();
-        expect(screen.getByText('你不用等情緒爆滿才來找我。')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByText('找主動教練整理'));
-
-        expect(window.location.hash).toBe('#coach');
-    });
-
-    it('首頁應該清楚顯示 LINE 官方帳號與加好友入口', () => {
-        render(<CheckInFlow />);
-
-        expect(screen.getByText('LINE Bot 也可以使用今心')).toBeInTheDocument();
-        expect(screen.getByText('鋅鋰師拔麻的小小額葉養成手札')).toBeInTheDocument();
-        expect(screen.getByText('@980pqrhn')).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '加入 LINE 官方帳號' })).toHaveAttribute(
-            'href',
-            'https://line.me/R/ti/p/@980pqrhn'
-        );
-
-        fireEvent.click(screen.getByText('前往教練綁定'));
-
-        expect(window.location.hash).toBe('#coach');
-    });
-
-    it('應該進入快速記錄模式', () => {
-        render(<CheckInFlow />);
-
-        fireEvent.click(screen.getByText('快速記錄'));
-        expect(screen.getByTestId('quick-check-in')).toBeInTheDocument();
-    });
-
-    it('應該從快速記錄返回並重置流程', async () => {
-        render(<CheckInFlow />);
-
-        fireEvent.click(screen.getByText('快速記錄'));
-        fireEvent.click(screen.getByText('快速完成'));
-
-        await waitFor(() => {
-            expect(mockCreateLog).toHaveBeenCalledWith(expect.objectContaining({
-                emotions: [{
-                    id: 'green_calm',
-                    name: '平靜的',
-                    quadrant: 'green',
-                    energy: 1,
-                    pleasantness: 4,
-                }],
-                intensity: 4,
-                understanding: expect.objectContaining({
-                    trigger: '下班後',
-                    what: '終於慢下來',
-                }),
-                timestamp: '2026-05-14T10:00:00.000Z',
-                isFullFlow: false,
-            }));
-            expect(mockResetFlow).toHaveBeenCalled();
-        });
+        expect(screen.queryByTestId('ruler-progress')).not.toBeInTheDocument();
+        expect(screen.queryByText('今日教練建議')).not.toBeInTheDocument();
+        expect(screen.queryByText('快速統計')).not.toBeInTheDocument();
+        expect(screen.queryByText('快速記錄')).not.toBeInTheDocument();
+        expect(screen.queryByText('LINE Bot 也可以使用今心')).not.toBeInTheDocument();
     });
 
     it('應該處理 MoodMeter 完成並呼叫 handleMoodComplete', () => {

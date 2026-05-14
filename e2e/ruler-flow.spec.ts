@@ -22,9 +22,8 @@ test.describe('RULER 流程關鍵路徑', () => {
     const heading = page.getByRole('heading', { name: /你現在感覺如何/ });
     await expect(heading).toBeVisible({ timeout: 10_000 });
 
-    // RulerProgress 顯示目前位於 recognizing
-    const progress = page.getByTestId('ruler-progress');
-    await expect(progress).toHaveAttribute('data-current-step', 'recognizing');
+    // 首頁保持極簡，只顯示四象限，不在第一屏放進度條
+    await expect(page.getByTestId('ruler-progress')).toHaveCount(0);
 
     // 選擇一個象限（綠色 / 低能量 愉快）
     await page.getByTestId('mood-quadrant-green').click();
@@ -34,9 +33,9 @@ test.describe('RULER 流程關鍵路徑', () => {
     await expect(confirm).toBeEnabled();
     await confirm.click();
 
-    // 進入下一步：data-current-step 不再是 recognizing
-    await expect(progress).not.toHaveAttribute('data-current-step', 'recognizing', {
-      timeout: 5_000,
-    });
+    // 進入下一步後才顯示流程進度
+    const progress = page.getByTestId('ruler-progress');
+    await expect(progress).toBeVisible({ timeout: 5_000 });
+    await expect(progress).not.toHaveAttribute('data-current-step', 'recognizing');
   });
 });

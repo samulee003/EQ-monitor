@@ -1,0 +1,125 @@
+.ruler-progress {
+    margin-bottom: var(--s-10);
+    position: relative;
+    padding: 0 var(--s-2);
+}
+
+.progress-track {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    z-index: 1;
+}
+
+.progress-track-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--glass-border);
+    border-radius: 2px;
+}
+
+.progress-track-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s-2);
+    opacity: 0.35;
+    transition: var(--transition-luxe);
+}
+
+.progress-step.active {
+    opacity: 1;
+}
+
+.step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: var(--transition-luxe);
+    backdrop-filter: var(--glass-blur);
+}
+
+.progress-step.current .step-circle {
+    background: var(--bg-color);
+    transform: scale(1.15);
+}
+
+.step-letter {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    z-index: 2;
+}
+
+.step-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: stepPulse 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes stepPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+}
+
+.step-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.progress-step.current .step-label {
+    color: var(--text-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 360px) {
+    .step-circle {
+        width: 30px;
+        height: 30px;
+    }
+    .step-letter {
+        font-size: 0.75rem;
+    }
+    .step-label {
+        font-size: 0.6rem;
+    }
+    .progress-track {
+        top: 15px;
+    }
+}
