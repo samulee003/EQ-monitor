@@ -61,24 +61,28 @@
 
 ### 2.5 內測狀態（2026-05-14）
 
-**PM 判斷**：黃燈偏綠，可進入 1-3 人封閉內測；暫不建議公開宣傳或大量開放。
+**PM 判斷**：黃燈偏綠，可進入 1-3 人／小圈朋友封閉試玩；暫不建議大量公開或投放式宣傳。
 
 已收斂：
 - PWA、Bot Server、`coach`、`weekly-report`、`achievement-checker` 均已部署。
 - Coach 危機語句會回 `MetaMomentSkill` 並觸發 `open_sos`。
 - 首頁與 Coach 首屏已強化為「Agentic AI 主動教練」導覽：首頁有「今日教練建議」，Coach 空狀態有焦慮、親子修復、教練觀察三個情境入口。
+- Production PWA 最新部署：`https://today-mood.zeabur.app/?v=nav-original-9a5c5c3#home`。線上 smoke 已確認主導覽為原版文案「今日心情／記錄回顧／成長看板／教練」，頁首右上為純 SVG 圖示列（成就、主題、提醒、帳號），沒有再顯示「勳／系／訊」或「安定室」。
+- Header 帳號入口已接 InsForge Auth：未登入時帳號圖示開啟登入／註冊 modal；已登入時打開個人中心。
+- 重要 UI 約束：`MainLayout` 主導覽與 `CoachPage` 底部導覽必須保留原版文案「今日心情／記錄回顧／成長看板／教練」，不要改回「安定室／紀錄／洞察／主動教練」。
 - AI 教練 soul 已落地：`server/insforge/agents/soul.md` 是人格與安全邊界規格；ADK agent 使用 `globalInstruction + instruction`；production `coach-simple.ts` 使用同一套核心 prompt 組裝並已重新部署。
 - LINE 綁定碼從 production PWA 到 production Bot Server 已 smoke 通過。
 - Bot `/webhook` 已補簽名保護：缺少或無效 `x-line-signature` 回 401；有效簽名空事件回 200。
 - 本機 PWA 已接上 InsForge Auth：`AuthContext` 走 `InsForgeAuthService`，不再使用本機假登入。
 - 測試帳號 `samlei@apm.org.mo` 已在 InsForge Auth 建立並完成 email verification；UI 登入與重新整理保持登入已通過。
 - `coach_context` 會在登入/註冊時自動初始化，已回查 InsForge 確認 user / profile / coach context 都落庫。
-- 最近一次完整本機驗證：前端 `352 tests / 37 files` 通過，後端 `156 tests / 15 files` 通過，前後端 build 與 `npx tsc --noEmit` 通過。
+- 最近一次完整本機驗證：前端 `364 tests / 39 files` 通過，後端 `156 tests / 15 files` 通過；前端 `npm run build`、`npx tsc --noEmit`、`git diff --check` 通過。
 
 仍需 PM/QA 實測：
 - 用真 LINE 帳號跑一次完整流程：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
-- Production Zeabur PWA 若尚未重部署，需確認 `VITE_INSFORGE_URL` / `VITE_INSFORGE_ANON_KEY` 已在部署環境設定；本機 `.env.local` 已設定且受 gitignore 保護。
-- 目前工作分支為 `codex/stitch-ui-release-20260513`，`main` 與 `origin/main` 對齊；工作樹仍有多組未整理變更，不要直接 reset / pull 覆蓋。
+- 目前 `CoachPage` 只有 LINE 綁定碼輸入說明，尚未在此主線加入「官方帳號名稱 / Basic ID / 加好友連結」的清楚入口；朋友測試前仍建議人工告知 LINE 帳號，或補 UI 後再擴大分享。
+- Production Zeabur PWA 已重部署，但部署驗證要等 `zeabur deployment list` 顯示最新 deployment `RUNNING` 後再 smoke；CLI 回 `Service deployed successfully` 時可能仍在 `BUILDING`，此時正式網址會暫時吐舊 bundle。
+- 目前工作分支為 `codex/stitch-ui-release-20260513`，包含 `61f61fd`（純圖示帳號入口）與 `9a5c5c3`（恢復原版導覽文案）；不要 reset / checkout 覆蓋。
 
 ### 2.6 AI 教練 Soul / ADK / Production Prompt
 
@@ -230,7 +234,7 @@ npm run preview
 
 # 測試
 npm run test              # 監視模式
-npm run test:run          # 單次執行（352 測試通過）
+npm run test:run          # 單次執行（364 測試通過）
 npm run test:coverage     # 覆蓋率報告
 
 # 代碼檢查
@@ -381,7 +385,7 @@ type View = 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
 - Setup：`src/test/setup.ts`
 - 別名：`@` → `./src`，`@insforge/sdk` → `./src/test/mocks/insforge-sdk.ts`
 
-**當前覆蓋**（352 測試，37 文件全通）：
+**當前覆蓋**（364 測試，39 文件全通）：
 
 | 文件 | 測試數 | 覆蓋範圍 |
 |------|--------|----------|
@@ -395,7 +399,8 @@ type View = 'home' | 'checkin' | 'history' | 'growth' | 'achievement' | 'coach';
 | `lib/insforge/adapter.test.ts` | 5 | InsForge SDK 整合 |
 | `services/InsForgeAuthService*.test.ts` | 若干 | InsForge Auth 註冊、登入、session、profile |
 | `lib/insforge/localStorageMigration*.test.ts` | 若干 | LocalStorage → InsForge `ruler_logs` 遷移 |
-| `components/MainLayout.auth.test.tsx` | 若干 | Header 登入入口與帳號狀態 |
+| `components/MainLayout.auth.test.tsx` | 若干 | Header 登入入口、純 SVG 圖示列、原版主導覽文案 |
+| `pages/CoachPage.test.tsx` | 若干 | Coach 空狀態、LINE 綁定碼、底部導覽原版文案 |
 | `components/coach/*.test.tsx` | 若干 | Coach UI 組件 |
 | 其他 | 25+ | 格式化、無障礙、認證上下文、LoadingSpinner 等 |
 
@@ -526,7 +531,8 @@ LocalStorage → InsForge 的 RULER 日誌遷移已在本機實作：
 | 問題 | 狀態 | 繞過方式 / 備註 |
 |---|---|---|
 | Husky pre-commit hook 壞掉 | 未修 | commit 加 `--no-verify` |
-| 工作樹 dirty | 未整理 | 目前在 `codex/stitch-ui-release-20260513`；不要 reset / checkout 覆蓋使用者或前序 agent 變更 |
+| 工作分支 ahead of `origin/main` | 待 PR / merge | 目前在 `codex/stitch-ui-release-20260513`；不要 reset / checkout 覆蓋 `61f61fd`、`9a5c5c3` 之後的發布修正 |
+| LINE 官方帳號入口不夠明確 | 待補強 | 目前 Coach 只說在 LINE 輸入「綁定」並貼 6 位碼，尚未在主線 UI 顯示官方帳號名稱、Basic ID 或加好友連結 |
 | ESLint warnings | 已知 | `npm run lint` 目前 0 errors / 31 warnings |
 | 本機無 `deno` | 已知 | Edge Functions 靠部署與線上 smoke 驗證；本機 `deno check` 未跑 |
 | ADK JS 無法在 Deno 部署 | 已繞過 | ADK agent 已同步 soul；production 使用純 REST API fallback（`coach-simple.ts`），且因 InsForge 打包限制需自包含 prompt builder |
@@ -651,7 +657,7 @@ TypeScript Check → ESLint → Test + Coverage → 80% Gate → Build
 npm run dev              # localhost:5173
 npm run build            # 生產構建
 cd server && npm run dev # Bot 後端 localhost:3000
-npm run test:run         # 前端全量測試（352 測試）
+npm run test:run         # 前端全量測試（364 測試）
 cd server && npm run test:run # 後端全量測試（156 測試）
 npm run test:coverage    # 覆蓋率
 npm run lint             # ESLint
