@@ -1,7 +1,7 @@
 name: Cron Fallback (主動推送備援)
 
 # 備援用途：若 InsForge 雲端不允許 pg_cron extension，由 GitHub Actions 觸發 Edge Functions。
-# 預設不啟用，避免與 pg_cron 雙重觸發。啟用方式：移除下方 `if: false`。
+# 當 pg_net 不可用時啟用，由 GitHub Actions 單一路徑觸發，避免與 pg_cron 雙重觸發。
 
 on:
   schedule:
@@ -22,31 +22,33 @@ on:
 
 jobs:
   weekly-report:
-    if: false # 預設關閉。確認啟用後改為 ${{ github.event.schedule == '0 13 * * 0' || github.event.inputs.target == 'weekly-report' }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 13 * * 0') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'weekly-report') }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger weekly-report batch
         env:
-          INSFORGE_BASE_URL: https://b88egxiz.ap-southeast.insforge.app
+          INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
           SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
         run: |
           set -e
-          curl -fsS -X POST "$INSFORGE_BASE_URL/functions/v1/weekly-report" \
+          test -n "$SERVICE_ROLE_KEY"
+          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/weekly-report" \
             -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -d '{"mode":"batch"}'
 
   care-scan:
-    if: false # 預設關閉。確認啟用後改為 ${{ github.event.schedule == '0 2 * * *' || github.event.inputs.target == 'achievement-checker' }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'achievement-checker') }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger achievement-checker scan
         env:
-          INSFORGE_BASE_URL: https://b88egxiz.ap-southeast.insforge.app
+          INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
           SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
         run: |
           set -e
-          curl -fsS -X POST "$INSFORGE_BASE_URL/functions/v1/achievement-checker" \
+          test -n "$SERVICE_ROLE_KEY"
+          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
             -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -d '{"mode":"scan"}'
