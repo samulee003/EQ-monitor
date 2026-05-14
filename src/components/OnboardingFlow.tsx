@@ -218,7 +218,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <div className="feature-tags">
                             <span className="feature-tag">✦ {t('主動提醒')}</span>
                             <span className="feature-tag">📊 {t('週報洞察')}</span>
-                            <span className="feature-tag">勳 {t('成就鼓勵')}</span>
+                            <span className="feature-tag">🏆 {t('成就鼓勵')}</span>
                         </div>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
