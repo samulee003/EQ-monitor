@@ -4,6 +4,48 @@
 
 ---
 
+## [4.3.2] - 2026-05-14 — LINE RULER 資料流與主動推送排程驗收
+
+### PM 狀態
+
+- **今晚朋友試玩的技術 blocker 已清**：LINE 綁定已驗，production LINE RULER 資料流也已驗到 Coach / 週報都讀得到資料。
+- **主動推送有正式路徑**：InsForge PostgreSQL 已啟用 `pg_cron` / `pg_net`，兩個 production cron job 已 active；GitHub Actions fallback 保留。
+
+### 已完成
+
+- **LINE RULER production 資料流**
+  - 以一次性已綁定測試帳號呼叫 production `/webhook`，使用有效 LINE 簽名送完整 7 則 RULER 對話。
+  - Bot Server 完成 RULER 後寫入 `agent_ruler_logs`：`source: line`、`is_full_flow: true`、情緒「焦慮」。
+  - `weekly-report` 對同一 app user 讀到 `total_sessions: 1`、`dominant_quadrant: red`。
+  - Coach 對同一 app user 可讀到最近一筆 LINE RULER 紀錄：「焦慮」、強度 `7`。
+  - 測試產生的一次性 binding、bot user、RULER session、chat messages、agent log、ADK session/event 已清理。
+- **主動推送排程**
+  - production DB 已確認 `pg_cron` 存在，並成功啟用 `pg_net`。
+  - 已註冊 `weekly-report-batch`：`0 13 * * 0`（台北每週日 21:00）。
+  - 已註冊 `care-scan-daily`：`0 2 * * *`（台北每日 10:00）。
+  - 兩個 `cron.job` 均回查為 `active: true`。
+- **UI 殘留清理**
+  - onboarding 可見的「勳」短字已改為獎盃圖示。
+  - Timeline 測試名稱中的舊稱「安定室」已改為「今日心情」。
+
+### 驗證
+
+- Production Bot `/health`：`adapter: insforge` ✅
+- Production `/webhook` + 有效 LINE 簽名 + 完整 RULER：7 則訊息 accepted ✅
+- `agent_ruler_logs`：新增 1 筆 LINE full-flow 測試資料 ✅
+- `weekly-report`：讀到 LINE RULER 寫入資料 ✅
+- Coach：讀到最近一筆 LINE RULER「焦慮 / 7」✅
+- 測試資料 cleanup：`agent_ruler_logs`、`line_user_bindings`、`ruler_sessions`、`chat_messages` 均為 0 leftover ✅
+- Production schedule：`pg_cron` / `pg_net` installed，`weekly-report-batch` / `care-scan-daily` active ✅
+- 本機 targeted tests：`Timeline.test.tsx`、`OnboardingFlow.test.tsx`、`MainLayout.auth.test.tsx` ✅ 8 tests
+
+### 剩餘風險
+
+- 技術上已可支撐小圈朋友試玩；若要擴大公開，仍建議用朋友手機做一次非阻塞體驗驗收：加 LINE 官方帳號、輸入「綁定」、PWA 貼碼、完成 RULER。
+- LINE Push 免費方案有月額限制；主動推送已透過排程啟用，後續需觀察 `notification_log` 與 LINE quota。
+
+---
+
 ## [4.3.1] - 2026-05-14 — 發布前 UI 信任收斂：原版導覽 + 純圖示帳號入口 + LINE 官方帳號入口
 
 ### PM 狀態
@@ -51,7 +93,7 @@
 
 ### 剩餘風險
 
-- 真 LINE 綁定已驗；仍需用已綁定真 LINE 帳號完成一次 RULER，確認 Coach / 週報讀到資料。
+- 真 LINE 綁定與 production LINE RULER 資料流已於 `4.3.2` 補驗完成。
 - 這些修正已推到 `main` 與 `codex/stitch-ui-release-20260513`，正式 Zeabur 來源已可部署到同一版。
 
 ---
