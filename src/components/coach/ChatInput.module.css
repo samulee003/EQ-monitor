@@ -1,30 +1,31 @@
 .form {
   display: flex;
-  align-items: flex-end;
-  gap: var(--s-2);
-  padding: var(--s-3) var(--s-4);
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--glass-border);
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .sosButton {
-  flex-shrink: 0;
+  flex: 0 0 auto;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border: 0;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--grad-red);
-  color: var(--text-primary);
-  border: none;
+  background: radial-gradient(circle at center, #d67373 0%, rgba(214, 115, 115, 0.1) 70%);
+  color: #1a1a1a;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: 0 2px 10px rgba(214, 115, 115, 0.35);
-  transition: var(--transition-luxe);
+  box-shadow: 0 4px 12px rgba(214, 115, 115, 0.45);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease;
+}
+
+.sosText {
+  transform: translateY(1px);
 }
 
 .sosButton:hover:not(:disabled) {
@@ -36,88 +37,86 @@
 }
 
 .sosButton:disabled {
-  opacity: 0.4;
+  opacity: 0.42;
   cursor: not-allowed;
 }
 
 .inputWrapper {
+  position: relative;
   flex: 1;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  border-radius: 9999px;
-  padding: var(--s-2) var(--s-4);
-  background: var(--bg-color);
-  border: 1px solid var(--glass-border);
-  transition: var(--transition-luxe);
+  border: 1px solid hsla(0, 0%, 0%, 0.18);
+  border-radius: 16px;
+  background: hsla(0, 0%, 0%, 0.06);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .inputWrapper:focus-within {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(151, 166, 180, 0.15);
+  border-color: #6b8fa8;
+  box-shadow: 0 0 0 3px rgba(107, 143, 168, 0.25);
 }
 
 .textInput {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  line-height: 1.5;
+  width: 100%;
   min-width: 0;
+  padding: 12px 48px 12px 16px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .textInput::placeholder {
-  color: var(--text-secondary);
-  opacity: 0.6;
+  color: #5a5a5a;
 }
 
 .sendButton {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  background: transparent;
+  color: #5a5a5a;
   cursor: pointer;
-  transition: var(--transition-luxe);
+  transform: translateY(-50%);
+  transition: color 0.3s ease, opacity 0.3s ease;
 }
 
 .sendButtonActive {
-  background: var(--grad-blue);
-  color: var(--text-primary);
-  box-shadow: 0 2px 10px rgba(107, 143, 168, 0.35);
+  color: #1a1a1a;
 }
 
 .sendButtonActive:hover:not(:disabled) {
-  transform: scale(1.05);
-}
-
-.sendButtonActive:active:not(:disabled) {
-  transform: scale(0.95);
+  color: #000;
 }
 
 .sendButtonInactive {
-  background: var(--glass-bg);
-  color: var(--text-secondary);
-  border: 1px solid var(--glass-border);
+  color: #5a5a5a;
 }
 
 .sendButton:disabled {
-  opacity: 0.4;
+  opacity: 0.42;
   cursor: not-allowed;
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid var(--text-secondary);
+  border: 2px solid #5a5a5a;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
   display: inline-block;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {

@@ -200,7 +200,7 @@ const handleTest = () => {
                         left: 0;
                         right: 0;
                         bottom: 0;
-                        background: rgba(0, 0, 0, 0.5);
+                        background: rgba(0, 0, 0, 0.68);
                         backdrop-filter: blur(4px);
                         display: flex;
                         align-items: center;
@@ -215,13 +215,14 @@ const handleTest = () => {
                     }
 
                     .notification-settings-panel {
-                        background: var(--glass-bg);
-                        backdrop-filter: var(--glass-blur);
-                        border: 1px solid var(--glass-border);
-                        border-radius: 20px;
+                        background: color-mix(in srgb, var(--shell-panel) 92%, var(--bg-color) 8%);
+                        backdrop-filter: blur(18px);
+                        border: 1px solid color-mix(in srgb, var(--shell-border) 70%, var(--text-primary) 30%);
+                        border-radius: 16px;
                         width: 90%;
                         max-width: 400px;
-                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                        color: var(--text-primary);
+                        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
                         animation: slideUp 0.3s ease;
                     }
 
@@ -241,7 +242,7 @@ const handleTest = () => {
                         justify-content: space-between;
                         align-items: center;
                         padding: var(--s-5);
-                        border-bottom: 1px solid var(--glass-border);
+                        border-bottom: 1px solid color-mix(in srgb, var(--shell-border) 72%, var(--text-primary) 28%);
                     }
 
                     .settings-header h3 {
@@ -251,17 +252,19 @@ const handleTest = () => {
                     }
 
                     .close-btn {
-                        background: transparent;
-                        border: none;
+                        background: var(--surface-elevated);
+                        border: 1px solid var(--shell-border);
+                        border-radius: 10px;
                         font-size: 1.2rem;
                         cursor: pointer;
-                        color: var(--text-muted);
+                        color: var(--text-primary);
                         padding: var(--s-2);
                         transition: color 0.2s;
                     }
 
                     .close-btn:hover {
                         color: var(--text-primary);
+                        background: var(--surface-hover);
                     }
 
                     .settings-content {
@@ -275,7 +278,7 @@ const handleTest = () => {
                         display: flex;
                         align-items: center;
                         gap: var(--s-3);
-                        background: rgba(197, 139, 138, 0.15);
+                        background: rgba(197, 139, 138, 0.22);
                         border: 1px solid var(--color-red);
                         border-radius: 12px;
                         padding: var(--s-4);
@@ -296,6 +299,10 @@ const handleTest = () => {
                         justify-content: space-between;
                         align-items: center;
                         gap: var(--s-3);
+                        background: color-mix(in srgb, var(--surface-elevated) 82%, transparent 18%);
+                        border: 1px solid var(--shell-border);
+                        border-radius: 12px;
+                        padding: var(--s-4);
                     }
 
                     .setting-info {
@@ -311,15 +318,15 @@ const handleTest = () => {
 
                     .setting-description {
                         font-size: 0.85rem;
-                        color: var(--text-muted);
+                        color: var(--text-secondary);
                     }
 
                     .toggle-switch {
                         width: 52px;
                         height: 28px;
                         border-radius: 14px;
-                        background: var(--bg-secondary);
-                        border: 1px solid var(--glass-border);
+                        background: color-mix(in srgb, var(--bg-secondary) 80%, var(--text-primary) 20%);
+                        border: 1px solid var(--shell-border);
                         cursor: pointer;
                         position: relative;
                         transition: all 0.3s ease;
@@ -353,9 +360,7 @@ const handleTest = () => {
                     }
 
                     .time-picker-row {
-                        background: var(--bg-secondary);
-                        padding: var(--s-4);
-                        border-radius: 12px;
+                        background: color-mix(in srgb, var(--bg-secondary) 86%, var(--text-primary) 14%);
                     }
 
                     .time-picker {
@@ -365,8 +370,8 @@ const handleTest = () => {
                     }
 
                     .time-picker select {
-                        background: var(--glass-bg);
-                        border: 1px solid var(--glass-border);
+                        background: var(--surface-elevated);
+                        border: 1px solid var(--shell-border);
                         border-radius: 8px;
                         padding: var(--s-2) var(--s-3);
                         font-size: 1rem;
@@ -380,7 +385,7 @@ const handleTest = () => {
                     .time-separator {
                         font-size: 1.2rem;
                         font-weight: bold;
-                        color: var(--text-muted);
+                        color: var(--text-secondary);
                     }
 
                     .test-btn {
@@ -407,8 +412,8 @@ const handleTest = () => {
 
                     .reset-pin-btn {
                         width: 100%;
-                        background: rgba(197, 139, 138, 0.15);
-                        border: 1px solid var(--glass-border);
+                        background: rgba(197, 139, 138, 0.22);
+                        border: 1px solid var(--shell-border);
                         border-radius: 12px;
                         padding: var(--s-3) var(--s-4);
                         font-size: 0.95rem;

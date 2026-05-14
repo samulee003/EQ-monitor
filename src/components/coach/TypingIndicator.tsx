@@ -5,7 +5,7 @@ export function TypingIndicator() {
     <div className={styles.container} data-testid="typing-indicator">
       {/* Avatar */}
       <div className={styles.avatar}>
-        🤖
+        ✦
       </div>
 
       <div className={styles.bubble}>

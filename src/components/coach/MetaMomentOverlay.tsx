@@ -90,6 +90,14 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
           {STEPS[step].content}
         </p>
 
+        <div className={styles.crisisCard} aria-label="緊急求助資訊">
+          <p>如果你或身邊的人有立即危險，請先離開危險環境並聯絡當地緊急服務。</p>
+          <div className={styles.hotlineRow}>
+            <a href="tel:1925">安心專線 1925</a>
+            <a href="tel:1909">生命線 1909</a>
+          </div>
+        </div>
+
         {step === 1 && <BreathingAnimation />}
 
         {step === 2 && (

@@ -56,7 +56,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
-                        <p>{t('這裡是你的情緒避風港。透過簡單的覺察練習，陪你注意、命名、選擇回應每一個情緒。')}</p>
+                        <div className="agentic-intro">
+                            <p>{t('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的 AI 教練。')}</p>
+                            <p>{t('你可以把它想成隨身情緒教練：看見你的紀錄、提醒你回到當下，必要時帶你做呼吸或緊急安定練習。')}</p>
+                        </div>
                         <div className="disclaimer-box">
                             <p className="disclaimer-title">⚠️ {t('使用須知')}</p>
                             <p className="disclaimer-text">{t('今心是情緒覺察輔助工具，非醫療器材，無法取代專業心理治療。如果您正在經歷嚴重情緒困擾或有自傷念頭，請立即聯繫專業人員。')}</p>
@@ -193,11 +196,11 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon pulse">{uiIcons.shield}</div>
                         <h2>{t('你的數據，你的隱私')}</h2>
-                        <p>{t('所有情緒記錄都保存在你的裝置本地，不會上傳到任何伺服器。我們也提供 PIN 碼鎖定功能，保護你的私密空間。你可以隨時匯出或刪除所有數據。')}</p>
+                        <p>{t('基本記錄會先留在你的裝置。登入並同意雲端備份後，AI 教練才會用你的情緒輪廓提供更個人化的提醒；你可以隨時匯出或刪除資料。')}</p>
                         <div className="feature-tags">
-                            <span className="feature-tag">🔒 {t('本地存儲')}</span>
+                            <span className="feature-tag">🔒 {t('本機優先')}</span>
                             <span className="feature-tag">📱 {t('PIN 保護')}</span>
-                            <span className="feature-tag">📤 {t('數據匯出')}</span>
+                            <span className="feature-tag">📤 {t('可匯出刪除')}</span>
                         </div>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
@@ -210,12 +213,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 8 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon bounce">{uiIcons.trophy}</div>
-                        <h2>{t('記錄你的成長')}</h2>
-                        <p>{t('每次完成情緒覺察，你都在建立更強大的心理韌性。達成連續記錄、探索不同情緒，解鎖成就徽章。在「成長看板」中，你可以回顧自己的情緒趨勢與進步。')}</p>
+                        <h2>{t('讓教練看見你的模式')}</h2>
+                        <p>{t('每次記錄都會變成教練理解你的線索。它會把最近的情緒、觸發點與需求整理成洞察，提醒你下一次可以更早照顧自己。')}</p>
                         <div className="feature-tags">
-                            <span className="feature-tag">🔥 {t('連續記錄')}</span>
-                            <span className="feature-tag">勳 {t('成就徽章')}</span>
-                            <span className="feature-tag">📊 {t('成長看板')}</span>
+                            <span className="feature-tag">✦ {t('主動提醒')}</span>
+                            <span className="feature-tag">📊 {t('週報洞察')}</span>
+                            <span className="feature-tag">勳 {t('成就鼓勵')}</span>
                         </div>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
@@ -228,8 +231,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 9 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon pulse">{uiIcons.sparkle}</div>
-                        <h2>{t('建立覺察習慣')}</h2>
-                        <p>{t('選一個適合你的時間，讓我們每天提醒你停下腳步，聽聽內心的聲音。規律的情緒覺察，是心理健康的重要基石。')}</p>
+                        <h2>{t('設定主動關心時間')}</h2>
+                        <p>{t('選一個你通常願意停下來的時間。今心會用溫和提醒把你帶回覺察，而不是等到情緒爆滿才開始處理。')}</p>
                         
                         <div className="time-selector">
                             <label>{t('每日提醒時間')}</label>
@@ -333,6 +336,24 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 .step-icon svg { 
                     width: 100%; 
                     height: 100%; 
+                }
+
+                .agentic-intro {
+                    display: grid;
+                    gap: var(--s-3);
+                    margin-bottom: var(--s-5);
+                    text-align: left;
+                }
+
+                .agentic-intro p {
+                    margin: 0;
+                    padding: var(--s-3) var(--s-4);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-md);
+                    background: var(--glass-bg);
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                    font-size: 0.92rem;
                 }
                 
                 .step-actions {

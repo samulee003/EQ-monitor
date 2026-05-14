@@ -4,6 +4,100 @@
 
 ---
 
+## [4.3.0] - 2026-05-14 — 主動教練導覽 + Soul/ADK 生產同步
+
+### PM 狀態
+
+- **產品定位更清楚**：導覽文案已從「AI 聊天」收斂為「Agentic AI 主動教練」，用一般使用者能理解的語言說明今心會主動整理線索、提出一個下一步。
+- **AI 人格契約已落地**：`soul.md` 不只是文件，已同步到 ADK agent、production REST fallback、契約測試與線上部署。
+
+### 已完成
+
+- **導覽與 Coach 首屏**
+  - 首頁新增「今日教練建議」，強調使用者不用等情緒爆滿才找今心。
+  - Coach 空狀態新增三個情境入口：晚上焦慮、對孩子發脾氣、想看教練觀察。
+  - Coach 首屏文案調整為「今心主動 AI 教練畫布」，凸顯主動教練而非普通聊天機器人。
+- **Soul 契約**
+  - 新增 `server/insforge/agents/soul.md` 作為今心教練人格、語氣、主動性邊界與危機處理規格。
+  - 新增 `server/src/agents/soulInstruction.ts`，提供 `buildEmotionCoachGlobalInstruction()`、`buildEmotionCoachInstruction()`、`buildProductionCoachSystemPrompt()`。
+  - 新增 `server/insforge/agents/soulContract.test.ts`，鎖定 `soul.md`、ADK agent 與 production prompt 不再分裂。
+- **ADK 對照與接入**
+  - 對照本地 `adk-js-adk-v1.0.0` 的 `LlmAgent`，確認 `instruction`、`globalInstruction`、`tools`、`subAgents` 是合適承載點。
+  - `server/src/agents/emotionCoach.ts` 與 `server/insforge/agents/emotionCoach.ts` 均改為用 `globalInstruction + instruction` 接上 soul/RULER 策略。
+  - 工具仍維持 `get_user_emotion_summary`、`get_emotion_trend`、`save_ruler_log`、`trigger_action`，危機轉接仍交給 `MetaMomentSkill`。
+- **Production fallback**
+  - `server/insforge/functions/coach-simple.ts` 改為 `buildProductionCoachSystemPrompt()` 組裝 prompt。
+  - InsForge Functions 部署不接受本地相對 import；因此 `coach-simple.ts` 保持自包含版本，並由契約測試比對核心 phrase 與 canonical builder。
+  - `coach` Edge Function 已重新部署成功。
+- **Session 整合補強**
+  - 補回 TDD 驗證 session 中不改產品碼的後端測試：`rulerData`、`triggerAction`、`insforgeAdapter`、`coach` route。
+  - `.gitignore` 已忽略本地 ADK vendor 與 Stitch design artifact，避免交接時把外部參考資料夾誤當成待提交源碼。
+
+### 驗證
+
+- 前端：
+  - `npx tsc --noEmit` ✅
+  - `npm run test:run` ✅ 352 tests / 37 files
+  - `npm run build` ✅
+- 後端：
+  - `cd server && npm run test:run` ✅ 156 tests / 15 files
+  - `cd server && npm run build` ✅
+  - `cd server && npm run test:run -- insforge/agents/soulContract.test.ts` ✅ 3 tests
+- 線上 smoke：
+  - `OPTIONS https://b88egxiz.functions.insforge.app/coach` → 204 ✅
+  - `POST /coach` 測試焦慮 7 分記錄 → 200 ✅，回傳 `skillInvoked: "MetaMomentSkill"` 與 `action: "open_sos"`。
+  - smoke 產生的 `codex-smoke-agentic-soul` 測試資料已從 `agent_ruler_logs`、`adk_events`、`adk_sessions`、`adk_user_states` 清除。
+
+### 剩餘風險
+
+- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
+- 目前工作樹仍有多組未整理變更；不要在 dirty worktree 直接 pull 或重置。
+- 本機仍無 `deno`，Edge Functions 本地 `deno check` 未跑，主要依賴 InsForge 部署與線上 smoke。
+- Production `coach-simple.ts` 因 InsForge 打包限制保留自包含 prompt builder；改 `soulInstruction.ts` 時必須同步檢查契約測試。
+
+---
+
+## [4.2.2] - 2026-05-14 — InsForge Auth 本機接通 + 帳號登入驗證
+
+### 已完成
+
+- **InsForge Auth 前端接線**
+  - `AuthContext` 改走 `InsForgeAuthService`，登入、註冊、取 current user、更新 profile 不再依賴本機假帳戶。
+  - Header 帳號入口可登入 InsForge 帳戶；登入後顯示帳號狀態，重新整理後仍保持登入。
+  - 訪客模式保留為本機 UI 狀態，不寫入 InsForge Auth。
+- **註冊 trigger 修復**
+  - 修正 `server/insforge/schema/001_profiles.sql` 的 `handle_new_user()`：InsForge `auth.users` 使用 `profile` / `metadata`，不是 Supabase 的 `raw_user_meta_data`。
+  - live InsForge trigger 已同步修正，註冊時會自動建立 `public.profiles`。
+- **Coach context 初始化**
+  - 登入/註冊成功後會自動補 `coach_context` 初始列。
+  - 測試帳號 `samlei@apm.org.mo` 已完成 email verification，並確認 `auth.users`、`public.profiles`、`coach_context` 均有資料。
+- **本機環境**
+  - `.env.local` 已設定 `VITE_INSFORGE_URL` / `VITE_INSFORGE_ANON_KEY`，且受 `.gitignore` 保護。
+  - `eslint.config.js` 已排除外部 ADK vendor 與 Stitch design artifact，避免 `npm run lint` 掃到非專案源碼。
+
+### 驗證
+
+- 前端：
+  - `npm run lint` ✅ 0 errors / 31 warnings
+  - `npx tsc --noEmit` ✅
+  - `npm run test:run` ✅ 352 tests / 37 files
+  - `npm run build` ✅
+- 後端：
+  - `cd server && npm run test:run` ✅ 156 tests / 15 files
+  - `cd server && npm run build` ✅
+- 本機 UI / 後端 smoke：
+  - `http://127.0.0.1:5176/#coach` 登入成功 ✅
+  - 登入後重新整理仍保持登入 ✅
+  - InsForge 回查 email verified / profile / coach context ✅
+
+### 剩餘風險
+
+- Production Zeabur PWA 仍需確認已設定 `VITE_INSFORGE_URL` / `VITE_INSFORGE_ANON_KEY` 並重部署，否則線上前端不一定會使用 InsForge Auth。
+- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成 RULER → Coach/週報讀到資料。
+- 目前工作分支 `codex/stitch-ui-release-20260513` 仍有多組 dirty changes / untracked artifacts，提交或 PR 前需整理 scope。
+
+---
+
 ## [4.2.1] - 2026-05-13 — Agentic Coach 內測收尾 + LINE/PWA 生產鏈路驗證
 
 ### PM 狀態
