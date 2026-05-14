@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { uiIcons } from './icons/SvgIcons';
 import { useLanguage } from '../services/LanguageContext';
+import './VoiceRecorder.css';
 
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void;
@@ -70,75 +71,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscription }) => {
         {simulationState === 'processing' && t("AI 正在轉譯您的聲音...")}
       </div>
 
-      <style>{`
-        .voice-recorder {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1rem;
-          margin: 1.5rem 0;
-          padding: 1.5rem;
-          background: var(--glass-bg);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--glass-border);
-        }
-
-        .record-btn {
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          background: var(--bg-secondary);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          border: 1px solid var(--glass-border);
-          position: relative;
-        }
-
-        .record-btn.idle:hover {
-          transform: scale(1.1);
-          background: var(--glass-border);
-        }
-
-        .record-btn:focus-visible {
-          outline: 2px solid var(--color-red);
-          outline-offset: 3px;
-        }
-
-        .record-btn.recording {
-          background: hsla(0, 40%, 65%, 0.15);
-          border-color: var(--color-red);
-          animation: pulse 1.5s infinite;
-        }
-
-        .status-text {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-          letter-spacing: 0.5px;
-          text-align: center;
-        }
-
-        .loader {
-          width: 24px;
-          height: 24px;
-          border: 2px solid var(--glass-border);
-          border-top-color: var(--text-primary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 hsla(0, 40%, 65%, 0.4); }
-          70% { box-shadow: 0 0 0 15px hsla(0, 40%, 65%, 0); }
-          100% { box-shadow: 0 0 0 0 hsla(0, 40%, 65%, 0); }
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };
