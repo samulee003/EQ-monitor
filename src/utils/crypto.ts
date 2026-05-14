@@ -261,10 +261,11 @@ export async function decryptData(ciphertext: string): Promise<string | null> {
     const iv = new Uint8Array(base64ToArrayBuffer(payload.iv));
     const key = await deriveKey(masterKey, salt);
 
+    const encryptedData = new Uint8Array(base64ToArrayBuffer(payload.data));
     const decrypted = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       key,
-      base64ToArrayBuffer(payload.data),
+      encryptedData,
     );
 
     const decoder = new TextDecoder();

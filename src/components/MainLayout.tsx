@@ -7,6 +7,9 @@ import AchievementToast from './AchievementToast';
 import OnboardingFlow from './OnboardingFlow';
 import { settingsStore } from '../adapters';
 import { CoachFAB } from './coach/CoachFAB';
+import AuthModal from './AuthModal';
+import UserProfile from './UserProfile';
+import { useAuth } from '../services/AuthContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,14 +20,22 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNavigate }) => {
   const { t } = useLanguage();
   const { theme, actualTheme, toggleTheme } = useTheme();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   // 主題圖標
   const themeIcon = {
     dark: '暗',
     light: '亮',
     system: '系'
+  }[theme];
+  const themeLabel = {
+    dark: t('深色'),
+    light: t('淺色'),
+    system: t('系統')
   }[theme];
 
   // Initialize notification service and check onboarding
@@ -42,6 +53,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
     setShowOnboarding(false);
   };
 
+  const handleAccountClick = () => {
+    if (isAuthenticated) {
+      setShowProfile(true);
+      return;
+    }
+    setShowAuth(true);
+  };
+
+  const accountLabel = isAuthenticated ? t('帳號設定') : t('登入');
+  const accountText = isLoading
+    ? '…'
+    : isAuthenticated
+      ? (user?.displayName || user?.email || t('帳號')).slice(0, 1)
+      : '人';
+  const accountFullText = isLoading
+    ? t('載入中')
+    : isAuthenticated
+      ? t('帳號設定')
+      : t('登入帳號');
+
   return (
     <div className="app-container">
       <header className="glass-header">
@@ -54,25 +85,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => onNavigate('home')}
           >
-            {t('今日心情')}
+            {t('安定室')}
           </button>
           <button
             className={`nav-link ${currentView === 'history' ? 'active' : ''}`}
             onClick={() => onNavigate('history')}
           >
-            {t('紀錄回顧')}
+            {t('紀錄')}
           </button>
           <button
             className={`nav-link ${currentView === 'growth' ? 'active' : ''}`}
             onClick={() => onNavigate('growth')}
           >
-            {t('成長看板')}
+            {t('洞察')}
           </button>
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
             onClick={() => onNavigate('coach')}
+            title={t('今心主動 AI 教練')}
           >
-            {t('教練')}
+            {t('主動教練')}
           </button>
         </nav>
         <div className="header-actions">
@@ -80,22 +112,38 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
             className={`achievement-nav-btn ${currentView === 'achievement' ? 'active' : ''}`}
             onClick={() => onNavigate('achievement')}
             title={t('我的成就')}
+            aria-label={t('我的成就')}
           >
-            勳
+            <span className="header-action-icon" aria-hidden="true">勳</span>
+            <span className="header-action-text">{t('成就')}</span>
           </button>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
             title={`${t('當前主題')}: ${t(theme)} (${t(actualTheme)})`}
+            aria-label={`${t('切換主題')}：${themeLabel}`}
           >
-            {themeIcon}
+            <span className="header-action-icon" aria-hidden="true">{themeIcon}</span>
+            <span className="header-action-text">{themeLabel}</span>
           </button>
           <button
             className="settings-btn"
             onClick={() => setShowSettings(true)}
             title={t('提醒設定')}
+            aria-label={t('提醒設定')}
           >
-            訊
+            <span className="header-action-icon" aria-hidden="true">訊</span>
+            <span className="header-action-text">{t('提醒')}</span>
+          </button>
+          <button
+            className="account-btn"
+            onClick={handleAccountClick}
+            title={accountLabel}
+            aria-label={accountLabel}
+            disabled={isLoading}
+          >
+            <span className="header-action-icon" aria-hidden="true">{accountText}</span>
+            <span className="header-action-text">{accountFullText}</span>
           </button>
         </div>
       </header>
@@ -117,7 +165,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
       <footer>
         <div className="footer-main">
-          {t('每日情緒覺察 • 打造平穩心靈')}
+          {t('每日情緒覺察 • 主動教練陪你整理下一步')}
         </div>
         <div className="footer-disclaimer">
           {t('本工具非醫療器材，不能取代專業心理治療。')}
@@ -132,18 +180,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         <NotificationSettingsPanel onClose={() => setShowSettings(false)} />
       )}
 
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      {showProfile && <UserProfile onClose={() => setShowProfile(false)} />}
+
       <style>{`
         .glass-header {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: var(--glass-bg);
-          backdrop-filter: var(--glass-blur);
-          border-bottom: 1px solid var(--glass-border);
+          background: var(--shell-panel);
+          backdrop-filter: blur(28px);
+          -webkit-backdrop-filter: blur(28px);
+          border-bottom: 1px solid var(--shell-border);
+          box-shadow: var(--shell-highlight), 0 10px 28px rgba(0, 0, 0, 0.08);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--s-4) var(--s-6);
+          padding: calc(var(--s-3) + 2px) var(--s-6);
         }
 
         .logo-section {
@@ -165,10 +218,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .logo-text {
-          font-size: 1.6rem;
+          font-size: 1.45rem;
           font-weight: 900;
-          letter-spacing: 3px;
-          background: linear-gradient(135deg, var(--color-red) 0%, var(--color-yellow) 50%, var(--color-green) 100%);
+          letter-spacing: 0.18em;
+          background: linear-gradient(135deg, var(--text-primary) 0%, var(--color-yellow) 58%, var(--color-green) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -185,23 +238,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           background: none;
           border: none;
           color: var(--text-secondary);
-          font-size: 0.95rem;
-          font-weight: 500;
+          font-size: 0.92rem;
+          font-weight: 600;
           cursor: pointer;
-          padding: var(--s-2) var(--s-2);
+          padding: 10px 14px;
           position: relative;
           transition: var(--transition);
           white-space: nowrap;
           flex-shrink: 0;
+          border-radius: 999px;
         }
 
         .nav-link:hover {
           color: var(--text-primary);
+          background: var(--surface-elevated);
         }
 
         .nav-link.active {
           color: var(--text-primary);
-          font-weight: 600;
+          font-weight: 700;
+          background: var(--surface-elevated);
+          box-shadow: inset 0 0 0 1px var(--glass-border);
         }
 
         .nav-link.active::after {
@@ -222,41 +279,45 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .achievement-nav-btn {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
-          border-radius: 50%;
-          width: 44px;
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1.1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
-        .achievement-nav-btn:hover { transform: scale(1.1); background: var(--glass-border); }
+        .achievement-nav-btn:hover { transform: translateY(-1px) scale(1.05); background: var(--surface-hover); }
         .achievement-nav-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
-        .achievement-nav-btn.active { border-color: var(--color-yellow); box-shadow: 0 0 10px var(--color-yellow); background: var(--surface-hover); }
+        .achievement-nav-btn.active { border-color: rgba(212, 184, 122, 0.45); box-shadow: 0 0 0 1px rgba(212, 184, 122, 0.15), 0 8px 20px rgba(212, 184, 122, 0.12); background: rgba(212, 184, 122, 0.12); }
 
         .settings-btn {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
-          border-radius: 50%;
-          width: 44px;
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
 
         .settings-btn:hover {
-          transform: scale(1.1);
-          background: var(--glass-border);
+          transform: translateY(-1px) scale(1.05);
+          background: var(--surface-hover);
         }
 
         .settings-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
@@ -266,29 +327,78 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
         }
 
         .theme-toggle {
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
-          border-radius: 50%;
-          width: 44px;
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
+          border-radius: 999px;
+          min-width: 78px;
           height: 44px;
+          padding: 0 14px;
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           flex-shrink: 0;
         }
 
         .theme-toggle:hover {
-          transform: scale(1.1) rotate(15deg);
-          background: var(--glass-border);
+          transform: translateY(-1px) scale(1.05) rotate(10deg);
+          background: var(--surface-hover);
         }
 
         .theme-toggle:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 
         .theme-toggle:active {
           transform: scale(0.95);
+        }
+
+        .account-btn {
+          min-width: 86px;
+          height: 44px;
+          padding: 0 14px;
+          background: var(--surface-elevated);
+          border: 1px solid var(--shell-border);
+          border-radius: 999px;
+          color: var(--text-primary);
+          font-size: 0.92rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .header-action-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 1.15em;
+          font-weight: 800;
+        }
+
+        .header-action-text {
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          font-size: 0.86rem;
+          font-weight: 700;
+        }
+
+        .account-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+          background: var(--surface-hover);
+        }
+
+        .account-btn:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+
+        .account-btn:disabled {
+          cursor: wait;
+          opacity: 0.7;
         }
 
         footer {
@@ -304,7 +414,45 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
         @media (max-width: 768px) {
           .footer-disclaimer { display: none; }
-          footer { padding: 0.5rem 1rem 0.5rem; }
+          footer { padding: 0.5rem 1rem 5.75rem; }
+          .main-content { padding-bottom: 5.25rem; }
+          .glass-header {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+          }
+          .glass-header nav {
+            position: fixed;
+            left: 50%;
+            bottom: var(--s-3);
+            z-index: 120;
+            width: min(calc(100vw - 24px), 420px);
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0;
+            padding: 6px;
+            background: var(--shell-panel);
+            border: 1px solid var(--shell-border);
+            border-radius: 28px;
+            box-shadow: var(--shell-highlight), 0 16px 34px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+          }
+          .glass-header .nav-link {
+            min-height: 44px;
+            padding: 10px 8px;
+            border-radius: 22px;
+            font-size: 0.76rem;
+            text-align: center;
+          }
+          .glass-header .nav-link.active {
+            color: #1f1b16;
+            background: linear-gradient(135deg, rgba(245, 243, 239, 0.9), rgba(213, 193, 165, 0.55));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 18px rgba(0, 0, 0, 0.14);
+          }
+          .glass-header .nav-link.active::after {
+            display: none;
+          }
         }
 
         .footer-main {
@@ -331,6 +479,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           border-radius: 4px;
         }
 
+        @media (max-width: 1023px) {
+          .settings-btn,
+          .achievement-nav-btn,
+          .theme-toggle,
+          .account-btn {
+            width: 44px;
+            min-width: 44px;
+            padding: 0;
+            gap: 0;
+          }
+          .header-action-text {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+          }
+        }
+
         @media (max-width: 480px) {
           .glass-header {
             padding: var(--s-3) var(--s-4);
@@ -354,10 +525,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           }
           .settings-btn,
           .achievement-nav-btn,
-          .theme-toggle {
+          .theme-toggle,
+          .account-btn {
             width: 40px;
+            min-width: 40px;
+            padding: 0;
             height: 40px;
             font-size: 0.95rem;
+            gap: 0;
           }
         }
 
@@ -370,8 +545,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           }
           .settings-btn,
           .achievement-nav-btn,
-          .theme-toggle {
+          .theme-toggle,
+          .account-btn {
             width: 36px;
+            min-width: 36px;
+            padding: 0;
             height: 36px;
             font-size: 0.9rem;
           }

@@ -16,6 +16,8 @@ export default defineConfig([
     'server/coverage-report',
     '.claude',
     '.codex',
+    'adk-js-adk-v1.0.0',
+    'stitch_design_system_implementation',
   ]),
   {
     files: ['**/*.{js,jsx}'],

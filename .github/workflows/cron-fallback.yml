@@ -1,0 +1,54 @@
+name: Cron Fallback (主動推送備援)
+
+# 備援用途：若 InsForge 雲端不允許 pg_cron extension，由 GitHub Actions 觸發 Edge Functions。
+# 當 pg_net 不可用時啟用，由 GitHub Actions 單一路徑觸發，避免與 pg_cron 雙重觸發。
+
+on:
+  schedule:
+    # 每週日 13:00 UTC（台北 21:00） — 週報批次
+    - cron: '0 13 * * 0'
+    # 每日 02:00 UTC（台北 10:00） — 主動關懷掃描
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 手動觸發目標
+        required: true
+        default: weekly-report
+        type: choice
+        options:
+          - weekly-report
+          - achievement-checker
+
+jobs:
+  weekly-report:
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 13 * * 0') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'weekly-report') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly-report batch
+        env:
+          INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          test -n "$SERVICE_ROLE_KEY"
+          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/weekly-report" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch"}'
+
+  care-scan:
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'achievement-checker') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger achievement-checker scan
+        env:
+          INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          test -n "$SERVICE_ROLE_KEY"
+          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"scan"}'

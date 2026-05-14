@@ -224,19 +224,26 @@ const GrowthDashboard: React.FC = () => {
 
     return (
         <div className="growth-dashboard fade-in">
-            <div className="resilience-header">
-                <div className="score-circle">
-                    <svg viewBox="0 0 36 36" className="circular-chart">
-                        <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path className="circle" strokeDasharray={`${overallScore}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <text x="18" y="20.35" className="percentage">{overallScore}</text>
-                    </svg>
+            <section className="growth-hero">
+                <div className="growth-hero-copy">
+                    <span className="growth-kicker">{t('週報洞察')}</span>
+                    <h3>{t('把情緒軌跡整理成可閱讀的成長地圖')}</h3>
+                    <p>{t('這裡不是分數排行榜，而是把你的記錄、波動與回穩方式，慢慢翻譯成更清楚的自我理解。')}</p>
                 </div>
-                <div className="header-text">
-                    <h3>{t('情緒參與度積分')}</h3>
-                    <p>{t('反映您的記錄參與程度，非臨床韌性評估')}</p>
+                <div className="resilience-header">
+                    <div className="score-circle">
+                        <svg viewBox="0 0 36 36" className="circular-chart">
+                            <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path className="circle" strokeDasharray={`${overallScore}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="20.35" className="percentage">{overallScore}</text>
+                        </svg>
+                    </div>
+                    <div className="header-text">
+                        <h4>{t('情緒參與度積分')}</h4>
+                        <p>{t('反映您的記錄參與程度，非臨床韌性評估')}</p>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             <p className="engagement-disclaimer">{t('⚠️ 此分數為參與激勵指標，不反映您的心理健康狀態，亦非任何臨床評估結果。')}</p>
 
@@ -457,16 +464,62 @@ const GrowthDashboard: React.FC = () => {
 
             <style>{`
                 .growth-dashboard { 
-                    padding: 1.5rem; 
-                    background: var(--bg-secondary); 
-                    border-radius: var(--radius-lg); 
-                    border: 1px solid var(--glass-border);
+                    padding: 1rem;
                     display: flex;
                     flex-direction: column;
-                    gap: 1.5rem;
+                    gap: 1.2rem;
+                }
+                .growth-hero {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.8fr);
+                    gap: 1rem;
+                    padding: 1.45rem;
+                    border-radius: 28px;
+                    border: 1px solid var(--glass-border);
+                    background:
+                        radial-gradient(circle at top right, rgba(213, 193, 165, 0.18), transparent 36%),
+                        radial-gradient(circle at bottom left, rgba(151, 166, 180, 0.14), transparent 42%),
+                        linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+                    box-shadow: var(--shadow-luxe);
+                }
+                .growth-hero-copy {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                .growth-kicker {
+                    display: inline-flex;
+                    width: fit-content;
+                    padding: 0.35rem 0.8rem;
+                    border-radius: 999px;
+                    background: rgba(151, 166, 180, 0.16);
+                    color: var(--color-blue);
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    letter-spacing: 0.12em;
+                }
+                .growth-hero-copy h3 {
+                    margin: 0;
+                    font-size: clamp(1.55rem, 4.6vw, 2.2rem);
+                    line-height: 1.08;
+                }
+                .growth-hero-copy p {
+                    margin: 0;
+                    color: var(--text-secondary);
+                    line-height: 1.7;
+                    max-width: 34rem;
                 }
                 
-                .resilience-header { display: flex; align-items: center; gap: 1rem; }
+                .resilience-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 1rem 1.1rem;
+                    border-radius: 24px;
+                    border: 1px solid var(--glass-border);
+                    background: rgba(255,255,255,0.05);
+                    backdrop-filter: blur(16px);
+                }
                 .score-circle { width: 60px; height: 60px; }
                 .circular-chart { display: block; max-width: 100%; max-height: 100%; }
 
@@ -481,10 +534,17 @@ const GrowthDashboard: React.FC = () => {
                 .circle { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke: var(--color-yellow); transition: stroke-dasharray 0.3s ease; }
                 .percentage { fill: var(--text-primary); font-family: inherit; font-size: 0.6em; text-anchor: middle; font-weight: 700; dominant-baseline: middle; }
 
-                .header-text h3 { font-size: 1.1rem; margin-bottom: 0.2rem; color: var(--text-primary); }
+                .header-text h4 { font-size: 1.05rem; margin-bottom: 0.2rem; color: var(--text-primary); }
                 .header-text p { font-size: 0.8rem; color: var(--text-secondary); margin: 0; }
 
                 .heading-sm { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 1rem; display: block; }
+                .dashboard-section {
+                    padding: 1.2rem;
+                    border-radius: 24px;
+                    border: 1px solid var(--glass-border);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0)), var(--bg-secondary);
+                    box-shadow: var(--shadow-sm);
+                }
 
                 .heatmap-grid { 
                     display: grid; 
@@ -510,10 +570,10 @@ const GrowthDashboard: React.FC = () => {
                 .legend-dots { display: flex; gap: 4px; }
                 .legend-dots span { width: 6px; height: 6px; border-radius: 50%; opacity: 0.6; }
 
-                .chart-container { 
-                    background: rgba(0,0,0,0.1); 
-                    padding: 1rem; 
-                    border-radius: var(--radius-md); 
+                .chart-container {
+                    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)), rgba(0,0,0,0.08);
+                    padding: 1rem;
+                    border-radius: 22px;
                     border: 1px solid var(--glass-border);
                 }
                 .line-chart { width: 100%; height: auto; margin-top: 0.5rem; overflow: visible; }
@@ -549,10 +609,11 @@ const GrowthDashboard: React.FC = () => {
 
                 /* Neuroscience Metrics - Phase 1 */
                 .neuroscience-metrics {
-                    background: var(--bg-secondary);
-                    border-radius: var(--radius-md);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)), var(--bg-secondary);
+                    border-radius: 24px;
                     padding: 1.2rem;
                     border: 1px solid var(--glass-border);
+                    box-shadow: var(--shadow-sm);
                 }
                 .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
                 @media (max-width: 500px) { .metrics-grid { grid-template-columns: 1fr; } }
@@ -562,8 +623,8 @@ const GrowthDashboard: React.FC = () => {
                     align-items: center;
                     gap: 1rem;
                     padding: 1rem;
-                    background: rgba(0,0,0,0.15);
-                    border-radius: var(--radius-md);
+                    background: rgba(255,255,255,0.04);
+                    border-radius: 20px;
                     border: 1px solid var(--glass-border);
                     transition: transform 0.2s, box-shadow 0.2s;
                 }
@@ -840,6 +901,11 @@ const GrowthDashboard: React.FC = () => {
                     font-size: 1.2rem;
                     font-weight: 700;
                     opacity: 0.6;
+                }
+                @media (max-width: 720px) {
+                    .growth-hero {
+                        grid-template-columns: 1fr;
+                    }
                 }
             `}</style>
         </div>
