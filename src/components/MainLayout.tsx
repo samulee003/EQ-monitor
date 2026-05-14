@@ -185,7 +185,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
             onClick={() => onNavigate('coach')}
-            title={t('今心主動 AI 教練')}
+            title={t('今心主動教練')}
           >
             {t('教練')}
           </button>

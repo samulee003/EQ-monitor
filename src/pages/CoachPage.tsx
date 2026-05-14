@@ -305,7 +305,7 @@ export default function CoachPage() {
     : messages;
 
   return (
-    <div className={styles.coachPage} role="region" aria-label="今心主動 AI 教練畫布">
+    <div className={styles.coachPage} role="region" aria-label="今心主動教練畫布">
       <div className={styles.emotionalGlow} />
 
       <header className={styles.header}>
@@ -327,13 +327,13 @@ export default function CoachPage() {
         </div>
 
         {showWelcome && (
-          <section className={styles.stitchOpening} aria-label="主動 AI 教練引導">
+          <section className={styles.stitchOpening} aria-label="主動教練引導">
             <div className={styles.coachAvatar} aria-hidden="true">
               ✦
             </div>
             <div className={styles.openingStack}>
               <div className={styles.agentIntro}>
-                <p className={styles.agentEyebrow}>主動 AI 情緒教練</p>
+                <p className={styles.agentEyebrow}>主動情緒教練</p>
                 <h2>你不用自己想下一步</h2>
                 <p className={styles.agentDescription}>
                   我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。
@@ -496,7 +496,7 @@ export default function CoachPage() {
           onComplete={({ bestSelf, strategy }) => {
             setShowSOS(false);
             handleSend(
-              `我完成了 Meta-Moment。看見的自己是：${bestSelf}，選擇的策略是：${strategy}`
+              `我完成了緊急安定練習。看見的自己是：${bestSelf}，選擇的策略是：${strategy}`
             );
           }}
         />

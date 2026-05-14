@@ -58,7 +58,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
                         <div className="agentic-intro">
-                            <p>{t('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的 AI 教練。')}</p>
+                            <p>{t('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的教練。')}</p>
                             <p>{t('你可以把它想成隨身情緒教練：看見你的紀錄、提醒你回到當下，必要時帶你做呼吸或緊急安定練習。')}</p>
                         </div>
                         <div className="disclaimer-box">
@@ -197,7 +197,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon pulse">{uiIcons.shield}</div>
                         <h2>{t('你的數據，你的隱私')}</h2>
-                        <p>{t('基本記錄會先留在你的裝置。登入並同意雲端備份後，AI 教練才會用你的情緒輪廓提供更個人化的提醒；你可以隨時匯出或刪除資料。')}</p>
+                        <p>{t('基本記錄會先留在你的裝置。登入並同意雲端備份後，主動教練才會用你的情緒輪廓提供更個人化的提醒；你可以隨時匯出或刪除資料。')}</p>
                         <div className="feature-tags">
                             <span className="feature-tag">🔒 {t('本機優先')}</span>
                             <span className="feature-tag">📱 {t('PIN 保護')}</span>

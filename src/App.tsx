@@ -8,6 +8,7 @@ import SkipLink from './components/SkipLink';
 import A11yAnnouncer from './components/A11yAnnouncer';
 import CombinedProviders from './components/CombinedProviders';
 import MigrationProgress from './components/MigrationProgress';
+import LandingPage from './components/LandingPage';
 import { useAppStore } from './stores/appStore';
 import { useFocusVisible } from './hooks/useA11y';
 import { useAuth } from './services/AuthContext';
@@ -37,6 +38,24 @@ function AppContent() {
     isLocked,
     unlock,
   } = useAppStore();
+
+  if (currentView === 'landing') {
+    return (
+      <>
+        <LandingPage
+          onStart={() => {
+            dismissSplash();
+            setView('home');
+          }}
+          onCoach={() => {
+            dismissSplash();
+            setView('coach');
+          }}
+        />
+        <A11yAnnouncer />
+      </>
+    );
+  }
 
   if (showSplash) {
     return <SplashScreen onComplete={dismissSplash} />;
