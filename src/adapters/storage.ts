@@ -291,9 +291,9 @@ export const logs = {
     const idx = all.findIndex(l => l.id === id);
     if (idx === -1) throw new Error(`記錄不存在: ${id}`);
     const updated = { ...all[idx], ...data };
-    all[idx] = updated;
-    logsCache = all;
-    await storeSet(userKey(StorageKeys.LOGS, currentUserId), all);
+    const nextLogs = all.map((log, index) => (index === idx ? updated : log));
+    logsCache = nextLogs;
+    await storeSet(userKey(StorageKeys.LOGS, currentUserId), nextLogs);
     return updated;
   },
 

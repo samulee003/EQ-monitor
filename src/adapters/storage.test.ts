@@ -184,10 +184,14 @@ describe('storage', () => {
                 intensity: 5, bodyScan: null, understanding: null, expressing: null, regulating: null,
                 postMood: 'same', timestamp: new Date().toISOString(),
             });
+            const beforeUpdate = await logs.export();
 
             const updated = await logs.update(created.id, { intensity: 9 });
+            const afterUpdate = await logs.export();
 
             expect(updated.intensity).toBe(9);
+            expect(afterUpdate).not.toBe(beforeUpdate);
+            expect(afterUpdate.find(log => log.id === created.id)?.intensity).toBe(9);
         });
 
         it('應刪除日誌', async () => {

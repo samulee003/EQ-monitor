@@ -88,7 +88,7 @@ class NotificationService {
      * Get notification settings
      */
     getSettings(): NotificationSettings {
-        const stored = settingsStore.get<NotificationSettings>(SETTINGS_KEY);
+        const stored = settingsStore.getCached<NotificationSettings>(SETTINGS_KEY);
         return stored ? { ...DEFAULT_SETTINGS, ...stored } : DEFAULT_SETTINGS;
     }
 
