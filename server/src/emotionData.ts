@@ -2,11 +2,11 @@ import { EmotionWord } from './types.js';
 
 /**
  * 今心情緒詞彙庫 — 繁體中文
- * 基於 RULER 情緒象限模型
+ * 使用今心四色狀態分類
  */
 
 export const EMOTION_WORDS: EmotionWord[] = [
-  // 紅色象限：高能量低愉悅
+  // 紅色狀態：很滿、卡住
   { name: '憤怒', quadrant: 'red', intensity: 8 },
   { name: '焦慮', quadrant: 'red', intensity: 7 },
   { name: '緊張', quadrant: 'red', intensity: 6 },
@@ -18,7 +18,7 @@ export const EMOTION_WORDS: EmotionWord[] = [
   { name: '委屈', quadrant: 'red', intensity: 5 },
   { name: '不公平', quadrant: 'red', intensity: 6 },
 
-  // 黃色象限：高能量高愉悅
+  // 黃色狀態：很滿、順心
   { name: '興奮', quadrant: 'yellow', intensity: 8 },
   { name: '快樂', quadrant: 'yellow', intensity: 7 },
   { name: '滿足', quadrant: 'yellow', intensity: 6 },
@@ -27,7 +27,7 @@ export const EMOTION_WORDS: EmotionWord[] = [
   { name: '自豪', quadrant: 'yellow', intensity: 6 },
   { name: '期待', quadrant: 'yellow', intensity: 7 },
 
-  // 藍色象限：低能量低愉悅
+  // 藍色狀態：很慢、卡住
   { name: '憂鬱', quadrant: 'blue', intensity: 7 },
   { name: '疲憊', quadrant: 'blue', intensity: 6 },
   { name: '沮喪', quadrant: 'blue', intensity: 6 },
@@ -38,7 +38,7 @@ export const EMOTION_WORDS: EmotionWord[] = [
   { name: '悲傷', quadrant: 'blue', intensity: 6 },
   { name: '絕望', quadrant: 'blue', intensity: 8 },
 
-  // 綠色象限：低能量高愉悅
+  // 綠色狀態：很慢、順心
   { name: '平靜', quadrant: 'green', intensity: 5 },
   { name: '放鬆', quadrant: 'green', intensity: 5 },
   { name: '安心', quadrant: 'green', intensity: 6 },
@@ -84,14 +84,14 @@ export function findEmotionWords(input: string, limit = 6): EmotionWord[] {
 }
 
 /**
- * 獲取象限描述
+ * 獲取狀態色彩描述
  */
 export function getQuadrantDescription(quadrant: string): string {
   const descriptions: Record<string, string> = {
-    red: '高能量低愉悅 — 憤怒、焦慮、緊張',
-    yellow: '高能量高愉悅 — 興奮、快樂、感恩',
-    blue: '低能量低愉悅 — 憂鬱、疲憊、孤單',
-    green: '低能量高愉悅 — 平靜、放鬆、安心',
+    red: '紅色狀態：很滿、卡住 — 憤怒、焦慮、緊張',
+    yellow: '黃色狀態：很滿、順心 — 興奮、快樂、感恩',
+    blue: '藍色狀態：很慢、卡住 — 憂鬱、疲憊、孤單',
+    green: '綠色狀態：很慢、順心 — 平靜、放鬆、安心',
   };
   return descriptions[quadrant] || '';
 }

@@ -25,7 +25,7 @@ class ExportService {
         const headers = [
             '時間',
             '情緒',
-            '象限',
+            '狀態色彩',
             '強度',
             '身體部位',
             '感官感受',
@@ -198,10 +198,10 @@ class ExportService {
 
     private getQuadrantLabel(quadrant?: string): string {
         const labels: Record<string, string> = {
-            red: '高能量/不愉快',
-            yellow: '高能量/愉快',
-            blue: '低能量/不愉快',
-            green: '低能量/愉快'
+            red: '很滿/卡住',
+            yellow: '很滿/順心',
+            blue: '很慢/卡住',
+            green: '很慢/順心'
         };
         return labels[quadrant || ''] || '';
     }

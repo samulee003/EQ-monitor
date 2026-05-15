@@ -86,20 +86,20 @@ describe('emotionData', () => {
   });
 
   describe('getQuadrantDescription', () => {
-    it('返回紅色象限描述', () => {
-      expect(getQuadrantDescription('red')).toContain('高能量低愉悅');
+    it('返回紅色狀態描述', () => {
+      expect(getQuadrantDescription('red')).toContain('很滿、卡住');
     });
 
-    it('返回黃色象限描述', () => {
-      expect(getQuadrantDescription('yellow')).toContain('高能量高愉悅');
+    it('返回黃色狀態描述', () => {
+      expect(getQuadrantDescription('yellow')).toContain('很滿、順心');
     });
 
-    it('返回藍色象限描述', () => {
-      expect(getQuadrantDescription('blue')).toContain('低能量低愉悅');
+    it('返回藍色狀態描述', () => {
+      expect(getQuadrantDescription('blue')).toContain('很慢、卡住');
     });
 
-    it('返回綠色象限描述', () => {
-      expect(getQuadrantDescription('green')).toContain('低能量高愉悅');
+    it('返回綠色狀態描述', () => {
+      expect(getQuadrantDescription('green')).toContain('很慢、順心');
     });
 
     it('未知象限返回空字符串', () => {

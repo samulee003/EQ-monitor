@@ -117,7 +117,7 @@ const SOSMode: React.FC<SOSModeProps> = ({ onComplete, onBack }) => {
     const renderSelectStep = () => (
         <div className="sos-step select-step">
             <div className="sos-header">
-                <h2>情緒急救</h2>
+                <h2>情緒安定</h2>
                 <p className="sos-subtitle">選擇你現在的情境，我們陪你一起處理</p>
             </div>
 

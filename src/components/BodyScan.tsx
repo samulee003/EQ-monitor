@@ -303,7 +303,7 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                 <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                 <div className="step-label-container">
                     <span className="step-dot" />
-                    <span className="step-tag">{t('Recognizing')}</span>
+                    <span className="step-tag">{t('看見身體')}</span>
                 </div>
             </div>
 

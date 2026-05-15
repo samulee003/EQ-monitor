@@ -88,7 +88,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
       <div className="intensity-step fade-in" style={getIntensityStyle()}>
         <div className="selection-header">
           <button className="nav-btn" onClick={() => setIsIntensityStep(false)}>{t('← 重新選擇')}</button>
-          <span className="step-tag">{t('Labeling 標記強度')}</span>
+          <span className="step-tag">{t('命名感覺與強度')}</span>
         </div>
 
         <div className="intensity-display">
@@ -140,7 +140,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
           {quadrants.map(q => (
             <div key={q} className="context-chip">
               <span className="dot" style={{ backgroundColor: quadrantColors[q] }}></span>
-              <span>{t(q === 'red' ? '高能量/不愉快' : q === 'yellow' ? '高能量/愉快' : q === 'blue' ? '低能量/不愉快' : '低能量/愉快')}</span>
+              <span>{t(q === 'red' ? '很滿/卡住' : q === 'yellow' ? '很滿/順心' : q === 'blue' ? '很慢/卡住' : '很慢/順心')}</span>
             </div>
           ))}
         </div>

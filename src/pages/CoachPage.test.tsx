@@ -29,7 +29,7 @@ describe('CoachPage', () => {
 
   it('應該顯示主動教練預設開場訊息', () => {
     render(<CoachPage />);
-    expect(screen.getByText('我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。')).toBeInTheDocument();
+    expect(screen.getByText('我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用看見、命名、安放、回應整理下一步。')).toBeInTheDocument();
   });
 
   it('應該顯示主動教練開場訊息與建議提示', () => {

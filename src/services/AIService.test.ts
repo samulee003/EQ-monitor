@@ -14,7 +14,7 @@ describe('AIService', () => {
     });
 
     describe('Mock Insights - getMockFallback', () => {
-        it('應該返回紅色象限的 mock insight', async () => {
+        it('應該返回紅色狀態的 mock insight', async () => {
             const data = {
                 emotion: { id: 'red_angry', quadrant: 'red' as const, name: '憤怒', energy: 4, pleasantness: 2 },
                 intensity: 8,
@@ -24,12 +24,12 @@ describe('AIService', () => {
             
             const result = await aiService.analyzeFeeling(data);
             
-            expect(result.summary).toContain('高能量');
-            expect(result.underlyingPatterns).toContain('急性壓力');
-            expect(result.colorTheory).toContain('紅色象限');
+            expect(result.summary).toContain('很滿');
+            expect(result.underlyingPatterns).toContain('壓力累積');
+            expect(result.colorTheory).toContain('紅色');
         });
 
-        it('應該返回黃色象限的 mock insight', async () => {
+        it('應該返回黃色狀態的 mock insight', async () => {
             const data = {
                 emotion: { id: 'yellow_excited', quadrant: 'yellow' as const, name: '興奮', energy: 5, pleasantness: 4 },
                 intensity: 8,
@@ -41,10 +41,10 @@ describe('AIService', () => {
             
             expect(result.summary).toContain('活力');
             expect(result.underlyingPatterns).toContain('成就達成');
-            expect(result.colorTheory).toContain('黃色象限');
+            expect(result.colorTheory).toContain('黃色');
         });
 
-        it('應該返回藍色象限的 mock insight', async () => {
+        it('應該返回藍色狀態的 mock insight', async () => {
             const data = {
                 emotion: { id: 'blue_sad', quadrant: 'blue' as const, name: '憂鬱', energy: 1, pleasantness: 1 },
                 intensity: 6,
@@ -54,12 +54,12 @@ describe('AIService', () => {
             
             const result = await aiService.analyzeFeeling(data);
             
-            expect(result.summary).toContain('低能量');
+            expect(result.summary).toContain('很慢');
             expect(result.underlyingPatterns).toContain('疲憊累積');
-            expect(result.colorTheory).toContain('藍色象限');
+            expect(result.colorTheory).toContain('藍色');
         });
 
-        it('應該返回綠色象限的 mock insight', async () => {
+        it('應該返回綠色狀態的 mock insight', async () => {
             const data = {
                 emotion: { id: 'green_calm', quadrant: 'green' as const, name: '平靜', energy: 2, pleasantness: 4 },
                 intensity: 5,
@@ -71,7 +71,7 @@ describe('AIService', () => {
             
             expect(result.summary).toContain('平靜');
             expect(result.underlyingPatterns).toContain('內在平衡');
-            expect(result.colorTheory).toContain('綠色象限');
+            expect(result.colorTheory).toContain('綠色');
         });
 
         it('應該返回默認的 mock insight 當象限未知時', async () => {
@@ -226,22 +226,29 @@ describe('AIService', () => {
     });
 
     describe('getMockChatResponse', () => {
-        it('應該返回 RULER 框架說明當詢問 ruler', async () => {
+        it('應該返回今心四步說明當詢問 ruler', async () => {
             const result = await aiService.chatWithAssistant('什麼是 RULER 框架？');
             
-            expect(result).toContain('RULER');
-            expect(result).toContain('ecognizing');
-            expect(result).toContain('nderstanding');
-            expect(result).toContain('abeling');
-            expect(result).toContain('xpressing');
-            expect(result).toContain('egulating');
+            expect(result).toContain('今心四步');
+            expect(result).toContain('看見');
+            expect(result).toContain('命名');
+            expect(result).toContain('安放');
+            expect(result).toContain('回應');
+            expect(result).toContain('Dan Siegel-informed');
+            expect(result).toContain('mindsight');
+            expect(result).toContain('不是 Yale');
+            expect(result).not.toContain('Recognizing');
         });
 
         it('應該返回建議當詢問建議', async () => {
             const result = await aiService.chatWithAssistant('我該怎麼辦？');
             
-            expect(result).toContain('RAIN');
-            expect(result).toContain('ecognize');
+            expect(result).toContain('今心四步');
+            expect(result).toContain('看見');
+            expect(result).toContain('命名');
+            expect(result).toContain('安放');
+            expect(result).toContain('回應');
+            expect(result).not.toContain('RA' + 'IN');
         });
 
         it('應該返回記錄好處當詢問記錄', async () => {
@@ -270,7 +277,7 @@ describe('AIService', () => {
             const result = await aiService.generateWeeklyInsight('test-user', logs);
 
             expect(result.summary).toContain('紅色');
-            expect(result.colorTheory).toContain('紅色象限');
+            expect(result.colorTheory).toContain('紅色');
         });
 
         it('應該為黃色主導週生成洞察', async () => {
@@ -282,7 +289,7 @@ describe('AIService', () => {
             const result = await aiService.generateWeeklyInsight('test-user', logs);
 
             expect(result.summary).toContain('黃色');
-            expect(result.colorTheory).toContain('黃色象限');
+            expect(result.colorTheory).toContain('黃色');
         });
 
         it('應該為藍色主導週生成洞察', async () => {
@@ -294,7 +301,7 @@ describe('AIService', () => {
             const result = await aiService.generateWeeklyInsight('test-user', logs);
 
             expect(result.summary).toContain('藍色');
-            expect(result.colorTheory).toContain('藍色象限');
+            expect(result.colorTheory).toContain('藍色');
         });
 
         it('應該為綠色主導週生成洞察', async () => {
@@ -306,7 +313,7 @@ describe('AIService', () => {
             const result = await aiService.generateWeeklyInsight('test-user', logs);
 
             expect(result.summary).toContain('綠色');
-            expect(result.colorTheory).toContain('綠色象限');
+            expect(result.colorTheory).toContain('綠色');
         });
 
         it('應該為空日誌返回紅色洞察（默認行為）', async () => {

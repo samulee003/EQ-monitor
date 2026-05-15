@@ -1,21 +1,21 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '../services/LanguageContext';
 import { type Quadrant } from '../data/emotionData';
-import './MoodMeter.css';
+import './EmotionQuadrantPicker.css';
 
-interface MoodMeterProps {
+interface EmotionQuadrantPickerProps {
   onSelectQuadrants: (qs: Quadrant[]) => void;
 }
 
-const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
+const EmotionQuadrantPicker: React.FC<EmotionQuadrantPickerProps> = ({ onSelectQuadrants }) => {
   const { t } = useLanguage();
   const [selectedQs, setSelectedQs] = React.useState<Quadrant[]>([]);
 
   const quadrants: { id: Quadrant; label: string; desc: string }[] = useMemo(() => [
-    { id: 'red', label: t('高能量 / 不愉快'), desc: t('焦慮、壓力、憤怒') },
-    { id: 'yellow', label: t('高能量 / 愉快'), desc: t('興奮、喜悅、動力') },
-    { id: 'blue', label: t('低能量 / 不愉快'), desc: t('悲傷、疲憊、抑鬱') },
-    { id: 'green', label: t('低能量 / 愉快'), desc: t('平靜、放鬆、知足') },
+    { id: 'red', label: t('很滿 / 卡住'), desc: t('緊繃、焦躁、快爆開') },
+    { id: 'yellow', label: t('很滿 / 順心'), desc: t('有勁、期待、被點亮') },
+    { id: 'blue', label: t('很慢 / 卡住'), desc: t('低落、疲累、想躲起來') },
+    { id: 'green', label: t('很慢 / 順心'), desc: t('安穩、鬆開、剛剛好') },
   ], [t]);
 
   const toggleQuadrant = (id: Quadrant) => {
@@ -46,10 +46,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
   };
 
   return (
-    <div className="mood-meter-container fade-in">
-      <div className="mood-meter-header">
+    <div className="emotion-quadrant-picker-container fade-in">
+      <div className="emotion-quadrant-picker-header">
         <h1>{t('你現在感覺如何？')}</h1>
-        <p>{t('可以選擇多個最貼近你當前能量與心情的色塊')}</p>
+        <p>{t('可以選擇多個最貼近你此刻身體速度與心裡狀態的色塊')}</p>
       </div>
 
       <div className="spheres-layout">
@@ -58,10 +58,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
         <div className="axis-line axis-horizontal" aria-hidden="true" />
 
         {/* 軸標籤 */}
-        <span className="axis-label axis-top">{t('高能量')}</span>
-        <span className="axis-label axis-bottom">{t('低能量')}</span>
-        <span className="axis-label axis-left">{t('不愉快')}</span>
-        <span className="axis-label axis-right">{t('愉快')}</span>
+        <span className="axis-label axis-top">{t('很滿')}</span>
+        <span className="axis-label axis-bottom">{t('很慢')}</span>
+        <span className="axis-label axis-left">{t('卡住')}</span>
+        <span className="axis-label axis-right">{t('順心')}</span>
 
         {quadrants.map((q) => (
           <div
@@ -73,9 +73,9 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
             role="button"
             tabIndex={0}
             aria-pressed={selectedQs.includes(q.id)}
-            aria-label={`${q.label.replace(/\s*\/\s*/g, '')} - ${q.id === 'red' ? '紅色' : q.id === 'yellow' ? '黃色' : q.id === 'blue' ? '藍色' : '綠色'}象限`}
+            aria-label={`${q.label.replace(/\s*\/\s*/g, '')} - ${q.id === 'red' ? '紅色' : q.id === 'yellow' ? '黃色' : q.id === 'blue' ? '藍色' : '綠色'}狀態區`}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleQuadrant(q.id)}
-            data-testid={`mood-quadrant-${q.id}`}
+            data-testid={`emotion-quadrant-${q.id}`}
           >
             <div className="sphere-orbital">
               <div className="sphere">
@@ -95,7 +95,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
         className="morandi-main-btn confirm-btn"
         disabled={selectedQs.length === 0}
         onClick={() => onSelectQuadrants(selectedQs)}
-        data-testid="mood-confirm"
+        data-testid="emotion-confirm"
       >
         {t('確認選擇')}
       </button>
@@ -104,4 +104,4 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onSelectQuadrants }) => {
   );
 };
 
-export default MoodMeter;
+export default EmotionQuadrantPicker;

@@ -20,7 +20,7 @@
 - 主導覽維持原版文案：`今日心情`、`記錄回顧`、`成長看板`、`教練`。
 - Header 右上角為純 SVG 圖示列：成就、主題、提醒、帳號。
 - 首頁與 Coach 首屏用一般人能懂的語氣呈現「主動 AI 教練」，不要把第一層文案改成內部技術語。
-- Coach 危機語句會回 `MetaMomentSkill` 並觸發 `open_sos`。
+- Coach 危機語句會回公開 enum `emergency_stabilization` 並觸發 `open_sos`。
 
 ## V1.0 已完成的技術面
 
@@ -32,7 +32,7 @@
   - `delete-account`
 - InsForge Auth 已接入 PWA：登入、註冊、session 保留、`coach_context` 初始化已驗。
 - 真 LINE 綁定 E2E 已驗：LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定。
-- Production LINE RULER 完整資料流已驗：有效簽名 webhook → 完整 RULER → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
+- Production LINE 情緒資料流已驗：有效簽名 webhook → 完整今心四步 → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
 - Bot `/webhook` 已啟用 LINE 簽名驗證：缺少或無效 `x-line-signature` 回 401。
 - 主動推送排程已啟用：`pg_cron` / `pg_net` installed，`weekly-report-batch` 與 `care-scan-daily` active。
 - 主動推送守門已補齊：需要有 LINE 綁定與 opt-in，避免未同意推送。
@@ -48,7 +48,7 @@
 - `cd server && npm run build` → passed
 - `npm run lint` → 0 errors / 31 warnings
 - `git diff --check` → passed
-- Production smoke：PWA、LINE 綁定、LINE RULER、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。
+- Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。
 
 ## 主要守門檔案
 
@@ -68,7 +68,7 @@
 ## 下一步
 
 1. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
-2. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE RULER → 回 Coach 問最近記錄。
+2. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄。
 3. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。
 4. P1 只根據真回饋補：LINE 綁定三步驟圖解、首頁入口分流、Coach 首屏文案。
 5. P2 再考慮：WeChat Bot、LINE Push quota 長期監控、主動推送 opt-in 設定頁、更多手機 viewport E2E、正式法律式隱私與免責審稿。

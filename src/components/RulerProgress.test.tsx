@@ -7,28 +7,28 @@ vi.mock('../services/LanguageContext', () => ({
 }));
 
 describe('RulerProgress', () => {
-    it('完整流程應該顯示 RULER 五步順序', () => {
+    it('完整流程應該顯示今心四步順序', () => {
         render(<RulerProgress currentStep="understanding" isFullFlow={true} selectedQuadrant="green" />);
 
         const labels = within(screen.getByTestId('ruler-progress'))
-            .getAllByText(/覺察|理解|標記|表達|調節/)
+            .getAllByText(/看見|命名|安放|回應/)
             .map(element => element.textContent);
 
-        expect(labels).toEqual(['覺察', '理解', '標記', '表達', '調節']);
-        expect(screen.queryByText('命名')).not.toBeInTheDocument();
-        expect(screen.queryByText('定位')).not.toBeInTheDocument();
-        expect(screen.queryByText('需要')).not.toBeInTheDocument();
-        expect(screen.queryByText('選擇')).not.toBeInTheDocument();
+        expect(labels).toEqual(['看見', '命名', '安放', '回應']);
+        expect(screen.queryByText('理解')).not.toBeInTheDocument();
+        expect(screen.queryByText('標記')).not.toBeInTheDocument();
+        expect(screen.queryByText('表達')).not.toBeInTheDocument();
+        expect(screen.queryByText('調節')).not.toBeInTheDocument();
     });
 
     it('快速流程應該只顯示必要且一致的步驟', () => {
         render(<RulerProgress currentStep="labeling" isFullFlow={false} selectedQuadrant="green" />);
 
         const labels = within(screen.getByTestId('ruler-progress'))
-            .getAllByText(/覺察|標記/)
+            .getAllByText(/看見|命名/)
             .map(element => element.textContent);
 
-        expect(labels).toEqual(['覺察', '標記']);
-        expect(screen.queryByText('命名')).not.toBeInTheDocument();
+        expect(labels).toEqual(['看見', '命名']);
+        expect(screen.queryByText('標記')).not.toBeInTheDocument();
     });
 });

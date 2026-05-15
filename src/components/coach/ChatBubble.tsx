@@ -38,7 +38,7 @@ export function ChatBubble({ message }: Props) {
         <div className={styles.metadata}>
           {message.metadata?.skillInvoked && (
             <span className={styles.skillBadge}>
-              🛟 {message.metadata.skillInvoked}
+              🛟 緊急安定
             </span>
           )}
           <span className={styles.timestamp}>

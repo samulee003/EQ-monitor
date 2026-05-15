@@ -44,9 +44,9 @@ vi.mock('../hooks/useRulerFlow', () => ({
 }));
 
 // Mock child components with minimal rendered output
-vi.mock('./MoodMeter', () => ({
+vi.mock('./EmotionQuadrantPicker', () => ({
     default: ({ onSelectQuadrants }: { onSelectQuadrants: (qs: string[]) => void }) => (
-        <div data-testid="mood-meter">
+        <div data-testid="emotion-quadrant-picker">
             <button onClick={() => onSelectQuadrants(['red'])}>選擇紅色象限</button>
         </div>
     ),
@@ -134,10 +134,10 @@ describe('CheckInFlow', () => {
         vi.clearAllMocks();
     });
 
-    it('初始首頁只渲染 MoodMeter 四象限，不顯示額外入口', () => {
+    it('初始首頁只渲染四色狀態入口，不顯示額外入口', () => {
         render(<CheckInFlow />);
 
-        expect(screen.getByTestId('mood-meter')).toBeInTheDocument();
+        expect(screen.getByTestId('emotion-quadrant-picker')).toBeInTheDocument();
         expect(screen.queryByTestId('ruler-progress')).not.toBeInTheDocument();
         expect(screen.queryByText('今日教練建議')).not.toBeInTheDocument();
         expect(screen.queryByText('快速統計')).not.toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('CheckInFlow', () => {
         expect(screen.queryByText('LINE Bot 也可以使用今心')).not.toBeInTheDocument();
     });
 
-    it('應該處理 MoodMeter 完成並呼叫 handleMoodComplete', () => {
+    it('應該處理四色狀態入口完成並呼叫 handleMoodComplete', () => {
         render(<CheckInFlow />);
 
         fireEvent.click(screen.getByText('選擇紅色象限'));

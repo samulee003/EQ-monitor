@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**今心 ImXin** — an open-source emotional awareness PWA based on the RULER method (Recognize → Understand → Label → Express → Regulate). Target users: anxious parents needing in-the-moment emotional regulation support.
+**今心 ImXin** — an open-source emotional awareness PWA built around the app's own 「今心整合四步」 flow: 看見 → 命名 → 安放 → 回應. The method is RULER-inspired, ACT-informed, IFS-informed, and Dan Siegel-informed, but 今心 is not affiliated with Yale, RULER Approach, ACT, IFS, Dan Siegel / Mindsight Institute, or any therapy institute. Target users: anxious parents needing in-the-moment emotional regulation support.
 
 **Dual-entry, Bot-First architecture:**
-- LINE Bot (primary) — RULER conversation state machine via `server/src/rulerBot.ts`
+- LINE Bot (primary) — 今心整合四步 conversation state machine via `server/src/rulerBot.ts`
 - PWA Dashboard (secondary) — history, heatmap, achievements, AI coach
 
 **All UI text, comments, commit messages must be in Traditional Chinese (Taiwan).**
@@ -83,7 +83,7 @@ Current implementation: AES-256-GCM encrypted localStorage. InsForge sync adapte
 |----------|-----|
 | Global UI prefs (theme/language) | React Context (`ThemeContext`, `LanguageContext`) |
 | Auth state | React Context (`AuthContext`) |
-| Complex flow state (RULER steps, chat) | `useReducer` (`useRulerFlow`) |
+| Complex flow state (今心整合四步, chat) | `useReducer` (`useRulerFlow`) |
 | Cross-component shared data | Zustand (`appStore`, `botStore`) |
 | Simple key-value prefs | `settingsStore` |
 | Local UI state | `useState` |
@@ -103,7 +103,7 @@ Project linked at `.insforge/project.json` (do not commit). OSS host: `https://b
 
 Express 5 + TypeScript. Entry: `server/src/index.ts`.
 
-**LINE Webhook** → `rulerBot.ts` (RULER state machine, 30-min session context).
+**LINE Webhook** → `rulerBot.ts` (今心整合四步 state machine, 30-min session context).
 
 **DB adapter** (`server/src/db/index.ts`): switches between `memoryAdapter` (dev/test, no env vars needed) and `insforgeAdapter` (production, requires `DATABASE_URL`). Production uses InsForge PostgreSQL.
 

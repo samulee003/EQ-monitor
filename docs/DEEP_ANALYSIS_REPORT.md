@@ -21,9 +21,9 @@
 
 ## 1. 執行摘要
 
-今心 (ImXin) 是一款基於耶魯 RULER 框架的開源情緒覺察工具，採用 **Bot-First 雙入口架構**：
+今心 (ImXin) 是一款基於今心四步的開源情緒覺察工具，採用 **Bot-First 雙入口架構**：
 
-- **LINE Bot**（主要入口）：對話式完成 RULER 五步練習
+- **LINE Bot**（主要入口）：對話式完成 今心四步練習
 - **PWA 儀表盤**（輔助入口）：歷史回顧、情緒熱力圖、AI 教練、成就系統
 
 **技術棧**：React 19 + TypeScript 5.9 + Vite 7 + Express 5 + InsForge BaaS + Google Gemini
@@ -62,12 +62,12 @@ main.tsx
                     └── 'coach' → CoachPage
 ```
 
-**RULER Flow 子層次**（9 步驟）：
+**今心四步 Flow 子層次**（9 步驟）：
 ```
 CheckInFlow
 ├── quickMode === 'quick' → QuickCheckIn
 ├── quickMode === 'parent' → ParentScenarios
-├── step === 'recognizing' → MoodMeter
+├── step === 'recognizing' → 四色狀態入口
 ├── step === 'centering' → CenteringStep
 ├── step === 'bodyScan' → BodyScan
 ├── step === 'labeling' → EmotionGrid
@@ -84,7 +84,7 @@ CheckInFlow
 | 層級 | 方案 | 實例 | 邊界說明 |
 |------|------|------|----------|
 | 全局 UI 偏好 | React Context | ThemeContext, LanguageContext | 主題/語言/認證 |
-| 複雜業務流程 | useReducer | useRulerFlow | RULER 9 步狀態機 |
+| 複雜業務流程 | useReducer | useRulerFlow | 今心四步 9 步狀態機 |
 | 跨組件業務數據 | Zustand | appStore, botStore | 路由/鎖屏/Bot 同步 |
 | 臨時 UI 狀態 | useState | 各組件內部 | 表單/選中/動畫 |
 | 持久化 | storage.ts | dataAdapter, settingsStore | 統一封裝 localStorage |
@@ -94,10 +94,10 @@ CheckInFlow
 | Token | Dark | Light | 用途 |
 |-------|------|-------|------|
 | `--bg-color` | `#1a1a1a` | `#f5f3ef` | 主背景 |
-| `--color-red` | `#C58B8A` | `#d67373` | 高能量低愉悅 |
-| `--color-yellow` | `#D5C1A5` | `#d4b87a` | 高能量高愉悅 |
-| `--color-blue` | `#97A6B4` | `#6b8fa8` | 低能量低愉悅 |
-| `--color-green` | `#AAB09B` | `#8dae7f` | 低能量高愉悅 |
+| `--color-red` | `#C58B8A` | `#d67373` | 很滿、卡住 |
+| `--color-yellow` | `#D5C1A5` | `#d4b87a` | 很滿、順心 |
+| `--color-blue` | `#97A6B4` | `#6b8fa8` | 很慢、卡住 |
+| `--color-green` | `#AAB09B` | `#8dae7f` | 很慢、順心 |
 
 - 全局 `* { transition: background-color 0.3s, ... }`
 - 玻璃態效果：`--glass-bg`, `--glass-border`, `--glass-blur`
@@ -152,7 +152,7 @@ Express Server (src/index.ts)
                     ▼ LINE Platform → 用戶
 ```
 
-### 3.2 RULER 狀態機
+### 3.2 今心四步狀態機
 
 共 **7 個對話狀態**：
 ```
@@ -253,9 +253,9 @@ interface RulerLogEntry {
   isFullFlow: boolean;
 }
 
-// 情緒數據：100+ 詞彙，四象限分類
-// Red(高能量低愉悅) / Yellow(高能量高愉悅)
-// Blue(低能量低愉悅) / Green(低能量高愉悅)
+// 情緒數據：100+ 詞彙，四色狀態分類
+// Red(很滿、卡住) / Yellow(很滿、順心)
+// Blue(很慢、卡住) / Green(很慢、順心)
 ```
 
 ### 4.4 數據層關鍵問題
@@ -282,7 +282,7 @@ CoachPage (前端)
     │
     ├── Chat Area (messages, optimistic UI)
     ├── ChatInput + SOS Button
-    ├── MetaMomentOverlay (4 步嚮導)
+    ├── EmergencyStabilizationOverlay (4 步嚮導)
     └── Error Banner + Retry
             │
             ▼ POST /coach
@@ -301,14 +301,14 @@ CoachPage (前端)
     Google Gemini API
 ```
 
-### 5.2 Meta Moment 流程
+### 5.2 緊急安定流程
 
 | 步驟 | 名稱 | 前端行為 | 後端感知 |
 |------|------|----------|----------|
-| 0 | Sense | 身體覺察文字引導 | 無 |
-| 1 | Stop | 4-7-8 呼吸動畫 | 無 |
-| 2 | Best Self | 自由文字輸入 | 無 |
-| 3 | Strategize | 5 個策略按鈕選擇 | 無 |
+| 0 | 感覺身體 | 身體覺察文字引導 | 無 |
+| 1 | 呼吸暫停 | 4-7-8 呼吸動畫 | 無 |
+| 2 | 記得想成為的自己 | 自由文字輸入 | 無 |
+| 3 | 選一個照顧動作 | 5 個策略按鈕選擇 | 無 |
 
 完成後發送文字摘要回 Coach，後端始終無結構化狀態。
 
@@ -316,7 +316,7 @@ CoachPage (前端)
 
 | 系統 | 用途 | 模型 | 端點 |
 |------|------|------|------|
-| AIService.ts | RULER 分析 + 週報 | GPT-4o | `VITE_API_PROXY_URL` |
+| AIService.ts | 今心四步 分析 + 週報 | GPT-4o | `VITE_API_PROXY_URL` |
 | ADK Client | Coach 對話 | Gemini 3.1 Flash Lite | `VITE_COACH_API_URL` |
 
 **問題**：兩套獨立 AI 系統，無統一層，維護成本高。
@@ -357,7 +357,7 @@ CoachPage (前端)
 | `hooks/useA11y.test.ts` | 22 | 焦點陷阱、快捷鍵、屏幕朗讀器 |
 | `services/AIService.test.ts` | 24 | Mock fallback、API 降級、育兒檢測 |
 | `services/HabitService.test.ts` | 17 | 連續天數、9 個成就解鎖 |
-| `pages/CoachPage.test.tsx` | 10 | API 呼叫、錯誤處理、Meta-Moment |
+| `pages/CoachPage.test.tsx` | 10 | API 呼叫、錯誤處理、緊急安定練習 |
 | `lib/insforge/syncAdapter.test.ts` | 16 | 離線/在線切換、隊列回放 |
 
 ### 6.3 測試清單（後端）
@@ -365,14 +365,14 @@ CoachPage (前端)
 | 文件 | 測試數 | 覆蓋範圍 |
 |------|--------|----------|
 | `server/src/rulerBot.test.ts` | 34 | 完整 7 步對話、情緒匹配、多使用者隔離 |
-| `server/src/emotionData.test.ts` | 23 | 精確/部分/模糊匹配、四象限 |
+| `server/src/emotionData.test.ts` | 23 | 精確/部分/模糊匹配、四色狀態 |
 | `server/src/db/memoryAdapter.test.ts` | 22 | CRUD、連續天數、週統計 |
 | `server/src/utils/metrics.test.ts` | 7 | 計數器、副本、重置 |
 
 ### 6.4 未測試核心模組（57 個文件）
 
 **前端組件（~30 個無測試）**：
-App.tsx, MainLayout.tsx, AuthModal.tsx, PrivacyLock.tsx, EmotionGrid.tsx, MoodMeter.tsx, BodyScan.tsx, UnderstandingStep.tsx, ExpressingStep.tsx, RegulatingStep.tsx, CheckInFlow.tsx, Timeline.tsx, GrowthDashboard.tsx, AchievementPage.tsx, OnboardingFlow.tsx, SplashScreen.tsx, ExportPanel.tsx, BotDashboard.tsx, ParentHome.tsx, ParentScenarios.tsx...
+App.tsx, MainLayout.tsx, AuthModal.tsx, PrivacyLock.tsx, EmotionGrid.tsx, 四色狀態入口.tsx, BodyScan.tsx, UnderstandingStep.tsx, ExpressingStep.tsx, RegulatingStep.tsx, CheckInFlow.tsx, Timeline.tsx, GrowthDashboard.tsx, AchievementPage.tsx, OnboardingFlow.tsx, SplashScreen.tsx, ExportPanel.tsx, BotDashboard.tsx, ParentHome.tsx, ParentScenarios.tsx...
 
 **後端無測試**：
 index.ts, api/dashboard.ts, middleware/*, db/supabaseAdapter.ts, db/index.ts

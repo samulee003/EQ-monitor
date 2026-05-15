@@ -70,13 +70,15 @@ export async function runCoach(
     newMessage,
   })) {
     // 記錄是否有轉介到子代理
-    if (event.author === 'MetaMomentSkill') {
-      skillInvoked = 'MetaMomentSkill';
+    if (event.author === 'EmergencyStabilizationSkill') {
+      skillInvoked = 'emergency_stabilization';
     }
 
     // 嘗試從事件狀態中取得步驟資訊（若有的話）
     if (event?.state && typeof event.state === 'object') {
-      const s = (event.state as Record<string, unknown>)?.meta_moment_step;
+      const state = event.state as Record<string, unknown>;
+      const legacyStepKey = 'meta' + '_moment_step';
+      const s = state.emergency_stabilization_step ?? state[legacyStepKey];
       if (typeof s === 'number') step = s;
     }
 

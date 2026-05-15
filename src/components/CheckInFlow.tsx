@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import MoodMeter from './MoodMeter';
+import EmotionQuadrantPicker from './EmotionQuadrantPicker';
 import EmotionGrid from './EmotionGrid';
 import BodyScan from './BodyScan';
 import UnderstandingStep from './UnderstandingStep';
@@ -87,7 +87,7 @@ const CheckInFlow: React.FC = () => {
                     <div className="ruler-stage-backdrop" aria-hidden="true"></div>
                     <div className="ruler-stage-frame">
                         {step === 'recognizing' && (
-                            <MoodMeter
+                            <EmotionQuadrantPicker
                                 onSelectQuadrants={(qs) => handleMoodComplete(qs, 5)}
                             />
                         )}

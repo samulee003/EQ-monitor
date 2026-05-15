@@ -120,14 +120,14 @@ const ParentHome: React.FC = () => {
 
                     {/* 三層級選擇 */}
                     <div className="mode-selection">
-                        {/* SOS 緊急救援 */}
+                        {/* SOS 緊急安定 */}
                         <button 
                             className="mode-card mode-sos"
                             onClick={() => setMode('sos')}
                         >
                             <div className="mode-icon" aria-hidden="true">!</div>
                             <div className="mode-content">
-                                <h2>我需要急救</h2>
+                                <h2>我需要先穩住</h2>
                                 <p>剛對孩子發脾氣 / 孩子哭鬧 / 快崩潰</p>
                                 <span className="mode-time">30 秒</span>
                             </div>

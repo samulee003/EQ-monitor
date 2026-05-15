@@ -145,7 +145,7 @@ export const emotions: Emotion[] = [
     { id: 'placid', name: '安詳的', quadrant: 'green', energy: 1, pleasantness: 5 },
 
     // --- GREEN: Parenting-specific ---
-    { id: 'healed_by_child', name: '被孩子療癒的', quadrant: 'green', energy: 3, pleasantness: 4, isParenting: true },
+    { id: 'healed_by_child', name: '被孩子溫暖到的', quadrant: 'green', energy: 3, pleasantness: 4, isParenting: true },
     { id: 'quality_time', name: '享受親子時光的', quadrant: 'green', energy: 2, pleasantness: 5, isParenting: true },
     { id: 'grounded_parent', name: '踏實的', quadrant: 'green', energy: 2, pleasantness: 2, isParenting: true },
     { id: 'family_warmth', name: '家的溫暖的', quadrant: 'green', energy: 1, pleasantness: 4, isParenting: true },

@@ -20,10 +20,10 @@ export interface QuickCheckInData {
 type QuickStep = 'quadrant' | 'emotion' | 'intensity' | 'scenario' | 'feedback';
 
 const quadrantConfig: Record<Quadrant, { emoji: string; label: string; color: string; desc: string }> = {
-    red: { emoji: '!', label: '高能量', color: '#C58B8A', desc: '不舒服' },
-    yellow: { emoji: '+', label: '高能量', color: '#D5C1A5', desc: '開心' },
-    blue: { emoji: '~', label: '低能量', color: '#97A6B4', desc: '不舒服' },
-    green: { emoji: '○', label: '低能量', color: '#AAB09B', desc: '平靜' }
+    red: { emoji: '!', label: '很滿', color: '#C58B8A', desc: '卡住' },
+    yellow: { emoji: '+', label: '很滿', color: '#D5C1A5', desc: '順心' },
+    blue: { emoji: '~', label: '很慢', color: '#97A6B4', desc: '卡住' },
+    green: { emoji: '○', label: '很慢', color: '#AAB09B', desc: '順心' }
 };
 
 const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
@@ -85,13 +85,13 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
         
         let feedback = '';
         
-        // 根據象限給予不同類型的回饋
+        // 根據四色狀態給予不同類型的回饋
         switch (emotion.quadrant) {
             case 'red':
                 feedback = `你記錄的是「${emotion.name}」（強度 ${intensity}/10）。`;
                 feedback += `\\n\\n${emotion.description}。`;
                 if (intensity >= 7) {
-                    feedback += '\\n\\n這個強度很高，記得先照顧好自己的狀態。試試 SOS 緊急救援的呼吸練習？';
+                    feedback += '\\n\\n這個強度很高，記得先照顧好自己的狀態。試試 SOS 緊急安定的呼吸練習？';
                 } else {
                     feedback += '\\n\\n這種情緒很正常，代表你在乎。給自己一點空間，它會慢慢過去。';
                 }
@@ -161,7 +161,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
         <div className="quick-step">
             <div className="quick-header">
                 <h2>現在的感受是...</h2>
-                <p className="quick-subtitle">選擇最接近的情緒象限</p>
+                <p className="quick-subtitle">選擇最接近的情緒狀態區</p>
             </div>
 
             <div className="quadrant-grid">
@@ -212,7 +212,7 @@ const QuickCheckIn: React.FC<QuickCheckInProps> = ({ onComplete, onBack }) => {
                 </div>
 
                 <button className="quick-back-btn" onClick={() => setStep('quadrant')}>
-                    ← 重新選擇象限
+                    ← 重新選擇狀態區
                 </button>
             </div>
         );

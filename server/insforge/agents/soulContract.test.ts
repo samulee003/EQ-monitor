@@ -17,7 +17,18 @@ describe('今心教練 soul 契約', () => {
     expect(soul).toContain('主動但不打擾');
     expect(soul).toContain('同理 → 觀察 → 下一步');
     expect(soul).toContain('不做診斷');
-    expect(soul).toContain('Meta-Moment');
+    expect(soul).toContain('緊急安定');
+    for (const phrase of [
+      'RULER 啟發',
+      'ACT-informed',
+      'IFS-informed',
+      'Dan Siegel-informed',
+      'mindsight',
+      '可承受範圍',
+      '不宣稱與 Yale',
+    ]) {
+      expect(soul).toContain(phrase);
+    }
   });
 
   it('生產 coach prompt 應該同步 soul 的核心原則', () => {
@@ -39,6 +50,13 @@ describe('今心教練 soul 契約', () => {
       'trigger_action',
       '不可提及工具名稱',
       '不可把工具結果原樣貼給使用者',
+      'RULER 啟發',
+      'ACT-informed',
+      'IFS-informed',
+      'Dan Siegel-informed',
+      'mindsight',
+      '可承受範圍',
+      '不宣稱與 Yale',
     ]) {
       expect(productionPrompt).toContain(phrase);
       expect(promptSource).toContain(phrase);
@@ -54,7 +72,7 @@ describe('今心教練 soul 契約', () => {
       expect(source).toContain('buildEmotionCoachInstruction()');
       expect(source).toContain('globalInstruction: buildEmotionCoachGlobalInstruction()');
       expect(source).toContain('tools: [rulerDataTool, saveRulerLogTool, getEmotionTrendTool, triggerActionTool]');
-      expect(source).toContain('subAgents: [createMetaMomentSkill(model)]');
+      expect(source).toContain('subAgents: [createEmergencyStabilizationSkill(model)]');
     }
   });
 });

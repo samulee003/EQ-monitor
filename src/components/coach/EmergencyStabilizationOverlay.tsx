@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BreathingAnimation } from './BreathingAnimation';
-import styles from './MetaMomentOverlay.module.css';
+import styles from './EmergencyStabilizationOverlay.module.css';
 
 interface Props {
   onClose: () => void;
@@ -9,21 +9,21 @@ interface Props {
 
 const STEPS = [
   {
-    title: 'Step 1: 感知',
+    title: '第 1 步：感覺身體',
     content:
       '先暫停一下，感受一下你的身體。你的心跳如何？肩膀緊嗎？肚子有什麼感覺？',
   },
   {
-    title: 'Step 2: 暫停',
+    title: '第 2 步：呼吸暫停',
     content: '讓我們一起深呼吸，給情緒一些空間。',
   },
   {
-    title: 'Step 3: 看見最好的自己',
+    title: '第 3 步：記得想成為的自己',
     content:
       '想一想，當你處於最好的狀態時，你是什麼樣子？充滿耐心？冷靜？有同理心？',
   },
   {
-    title: 'Step 4: 策略與行動',
+    title: '第 4 步：選一個照顧動作',
     content: '選擇一個策略來幫助你回到平衡：',
   },
 ];
@@ -33,10 +33,10 @@ const STRATEGIES = [
   '去外面散步 5 分鐘',
   '喝一杯水',
   '寫下現在的感受',
-  '打給我的「馬文叔叔」',
+  '打給信任的人',
 ];
 
-export function MetaMomentOverlay({ onClose, onComplete }: Props) {
+export function EmergencyStabilizationOverlay({ onClose, onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [bestSelf, setBestSelf] = useState('');
 
@@ -57,8 +57,8 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="meta-moment-title"
-      data-testid="meta-moment-overlay"
+      aria-labelledby="emergency-stabilization-title"
+      data-testid="emergency-stabilization-overlay"
       data-step={step}
     >
       {/* Header */}
@@ -66,7 +66,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
         <div className={styles.headerLeft}>
           <div className={styles.headerIcon}>🆘</div>
           <h2
-            id="meta-moment-title"
+            id="emergency-stabilization-title"
             className={styles.headerTitle}
           >
             緊急安定練習
@@ -83,7 +83,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
 
       {/* Content */}
       <div className={styles.content}>
-        <div className={styles.stepLabel} data-testid="meta-moment-step-title">
+        <div className={styles.stepLabel} data-testid="emergency-stabilization-step-title">
           {STEPS[step].title}
         </div>
         <p className={styles.stepContent}>
@@ -133,7 +133,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
           <button
             onClick={handleNext}
             className={styles.nextButton}
-            data-testid="meta-moment-next"
+            data-testid="emergency-stabilization-next"
           >
             {step === 0
               ? '我準備好了，開始呼吸'

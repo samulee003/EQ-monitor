@@ -14,7 +14,7 @@ export const saveRulerLogTool = new FunctionTool({
     userId: z.string().describe('使用者的 UUID'),
     emotions: z.array(z.object({
       name: z.string().describe('情緒名稱，例如「焦慮」、「平靜」'),
-      quadrant: z.enum(['red', 'yellow', 'blue', 'green']).describe('情緒所在象限'),
+      quadrant: z.enum(['red', 'yellow', 'blue', 'green']).describe('情緒所在狀態色彩'),
     })).describe('辨識出的情緒列表'),
     intensity: z.number().min(1).max(10).describe('情緒強度 1-10'),
     notes: z.string().optional().describe('額外備註或情境描述'),

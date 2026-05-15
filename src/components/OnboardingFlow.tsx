@@ -104,7 +104,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     </div>
                 )}
 
-                {/* Step 3: Four Colors */}
+                {/* Step 3: Four States */}
                 {step === 3 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-quadrants">
@@ -113,8 +113,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                             <div className="q-box blue"></div>
                             <div className="q-box green"></div>
                         </div>
-                        <h2>{t('情緒的四種色彩')}</h2>
-                        <p>{t('每種顏色代表不同的能量與愉悅程度。紅色是焦慮憤怒，黃色是興奮快樂，藍色是憂鬱疲憊，綠色是平靜滿足。沒有「好」或「壞」的情緒，只有需要被看見的感受。')}</p>
+                        <h2>{t('情緒的四色狀態')}</h2>
+                        <p>{t('今心用「身體速度」和「心裡順卡」幫你先定位此刻。紅色像緊繃卡住，黃色像有勁順心，藍色像低落卡住，綠色像安穩順心。沒有「好」或「壞」的情緒，只有需要被看見的感受。')}</p>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
                             <button className="morandi-main-btn" onClick={handleNext}>{t('下一步')}</button>
@@ -122,31 +122,27 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     </div>
                 )}
 
-                {/* Step 4: Pause Flow Steps */}
+                {/* Step 4: ImXin Flow Steps */}
                 {step === 4 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon breathe">{uiIcons.seedling}</div>
-                        <h2>{t('覺察五步練習')}</h2>
+                        <h2>{t('今心四步練習')}</h2>
                         <div className="ruler-steps-list">
                             <div className="ruler-step-item">
-                                <span className="ruler-letter r">N</span>
-                                <span>{t('覺察 — 我現在有什麼感覺？')}</span>
+                                <span className="ruler-letter r">1</span>
+                                <span>{t('看見 — 我現在落在哪個狀態？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter l">N</span>
-                                <span>{t('命名 — 這個感覺叫什麼？')}</span>
+                                <span className="ruler-letter l">2</span>
+                                <span>{t('命名 — 這個感覺比較像什麼？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter u">L</span>
-                                <span>{t('定位 — 身體哪裡有感覺？')}</span>
+                                <span className="ruler-letter u">3</span>
+                                <span>{t('安放 — 它在提醒我哪個需要？')}</span>
                             </div>
                             <div className="ruler-step-item">
-                                <span className="ruler-letter e">N</span>
-                                <span>{t('需要 — 此刻我需要什麼？')}</span>
-                            </div>
-                            <div className="ruler-step-item">
-                                <span className="ruler-letter r2">C</span>
-                                <span>{t('選擇 — 我想怎麼回應？')}</span>
+                                <span className="ruler-letter e">4</span>
+                                <span>{t('回應 — 我可以先做哪一小步？')}</span>
                             </div>
                         </div>
                         <div className="step-actions">
@@ -174,7 +170,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     </div>
                 )}
 
-                {/* Step 6: Express & Regulate */}
+                {/* Step 6: 安放與回應 */}
                 {step === 6 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon shake">{uiIcons.shredder}</div>
