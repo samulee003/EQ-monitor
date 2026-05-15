@@ -201,7 +201,7 @@ export function classifyCoachIntent(text: string, context: CoachLoopContext): Co
     return { kind: 'chat' };
   }
 
-  if (/^(好|可以|就這個|設為今天的小行動)$/.test(normalized) && context.pendingProposal) {
+  if (/^(好|可以|就這個|設為今天的小行動)(?:：.+)?$/.test(normalized) && context.pendingProposal) {
     return {
       kind: 'create_micro_action',
       task: context.pendingProposal.task,

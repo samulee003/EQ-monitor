@@ -284,6 +284,19 @@ describe('Coach action loop runtime helpers', () => {
     }
   });
 
+  it('有 pending proposal 時，帶標題的設定訊息仍建立同一個 pending task', () => {
+    const intent = classifyCoachIntent('設為今天的小行動：睡前做 3 分鐘安神呼吸', {
+      ...baseLoopContext,
+      activeMicroAction: null,
+      pendingProposal: pendingSleepProposal,
+    });
+
+    expect(intent.kind).toBe('create_micro_action');
+    if (intent.kind === 'create_micro_action') {
+      expect(intent.task).toEqual(pendingSleepProposal.task);
+    }
+  });
+
   it('有 pending repair proposal 時，確認 可以 會建立該 repair task', () => {
     const intent = classifyCoachIntent('可以', {
       ...baseLoopContext,

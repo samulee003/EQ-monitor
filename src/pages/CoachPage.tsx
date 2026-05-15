@@ -240,9 +240,7 @@ export default function CoachPage() {
       }
       setMicroActionProposal(res.microActionProposal ?? null);
       setActiveMicroAction(res.activeMicroAction ?? null);
-      if (res.gamification) {
-        setGamification(res.gamification);
-      }
+      setGamification(res.gamification ?? null);
 
       const modelMsg: CoachMessage = {
         id: crypto.randomUUID(),
@@ -296,7 +294,12 @@ export default function CoachPage() {
   const handleReportMicroAction = useCallback(
     (status: Extract<CoachMicroActionStatus, 'completed' | 'partial' | 'skipped'>) => {
       setActiveMicroAction(null);
-      handleSend(`小行動回報：${status}`);
+      const reportText = {
+        completed: '有做到',
+        partial: '做了一半',
+        skipped: '沒做到，但我回來了',
+      }[status];
+      handleSend(`小行動回報：${reportText}`);
     },
     [handleSend]
   );

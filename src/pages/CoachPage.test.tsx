@@ -133,7 +133,7 @@ describe('CoachPage', () => {
     });
   });
 
-  it('API 回傳進行中的小行動時顯示卡片，回報有做到會送出 completed', async () => {
+  it('API 回傳進行中的小行動時顯示卡片，回報有做到會送出自然語句', async () => {
     const sendMessageSpy = vi.spyOn(client, 'sendMessage')
       .mockResolvedValueOnce({
         response: '回來看一眼就好。',
@@ -158,7 +158,7 @@ describe('CoachPage', () => {
 
     await waitFor(() => {
       expect(sendMessageSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({ message: '小行動回報：completed' })
+        expect.objectContaining({ message: '小行動回報：有做到' })
       );
     });
   });
