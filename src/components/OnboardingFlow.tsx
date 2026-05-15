@@ -18,15 +18,28 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     const [step, setStep] = useState(1);
     const [reminderHour, setReminderHour] = useState(21);
     const [userRole, setUserRole] = useState<UserRole>('general');
+    const [notificationFeedback, setNotificationFeedback] = useState('');
 
     const handleNext = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
     const handlePrev = () => setStep(s => Math.max(s - 1, 1));
     
     const handleFinish = async () => {
-        await notificationService.setEnabled(true);
-        notificationService.setReminderTime(reminderHour, 0);
         settingsStore.setUserRole(userRole);
+        notificationService.setReminderTime(reminderHour, 0);
+        await notificationService.setEnabled(true);
         onComplete();
+    };
+
+    const handleTestReminder = async () => {
+        setNotificationFeedback('');
+        notificationService.setReminderTime(reminderHour, 0);
+        const enabled = await notificationService.setEnabled(true);
+        if (!enabled) {
+            setNotificationFeedback(t('這個瀏覽器目前沒有通知權限。請先允許通知，或改用 Safari / Chrome / 加入主畫面後再試。'));
+            return;
+        }
+        notificationService.sendTestNotification(userRole);
+        setNotificationFeedback(t('已送出測試提醒。如果沒有看到，請檢查瀏覽器通知權限。'));
     };
 
     const handleSkip = () => {
@@ -58,8 +71,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
                         <div className="agentic-intro">
-                            <p>{t('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的教練。')}</p>
-                            <p>{t('你可以把它想成隨身情緒教練：看見你的紀錄、提醒你回到當下，必要時帶你做呼吸或緊急安定練習。')}</p>
+                            <p>{t('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的阿念教練。')}</p>
+                            <p>{t('阿念會看見你的紀錄、接續你的情緒線索，必要時帶你做呼吸或緊急安定練習。用得越久，它越能看懂你的節奏。')}</p>
                         </div>
                         <div className="disclaimer-box">
                             <p className="disclaimer-title">⚠️ {t('使用須知')}</p>
@@ -81,17 +94,16 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                         <p>{t('選擇最符合的角色，我們會為你客製化體驗。')}</p>
                         <div className="role-grid">
                             {([
-                                { key: 'parent' as UserRole, label: t('父母'), icon: '育', desc: t('育兒情境、親職策略') },
-                                { key: 'general' as UserRole, label: t('通用'), icon: '通', desc: t('一般情緒管理') },
-                                { key: 'student' as UserRole, label: t('學生'), icon: '學', desc: t('學業與社交壓力') },
-                                { key: 'professional' as UserRole, label: t('職場'), icon: '職', desc: t('工作壓力管理') },
+                                { key: 'parent' as UserRole, label: t('照顧孩子的父母'), desc: t('親子衝突、照顧壓力、修復關係') },
+                                { key: 'general' as UserRole, label: t('一般日常使用'), desc: t('情緒整理、壓力覺察、照顧自己') },
+                                { key: 'student' as UserRole, label: t('學生'), desc: t('課業、人際、考試壓力') },
+                                { key: 'professional' as UserRole, label: t('職場工作者'), desc: t('工作壓力、溝通、下班復原') },
                             ]).map(role => (
                                 <button
                                     key={role.key}
                                     className={`role-btn ${userRole === role.key ? 'active' : ''}`}
                                     onClick={() => setUserRole(role.key)}
                                 >
-                                    <span className="role-icon">{role.icon}</span>
                                     <span className="role-label">{role.label}</span>
                                     <span className="role-desc">{role.desc}</span>
                                 </button>
@@ -192,12 +204,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 7 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon pulse">{uiIcons.shield}</div>
-                        <h2>{t('你的數據，你的隱私')}</h2>
-                        <p>{t('基本記錄會先留在你的裝置。登入並同意雲端備份後，主動教練才會用你的情緒輪廓提供更個人化的提醒；你可以隨時匯出或刪除資料。')}</p>
+                        <h2>{t('資料怎麼保存')}</h2>
+                        <p>{t('未登入時，情緒練習記錄會留在這台裝置的瀏覽器儲存空間，其中情緒記錄會用本機加密格式保存。登入或註冊並同意後，今心才會把必要的記錄與教練脈絡同步到雲端，讓阿念接續你的狀態；你可以匯出本機記錄，登入後也可以刪除帳號雲端資料。')}</p>
                         <div className="feature-tags">
-                            <span className="feature-tag">🔒 {t('本機優先')}</span>
-                            <span className="feature-tag">📱 {t('PIN 保護')}</span>
-                            <span className="feature-tag">📤 {t('可匯出刪除')}</span>
+                            <span className="feature-tag">{t('未登入：本機保存')}</span>
+                            <span className="feature-tag">{t('登入同意才同步')}</span>
+                            <span className="feature-tag">{t('可匯出 / 刪帳')}</span>
                         </div>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
@@ -210,12 +222,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 8 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon bounce">{uiIcons.trophy}</div>
-                        <h2>{t('讓教練看見你的模式')}</h2>
-                        <p>{t('每次記錄都會變成教練理解你的線索。它會把最近的情緒、觸發點與需求整理成洞察，提醒你下一次可以更早照顧自己。')}</p>
+                        <h2>{t('讓今心整理你的模式')}</h2>
+                        <p>{t('每次記錄都會變成你回看自己的線索。今心會在成長頁整理最近的情緒、觸發點與需要；若你有登入並開啟阿念主動關心，才會使用這些脈絡提供更個人化的提醒。')}</p>
                         <div className="feature-tags">
-                            <span className="feature-tag">✦ {t('主動提醒')}</span>
-                            <span className="feature-tag">📊 {t('週報洞察')}</span>
-                            <span className="feature-tag">🏆 {t('成就鼓勵')}</span>
+                            <span className="feature-tag">{t('每日提醒')}</span>
+                            <span className="feature-tag">{t('週洞察')}</span>
+                            <span className="feature-tag">{t('成就收藏')}</span>
                         </div>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
@@ -226,10 +238,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
 
                 {/* Step 9: Reminder Setting */}
                 {step === 9 && (
-                    <div className="onboarding-step fade-slide-up">
+                    <div className="onboarding-step reminder-step fade-slide-up">
                         <div className="step-icon pulse">{uiIcons.sparkle}</div>
-                        <h2>{t('設定主動關心時間')}</h2>
-                        <p>{t('選一個你通常願意停下來的時間。今心會用溫和提醒把你帶回覺察，而不是等到情緒爆滿才開始處理。')}</p>
+                        <h2>{t('提醒時間與內容')}</h2>
+                        <p>{t('到點會跳一則瀏覽器通知，提醒你回來看一眼。')}</p>
                         
                         <div className="time-selector">
                             <label>{t('每日提醒時間')}</label>
@@ -242,6 +254,19 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                             />
                             <div className="selected-time">{String(reminderHour).padStart(2, '0')}:00</div>
                         </div>
+
+                        <div className="reminder-preview" aria-label={t('提醒訊息預覽')}>
+                            <span>{t('提醒會像這樣')}</span>
+                            <strong>{t('今心 • 每日心情記錄')}</strong>
+                            <p>{t(notificationService.getDailyReminderPreview(userRole))}</p>
+                        </div>
+                        <p className="reminder-permission-note">
+                            {t('看不到通知通常是權限或內建瀏覽器限制；可改用 Safari / Chrome 或加入主畫面。')}
+                        </p>
+                        <button type="button" className="morandi-outline-btn reminder-test-btn" onClick={handleTestReminder}>
+                            {t('試發提醒')}
+                        </button>
+                        {notificationFeedback && <p className="reminder-feedback">{notificationFeedback}</p>}
 
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>

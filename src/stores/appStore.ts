@@ -8,7 +8,7 @@
 import { create } from 'zustand';
 import { settingsStore } from '../adapters';
 
-export type AppView = 'landing' | 'home' | 'history' | 'growth' | 'achievement' | 'coach';
+export type AppView = 'home' | 'history' | 'growth' | 'achievement' | 'coach' | 'about';
 
 interface AppState {
   // 視圖路由
@@ -36,14 +36,38 @@ interface AppState {
   clearImportToast: () => void;
 }
 
-const VALID_APP_VIEWS: AppView[] = ['landing', 'home', 'history', 'growth', 'achievement', 'coach'];
+const VALID_APP_VIEWS: AppView[] = ['home', 'history', 'growth', 'achievement', 'coach', 'about'];
+
+function shouldShowPrivacyLock(): boolean {
+  const enabled = settingsStore.isPrivacyEnabled();
+  if (!enabled) return false;
+
+  // When privacy lock is enabled for the first time there is no PIN yet.
+  // Enter the lock surface so PrivacyLock can collect the initial 4-digit PIN.
+  return true;
+}
+
+function replaceHash(view: AppView): void {
+  if (typeof window === 'undefined') return;
+  const nextUrl = `${location.pathname}${location.search}#${view}`;
+  history.replaceState(null, '', nextUrl);
+}
 
 function getValidViewFromHash(): AppView {
-  if (typeof window === 'undefined') return 'landing';
+  if (typeof window === 'undefined') return 'home';
   const hash = location.hash.slice(1);
-  if (!hash) return 'landing';
+  if (!hash) {
+    replaceHash('home');
+    return 'home';
+  }
   if (hash === 'checkin') return 'home';
-  return VALID_APP_VIEWS.includes(hash as AppView) ? (hash as AppView) : 'landing';
+  if (hash === 'landing') {
+    replaceHash('about');
+    return 'about';
+  }
+  if (VALID_APP_VIEWS.includes(hash as AppView)) return hash as AppView;
+  replaceHash('home');
+  return 'home';
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -62,26 +86,18 @@ export const useAppStore = create<AppState>((set) => ({
   dismissSplash: () => set({ showSplash: false }),
 
   // 隱私鎖
-  // 初始狀態：使用 hasPrivacyPin() 同步判斷是否有 PIN 存在
-  // PIN 內容已改為哈希存儲，此處僅判斷存在性
-  isLocked: (() => {
-    const hasPin = settingsStore.hasPrivacyPin();
-    const enabled = settingsStore.isPrivacyEnabled();
-    return hasPin && enabled;
-  })(),
+  // 初始狀態：若已啟用應用鎖，即進入鎖定畫面。
+  // 尚未設定 PIN 時，PrivacyLock 會負責收集初始 PIN；已有 PIN 時則進入解鎖。
+  isLocked: shouldShowPrivacyLock(),
   isLockInitialized: true,
   unlock: () => set({ isLocked: false }),
   relock: () => {
-    const hasPin = settingsStore.hasPrivacyPin();
-    const enabled = settingsStore.isPrivacyEnabled();
-    if (hasPin && enabled) {
+    if (shouldShowPrivacyLock()) {
       set({ isLocked: true });
     }
   },
   initializeLock: () => {
-    const hasPin = settingsStore.hasPrivacyPin();
-    const enabled = settingsStore.isPrivacyEnabled();
-    set({ isLocked: hasPin && enabled, isLockInitialized: true });
+    set({ isLocked: shouldShowPrivacyLock(), isLockInitialized: true });
   },
 
   // 導引
@@ -100,12 +116,6 @@ export const useAppStore = create<AppState>((set) => ({
 // 監聽瀏覽器 hash 變化，同步到 store
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', () => {
-    const hash = location.hash.slice(1) as AppView;
-    if (VALID_APP_VIEWS.includes(hash)) {
-      useAppStore.setState({ currentView: hash });
-    }
-    if (!hash) {
-      useAppStore.setState({ currentView: 'landing' });
-    }
+    useAppStore.setState({ currentView: getValidViewFromHash() });
   });
 }

@@ -22,6 +22,33 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 class NotificationService {
     private checkInterval: ReturnType<typeof setInterval> | null = null;
 
+    private getReminderMessages(role = settingsStore.getUserRole() || 'general'): string[] {
+        const messagesByRole: Record<string, string[]> = {
+            parent: [
+                '今天照顧孩子也照顧你自己了嗎？留一分鐘回到心裡。',
+                '如果今天有一刻很滿，先記下一個最靠近的感受。',
+            ],
+            student: [
+                '今天給自己一分鐘，看看課業和人際之外的感受。',
+                '不用寫很多，留下一個情緒名字也可以。',
+            ],
+            professional: [
+                '下班前後，留一分鐘把今天的情緒放下來。',
+                '今天的壓力可以先被看見，不必一次解決。',
+            ],
+            general: [
+                '今天給自己一分鐘，看看此刻的感受。',
+                '不用寫很多，留下一個情緒名字也可以。',
+            ],
+        };
+
+        return messagesByRole[role] || messagesByRole.general;
+    }
+
+    getDailyReminderPreview(role?: string): string {
+        return this.getReminderMessages(role)[0];
+    }
+
     /**
      * Request notification permission from the browser
      */
@@ -132,10 +159,10 @@ class NotificationService {
     /**
      * Send a test notification
      */
-    sendTestNotification(): void {
+    sendTestNotification(role?: string): void {
         this.showNotification(
-            '🌿 今心提醒測試',
-            '如果你看到這則通知，代表提醒功能已設定成功！',
+            '今心 • 每日心情記錄',
+            this.getDailyReminderPreview(role),
             'imxin-test'
         );
     }
@@ -172,15 +199,7 @@ class NotificationService {
      * Send the daily reminder notification
      */
     private sendDailyReminder(): void {
-        const messages = [
-            '🌿 今天帶孩子過得如何？花一分鐘記錄你的心情吧！',
-            '🧘 孩子睡了嗎？現在是你的時間，和自己的情緒對話一下？',
-            '💚 照顧好自己，才能照顧好孩子。覺察情緒是第一步',
-            '🌸 每日的小覺察，累積成長的大力量',
-            '✨ 你今天的感受值得被記錄，來和今心聊聊吧！',
-            '🤗 當爸媽好辛苦，但你不是一個人。記錄一下今天的心情？',
-            '💛 育兒之路有高有低，今天你感受到了什麼？',
-        ];
+        const messages = this.getReminderMessages();
 
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 
