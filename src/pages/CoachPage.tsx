@@ -1,10 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { sendMessage } from '../lib/adk/client';
 import { loadChatHistory, saveChatHistory } from '../lib/adk/storage';
-import { type CoachMessage, type CoachAction } from '../lib/adk/types';
+import {
+  type CoachMessage,
+  type CoachAction,
+  type CoachGamificationSummary,
+  type CoachMicroAction,
+  type CoachMicroActionProposal,
+  type CoachMicroActionStatus,
+} from '../lib/adk/types';
 import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
 import { EmergencyStabilizationOverlay } from '../components/coach/EmergencyStabilizationOverlay';
+import { GamificationStrip } from '../components/coach/GamificationStrip';
+import { MicroActionCard } from '../components/coach/MicroActionCard';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { useAuth } from '../services/AuthContext';
 import { botSyncService } from '../services/BotSyncService';
@@ -16,7 +25,7 @@ const WELCOME_MSG: CoachMessage = {
   id: 'welcome',
   role: 'model',
   content:
-    '你好，我是今心主動教練。我會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。',
+    '你好，我是阿念教練。我會依你的情緒記錄、LINE 互動與當下訊息，慢慢看懂你的節奏，陪你整理下一步。',
   timestamp: new Date().toISOString(),
 };
 
@@ -27,16 +36,22 @@ const QUICK_REPLIES = ['好的，一起試試', '我現在只想聊聊'];
 const COACH_SCENARIOS = [
   {
     label: '我最近晚上都很焦慮',
-    prompt: '我最近晚上都很焦慮，想請你用主動教練的方式陪我整理可能的模式和下一步。',
+    prompt: '我最近晚上都很焦慮，想請阿念陪我整理可能的模式和下一步。',
   },
   {
     label: '我剛對孩子發脾氣',
     prompt: '我剛對孩子發脾氣，現在有點後悔，也想知道接下來可以怎麼修復。',
   },
   {
-    label: '我想看教練觀察到什麼',
-    prompt: '我想看你作為主動教練，根據我最近的情緒線索觀察到什麼。',
+    label: '我想看阿念觀察到什麼',
+    prompt: '我想看阿念根據我最近的情緒線索觀察到什麼。',
   },
+];
+
+const COMPANION_GOALS = [
+  '睡前焦慮少一點',
+  '親子衝突後快一點回來',
+  '每天做一個照顧自己的小動作',
 ];
 
 const TOOL_TRACE_NAMES = [
@@ -149,6 +164,9 @@ export default function CoachPage() {
   const [showSOS, setShowSOS] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ action: CoachAction; reason?: string } | null>(null);
+  const [microActionProposal, setMicroActionProposal] = useState<CoachMicroActionProposal | null>(null);
+  const [activeMicroAction, setActiveMicroAction] = useState<CoachMicroAction | null>(null);
+  const [gamification, setGamification] = useState<CoachGamificationSummary | null>(null);
   const [error, setError] = useState<{ type: ErrorType; retryText: string } | null>(null);
   const [bindingCode, setBindingCode] = useState('');
   const [bindingMessage, setBindingMessage] = useState('');
@@ -220,6 +238,11 @@ export default function CoachPage() {
       if (res.action) {
         handleAction(res.action as CoachAction, res.actionReason);
       }
+      setMicroActionProposal(res.microActionProposal ?? null);
+      setActiveMicroAction(res.activeMicroAction ?? null);
+      if (res.gamification) {
+        setGamification(res.gamification);
+      }
 
       const modelMsg: CoachMessage = {
         id: crypto.randomUUID(),
@@ -231,6 +254,7 @@ export default function CoachPage() {
           step: res.step,
           action: res.action,
           actionReason: res.actionReason,
+          intent: res.intent,
         },
       };
       setMessages((prev) => [...prev, modelMsg]);
@@ -251,6 +275,32 @@ export default function CoachPage() {
     [doSend]
   );
 
+  const handleStartCompanionRun = useCallback(
+    (goal: string) => handleSend(`我想開始 7 日小陪跑：${goal}`),
+    [handleSend]
+  );
+
+  const handleConfirmMicroAction = useCallback(
+    (title: string) => {
+      setMicroActionProposal(null);
+      handleSend(`設為今天的小行動：${title}`);
+    },
+    [handleSend]
+  );
+
+  const handleRejectMicroAction = useCallback(() => {
+    setMicroActionProposal(null);
+    handleSend('先不要設小行動，我現在只想聊聊。');
+  }, [handleSend]);
+
+  const handleReportMicroAction = useCallback(
+    (status: Extract<CoachMicroActionStatus, 'completed' | 'partial' | 'skipped'>) => {
+      setActiveMicroAction(null);
+      handleSend(`小行動回報：${status}`);
+    },
+    [handleSend]
+  );
+
   const handleRetry = useCallback(() => {
     if (error) {
       setError(null);
@@ -261,7 +311,7 @@ export default function CoachPage() {
   const handleQuickReply = useCallback(
     (prompt: string) => {
       if (prompt === '好的，一起試試') {
-        setPendingAction({ action: 'start_breathing', reason: '跟著教練一起呼吸' });
+        setPendingAction({ action: 'start_breathing', reason: '跟著阿念一起呼吸' });
         setShowBreathing(true);
         return;
       }
@@ -305,7 +355,7 @@ export default function CoachPage() {
     : messages;
 
   return (
-    <div className={styles.coachPage} role="region" aria-label="今心主動教練畫布">
+    <div className={styles.coachPage} role="region" aria-label="阿念教練畫布">
       <div className={styles.emotionalGlow} />
 
       <header className={styles.header}>
@@ -327,18 +377,18 @@ export default function CoachPage() {
         </div>
 
         {showWelcome && (
-          <section className={styles.stitchOpening} aria-label="主動教練引導">
+          <section className={styles.stitchOpening} aria-label="阿念教練引導">
             <div className={styles.coachAvatar} aria-hidden="true">
               ✦
             </div>
             <div className={styles.openingStack}>
               <div className={styles.agentIntro}>
-                <p className={styles.agentEyebrow}>主動情緒教練</p>
+                <p className={styles.agentEyebrow}>阿念教練</p>
                 <h2>你不用自己想下一步</h2>
                 <p className={styles.agentDescription}>
-                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，整理下一步。
+                  我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。
                 </p>
-                <div className={styles.agentFeatureGrid} aria-label="主動教練特色">
+                <div className={styles.agentFeatureGrid} aria-label="阿念教練特色">
                   <div className={styles.agentFeature}>
                     <strong>主動提下一步</strong>
                     <span>聊天、記錄、呼吸或緊急安定，我會幫你判斷先做什麼。</span>
@@ -348,13 +398,13 @@ export default function CoachPage() {
                     <span>日常在 LINE 留下片段，回到 APP 就能看見脈絡。</span>
                   </div>
                   <div className={styles.agentFeature}>
-                    <strong>看懂你的模式</strong>
+                    <strong>越來越懂你</strong>
                     <span>把最近的情緒、強度與需求整理成更容易行動的提醒。</span>
                   </div>
                 </div>
               </div>
               <div className={styles.modelBubble}>
-                <p>你不需要先想好怎麼說。只要留下一句話，我會主動判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。</p>
+                <p>你不需要先想好怎麼說。只要留下一句話，阿念會接住前後脈絡，判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。</p>
               </div>
               <div className={styles.modelBubble}>
                 <p>例如你說「我今天很焦慮」，我會先陪你釐清觸發點，再把它轉成可以完成的一小步。</p>
@@ -374,7 +424,32 @@ export default function CoachPage() {
                   </button>
                 ))}
               </div>
-              <div className={styles.scenarioPanel} aria-label="主動教練情境入口">
+              <div className={styles.momentumPanel} aria-label="7 日小陪跑">
+                <div className={styles.momentumHeader}>
+                  <p>7 日小陪跑</p>
+                  <h3>讓阿念推你前進一點點</h3>
+                </div>
+                <button
+                  type="button"
+                  className={styles.momentumPrimary}
+                  onClick={() => handleStartCompanionRun('每天做一個照顧自己的小動作')}
+                >
+                  開始 7 日小陪跑
+                </button>
+                <div className={styles.momentumGoals}>
+                  {COMPANION_GOALS.map((goal) => (
+                    <button
+                      type="button"
+                      key={goal}
+                      className={styles.momentumGoal}
+                      onClick={() => handleStartCompanionRun(goal)}
+                    >
+                      {goal}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.scenarioPanel} aria-label="阿念教練情境入口">
                 <p>你現在可能想找我做什麼</p>
                 <div className={styles.scenarioGrid}>
                   {COACH_SCENARIOS.map(({ label, prompt }) => (
@@ -393,10 +468,23 @@ export default function CoachPage() {
           </section>
         )}
 
+        {visibleMessages.map((m) => (
+          <ChatBubble key={m.id} message={m} />
+        ))}
+
+        <GamificationStrip summary={gamification} />
+        <MicroActionCard
+          proposal={microActionProposal}
+          activeAction={activeMicroAction}
+          onConfirmProposal={handleConfirmMicroAction}
+          onRejectProposal={handleRejectMicroAction}
+          onReportAction={handleReportMicroAction}
+        />
+
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
             <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
-            <p className={styles.bindingHint}>先加入下方 LINE 官方帳號，對它輸入「綁定」，再把 6 位碼貼到這裡。之後你在 LINE 留下的覺察，也會成為教練理解你的線索。</p>
+            <p className={styles.bindingHint}>先加入下方 LINE 官方帳號，對它輸入「綁定」，再把 6 位碼貼到這裡。之後你在 LINE 留下的覺察，也會成為阿念理解你的線索。</p>
           </div>
           <div className={styles.bindingAccount} aria-label="目前使用的 LINE 官方帳號">
             <span>LINE 官方帳號</span>
@@ -442,9 +530,6 @@ export default function CoachPage() {
           )}
         </section>
 
-        {visibleMessages.map((m) => (
-          <ChatBubble key={m.id} message={m} />
-        ))}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </main>
@@ -513,7 +598,7 @@ export default function CoachPage() {
           >
             <div className={styles.breathingOrb} />
             <p className={styles.breathingText}>
-              {pendingAction?.reason || '跟著教練一起呼吸'}
+              {pendingAction?.reason || '跟著阿念一起呼吸'}
             </p>
             <button
               onClick={() => setShowBreathing(false)}

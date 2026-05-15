@@ -27,21 +27,21 @@ describe('CoachPage', () => {
     vi.restoreAllMocks();
   });
 
-  it('應該顯示主動教練預設開場訊息', () => {
+  it('應該顯示阿念教練預設開場訊息', () => {
     render(<CoachPage />);
-    expect(screen.getByText('我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，整理下一步。')).toBeInTheDocument();
+    expect(screen.getByText('我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。')).toBeInTheDocument();
   });
 
-  it('應該顯示主動教練開場訊息與建議提示', () => {
+  it('應該顯示阿念教練開場訊息與建議提示', () => {
     render(<CoachPage />);
-    expect(screen.getByText('你不需要先想好怎麼說。只要留下一句話，我會主動判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。')).toBeInTheDocument();
+    expect(screen.getByText('你不需要先想好怎麼說。只要留下一句話，阿念會接住前後脈絡，判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。')).toBeInTheDocument();
     expect(screen.getByText('我現在只想聊聊')).toBeInTheDocument();
   });
 
-  it('應該顯示主動教練畫面骨架與快速回覆', () => {
+  it('應該顯示阿念教練畫面骨架與快速回覆', () => {
     render(<CoachPage />);
 
-    expect(screen.getByRole('region', { name: '今心主動教練畫布' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: '阿念教練畫布' })).toBeInTheDocument();
     expect(screen.getByText(/^今日，/)).toBeInTheDocument();
     expect(screen.getByText('主動提下一步')).toBeInTheDocument();
     expect(screen.getByText('串起 LINE 與 APP')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('CoachPage', () => {
     expect(screen.getByRole('button', { name: '我現在只想聊聊' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '好的，一起試試' }));
-    expect(screen.getByText('跟著教練一起呼吸')).toBeInTheDocument();
+    expect(screen.getByText('跟著阿念一起呼吸')).toBeInTheDocument();
   });
 
   it('Coach 頁底部導覽使用一般使用者看得懂的中文標籤', () => {
@@ -64,13 +64,21 @@ describe('CoachPage', () => {
     expect(screen.queryByText('安定室')).not.toBeInTheDocument();
   });
 
-  it('Coach 空狀態應該提供三個主動教練情境入口', () => {
+  it('Coach 空狀態應該提供三個阿念教練情境入口', () => {
     render(<CoachPage />);
 
     expect(screen.getByText('你現在可能想找我做什麼')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '我最近晚上都很焦慮' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '我剛對孩子發脾氣' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '我想看教練觀察到什麼' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我想看阿念觀察到什麼' })).toBeInTheDocument();
+  });
+
+  it('Coach 首屏提供 7 日小陪跑入口', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByText('7 日小陪跑')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '開始 7 日小陪跑' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '每天做一個照顧自己的小動作' })).toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {
@@ -95,6 +103,100 @@ describe('CoachPage', () => {
     });
   });
 
+  it('API 回傳小行動提案時顯示卡片，確認後送出設定訊息', async () => {
+    const sendMessageSpy = vi.spyOn(client, 'sendMessage')
+      .mockResolvedValueOnce({
+        response: '我先幫你提一個小行動。',
+        intent: 'propose_micro_action',
+        microActionProposal: {
+          key: 'daily-water',
+          goalKey: 'daily_care',
+          category: 'daily_care',
+          title: '喝一杯水，然後看窗外十秒',
+          dueHours: 24,
+        },
+      })
+      .mockResolvedValueOnce({ response: '已設為今天的小行動。' });
+
+    render(<CoachPage />);
+
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '我想做一點點就好' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    expect(await screen.findByText('喝一杯水，然後看窗外十秒')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '設為今天的小行動' }));
+
+    await waitFor(() => {
+      expect(sendMessageSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ message: '設為今天的小行動：喝一杯水，然後看窗外十秒' })
+      );
+    });
+  });
+
+  it('API 回傳進行中的小行動時顯示卡片，回報有做到會送出 completed', async () => {
+    const sendMessageSpy = vi.spyOn(client, 'sendMessage')
+      .mockResolvedValueOnce({
+        response: '回來看一眼就好。',
+        activeMicroAction: {
+          id: 'action-1',
+          title: '睡前把手機放遠一點',
+          category: 'sleep',
+          status: 'active',
+          due_at: '2026-05-16T12:00:00.000Z',
+          created_at: '2026-05-15T12:00:00.000Z',
+        },
+      })
+      .mockResolvedValueOnce({ response: '我記下來了。' });
+
+    render(<CoachPage />);
+
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '我回來了' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    expect(await screen.findByText('睡前把手機放遠一點')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '有做到' }));
+
+    await waitFor(() => {
+      expect(sendMessageSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ message: '小行動回報：completed' })
+      );
+    });
+  });
+
+  it('API 回傳個人陪跑摘要時顯示進度，且不出現懲罰語言', async () => {
+    const { container } = render(<CoachPage />);
+    vi.spyOn(client, 'sendMessage').mockResolvedValue({
+      response: '我有看到你回來了。',
+      gamification: {
+        total_xp: 180,
+        coin_balance: 9,
+        lifetime_coins: 18,
+        total_reported: 6,
+        completed_count: 3,
+        partial_count: 2,
+        skipped_count: 1,
+        current_review_streak: 3,
+        longest_review_streak: 5,
+        last_review_date: '2026-05-15',
+        level: {
+          level: 2,
+          title: '回來看一眼',
+          currentXp: 80,
+          nextLevelXp: 150,
+        },
+      },
+    });
+
+    fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '今天有做一點' } });
+    fireEvent.click(screen.getByLabelText('送出訊息'));
+
+    expect(await screen.findByText('Lv.2 回來看一眼')).toBeInTheDocument();
+    expect(screen.getByText('80 / 150 XP')).toBeInTheDocument();
+    expect(screen.getByText('9 金幣')).toBeInTheDocument();
+    expect(screen.getByText('復盤連續 3 天')).toBeInTheDocument();
+    expect(container).not.toHaveTextContent(/失敗|扣分|降級/);
+  });
+
   it('應該顯示打字指示器在載入中', async () => {
     vi.spyOn(client, 'sendMessage').mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve({ response: '好' }), 100))
@@ -105,7 +207,7 @@ describe('CoachPage', () => {
     fireEvent.change(screen.getByLabelText('輸入訊息'), { target: { value: '測試' } });
     fireEvent.click(screen.getByLabelText('送出訊息'));
 
-    expect(screen.getByText('教練正在思考...')).toBeInTheDocument();
+    expect(screen.getByText('阿念正在整理...')).toBeInTheDocument();
   });
 
   it('API 錯誤時應該顯示錯誤訊息與重試按鈕', async () => {
