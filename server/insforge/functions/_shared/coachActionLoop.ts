@@ -13,6 +13,7 @@ export interface CoachActionLoopInput {
   quadrant?: EmotionalQuadrant | null;
   energy?: number | null;
   valence?: number | null;
+  safetySignal?: 'none' | 'high';
   now?: Date;
 }
 
@@ -45,7 +46,6 @@ export interface CoachActionLoopMetadata {
 }
 
 const LOOP_VERSION = '2026-05-action-loop-v1' as const;
-const FALLBACK_NOW = new Date('2026-05-15T00:00:00.000Z');
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 const HIGH_RISK_PATTERNS = [
@@ -69,9 +69,9 @@ const HIGH_RISK_PATTERNS = [
 ];
 
 export function buildCoachActionLoop(input: CoachActionLoopInput): CoachActionLoopMetadata {
-  const now = input.now ?? FALLBACK_NOW;
+  const now = requireInjectedNow(input.now);
   const quadrant = input.quadrant ?? null;
-  const riskLevel = detectRiskLevel(input.message, input.coachResponse, quadrant);
+  const riskLevel = detectRiskLevel(input.message, quadrant, input.safetySignal ?? 'none');
   const hasEmotionLabel = typeof input.emotionLabel === 'string' && input.emotionLabel.trim().length > 0;
   const zhixinMove = chooseZhixinMove({ riskLevel, quadrant, hasEmotionLabel });
   const plan = buildPlan(zhixinMove);
@@ -96,11 +96,11 @@ export function buildCoachActionLoop(input: CoachActionLoopInput): CoachActionLo
 
 function detectRiskLevel(
   message: string,
-  coachResponse: string,
-  quadrant: EmotionalQuadrant | null
+  quadrant: EmotionalQuadrant | null,
+  safetySignal: NonNullable<CoachActionLoopInput['safetySignal']>
 ): 'low' | 'medium' | 'high' {
-  const text = `${message}\n${coachResponse}`;
-  if (HIGH_RISK_PATTERNS.some((pattern) => pattern.test(text))) return 'high';
+  if (safetySignal === 'high') return 'high';
+  if (HIGH_RISK_PATTERNS.some((pattern) => pattern.test(message))) return 'high';
   if (quadrant === 'red' || quadrant === 'blue') return 'medium';
   return 'low';
 }
@@ -210,15 +210,30 @@ function buildSafetyNotes(
 }
 
 function buildTraceId(input: CoachActionLoopInput, now: Date): string {
-  const seed = [
-    LOOP_VERSION,
-    input.userId,
-    input.sessionId,
-    now.toISOString(),
-    input.message,
-    input.coachResponse,
-  ].join('\u001f');
+  const seed = JSON.stringify({
+    loopVersion: LOOP_VERSION,
+    userId: input.userId,
+    sessionId: input.sessionId,
+    now: now.toISOString(),
+    message: input.message,
+    coachResponse: input.coachResponse,
+    emotionLabel: input.emotionLabel?.trim() || null,
+    quadrant: input.quadrant ?? null,
+    energy: input.energy ?? null,
+    valence: input.valence ?? null,
+    safetySignal: input.safetySignal ?? 'none',
+  });
   return `cal_${stableHash(seed)}`;
+}
+
+function requireInjectedNow(now: Date | undefined): Date {
+  if (!now) {
+    throw new Error('buildCoachActionLoop requires input.now; integration boundary must inject clock.');
+  }
+  if (Number.isNaN(now.getTime())) {
+    throw new Error('buildCoachActionLoop requires a valid input.now Date.');
+  }
+  return now;
 }
 
 function stableHash(value: string): string {

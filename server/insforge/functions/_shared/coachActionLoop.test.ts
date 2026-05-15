@@ -12,12 +12,42 @@ const baseInput: CoachActionLoopInput = {
 };
 
 describe('buildCoachActionLoop', () => {
+  it('缺少 now 時丟出清楚錯誤，避免產生過期 action', () => {
+    const inputWithoutNow: CoachActionLoopInput = { ...baseInput };
+    delete inputWithoutNow.now;
+
+    expect(() => buildCoachActionLoop(inputWithoutNow)).toThrow(
+      'buildCoachActionLoop requires input.now'
+    );
+  });
+
   it('相同輸入產生 deterministic output', () => {
     const first = buildCoachActionLoop(baseInput);
     const second = buildCoachActionLoop(baseInput);
 
     expect(second).toEqual(first);
     expect(first.traceId).toMatch(/^cal_[0-9a-f]{8}$/);
+  });
+
+  it('改變會影響輸出的 normalized input 時，traceId 也會改變', () => {
+    const redWithoutLabel = buildCoachActionLoop({
+      ...baseInput,
+      quadrant: 'red',
+      emotionLabel: null,
+    });
+    const redWithLabel = buildCoachActionLoop({
+      ...baseInput,
+      quadrant: 'red',
+      emotionLabel: '憤怒',
+    });
+    const greenWithLabel = buildCoachActionLoop({
+      ...baseInput,
+      quadrant: 'green',
+      emotionLabel: '憤怒',
+    });
+
+    expect(redWithLabel.traceId).not.toBe(redWithoutLabel.traceId);
+    expect(greenWithLabel.traceId).not.toBe(redWithLabel.traceId);
   });
 
   it('紅象限且已有情緒命名時，對應安神與 medium risk', () => {
@@ -56,6 +86,31 @@ describe('buildCoachActionLoop', () => {
     expect(result.orientation.zhixinMove).toBe('喚名');
     expect(result.safetyNotes.join('\n')).toContain('不是正式心理治療、診斷或醫療建議');
     expect(result.safetyNotes.join('\n')).toContain('緊急服務');
+  });
+
+  it('coachResponse 的一般安全提醒不會誤升為 high risk', () => {
+    const result = buildCoachActionLoop({
+      ...baseInput,
+      message: '我今天很累，但只是想先冷靜一下。',
+      coachResponse: '若想傷害自己請立刻求助；現在我們先做一個短暫停頓。',
+      quadrant: 'green',
+    });
+
+    expect(result.orientation.riskLevel).toBe('low');
+    expect(result.safetyNotes).toEqual([]);
+  });
+
+  it('明確 structured safetySignal 可以升高為 high risk', () => {
+    const result = buildCoachActionLoop({
+      ...baseInput,
+      message: '我現在說不太清楚。',
+      coachResponse: '先確保身邊安全。',
+      quadrant: 'green',
+      safetySignal: 'high',
+    });
+
+    expect(result.orientation.riskLevel).toBe('high');
+    expect(result.safetyNotes.join('\n')).toContain('不是正式心理治療、診斷或醫療建議');
   });
 
   it('小行動獎勵為正向，且沒有扣分欄位或負值', () => {
