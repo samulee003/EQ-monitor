@@ -61,4 +61,18 @@ describe('發布前 P0/P1 守門', () => {
     expect(schema).toContain('Service role full access coach gamification stats');
     expect(schema).toContain('Service role full access coach agent traces');
   });
+
+  it('production coach 必須是多步 Agentic Action Loop，不可退回單次工具呼叫', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain('MAX_AGENTIC_STEPS');
+    expect(source).toContain('runAgenticActionLoop');
+    expect(source).toContain('persistTraceEvent');
+    expect(source).toContain('loadLoopContext');
+    expect(source).toContain('create_micro_action');
+    expect(source).toContain('report_micro_action');
+    expect(source).toContain('get_active_micro_action');
+    expect(source).toContain('get_gamification_summary');
+    expect(source).toContain('crisis_reward_blocked');
+  });
 });
