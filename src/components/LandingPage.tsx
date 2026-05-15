@@ -73,20 +73,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onCoach }) => {
         <div className="landing-flow-grid">
           <div className="landing-flow-copy">
             <div className="landing-step">
-              <strong>看見</strong>
-              <p>選一個最接近現在能量與心情的位置。</p>
+              <strong>心照</strong>
+              <p>心照一念，選一個最接近現在能量與心情的位置。</p>
             </div>
             <div className="landing-step">
-              <strong>命名</strong>
-              <p>把「有點怪」慢慢靠近成更準確的感覺。</p>
+              <strong>喚名</strong>
+              <p>喚其真名，把「有點怪」慢慢靠近成更準確的感覺。</p>
             </div>
             <div className="landing-step">
-              <strong>安放</strong>
-              <p>把感覺和需要放到安全的位置。</p>
+              <strong>安神</strong>
+              <p>安住心神，把感覺和需要放到安全的位置。</p>
             </div>
             <div className="landing-step">
-              <strong>回應</strong>
-              <p>留下一個能真的開始的小行動。</p>
+              <strong>動念</strong>
+              <p>一念可轉，留下一個能真的開始的小行動。</p>
             </div>
           </div>
           <figure className="landing-screen-panel">

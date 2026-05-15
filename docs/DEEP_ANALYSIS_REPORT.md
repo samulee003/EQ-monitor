@@ -21,9 +21,9 @@
 
 ## 1. 執行摘要
 
-今心 (ImXin) 是一款基於今心四步的開源情緒覺察工具，採用 **Bot-First 雙入口架構**：
+今心 (ImXin) 是一款基於知心四式的開源情緒覺察工具，採用 **Bot-First 雙入口架構**：
 
-- **LINE Bot**（主要入口）：對話式完成 今心四步練習
+- **LINE Bot**（主要入口）：對話式完成 知心四式練習
 - **PWA 儀表盤**（輔助入口）：歷史回顧、情緒熱力圖、AI 教練、成就系統
 
 **技術棧**：React 19 + TypeScript 5.9 + Vite 7 + Express 5 + InsForge BaaS + Google Gemini
@@ -62,7 +62,7 @@ main.tsx
                     └── 'coach' → CoachPage
 ```
 
-**今心四步 Flow 子層次**（9 步驟）：
+**知心四式 Flow 子層次**（9 步驟）：
 ```
 CheckInFlow
 ├── quickMode === 'quick' → QuickCheckIn
@@ -84,7 +84,7 @@ CheckInFlow
 | 層級 | 方案 | 實例 | 邊界說明 |
 |------|------|------|----------|
 | 全局 UI 偏好 | React Context | ThemeContext, LanguageContext | 主題/語言/認證 |
-| 複雜業務流程 | useReducer | useRulerFlow | 今心四步 9 步狀態機 |
+| 複雜業務流程 | useReducer | useRulerFlow | 知心四式 9 步狀態機 |
 | 跨組件業務數據 | Zustand | appStore, botStore | 路由/鎖屏/Bot 同步 |
 | 臨時 UI 狀態 | useState | 各組件內部 | 表單/選中/動畫 |
 | 持久化 | storage.ts | dataAdapter, settingsStore | 統一封裝 localStorage |
@@ -152,7 +152,7 @@ Express Server (src/index.ts)
                     ▼ LINE Platform → 用戶
 ```
 
-### 3.2 今心四步狀態機
+### 3.2 知心四式狀態機
 
 共 **7 個對話狀態**：
 ```
@@ -316,7 +316,7 @@ CoachPage (前端)
 
 | 系統 | 用途 | 模型 | 端點 |
 |------|------|------|------|
-| AIService.ts | 今心四步 分析 + 週報 | GPT-4o | `VITE_API_PROXY_URL` |
+| AIService.ts | 知心四式 分析 + 週報 | GPT-4o | `VITE_API_PROXY_URL` |
 | ADK Client | Coach 對話 | Gemini 3.1 Flash Lite | `VITE_COACH_API_URL` |
 
 **問題**：兩套獨立 AI 系統，無統一層，維護成本高。

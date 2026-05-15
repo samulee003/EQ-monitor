@@ -23,7 +23,7 @@ export function WelcomeCard({ onPromptClick }: Props) {
           歡迎來到今心教練
         </h2>
         <p className={styles.description}>
-          我是你的主動情緒教練，在這裡陪你用看見、命名、安放、回應整理情緒，練習選一個可承受的下一步。
+          我是你的主動情緒教練，在這裡陪你用知心四式：心照、喚名、安神、動念，整理情緒，練習選一個可承受的下一步。
         </p>
 
         <div className={styles.promptList}>

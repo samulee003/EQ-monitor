@@ -275,7 +275,7 @@ class AIService {
 1. 以溫暖、同理心的方式回應
 2. 使用繁體中文（台灣用語）
 3. 回答簡潔但深入（100-200字）
-4. 適時引用心理學概念，但優先使用今心自己的四步語言
+4. 適時引用心理學概念，但優先使用今心自己的知心四式語言
 5. 提供具體可行的建議
 6. 避免過度醫療化或診斷
 7. 方法來源要誠實：今心是 RULER 啟發、ACT-informed、IFS-informed、Dan Siegel-informed 的自有整合練習
@@ -308,13 +308,13 @@ class AIService {
     private getMockChatResponse(message: string): string {
         const lowerMessage = message.toLowerCase();
         
-        if (lowerMessage.includes('ruler') || lowerMessage.includes('框架') || lowerMessage.includes('五步') || lowerMessage.includes('四步')) {
-            return `今心四步是我們自己的前台整理語言，幫你把混亂感受拆成可以開始的小步：
+        if (lowerMessage.includes('ruler') || lowerMessage.includes('框架') || lowerMessage.includes('五步') || lowerMessage.includes('四步') || lowerMessage.includes('四式')) {
+            return `知心四式是今心自己的前台整理語言，有一點像溫柔的內功心法：不急著勝過情緒，先把心穩住，再動下一念。
 
-1. **看見**：先注意身體與此刻狀態
-2. **命名**：用更準確的詞靠近感覺
-3. **安放**：理解它和哪個情境、需要或內在部分有關，並把想說的話安全放下來
-4. **回應**：選一個不傷害自己或他人的小行動
+1. **心照式**：心照一念，先看清身體與此刻狀態
+2. **喚名式**：喚其真名，用更準確的詞靠近感覺
+3. **安神式**：安住心神，理解它和哪個情境、需要或內在部分有關，並把想說的話安全放下來
+4. **動念式**：一念可轉，選一個不傷害自己或他人的小行動
 
 這套練習靈感來自 RULER 的情緒覺察技能，也參考 ACT 的接納與價值行動、IFS-informed 的內在部分覺察，以及 Dan Siegel-informed 的 mindsight 與身心腦整合觀點；今心不是 Yale、RULER Approach、ACT、IFS 或 Dan Siegel / Mindsight Institute 官方產品，也不是心理治療。
 
@@ -322,12 +322,12 @@ class AIService {
         }
         
         if (lowerMessage.includes('建議') || lowerMessage.includes('怎麼辦')) {
-            return `可以先用今心四步做一個很小的版本：
+            return `可以先用知心四式做一個很小的版本，像先收住一口氣，再慢慢動念：
 
-1. **看見**：先停 10 秒，注意身體最明顯的一個感覺。
-2. **命名**：用一句話說「我現在比較像是……」。
-3. **安放**：問自己，這份感覺可能在提醒我哪個需要或界線？
-4. **回應**：選一個不傷害自己或他人的小動作，例如喝水、離開現場 2 分鐘、傳訊息給可信任的人。
+1. **心照**：先停 10 秒，注意身體最明顯的一個感覺。
+2. **喚名**：用一句話說「我現在比較像是……」。
+3. **安神**：問自己，這份感覺可能在提醒我哪個需要或界線？
+4. **動念**：選一個不傷害自己或他人的小動作，例如喝水、離開現場 2 分鐘、傳訊息給可信任的人。
 
 先不用把事情想清楚，能多一點停頓，就已經是在把主導權拿回來。`;
         }
@@ -347,7 +347,7 @@ class AIService {
 無論你此刻感受到什麼，那都是真實且重要的。情緒不是敵人，而是內在智慧傳遞訊息的方式。
 
 如果你想深入探索，可以：
-• 問我關於今心四步的問題
+• 問我關於知心四式的問題
 • 請我分析你最近的情緒模式
 • 聊聊具體的調節策略
 

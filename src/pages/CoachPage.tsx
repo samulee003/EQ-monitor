@@ -336,7 +336,7 @@ export default function CoachPage() {
                 <p className={styles.agentEyebrow}>主動情緒教練</p>
                 <h2>你不用自己想下一步</h2>
                 <p className={styles.agentDescription}>
-                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用看見、命名、安放、回應整理下一步。
+                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，整理下一步。
                 </p>
                 <div className={styles.agentFeatureGrid} aria-label="主動教練特色">
                   <div className={styles.agentFeature}>

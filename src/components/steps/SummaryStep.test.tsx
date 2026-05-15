@@ -67,7 +67,7 @@ describe('SummaryStep', () => {
         expect(screen.getByText('覺察當下的感受')).toBeInTheDocument();
         expect(screen.getByText('定位觸發因素')).toBeInTheDocument();
         expect(screen.getByText('表達內在需求')).toBeInTheDocument();
-        expect(screen.getByText('選擇回應方式')).toBeInTheDocument();
+        expect(screen.getByText('選擇動念方式')).toBeInTheDocument();
     });
 
     it('應該只顯示基本檢查清單當非完整流程', async () => {

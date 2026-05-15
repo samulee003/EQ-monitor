@@ -21,7 +21,7 @@
 - **LINE Bot / 情緒資料流**
   - 首頁與 Coach 綁定區顯示 LINE 官方帳號 `鋅鋰師拔麻的小小額葉養成手札`、Basic ID `@980pqrhn` 與加好友連結。
   - 真 LINE 綁定流程已驗：LINE 取碼、PWA Coach 貼碼、畫面顯示已綁定。
-  - Production LINE 情緒整理 完整資料流已驗：有效簽名 webhook、完整今心四步、寫入 `agent_ruler_logs`、`weekly-report` 與 Coach 讀到同一筆資料。
+  - Production LINE 情緒整理 完整資料流已驗：有效簽名 webhook、完整知心四式、寫入 `agent_ruler_logs`、`weekly-report` 與 Coach 讀到同一筆資料。
 - **帳號 / 資料 / 安全**
   - PWA 已接 InsForge Auth，登入、註冊、重新整理保留 session 與 `coach_context` 初始化均已驗。
   - 刪除帳號流程已補齊：`delete-account` 會清除 app/public 資料、寫入 `account_deletions` 最小刪除紀錄，前端會阻擋已刪帳號再次進入產品。
@@ -63,11 +63,11 @@
 ### 已完成
 
 - **LINE 情緒整理 production 資料流**
-  - 以一次性已綁定測試帳號呼叫 production `/webhook`，使用有效 LINE 簽名送完整 7 則 今心四步 對話。
-  - Bot Server 完成今心四步 後寫入 `agent_ruler_logs`：`source: line`、`is_full_flow: true`、情緒「焦慮」。
+  - 以一次性已綁定測試帳號呼叫 production `/webhook`，使用有效 LINE 簽名送完整 7 則 知心四式 對話。
+  - Bot Server 完成知心四式 後寫入 `agent_ruler_logs`：`source: line`、`is_full_flow: true`、情緒「焦慮」。
   - `weekly-report` 對同一 app user 讀到 `total_sessions: 1`、`dominant_quadrant: red`。
   - Coach 對同一 app user 可讀到最近一筆 LINE 情緒紀錄：「焦慮」、強度 `7`。
-  - 測試產生的一次性 binding、bot user、今心四步 session、chat messages、agent log、ADK session/event 已清理。
+  - 測試產生的一次性 binding、bot user、知心四式 session、chat messages、agent log、ADK session/event 已清理。
 - **主動推送排程**
   - production DB 已確認 `pg_cron` 存在，並成功啟用 `pg_net`。
   - 已註冊 `weekly-report-batch`：`0 13 * * 0`（台北每週日 21:00）。
@@ -80,7 +80,7 @@
 ### 驗證
 
 - Production Bot `/health`：`adapter: insforge` ✅
-- Production `/webhook` + 有效 LINE 簽名 + 完整今心四步：7 則訊息 accepted ✅
+- Production `/webhook` + 有效 LINE 簽名 + 完整知心四式：7 則訊息 accepted ✅
 - `agent_ruler_logs`：新增 1 筆 LINE full-flow 測試資料 ✅
 - `weekly-report`：讀到 LINE 情緒整理 寫入資料 ✅
 - Coach：讀到最近一筆 LINE 情緒整理「焦慮 / 7」✅
@@ -90,7 +90,7 @@
 
 ### 剩餘風險
 
-- 技術上已可支撐小圈朋友試玩；若要擴大公開，仍建議用朋友手機做一次非阻塞體驗驗收：加 LINE 官方帳號、輸入「綁定」、PWA 貼碼、完成今心四步。
+- 技術上已可支撐小圈朋友試玩；若要擴大公開，仍建議用朋友手機做一次非阻塞體驗驗收：加 LINE 官方帳號、輸入「綁定」、PWA 貼碼、完成知心四式。
 - LINE Push 免費方案有月額限制；主動推送已透過排程啟用，後續需觀察 `notification_log` 與 LINE quota。
 
 ---
@@ -166,7 +166,7 @@
   - 新增 `server/insforge/agents/soulContract.test.ts`，鎖定 `soul.md`、ADK agent 與 production prompt 不再分裂。
 - **ADK 對照與接入**
   - 對照本地 `adk-js-adk-v1.0.0` 的 `LlmAgent`，確認 `instruction`、`globalInstruction`、`tools`、`subAgents` 是合適承載點。
-  - `server/src/agents/emotionCoach.ts` 與 `server/insforge/agents/emotionCoach.ts` 均改為用 `globalInstruction + instruction` 接上 soul/今心四步 策略。
+  - `server/src/agents/emotionCoach.ts` 與 `server/insforge/agents/emotionCoach.ts` 均改為用 `globalInstruction + instruction` 接上 soul/知心四式 策略。
   - 工具仍維持 `get_user_emotion_summary`、`get_emotion_trend`、`save_ruler_log`、`trigger_action`，危機轉接走內部緊急安定技能；API 對外只回公開 enum。
 - **Production fallback**
   - `server/insforge/functions/coach-simple.ts` 改為 `buildProductionCoachSystemPrompt()` 組裝 prompt。
@@ -193,7 +193,7 @@
 
 ### 剩餘風險
 
-- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成今心四步 → Coach/週報讀到資料。
+- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成知心四式 → Coach/週報讀到資料。
 - 目前工作樹仍有多組未整理變更；不要在 dirty worktree 直接 pull 或重置。
 - 本機仍無 `deno`，Edge Functions 本地 `deno check` 未跑，主要依賴 InsForge 部署與線上 smoke。
 - Production `coach-simple.ts` 因 InsForge 打包限制保留自包含 prompt builder；改 `soulInstruction.ts` 時必須同步檢查契約測試。
@@ -236,7 +236,7 @@
 ### 剩餘風險
 
 - Production Zeabur PWA 仍需確認已設定 `VITE_INSFORGE_URL` / `VITE_INSFORGE_ANON_KEY` 並重部署，否則線上前端不一定會使用 InsForge Auth。
-- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成今心四步 → Coach/週報讀到資料。
+- 真 LINE 使用者完整 E2E 仍未跑：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成知心四式 → Coach/週報讀到資料。
 - 目前工作分支 `codex/stitch-ui-release-20260513` 仍有多組 dirty changes / untracked artifacts，提交或 PR 前需整理 scope。
 
 ---
@@ -246,7 +246,7 @@
 ### PM 狀態
 
 - **內測判斷**：黃燈偏綠，可進入 1-3 人封閉內測；暫不建議公開宣傳或大量開放。
-- **內測目標**：驗證真實使用者是否能順利完成 LINE 綁定、今心四步 情緒紀錄、AI Coach 對話與 緊急安定練習 SOS。
+- **內測目標**：驗證真實使用者是否能順利完成 LINE 綁定、知心四式 情緒紀錄、AI Coach 對話與 緊急安定練習 SOS。
 
 ### 已完成
 
@@ -286,7 +286,7 @@
 
 ### 剩餘風險
 
-- 真 LINE 使用者訊息尚未完整 E2E：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成今心四步 → Coach/週報讀到資料。
+- 真 LINE 使用者訊息尚未完整 E2E：LINE 輸入「綁定」→ PWA 貼碼 → LINE 完成知心四式 → Coach/週報讀到資料。
 - `main` 仍落後 `origin/main` 2 commits，且工作樹尚未整理成 commit/PR；不要在髒工作樹直接 pull。
 - 本機沒有 `deno`，Edge Functions 本地 `deno check` 未跑，主要依賴線上 smoke。
 - 既有 ESLint warnings 與 Vite circular chunk warning 仍需另排技術債整理。
@@ -460,7 +460,7 @@ server/insforge/functions/coach-simple.ts       # 讀取 coach_context 注入 pr
 
 - **🧠 AI 情緒教練對話**
   - 獨立 `/coach` 頁面，全螢幕聊天介面
-  - 依今心四步的系統提示（Recognize / Understand / Label / Express / Regulate）
+  - 依知心四式的系統提示（Recognize / Understand / Label / Express / Regulate）
   - 讀取使用者歷史情緒日誌，提供個人化回應
   - 模型：`gemini-3.1-flash-lite`
 - **🆘 緊急安定練習 SOS 緊急協助**
@@ -540,7 +540,7 @@ server/insforge/agents/
 
 - **Bot-First 架構**：項目從「純前端 PWA」全面轉型為「LINE Bot 為核心入口，PWA 為數據儀表盤」的架構。
 - **新增後端伺服器** (`server/`)：完整的 LINE Bot 後端，基於 Express + TypeScript。
-- **今心四步對話式狀態機**：實現 `recognize → understand → label → express → regulate → summary` 六步對話流程，用戶在 LINE 上即可完成完整覺察練習。
+- **知心四式對話式狀態機**：實現 `recognize → understand → label → express → regulate → summary` 六步對話流程，用戶在 LINE 上即可完成完整覺察練習。
 
 ### ✨ 新增功能
 
@@ -561,7 +561,7 @@ server/insforge/agents/
   - `GET /` — 服務狀態（含 live/demo 模式標識）
   - `GET /health` — 健康檢查（含 uptime）
   - `POST /webhook` — LINE Webhook 接收端（帶簽名驗證）
-- **端到端測試腳本** (`test-bot.cjs`)：模擬完整 今心四步流程的自動化測試
+- **端到端測試腳本** (`test-bot.cjs`)：模擬完整 知心四式流程的自動化測試
 
 ### 🔧 技術棧擴展
 
@@ -623,7 +623,7 @@ server/insforge/agents/
 
 ### 核心功能
 
-- 今心四步情緒覺察練習
+- 知心四式情緒覺察練習
 - 100+ 繁體中文情緒詞彙
 - AI 洞察分析
 - 成就系統

@@ -2,7 +2,7 @@
 
 > **Goal:** 在既有今心 APP 上疊加一層 AI 情緒教練（Google ADK JS），1 日 MVP 交付對話介面 + 緊急安定練習 SOS。
 
-**Architecture:** 漸進式擴充。不改動既有 今心四步流程，新增 `/coach` 頁面與 Edge Function API。ADK Agent 讀取使用者情緒歷史（InsForge DB），透過 Skill 執行 緊急安定練習 流程。
+**Architecture:** 漸進式擴充。不改動既有 知心四式流程，新增 `/coach` 頁面與 Edge Function API。ADK Agent 讀取使用者情緒歷史（InsForge DB），透過 Skill 執行 緊急安定練習 流程。
 
 **Tech Stack:** React 19 + TypeScript + Vite, Google ADK JS v1.0.0, InsForge Edge Functions (Deno), Tailwind CSS 3.4.
 
@@ -45,10 +45,10 @@ User ──→ CoachPage (React) ──POST /api/coach──→ Edge Function (c
 ```typescript
 const emotionCoachAgent = new LlmAgent({
   name: 'EmotionCoachAgent',
-  description: 'A compassionate emotional regulation coach based on 今心四步.',
+  description: 'A compassionate emotional regulation coach based on 知心四式.',
   instruction: `
-    You are a compassionate emotional regulation coach trained in 今心四步:
-    看見、命名、安放、回應.
+    You are a compassionate emotional regulation coach trained in 知心四式:
+    心照、喚名、安神、動念.
     The method is RULER 啟發, ACT-informed, IFS-informed, and Dan Siegel-informed,
     but it does not use the RULER five-letter sequence as the user-facing flow.
     

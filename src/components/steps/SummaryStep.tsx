@@ -95,7 +95,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                 </div>
                 <div className="checklist-item done">
                     <span className="step-tag l">N</span>
-                    <span>{t('命名情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
+                    <span>{t('喚名情緒：')}<b>{selectedEmotions.map(e => t(e.name)).join('、')}</b></span>
                 </div>
                 {isFullFlow && (
                     <>
@@ -109,7 +109,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                         </div>
                         <div className="checklist-item done">
                             <span className="step-tag r2">C</span>
-                            <span>{t('選擇回應方式')}</span>
+                            <span>{t('選擇動念方式')}</span>
                         </div>
                     </>
                 )}

@@ -91,8 +91,8 @@ export async function processMessage(userId: string, text: string): Promise<BotR
 • 「幫助」— 顯示此說明
 • 「週報」— 查看本週情緒統計
 
-我會引導你完成今心四步情緒整理：
-看見 → 命名 → 安放 → 回應`,
+我會引導你完成知心四式情緒整理：
+心照 → 喚名 → 安神 → 動念`,
     };
   }
 
@@ -183,7 +183,8 @@ async function handleIdle(session: UserSession, text: string): Promise<BotRespon
 
 讓我們一起做一次簡短的情緒覺察練習。只需要幾分鐘。
 
-**第一步：看見**
+**第一式：心照**
+心照一念，心不被情緒牽著走。
 現在，閉上眼睛或放鬆視線，掃描一下你的身體——
 哪個部位感覺最緊、最重或最不適？
 （例如：胸口、肩膀、胃、頭、喉嚨）`,
@@ -211,7 +212,8 @@ async function handleRecognize(session: UserSession, text: string): Promise<BotR
   return {
     text: `收到。${text === '說不出來' ? '沒關係，身體的感覺有時候很模糊。' : `你感覺到 ${text} 有些緊繃。`}
 
-**第二步：命名**
+**第二式：喚名**
+喚其真名，情緒就少三分迷霧。
 如果用一個詞或幾個字來描述你現在的情緒，會是什麼？
 （可以直接打出來，或選一個最接近的）`,
     quickReplies: [
@@ -256,7 +258,8 @@ async function handleUnderstand(session: UserSession, text: string): Promise<Bot
 
 ${getQuadrantDescription(emotion.quadrant)}
 
-**第三步：安放**
+**第三式：安神**
+安住心神，先把感受安放好。
 先不用急著解決它。${emotion.name} 背後，你內心深處需要什麼？
 （選一個最觸動你的，或自己打出來）`,
       quickReplies: needs.map((need) => ({
@@ -296,7 +299,7 @@ async function handleLabel(session: UserSession, text: string): Promise<BotRespo
   return {
     text: `「${text}」——這個需求很重要。
 
-**第三步：安放**
+**第三式：安神**
 現在我們來做一個小儀式，叫做「情緒碎紙機」。
 
 把你此刻想說的話、想發的牢騷、想流的淚，
@@ -335,7 +338,8 @@ async function handleExpress(session: UserSession, text: string): Promise<BotRes
 
 你做得很好。
 
-**第四步：回應**
+**第四式：動念**
+一念可轉，再動下一念。
 現在讓我們一起做一個回應練習，
 幫助身體和情緒回到一個更平穩的狀態。`,
     quickReplies: [
@@ -348,7 +352,7 @@ async function handleExpress(session: UserSession, text: string): Promise<BotRes
 
 function regulationMenu(): BotResponse {
   return {
-    text: `**第四步：回應**
+    text: `**第四式：動念**
 
 選一個你想嘗試的練習：`,
     quickReplies: [

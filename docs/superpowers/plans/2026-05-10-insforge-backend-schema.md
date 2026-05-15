@@ -123,7 +123,7 @@ git commit -m "feat(backend): create profiles table with RLS"
 **Files:**
 - Create: `server/insforge/schema/002_ruler_logs.sql`
 
-**Context:** 存儲每次完整的 今心四步 情緒覺察記錄。字段需對齊前端 `RulerLogEntry` 類型。JSONB 用於嵌套結構（emotions, bodyScan, understanding, expressing, regulating）。
+**Context:** 存儲每次完整的 知心四式 情緒覺察記錄。字段需對齊前端 `RulerLogEntry` 類型。JSONB 用於嵌套結構（emotions, bodyScan, understanding, expressing, regulating）。
 
 - [ ] **Step 1: Write SQL migration**
 
