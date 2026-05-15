@@ -4,6 +4,46 @@
 
 ---
 
+## [Unreleased] - 2026-05-15 — 方法語言風險收斂與知心四式定稿
+
+### PM 狀態
+
+- **方法語言已收斂**：前台不再使用容易被看成直接沿用 How We Feel / Mood Meter / Meta-Moment 的 active 品牌化語言。
+- **來源說法更誠實**：保留 RULER-inspired、ACT-informed、IFS-informed、Dan Siegel-informed，但明確寫清楚今心不是 Yale、RULER Approach、ACT、IFS、Dan Siegel / Mindsight Institute 或任何治療機構的官方產品，也不是心理治療。
+- **知心四式定稿**：前台四式命名改為 `心照 → 喚名 → 安神 → 動念`，保留一點武俠心法感，但不神秘化、不浮誇。
+
+### 已完成
+
+- `582659e Reduce method language overlap risk`
+  - `MoodMeter` 前台組件更名為 `EmotionQuadrantPicker`。
+  - `MetaMomentOverlay` 前台流程更名為 `EmergencyStabilizationOverlay` / `緊急安定練習`。
+  - AI 教練、production `coach-simple.ts`、soul contract、fallback 回覆與 docs 同步改成今心自己的方法語言。
+  - active surface scan 清掉 How We Feel、Mood Meter、Meta-Moment、舊 RAIN fallback 等殘留。
+- `636b8e4 Rename 知心四式 moves`
+  - PWA、LINE Bot、AI 教練 prompt / fallback、onboarding、landing、進度條、E2E 與文件同步使用 `心照、喚名、安神、動念`。
+  - LINE Bot 會以「第一式：心照」「第二式：喚名」「第三式：安神」「第四式：動念」引導完整流程。
+- 本次交接文件更新新增根目錄 `AGENTS.md`，記錄後續 agent 的產品語言、工程邊界與驗證基線。
+
+### 驗證
+
+- Frontend tests：`npm run test:run` ✅ 368 tests / 40 files
+- Server tests：`cd server && npm run test:run` ✅ 164 tests / 17 files
+- Frontend build：`npm run build` ✅
+- Server build：`cd server && npm run build` ✅
+- Frontend lint：`npm run lint` ✅ 0 errors / 31 warnings
+- Server lint：`cd server && npm run lint` ✅ 0 errors / 24 warnings
+- E2E：`npm run test:e2e` ✅ 4 tests
+- `git diff --check` ✅
+- Runtime / user-facing source scan：無 `今心四步` / `今心整合四步` / `照心` / `點名` / `歸息` / `出招` / 舊品牌化前台語言殘留；CHANGELOG / AGENTS 可保留歷史說明與禁止使用清單 ✅
+
+### 注意
+
+- 這是產品語言與程式輸出層面的風險降低，不是法律意見。
+- 內部資料表與相容 identifier 仍保留 `ruler_*` / `RulerLogEntry` / `useRulerFlow`，避免已部署資料與 migration 失配。
+- 方法語言更名後尚未重新部署 production；部署前需再做 PWA + LINE Bot smoke。
+
+---
+
 ## [V1.0.0] - 2026-05-14 — 今心產品起點版
 
 ### PM 狀態
