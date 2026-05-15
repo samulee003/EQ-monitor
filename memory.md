@@ -13,14 +13,24 @@
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
 
+## Agentic Action Loop 下一步（2026-05-15）
+
+- 新規格：`docs/superpowers/specs/2026-05-15-7-day-coach-momentum.md`。
+- 新 ADR：`docs/adr/0001-complete-agentic-action-loop-for-coach.md`。
+- 實作計畫：`docs/superpowers/plans/2026-05-15-complete-agentic-action-loop.md`。
+- 產品核心：阿念是 Agentic 情緒代理；遊戲化待辦只是工具層。
+- 技術核心：必須實作 Observe → Orient → Plan → Act → Persist → Evaluate → Adjust，不可只做 prompt + 單次 function call。
+- 第一個實作切片：PWA Coach 完成一次 7 日小陪跑小行動閉環，包含 trace、guardrails、micro-action state、basic XP / coins。
+
 ## V1.0 已完成的產品面
 
 - PWA 已可作為共同入口：朋友用 LINE、WeChat 或其他通訊軟體，都可以直接打開 `https://today-mood.zeabur.app/` 使用網頁版。
+- 無 hash 的根網址應直接進入 `#home` 今日心情；官網式介紹頁保留在 `#landing`，先由頁尾「關於今心」進入。
 - LINE 是 V1.0 已驗證的對話入口：官方帳號 `鋅鋰師拔麻的小小額葉養成手札`，Basic ID `@980pqrhn`。
 - WeChat 朋友先走 PWA 網頁，不做 WeChat Bot；WeChat Official Account / Bot 放 P2。
 - 主導覽維持原版文案：`今日心情`、`記錄回顧`、`成長看板`、`教練`。
 - Header 右上角為純 SVG 圖示列：成就、主題、提醒、帳號。
-- 首頁與 Coach 首屏用一般人能懂的語氣呈現「主動 AI 教練」，不要把第一層文案改成內部技術語。
+- 首頁與 Coach 首屏用一般人能懂的語氣呈現「阿念教練」：會接續情緒線索、慢慢看懂使用者節奏、陪使用者整理下一步。不要把第一層文案改成內部技術語。
 - Coach 危機語句會回公開 enum `emergency_stabilization` 並觸發 `open_sos`。
 - 前台方法語言定稿為 **知心四式：心照、喚名、安神、動念**。保留輕武俠心法感，但不要浮誇或神秘化。
 - Active 前台 / prompt 語言已清掉 `How We Feel`、`Mood Meter`、`Meta-Moment` 等容易混淆的品牌化表述；保留 RULER-inspired / ACT-informed / IFS-informed / Dan Siegel-informed 的誠實來源與非官方邊界。
