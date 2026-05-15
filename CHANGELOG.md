@@ -4,10 +4,70 @@
 
 ---
 
+## [Unreleased] - 2026-05-15 — Agentic Action Loop MVP 與 7 日小陪跑
+
+### PM 狀態
+
+- **阿念已從聊天框升級為 action-loop coach**：第一版實作 Observe → Orient → Plan → Act → Persist → Evaluate → Adjust，不再只靠 prompt 或單次 function call 裝成 agentic。
+- **7 日推動感成為第一個產品驗收**：目標是讓使用者在 7 天內感覺「阿念真的有推動我生活一點點」，不是承諾治療成效。
+- **遊戲化待辦定位清楚**：XP、金幣、等級、復盤連續是阿念推動小行動的工具層；第一版只做個人進度，不做社交排行榜，也沒有扣分模式。
+- **已推到 GitHub `origin/main`**：本地與遠端 `main` 已指向 `baa6275 docs: 同步 Agentic Action Loop 實作計畫`。
+
+### 已完成
+
+- **規格與交接**
+  - 新增 `CONTEXT.md`，鎖定阿念、Agentic 情緒代理、完整 action loop、小行動閉環、無扣分模式等詞彙邊界。
+  - 新增 ADR：`docs/adr/0001-complete-agentic-action-loop-for-coach.md`，決定先做 single-agent multi-step loop，而不是一口氣做 full multi-agent orchestration。
+  - 新增規格：`docs/superpowers/specs/2026-05-15-7-day-coach-momentum.md`。
+  - 新增 implementation plan：`docs/superpowers/plans/2026-05-15-complete-agentic-action-loop.md`。
+- **Deterministic core**
+  - 新增 `server/insforge/functions/_shared/coachActionLoop.ts`。
+  - 支援 intent classification、pending proposal、active micro-action expiry、positive-only reward、review streak、level calculation 與 action-loop metadata。
+  - `traceId` 改為包含會影響輸出的 normalized inputs；缺少 injected clock 時 fail fast，避免 production 產生 stale dueAt。
+  - 高風險判斷改用 user message + structured safety signal，不掃描 free-form coach disclaimer。
+- **資料層**
+  - 新增 `server/insforge/schema/011_coach_action_loop.sql`。
+  - 新表：`coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
+  - schema-level 鎖住 no-penalty invariant：XP、coins、counts、streaks 都有 non-negative checks。
+  - 加上 one active micro-action per user/app_user partial unique indexes，避免併發建立重複 active 小行動。
+- **Production runtime**
+  - `server/insforge/functions/coach-simple.ts` 接上 max-3-step `runAgenticActionLoop()`。
+  - 回傳 `intent`、`microActionProposal`、`activeMicroAction`、`gamification`、`toolResult`。
+  - 寫入 trace event，並可 create/report micro-action、更新 gamification stats。
+  - 危機 path 使用 restricted tools 並 hard-block mutating action-loop tools，回傳 `crisis_reward_blocked`，不得建立小行動或給獎。
+  - public `coach-simple` endpoint 拒絕任意 non-UUID `userId`，避免 app_user_id 被公開 endpoint 竄改。
+- **PWA Coach UI**
+  - `src/lib/adk/types.ts` 新增 action-loop response metadata 型別。
+  - 新增 `MicroActionCard`：顯示小行動提案、明確確認、active 小行動回報 completed / partial / skipped。
+  - 新增 `GamificationStrip`：顯示等級、XP、金幣與復盤連續。
+  - `CoachPage` 首屏新增 `7 日小陪跑` 入口與三個方向：睡前焦慮、親子修復、每日自我照顧。
+  - 前端回報文字已與後端 classifier 對齊，避免 UI 看起來有閉環但實際落成普通聊天。
+- **守門與 eval**
+  - `publishingGuardrails.test.ts` 鎖住 action-loop schema、runtime 多步 loop、trace persistence、新工具與 `crisis_reward_blocked`。
+  - 新增 `coachActionLoopEval.test.ts`，防止開始陪跑退回普通聊天、危機拿任務/金幣、沒有 active 小行動卻憑空回報。
+
+### 驗證
+
+- Focused frontend action-loop tests：`npx vitest run src/pages/CoachPage.test.tsx src/components/coach/MicroActionCard.test.tsx src/components/coach/GamificationStrip.test.tsx` ✅ 30 tests / 3 files
+- Focused server action-loop tests：`cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` ✅ 41 tests / 3 files
+- Frontend build：`npm run build` ✅
+- Server build：`cd server && npm run build` ✅
+- `git diff --check` ✅
+- GitHub：`git push origin main` ✅ `cb4a8b5..baa6275 main -> main`
+
+### 注意
+
+- 這是 source + local verification 完成；production live smoke 還要在 schema / Edge Function / PWA 部署後重跑。
+- 第一版小行動只在 PWA Coach 建立與回報，LINE Bot 暫不建立小行動狀態機。
+- 仍要找 1 位非開發者手機試玩 7 日小陪跑，觀察是否真的理解「回來看一眼，不是成績單」。
+
+---
+
 ## [Unreleased] - 2026-05-15 — 方法語言風險收斂與知心四式定稿
 
 ### PM 狀態
 
+- **阿念教練命名試行**：原「主動教練」角色在使用者可見文案中改為「阿念教練」，承接「今心，即為念」，並強調會接續情緒線索、慢慢看懂使用者節奏。
 - **方法語言已收斂**：前台不再使用容易被看成直接沿用 How We Feel / Mood Meter / Meta-Moment 的 active 品牌化語言。
 - **來源說法更誠實**：保留 RULER-inspired、ACT-informed、IFS-informed、Dan Siegel-informed，但明確寫清楚今心不是 Yale、RULER Approach、ACT、IFS、Dan Siegel / Mindsight Institute 或任何治療機構的官方產品，也不是心理治療。
 - **知心四式定稿**：前台四式命名改為 `心照 → 喚名 → 安神 → 動念`，保留一點武俠心法感，但不神秘化、不浮誇。
@@ -23,6 +83,8 @@
   - PWA、LINE Bot、AI 教練 prompt / fallback、onboarding、landing、進度條、E2E 與文件同步使用 `心照、喚名、安神、動念`。
   - LINE Bot 會以「第一式：心照」「第二式：喚名」「第三式：安神」「第四式：動念」引導完整流程。
 - 本次交接文件更新新增根目錄 `AGENTS.md`，記錄後續 agent 的產品語言、工程邊界與驗證基線。
+- PWA、Coach 首屏、onboarding、landing、AI prompt / soul contract 與影片腳本開始試行「阿念教練」命名；主導覽仍保留「教練」作為簡短分類標籤。
+- PWA 無 hash 根網址固定進入 `#home` 今日心情；產品說明移到 App 內 `#about`「關於我們」，由頁尾產品資訊進入，舊 `#landing` 轉到 `#about`。
 
 ### 驗證
 
