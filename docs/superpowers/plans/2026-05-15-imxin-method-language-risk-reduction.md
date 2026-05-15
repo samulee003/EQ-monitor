@@ -15,7 +15,7 @@
 ## Assumptions
 
 - 今心可以明確寫出「靈感來自 RULER 的情緒覺察技能」，但不宣稱與 Yale、RULER Approach、第三方情緒記錄 App、ACT、IFS 或 Dan Siegel / Mindsight Institute 有官方關係。
-- 今心前台方法名使用「今心整合四步」：看見、命名、安放、回應。
+- 今心前台方法名使用「知心四式」：心照、喚名、安神、動念。
 - 四象限與能量/舒適度類型的視覺分類可以保留；避免的是把它命名為 `四象限情緒表` 或把 RULER 五字母流程當成今心自己的產品方法。
 - ACT、IFS 與 Dan Siegel 相關內容只用作「informed / 參考方向」，不宣稱提供正式 ACT 治療、IFS 治療、心理治療、診斷或官方 Dan Siegel / Mindsight Institute 練習。
 - 這不是法律意見；本次是產品語言與程式輸出層面的風險降低。
@@ -26,7 +26,7 @@
 - Modify: `src/services/AIService.ts`
   - Responsibility: local AI fallback, chat fallback, weekly insight fallback. Remove user-facing `RULER` acronym teaching while keeping four-quadrant wording where it is useful. Add the same 今心 method blend used by the AI coach: RULER-inspired, ACT-informed, IFS-informed, and Dan Siegel-informed.
 - Modify: `src/services/AIService.test.ts`
-  - Responsibility: update fallback expectations from `RULER` acronym teaching to `今心四步`; four-quadrant expectations may remain.
+  - Responsibility: update fallback expectations from `RULER` acronym teaching to `知心四式`; four-quadrant expectations may remain.
 - Modify: `src/services/prompts.ts`
   - Responsibility: frontend AI analysis system prompt for parenting / emotional coaching. Add concise method boundaries and Dan Siegel-informed language without turning the output into formal therapy.
 - Modify: `server/insforge/agents/soul.md`
@@ -63,7 +63,7 @@
 ## Success Criteria
 
 - Public-facing text no longer teaches the RULER acronym as the product method.
-- Public-facing app, AI fallback, weekly report, and care push output use `今心四步` / `今心整合四步`; four-quadrant wording can remain.
+- Public-facing app, AI fallback, weekly report, and care push output use `知心四式` / `知心四式`; four-quadrant wording can remain.
 - AI coach prompts consistently state the method blend: RULER-inspired emotion awareness, ACT-informed acceptance / values action, IFS-informed parts awareness, and Dan Siegel-informed mindsight / integration / nervous-system stabilization.
 - AI coach prompts avoid claiming affiliation with Dan Siegel, Mindsight Institute, Yale, RULER Approach, 第三方情緒記錄 App, ACT, or IFS organizations.
 - README / CLAUDE / current spec clearly state the honest influence line: RULER-inspired, ACT-informed, IFS-informed, Dan Siegel-informed, not affiliated, not therapy.
@@ -159,7 +159,7 @@ Add to `buildEmotionCoachInstruction()`:
 
 ```md
 ## 方法融合
-- RULER 啟發：看見、理解、命名情緒，但使用今心自己的四步語言。
+- RULER 啟發：看見、理解、命名情緒，但使用今心自己的知心四式語言。
 - ACT-informed：接納感受，協助使用者回到價值與可做的小行動。
 - IFS-informed：把內在衝突視為不同部分的保護訊號，不把任何部分說成壞。
 - Dan Siegel-informed：用 mindsight 幫使用者看見「我正在感到...」而不是「我就是...」，並在高壓時先回到可承受範圍。
@@ -212,7 +212,7 @@ In `src/services/prompts.ts`, add to the parent coach system prompt:
 
 - [x] **Step 2: Update chat fallback explanation**
 
-In `src/services/AIService.ts`, ensure the `今心四步` explanation includes:
+In `src/services/AIService.ts`, ensure the `知心四式` explanation includes:
 
 ```ts
 這套練習靈感來自 RULER 的情緒覺察技能，也參考 ACT 的接納與價值行動、IFS-informed 的內在部分覺察，以及 Dan Siegel-informed 的 mindsight 與身心腦整合觀點；今心不是 Yale、RULER Approach、第三方情緒記錄 App、ACT、IFS 或 Dan Siegel / Mindsight Institute 官方產品，也不是心理治療。
@@ -260,7 +260,7 @@ expect(result.colorTheory).toContain('綠色');
 For chat fallback, replace acronym expectations with:
 
 ```ts
-expect(result).toContain('今心四步');
+expect(result).toContain('知心四式');
 expect(result).toContain('看見');
 expect(result).toContain('命名');
 expect(result).toContain('安放');
@@ -292,7 +292,7 @@ colorTheory: "綠色象限是恢復與整合的狀態，是建立新習慣和深
 For `getMockChatResponse()`, keep this explanation style:
 
 ```ts
-return `今心四步是我們自己的前台整理語言，幫你把混亂感受拆成可以開始的小步：
+return `知心四式是我們自己的前台整理語言，幫你把混亂感受拆成可以開始的小步：
 
 1. **看見**：先注意身體與此刻狀態
 2. **命名**：用更準確的詞靠近感覺
@@ -437,7 +437,7 @@ Expected: PASS if `server/src/emotionData.ts` already uses 今心四色狀態 wo
 In `server/src/index.ts`, change:
 
 ```ts
-// 使用今心四步 Bot 處理消息
+// 使用知心四式 Bot 處理消息
 ```
 
 - [x] **Step 2: Update current design docs prose**

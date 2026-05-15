@@ -226,14 +226,15 @@ describe('AIService', () => {
     });
 
     describe('getMockChatResponse', () => {
-        it('應該返回今心四步說明當詢問 ruler', async () => {
+        it('應該返回知心四式說明當詢問 ruler', async () => {
             const result = await aiService.chatWithAssistant('什麼是 RULER 框架？');
             
-            expect(result).toContain('今心四步');
-            expect(result).toContain('看見');
-            expect(result).toContain('命名');
-            expect(result).toContain('安放');
-            expect(result).toContain('回應');
+            expect(result).toContain('知心四式');
+            expect(result).toContain('心照式');
+            expect(result).toContain('喚名式');
+            expect(result).toContain('安神式');
+            expect(result).toContain('動念式');
+            expect(result).toContain('一念可轉');
             expect(result).toContain('Dan Siegel-informed');
             expect(result).toContain('mindsight');
             expect(result).toContain('不是 Yale');
@@ -243,11 +244,11 @@ describe('AIService', () => {
         it('應該返回建議當詢問建議', async () => {
             const result = await aiService.chatWithAssistant('我該怎麼辦？');
             
-            expect(result).toContain('今心四步');
-            expect(result).toContain('看見');
-            expect(result).toContain('命名');
-            expect(result).toContain('安放');
-            expect(result).toContain('回應');
+            expect(result).toContain('知心四式');
+            expect(result).toContain('心照');
+            expect(result).toContain('喚名');
+            expect(result).toContain('安神');
+            expect(result).toContain('動念');
             expect(result).not.toContain('RA' + 'IN');
         });
 

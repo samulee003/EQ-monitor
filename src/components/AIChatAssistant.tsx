@@ -160,7 +160,7 @@ ${insight.colorTheory || '無'}
   const quickActions = [
     { label: '分析今天的情緒', action: () => handleAnalyzeCurrentLog() },
     { label: '給我一些調節建議', action: () => setInputValue('我現在感覺不太好，可以給我一些調節情緒的建議嗎？') },
-    { label: '解釋今心四步', action: () => setInputValue('可以幫我解釋一下今心四步情緒整理法嗎？') },
+    { label: '解釋知心四式', action: () => setInputValue('可以幫我解釋一下知心四式情緒整理法嗎？') },
     { label: '為什麼要記錄情緒', action: () => setInputValue('為什麼記錄情緒對心理健康有幫助？') }
   ];
 

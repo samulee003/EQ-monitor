@@ -181,12 +181,12 @@ const RegulatingStep: React.FC<RegulatingStepProps> = ({ emotion, onComplete, on
                         <button className="nav-btn" onClick={onBack}>{t('← 返回')}</button>
                         <div className="step-label-container">
                             <span className="dot" style={{ backgroundColor: `var(--color-${emotion.quadrant})` }}></span>
-                            <span className="step-title">{t('選擇 — 我想如何回應？')}</span>
+                            <span className="step-title">{t('動念 — 我想如何回應？')}</span>
                         </div>
                     </div>
 
                     <div className="section-intro">
-                        <h2>{t('選擇你的回應方式')}</h2>
+                        <h2>{t('選擇你的動念方式')}</h2>
                         <p>{t('選擇一個引導式練習，或幾項簡單的動作來恢復平衡。')}</p>
                     </div>
 

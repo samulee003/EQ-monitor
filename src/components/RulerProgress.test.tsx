@@ -7,14 +7,14 @@ vi.mock('../services/LanguageContext', () => ({
 }));
 
 describe('RulerProgress', () => {
-    it('完整流程應該顯示今心四步順序', () => {
+    it('完整流程應該顯示知心四式順序', () => {
         render(<RulerProgress currentStep="understanding" isFullFlow={true} selectedQuadrant="green" />);
 
         const labels = within(screen.getByTestId('ruler-progress'))
-            .getAllByText(/看見|命名|安放|回應/)
+            .getAllByText(/心照|喚名|安神|動念/)
             .map(element => element.textContent);
 
-        expect(labels).toEqual(['看見', '命名', '安放', '回應']);
+        expect(labels).toEqual(['心照', '喚名', '安神', '動念']);
         expect(screen.queryByText('理解')).not.toBeInTheDocument();
         expect(screen.queryByText('標記')).not.toBeInTheDocument();
         expect(screen.queryByText('表達')).not.toBeInTheDocument();
@@ -25,10 +25,10 @@ describe('RulerProgress', () => {
         render(<RulerProgress currentStep="labeling" isFullFlow={false} selectedQuadrant="green" />);
 
         const labels = within(screen.getByTestId('ruler-progress'))
-            .getAllByText(/看見|命名/)
+            .getAllByText(/心照|喚名/)
             .map(element => element.textContent);
 
-        expect(labels).toEqual(['看見', '命名']);
+        expect(labels).toEqual(['心照', '喚名']);
         expect(screen.queryByText('標記')).not.toBeInTheDocument();
     });
 });

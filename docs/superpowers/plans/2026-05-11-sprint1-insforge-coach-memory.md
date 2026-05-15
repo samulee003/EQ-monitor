@@ -1025,7 +1025,7 @@ npm run dev
 - [x] 開啟 App，點擊登入，看到 Auth Modal 有兩個勾選框
 - [x] 嘗試不勾選第一個框就提交，看到「請先閱讀並同意隱私聲明」錯誤
 - [x] 正常登入，若 localStorage 有舊資料，看到遷移進度畫面
-- [x] 完成一次 今心四步流程，在 InsForge 驗證 coach_context 有更新
+- [x] 完成一次 知心四式流程，在 InsForge 驗證 coach_context 有更新
 
 - [x] **Step 5：InsForge 驗證元數據已寫入**
 

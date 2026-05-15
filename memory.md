@@ -32,7 +32,7 @@
   - `delete-account`
 - InsForge Auth 已接入 PWA：登入、註冊、session 保留、`coach_context` 初始化已驗。
 - 真 LINE 綁定 E2E 已驗：LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定。
-- Production LINE 情緒資料流已驗：有效簽名 webhook → 完整今心四步 → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
+- Production LINE 情緒資料流已驗：有效簽名 webhook → 完整知心四式 → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
 - Bot `/webhook` 已啟用 LINE 簽名驗證：缺少或無效 `x-line-signature` 回 401。
 - 主動推送排程已啟用：`pg_cron` / `pg_net` installed，`weekly-report-batch` 與 `care-scan-daily` active。
 - 主動推送守門已補齊：需要有 LINE 綁定與 opt-in，避免未同意推送。

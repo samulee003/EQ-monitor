@@ -10,20 +10,20 @@ interface RulerProgressProps {
     selectedQuadrant: Quadrant | null | undefined;
 }
 
-// Map internal flow states to 今心四步 display steps.
+// Map internal flow states to 知心四式 display moves.
 const getDisplaySteps = (isFullFlow: boolean, t: (s: string) => string) => {
     if (isFullFlow) {
         return [
-            { key: 'recognizing', label: t('看見'), letter: '1', color: 'red' },
-            { key: 'labeling', label: t('命名'), letter: '2', color: 'yellow' },
-            { key: 'understanding', label: t('安放'), letter: '3', color: 'blue' },
-            { key: 'regulating', label: t('回應'), letter: '4', color: 'green' },
+            { key: 'recognizing', label: t('心照'), letter: '1', color: 'red' },
+            { key: 'labeling', label: t('喚名'), letter: '2', color: 'yellow' },
+            { key: 'understanding', label: t('安神'), letter: '3', color: 'blue' },
+            { key: 'regulating', label: t('動念'), letter: '4', color: 'green' },
         ];
     }
     // Quick mode
     return [
-        { key: 'recognizing', label: t('看見'), letter: '1', color: 'red' },
-        { key: 'labeling', label: t('命名'), letter: '2', color: 'yellow' },
+        { key: 'recognizing', label: t('心照'), letter: '1', color: 'red' },
+        { key: 'labeling', label: t('喚名'), letter: '2', color: 'yellow' },
     ];
 };
 

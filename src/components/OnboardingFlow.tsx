@@ -126,23 +126,23 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {step === 4 && (
                     <div className="onboarding-step fade-slide-up">
                         <div className="step-icon breathe">{uiIcons.seedling}</div>
-                        <h2>{t('今心四步練習')}</h2>
+                        <h2>{t('知心四式練習')}</h2>
                         <div className="ruler-steps-list">
                             <div className="ruler-step-item">
                                 <span className="ruler-letter r">1</span>
-                                <span>{t('看見 — 我現在落在哪個狀態？')}</span>
+                                <span>{t('心照 — 心照一念，我現在落在哪個狀態？')}</span>
                             </div>
                             <div className="ruler-step-item">
                                 <span className="ruler-letter l">2</span>
-                                <span>{t('命名 — 這個感覺比較像什麼？')}</span>
+                                <span>{t('喚名 — 喚其真名，這個感覺比較像什麼？')}</span>
                             </div>
                             <div className="ruler-step-item">
                                 <span className="ruler-letter u">3</span>
-                                <span>{t('安放 — 它在提醒我哪個需要？')}</span>
+                                <span>{t('安神 — 安住心神，它在提醒我哪個需要？')}</span>
                             </div>
                             <div className="ruler-step-item">
                                 <span className="ruler-letter e">4</span>
-                                <span>{t('回應 — 我可以先做哪一小步？')}</span>
+                                <span>{t('動念 — 一念可轉，我可以先做哪一小步？')}</span>
                             </div>
                         </div>
                         <div className="step-actions">

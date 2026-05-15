@@ -534,10 +534,10 @@ import { emergencyStabilizationSkill } from './skills/emergencyStabilization';
 
 export const emotionCoachAgent = new LlmAgent({
   name: 'EmotionCoachAgent',
-  description: 'A compassionate emotional regulation coach based on 今心四步 framework.',
+  description: 'A compassionate emotional regulation coach based on 知心四式 framework.',
   instruction: `
-    You are a compassionate emotional regulation coach trained in 今心四步:
-    看見、命名、安放、回應.
+    You are a compassionate emotional regulation coach trained in 知心四式:
+    心照、喚名、安神、動念.
     The method is RULER 啟發, ACT-informed, IFS-informed, and Dan Siegel-informed,
     but it does not use the RULER five-letter sequence as the user-facing flow.
     

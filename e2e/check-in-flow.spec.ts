@@ -2,22 +2,22 @@ import { test, expect } from '@playwright/test';
 import { bypassSplashViaSession, skipSplash } from './helpers';
 
 /**
- * 今心四步關鍵路徑：訪問今日心情 → 從看見推進到命名/安放前段
+ * 知心四式關鍵路徑：訪問今日心情 → 從心照推進到喚名/安神前段
  *
  * 完整流程包含多個互動子組件且帶輸入校驗；端到端逐步模擬會極為脆弱
- * （且許多步驟需要鍵盤/滑桿）。此 spec 以「能進入今心四步並從看見往下一段」
+ * （且許多步驟需要鍵盤/滑桿）。此 spec 以「能進入知心四式並從心照往下一段」
  * 作為主要關鍵路徑驗證，後續細部步驟由 Vitest 單元測試覆蓋。
  */
-test.describe('今心四步關鍵路徑', () => {
+test.describe('知心四式關鍵路徑', () => {
   test.beforeEach(async ({ page }) => {
     await bypassSplashViaSession(page);
   });
 
-  test('使用者可以從「看見」推進到下一步', async ({ page }) => {
+  test('使用者可以從「心照」推進到下一步', async ({ page }) => {
     await page.goto('/#home');
     await skipSplash(page);
 
-    // 今日心情應顯示四象限選擇器（看見）
+    // 今日心情應顯示四象限選擇器（心照）
     const heading = page.getByRole('heading', { name: /你現在感覺如何/ });
     await expect(heading).toBeVisible({ timeout: 10_000 });
 

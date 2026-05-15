@@ -88,7 +88,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
       <div className="intensity-step fade-in" style={getIntensityStyle()}>
         <div className="selection-header">
           <button className="nav-btn" onClick={() => setIsIntensityStep(false)}>{t('← 重新選擇')}</button>
-          <span className="step-tag">{t('命名感覺與強度')}</span>
+          <span className="step-tag">{t('喚名感覺與強度')}</span>
         </div>
 
         <div className="intensity-display">
