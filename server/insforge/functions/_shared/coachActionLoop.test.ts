@@ -11,6 +11,7 @@ import {
   type CoachActionLoopInput,
   type CoachLoopContext,
   type MicroActionRow,
+  type PendingMicroActionProposal,
 } from './coachActionLoop.js';
 
 const fixedNow = new Date('2026-05-15T08:00:00.000Z');
@@ -151,6 +152,7 @@ const baseLoopContext: CoachLoopContext = {
   userId: 'user-1',
   sessionId: 'session-1',
   activeMicroAction: null,
+  pendingProposal: null,
   gamification: {
     total_xp: 0,
     coin_balance: 0,
@@ -164,6 +166,28 @@ const baseLoopContext: CoachLoopContext = {
     last_review_date: null,
   },
   recentEmotionSummary: { recent_logs_count: 0 },
+};
+
+const pendingSleepProposal: PendingMicroActionProposal = {
+  task: {
+    key: 'sleep_breath_3min',
+    goalKey: 'sleep_anxiety',
+    category: 'settling',
+    title: '睡前做 3 分鐘安神呼吸',
+    dueHours: 24,
+  },
+  proposedAt: '2026-05-15T08:00:00.000Z',
+};
+
+const pendingRepairProposal: PendingMicroActionProposal = {
+  task: {
+    key: 'repair_step_away_2min',
+    goalKey: 'parent_repair',
+    category: 'repair',
+    title: '情緒升高時先離開現場 2 分鐘',
+    dueHours: 24,
+  },
+  proposedAt: '2026-05-15T08:00:00.000Z',
 };
 
 const activeMicroAction: MicroActionRow = {
@@ -236,15 +260,40 @@ describe('Coach action loop runtime helpers', () => {
     });
   });
 
-  it('沒有 active micro action 且使用者確認可以時建立 micro action', () => {
+  it('沒有 pending proposal 時，裸確認 可以 不會建立 micro action', () => {
+    expect(
+      classifyCoachIntent('可以', {
+        ...baseLoopContext,
+        activeMicroAction: null,
+        pendingProposal: null,
+      }).kind
+    ).not.toBe('create_micro_action');
+  });
+
+  it('有 pending sleep proposal 時，確認 可以 會建立該 sleep task', () => {
     const intent = classifyCoachIntent('可以', {
       ...baseLoopContext,
       activeMicroAction: null,
+      pendingProposal: pendingSleepProposal,
     });
 
     expect(intent.kind).toBe('create_micro_action');
     if (intent.kind === 'create_micro_action') {
-      expect(intent.task.key).toBe('drink_water_and_need');
+      expect(intent.task).toEqual(pendingSleepProposal.task);
+      expect(intent.confirmationText).toBe('可以');
+    }
+  });
+
+  it('有 pending repair proposal 時，確認 可以 會建立該 repair task', () => {
+    const intent = classifyCoachIntent('可以', {
+      ...baseLoopContext,
+      activeMicroAction: null,
+      pendingProposal: pendingRepairProposal,
+    });
+
+    expect(intent.kind).toBe('create_micro_action');
+    if (intent.kind === 'create_micro_action') {
+      expect(intent.task).toEqual(pendingRepairProposal.task);
       expect(intent.confirmationText).toBe('可以');
     }
   });

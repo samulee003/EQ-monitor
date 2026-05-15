@@ -30,6 +30,14 @@ create index if not exists idx_coach_micro_actions_app_user_status_due
   on public.coach_micro_actions (app_user_id, status, due_at)
   where app_user_id is not null;
 
+create unique index if not exists idx_coach_micro_actions_one_active_user
+  on public.coach_micro_actions (user_id)
+  where user_id is not null and status = 'active';
+
+create unique index if not exists idx_coach_micro_actions_one_active_app_user
+  on public.coach_micro_actions (app_user_id)
+  where app_user_id is not null and status = 'active';
+
 alter table public.coach_micro_actions enable row level security;
 
 drop policy if exists "Users can read own coach micro actions"
