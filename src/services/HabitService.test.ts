@@ -200,7 +200,7 @@ describe('HabitService', () => {
             expect(result.newlyUnlocked).toContain('emotions_10');
         });
 
-        it('完成五次完整 RULER 流程應解鎖 full_ruler_5 成就', async () => {
+        it('完成五次完整覺察練習應解鎖 full_ruler_5 成就', async () => {
             const logs: RulerLogEntry[] = [];
             for (let i = 0; i < 5; i++) {
                 logs.push({

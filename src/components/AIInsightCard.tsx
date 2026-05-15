@@ -19,7 +19,7 @@ export const AIInsightCard: React.FC<AIInsightCardProps> = ({
 }) => {
     const { t } = useLanguage();
 
-    // 根據象限選擇主題色
+    // 根據狀態色彩選擇主題色
     const getThemeColor = () => {
         const colors: Record<string, string> = {
             red: 'var(--color-red)',

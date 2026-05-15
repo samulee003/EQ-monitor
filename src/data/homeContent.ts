@@ -20,7 +20,7 @@ export interface HomeContent {
 export const homeContentMap: Record<UserRole, HomeContent> = {
   parent: {
     sos: {
-      title: '我需要急救',
+      title: '我需要先穩住',
       description: '剛對孩子發脾氣 / 孩子哭鬧 / 快崩潰',
     },
     quick: {
@@ -36,7 +36,7 @@ export const homeContentMap: Record<UserRole, HomeContent> = {
   },
   student: {
     sos: {
-      title: '我需要急救',
+      title: '我需要先穩住',
       description: '考試壓力 / 同儕衝突 / 快要爆發',
     },
     quick: {
@@ -52,7 +52,7 @@ export const homeContentMap: Record<UserRole, HomeContent> = {
   },
   professional: {
     sos: {
-      title: '我需要急救',
+      title: '我需要先穩住',
       description: '職場衝突 / deadline 壓力 / 瀕臨失控',
     },
     quick: {
@@ -68,7 +68,7 @@ export const homeContentMap: Record<UserRole, HomeContent> = {
   },
   general: {
     sos: {
-      title: '我需要急救',
+      title: '我需要先穩住',
       description: '情緒高漲 / 需要暫停 / 無法思考',
     },
     quick: {

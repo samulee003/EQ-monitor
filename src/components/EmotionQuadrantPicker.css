@@ -1,4 +1,4 @@
-.mood-meter-container {
+.emotion-quadrant-picker-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7,12 +7,12 @@
   justify-content: center;
 }
 
-.mood-meter-header {
+.emotion-quadrant-picker-header {
   text-align: center;
   max-width: 320px;
 }
 
-.mood-meter-header h1 {
+.emotion-quadrant-picker-header h1 {
   font-size: 2rem;
   font-weight: 800;
   margin-bottom: 1rem;
@@ -20,7 +20,7 @@
   line-height: 1.2;
 }
 
-.mood-meter-header p {
+.emotion-quadrant-picker-header p {
   color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
@@ -212,9 +212,9 @@
     transform: scale(0.75);
     margin: -2rem 0;
   }
-  .mood-meter-header h1 { font-size: 1.6rem; }
-  .mood-meter-header p { font-size: 0.85rem; }
-  .mood-meter-container { gap: 2rem; }
+  .emotion-quadrant-picker-header h1 { font-size: 1.6rem; }
+  .emotion-quadrant-picker-header p { font-size: 0.85rem; }
+  .emotion-quadrant-picker-container { gap: 2rem; }
 
   .sphere-info {
     bottom: -55px;
@@ -226,7 +226,7 @@
   .spheres-layout {
     transform: scale(0.65);
   }
-  .mood-meter-container { gap: 1rem; }
+  .emotion-quadrant-picker-container { gap: 1rem; }
 }
 
 @media (min-width: 768px) {
@@ -234,8 +234,8 @@
     width: 420px;
     height: 420px;
   }
-  .mood-meter-header h1 { font-size: 2.2rem; }
-  .mood-meter-header { max-width: 400px; }
+  .emotion-quadrant-picker-header h1 { font-size: 2.2rem; }
+  .emotion-quadrant-picker-header { max-width: 400px; }
 }
 
 @media (min-width: 1024px) {
@@ -243,5 +243,5 @@
     width: 480px;
     height: 480px;
   }
-  .mood-meter-header h1 { font-size: 2.4rem; }
+  .emotion-quadrant-picker-header h1 { font-size: 2.4rem; }
 }

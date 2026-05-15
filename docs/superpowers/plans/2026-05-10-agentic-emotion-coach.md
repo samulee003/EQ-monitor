@@ -2,9 +2,9 @@
 
 > **For agentic workers:** Use superpowers:subagent-driven-development or superpowers:dispatching-parallel-agents. Steps use checkbox syntax.
 
-**Goal:** Deliver AI coach chat + Meta-Moment SOS in the 今心 APP by end of day.
+**Goal:** Deliver AI coach chat + 緊急安定練習 SOS in the 今心 APP by end of day.
 
-**Architecture:** Frontend `/coach` page calls Edge Function `/api/coach`, which runs Google ADK JS agent. Agent reads user history via InsForge DB tool and can invoke Meta-Moment skill for crisis intervention.
+**Architecture:** Frontend `/coach` page calls Edge Function `/api/coach`, which runs Google ADK JS agent. Agent reads user history via InsForge DB tool and can invoke 緊急安定練習 skill for crisis intervention.
 
 **Tech Stack:** React 19 + TS + Vite, Google ADK JS v1.0.0, InsForge Edge Functions (Deno), Tailwind 3.4.
 
@@ -17,13 +17,13 @@
 | `src/pages/CoachPage.tsx` | Create | Main chat UI with SOS button |
 | `src/components/coach/ChatBubble.tsx` | Create | Message bubble component |
 | `src/components/coach/ChatInput.tsx` | Create | Input + send button |
-| `src/components/coach/MetaMomentOverlay.tsx` | Create | 4-step SOS wizard overlay |
+| `src/components/coach/EmergencyStabilizationOverlay.tsx` | Create | 4-step SOS wizard overlay |
 | `src/components/coach/BreathingAnimation.tsx` | Create | Circle breathing animation |
 | `src/lib/adk/client.ts` | Create | Frontend client calling `/api/coach` |
 | `src/lib/adk/types.ts` | Create | TypeScript types for coach API |
 | `server/insforge/functions/coach.ts` | Create | Edge Function: ADK Runner endpoint |
 | `server/insforge/agents/emotionCoach.ts` | Create | EmotionCoachAgent definition |
-| `server/insforge/agents/skills/metaMoment.ts` | Create | MetaMomentSkill definition |
+| `server/insforge/agents/skills/emergencyStabilization.ts` | Create | Internal emergency stabilization skill definition |
 | `server/insforge/agents/tools/rulerData.ts` | Create | RulerDataTool (InsForge DB query) |
 | `server/insforge/agents/runner.ts` | Create | ADK Runner setup |
 | `src/App.tsx` | Modify | Add `/coach` route |
@@ -186,7 +186,7 @@ import { sendMessage } from '../lib/adk/client';
 import type { CoachMessage } from '../lib/adk/types';
 import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
-import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
+import { EmergencyStabilizationOverlay } from '../components/coach/EmergencyStabilizationOverlay';
 import { v4 as uuidv4 } from 'uuid';
 
 const SESSION_ID = uuidv4();
@@ -265,9 +265,9 @@ export default function CoachPage() {
       <ChatInput onSend={handleSend} onSOS={() => setShowSOS(true)} disabled={loading} />
 
       {showSOS && (
-        <MetaMomentOverlay onClose={() => setShowSOS(false)} onComplete={(strategy) => {
+        <EmergencyStabilizationOverlay onClose={() => setShowSOS(false)} onComplete={(strategy) => {
           setShowSOS(false);
-          handleSend(`我完成了 Meta-Moment，選擇的策略是：${strategy}`);
+          handleSend(`我完成了 緊急安定練習，選擇的策略是：${strategy}`);
         }} />
       )}
     </div>
@@ -290,10 +290,10 @@ Verify: `npm run test:run` should still pass (only existing tests).
 
 ---
 
-## Task 2: Frontend — Meta-Moment SOS Overlay
+## Task 2: Frontend — 緊急安定練習 SOS Overlay
 
 **Files:**
-- Create: `src/components/coach/MetaMomentOverlay.tsx`
+- Create: `src/components/coach/EmergencyStabilizationOverlay.tsx`
 - Create: `src/components/coach/BreathingAnimation.tsx`
 
 ### Step 2.1: Write BreathingAnimation
@@ -351,9 +351,9 @@ export function BreathingAnimation() {
 }
 ```
 
-### Step 2.2: Write MetaMomentOverlay
+### Step 2.2: Write EmergencyStabilizationOverlay
 
-`src/components/coach/MetaMomentOverlay.tsx`:
+`src/components/coach/EmergencyStabilizationOverlay.tsx`:
 ```typescript
 import { useState } from 'react';
 import { BreathingAnimation } from './BreathingAnimation';
@@ -390,7 +390,7 @@ const STRATEGIES = [
   '打給我的「馬文叔叔」',
 ];
 
-export function MetaMomentOverlay({ onClose, onComplete }: Props) {
+export function EmergencyStabilizationOverlay({ onClose, onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [bestSelf, setBestSelf] = useState('');
 
@@ -401,7 +401,7 @@ export function MetaMomentOverlay({ onClose, onComplete }: Props) {
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b">
-        <h2 className="text-lg font-bold text-red-600">🆘 Meta-Moment 緊急協助</h2>
+        <h2 className="text-lg font-bold text-red-600">🆘 緊急安定練習 緊急協助</h2>
         <button onClick={onClose} className="text-gray-500 text-2xl">&times;</button>
       </div>
 
@@ -459,7 +459,7 @@ Verify: Visually inspect `/coach` page in browser. SOS button should open overla
 
 **Files:**
 - Create: `server/insforge/agents/tools/rulerData.ts`
-- Create: `server/insforge/agents/skills/metaMoment.ts`
+- Create: `server/insforge/agents/skills/emergencyStabilization.ts`
 - Create: `server/insforge/agents/emotionCoach.ts`
 - Create: `server/insforge/agents/runner.ts`
 - Create: `server/insforge/functions/coach.ts`
@@ -502,17 +502,17 @@ export async function getUserEmotionSummary(userId: string) {
 }
 ```
 
-### Step 3.3: Write MetaMomentSkill
+### Step 3.3: Write internal emergency stabilization skill
 
-`server/insforge/agents/skills/metaMoment.ts`:
+`server/insforge/agents/skills/emergencyStabilization.ts`:
 ```typescript
 import { LlmAgent } from '@google/adk';
 
-export const metaMomentSkill = new LlmAgent({
-  name: 'MetaMomentSkill',
-  description: 'Emergency emotional regulation using the 4-step Meta-Moment protocol.',
+export const emergencyStabilizationSkill = new LlmAgent({
+  name: 'InternalStabilizationSkill',
+  description: 'Emergency emotional regulation using the 4-step 緊急安定練習 protocol.',
   instruction: `
-    You are the Meta-Moment emergency skill. Guide the user through 4 steps:
+    You are the 緊急安定練習 emergency skill. Guide the user through 4 steps:
     
     Step 1 - Sense: Ask the user to notice physical sensations (heartbeat, tension, stomach).
     Step 2 - Stop: Guide deep breathing (4-7-8 pattern). Count with them.
@@ -530,14 +530,16 @@ export const metaMomentSkill = new LlmAgent({
 `server/insforge/agents/emotionCoach.ts`:
 ```typescript
 import { LlmAgent } from '@google/adk';
-import { metaMomentSkill } from './skills/metaMoment';
+import { emergencyStabilizationSkill } from './skills/emergencyStabilization';
 
 export const emotionCoachAgent = new LlmAgent({
   name: 'EmotionCoachAgent',
-  description: 'A compassionate emotional regulation coach based on RULER framework.',
+  description: 'A compassionate emotional regulation coach based on 今心四步 framework.',
   instruction: `
-    You are a compassionate emotional regulation coach trained in the RULER framework
-    (Recognize, Understand, Label, Express, Regulate) and Marc Brackett's work.
+    You are a compassionate emotional regulation coach trained in 今心四步:
+    看見、命名、安放、回應.
+    The method is RULER 啟發, ACT-informed, IFS-informed, and Dan Siegel-informed,
+    but it does not use the RULER five-letter sequence as the user-facing flow.
     
     Communication style:
     - Warm, non-judgmental, validating
@@ -545,13 +547,13 @@ export const emotionCoachAgent = new LlmAgent({
     - Ask open-ended questions
     - Never dismiss feelings
     
-    When the user is in crisis or highly distressed, transfer to MetaMomentSkill.
+    When the user is in crisis or highly distressed, transfer to the internal stabilization skill.
     Otherwise, engage in supportive dialogue.
     
     You have access to the user's emotion history via tools.
   `,
   tools: [], // rulerDataTool will be injected at runtime
-  subAgents: [metaMomentSkill],
+  subAgents: [emergencyStabilizationSkill],
 });
 ```
 
@@ -568,7 +570,7 @@ export async function runCoach(userMessage: string, userId: string) {
   const result = await runner.run(userMessage);
   return {
     response: result.text ?? '抱歉，我無法回應。',
-    skillInvoked: result.events?.find((e) => e.author === 'MetaMomentSkill') ? 'MetaMomentSkill' : undefined,
+    skillInvoked: result.events?.find((e) => e.author === 'InternalStabilizationSkill') ? 'emergency_stabilization' : undefined,
   };
 }
 ```
@@ -640,7 +642,7 @@ Add a floating or nav link to `/coach` from the main app homepage.
 
 3 independent agent tracks:
 
-1. **Frontend Agent** → Tasks 1 & 2 (CoachPage + Chat components + MetaMomentOverlay)
+1. **Frontend Agent** → Tasks 1 & 2 (CoachPage + Chat components + EmergencyStabilizationOverlay)
 2. **Backend Agent** → Task 3 (ADK Agent + Skills + Edge Function)
 3. **Integration Agent** → Task 4 (env vars + routing + navigation)
 

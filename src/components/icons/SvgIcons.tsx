@@ -9,7 +9,7 @@ type IconComponent = React.ReactNode;
 
 // ===== REGULATION STRATEGY ICONS =====
 export const regulationIcons: Record<string, IconComponent> = {
-    // Red Quadrant (High Energy, Low Pleasantness)
+    // Red state area (full and stuck)
     breathing: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M12 4c2 0 4 2 4 4 0 3-4 6-4 6s-4-3-4-6c0-2 2-4 4-4z" />
@@ -42,7 +42,7 @@ export const regulationIcons: Record<string, IconComponent> = {
         </svg>
     ),
 
-    // Yellow Quadrant (High Energy, High Pleasantness)
+    // Yellow state area (full and smooth)
     gratitude: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <rect x="4" y="3" width="16" height="18" rx="2" />
@@ -80,7 +80,7 @@ export const regulationIcons: Record<string, IconComponent> = {
         </svg>
     ),
 
-    // Blue Quadrant (Low Energy, Low Pleasantness)
+    // Blue state area (slow and stuck)
     coffee: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M5 10h12a2 2 0 012 2v2a6 6 0 01-6 6H9a6 6 0 01-6-6v-2a2 2 0 012-2z" />
@@ -113,7 +113,7 @@ export const regulationIcons: Record<string, IconComponent> = {
         </svg>
     ),
 
-    // Green Quadrant (Low Energy, High Pleasantness)
+    // Green state area (slow and smooth)
     meditate: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <circle cx="12" cy="6" r="3" />

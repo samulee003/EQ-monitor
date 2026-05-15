@@ -13,7 +13,7 @@ import {
 } from './utils/metrics.js';
 
 /**
- * 今心對話式 RULER 狀態機
+ * 今心對話式四步狀態機
  * 管理用戶在 LINE/微信對話中的情緒覺察流程
  */
 
@@ -91,8 +91,8 @@ export async function processMessage(userId: string, text: string): Promise<BotR
 • 「幫助」— 顯示此說明
 • 「週報」— 查看本週情緒統計
 
-我會引導你完成 RULER 五步情緒覺察：
-覺察 → 理解 → 標記 → 表達 → 調節`,
+我會引導你完成今心四步情緒整理：
+看見 → 命名 → 安放 → 回應`,
     };
   }
 
@@ -183,7 +183,7 @@ async function handleIdle(session: UserSession, text: string): Promise<BotRespon
 
 讓我們一起做一次簡短的情緒覺察練習。只需要幾分鐘。
 
-**第一步：覺察**
+**第一步：看見**
 現在，閉上眼睛或放鬆視線，掃描一下你的身體——
 哪個部位感覺最緊、最重或最不適？
 （例如：胸口、肩膀、胃、頭、喉嚨）`,
@@ -211,7 +211,7 @@ async function handleRecognize(session: UserSession, text: string): Promise<BotR
   return {
     text: `收到。${text === '說不出來' ? '沒關係，身體的感覺有時候很模糊。' : `你感覺到 ${text} 有些緊繃。`}
 
-**第二步：理解**
+**第二步：命名**
 如果用一個詞或幾個字來描述你現在的情緒，會是什麼？
 （可以直接打出來，或選一個最接近的）`,
     quickReplies: [
@@ -256,8 +256,8 @@ async function handleUnderstand(session: UserSession, text: string): Promise<Bot
 
 ${getQuadrantDescription(emotion.quadrant)}
 
-**第三步：標記**
-${emotion.name} 背後，你內心深處需要什麼？
+**第三步：安放**
+先不用急著解決它。${emotion.name} 背後，你內心深處需要什麼？
 （選一個最觸動你的，或自己打出來）`,
       quickReplies: needs.map((need) => ({
         label: need,
@@ -296,7 +296,7 @@ async function handleLabel(session: UserSession, text: string): Promise<BotRespo
   return {
     text: `「${text}」——這個需求很重要。
 
-**第四步：表達**
+**第三步：安放**
 現在我們來做一個小儀式，叫做「情緒碎紙機」。
 
 把你此刻想說的話、想發的牢騷、想流的淚，
@@ -333,7 +333,10 @@ async function handleExpress(session: UserSession, text: string): Promise<BotRes
 那些話不需要被保存，不需要被評價。
 它們只是需要**被說出來**。
 
-你做得很好。現在讓我們一起做一個調節練習，
+你做得很好。
+
+**第四步：回應**
+現在讓我們一起做一個回應練習，
 幫助身體和情緒回到一個更平穩的狀態。`,
     quickReplies: [
       { label: '呼吸引導', text: '呼吸', type: 'text' },
@@ -345,7 +348,7 @@ async function handleExpress(session: UserSession, text: string): Promise<BotRes
 
 function regulationMenu(): BotResponse {
   return {
-    text: `**第五步：調節**
+    text: `**第四步：回應**
 
 選一個你想嘗試的練習：`,
     quickReplies: [
@@ -473,7 +476,7 @@ ${feedback}
 「我今天發現自己很容易 ${emotion}，
 原來我內心需要的是 ${need}。」
 
-真實的連結，是最好的療癒。
+真實的連結，會讓這份覺察更容易被承接。
 
 隨時回來，我在這裡。🌿`,
     quickReplies: [

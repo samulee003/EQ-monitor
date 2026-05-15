@@ -188,7 +188,7 @@ async function handleTextMessage(event: WebhookEvent): Promise<void> {
 
   logger.debug(`Message received`, { userId, text: text.substring(0, 50) });
 
-  // 使用 RULER Bot 處理消息
+  // 使用今心四步 Bot 處理消息
   const response = await processMessage(userId, text);
 
   // 回覆用戶

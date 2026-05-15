@@ -18,7 +18,7 @@ function getClient(): ReturnType<typeof createClient> {
 
 export const getEmotionTrendTool = new FunctionTool({
   name: 'get_emotion_trend',
-  description: '分析使用者最近 N 天的情緒趨勢，包含最常出現的情緒、平均強度、象限分佈與連續記錄資訊。用於個人化回應與模式洞察。',
+  description: '分析使用者最近 N 天的情緒趨勢，包含最常出現的情緒、平均強度、狀態色彩分佈與連續記錄資訊。用於個人化回應與模式洞察。',
   parameters: z.object({
     userId: z.string().describe('使用者的 UUID'),
     days: z.number().min(1).max(90).default(7).describe('分析最近幾天，預設 7 天'),

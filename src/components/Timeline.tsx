@@ -297,7 +297,7 @@ const Timeline: React.FC = () => {
                     </div>
                     <span className="timeline-kicker">{t('歷史時間軸')}</span>
                     <h2>{t('第一筆情緒紀錄，會為之後的洞察打開入口。')}</h2>
-                    <p>{t('當你開始留下情緒與情境，這裡會逐步長出屬於你的敘事軌跡、象限分布與回顧節奏。')}</p>
+                    <p>{t('當你開始留下情緒與情境，這裡會逐步長出屬於你的敘事軌跡、狀態色彩與回顧節奏。')}</p>
 
                     <div className="timeline-empty-feature-grid">
                         <div className="timeline-empty-feature">
@@ -354,7 +354,7 @@ const Timeline: React.FC = () => {
                 <div className="timeline-hero-copy">
                     <span className="timeline-kicker">{t('歷史 / Timeline')}</span>
                     <h2>{t('把情緒記錄整理成一條能回看的內在敘事。')}</h2>
-                    <p>{t('你已累積 {{count}} 筆紀錄；這一頁將時間、情緒象限與事件線索收進同一條光感時間軸，幫你更安靜地回看自己。').replace('{{count}}', String(narrativeStats.total))}</p>
+                    <p>{t('你已累積 {{count}} 筆紀錄；這一頁將時間、情緒色彩與事件線索收進同一條光感時間軸，幫你更安靜地回看自己。').replace('{{count}}', String(narrativeStats.total))}</p>
                 </div>
 
                 <div className="timeline-hero-panel">
@@ -378,7 +378,7 @@ const Timeline: React.FC = () => {
                 </div>
             </section>
 
-            <section className="timeline-chip-row" aria-label={t('情緒象限摘要')}>
+            <section className="timeline-chip-row" aria-label={t('情緒色彩摘要')}>
                 {quadrantSummary.map((chip) => {
                     const palette = chip.key === 'all' ? null : quadrantPalette[chip.key as QuadrantKey];
                     return (

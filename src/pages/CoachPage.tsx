@@ -4,7 +4,7 @@ import { loadChatHistory, saveChatHistory } from '../lib/adk/storage';
 import { type CoachMessage, type CoachAction } from '../lib/adk/types';
 import { ChatBubble } from '../components/coach/ChatBubble';
 import { ChatInput } from '../components/coach/ChatInput';
-import { MetaMomentOverlay } from '../components/coach/MetaMomentOverlay';
+import { EmergencyStabilizationOverlay } from '../components/coach/EmergencyStabilizationOverlay';
 import { TypingIndicator } from '../components/coach/TypingIndicator';
 import { useAuth } from '../services/AuthContext';
 import { botSyncService } from '../services/BotSyncService';
@@ -126,7 +126,7 @@ function executeCoachAction(action: CoachAction, reason?: string): string {
       setView('home');
       return reason ? `已為你開啟情緒記錄：${reason}` : '已為你開啟情緒記錄';
     case 'open_sos':
-      // SOS 由頁面內的 MetaMomentOverlay 處理
+      // SOS 由頁面內的 EmergencyStabilizationOverlay 處理
       return reason ? `已準備好緊急協助：${reason}` : '已準備好緊急協助';
     case 'show_history':
       setView('history');
@@ -336,7 +336,7 @@ export default function CoachPage() {
                 <p className={styles.agentEyebrow}>主動情緒教練</p>
                 <h2>你不用自己想下一步</h2>
                 <p className={styles.agentDescription}>
-                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你整理下一步。
+                  我是今心主動教練，會依你的情緒記錄、LINE 互動與當下訊息，陪你用看見、命名、安放、回應整理下一步。
                 </p>
                 <div className={styles.agentFeatureGrid} aria-label="主動教練特色">
                   <div className={styles.agentFeature}>
@@ -491,7 +491,7 @@ export default function CoachPage() {
       </nav>
 
       {showSOS && (
-        <MetaMomentOverlay
+        <EmergencyStabilizationOverlay
           onClose={() => setShowSOS(false)}
           onComplete={({ bestSelf, strategy }) => {
             setShowSOS(false);

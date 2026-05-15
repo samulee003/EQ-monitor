@@ -12,6 +12,8 @@ export default defineConfig([
     'android',
     'node_modules',
     'coverage',
+    'test-results',
+    'playwright-report',
     'server/coverage',
     'server/coverage-report',
     '.claude',

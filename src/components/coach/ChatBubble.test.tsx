@@ -62,10 +62,10 @@ describe('ChatBubble', () => {
           role: 'model',
           content: '測試',
           timestamp: new Date().toISOString(),
-          metadata: { skillInvoked: 'MetaMoment' },
+          metadata: { skillInvoked: 'emergency_stabilization' },
         }}
       />
     );
-    expect(screen.getByText('🛟 MetaMoment')).toBeInTheDocument();
+    expect(screen.getByText('🛟 緊急安定')).toBeInTheDocument();
   });
 });

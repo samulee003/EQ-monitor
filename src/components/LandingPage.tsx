@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onCoach }) => {
           <h1 id="landing-title">今心主動情緒教練</h1>
           <p className="landing-hero-statement">不是等你整理好，才開始陪你。</p>
           <p className="landing-lead">
-            先用四象限看見此刻，再由主動教練接續你的記錄、LINE 片段與當下訊息，陪你判斷現在最適合聊天、記錄、呼吸，還是先暫停。
+            先用四色狀態看見此刻，再由主動教練接續你的記錄、LINE 片段與當下訊息，陪你判斷現在最適合聊天、記錄、呼吸，還是先暫停。
           </p>
           <div className="landing-hero-actions">
             <button type="button" className="landing-primary" onClick={onStart}>開始整理</button>
@@ -36,8 +36,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onCoach }) => {
         </div>
 
         <figure className="landing-hero-product">
-          <img src="/landing/home-desktop-latest.png" alt="今心最新版四象限首頁畫面" />
-          <figcaption>最新版首頁：四象限入口、右上角工具與主動教練浮動入口</figcaption>
+          <img src="/landing/home-desktop-latest.png" alt="今心最新版四色狀態首頁畫面" />
+          <figcaption>最新版首頁：四色狀態入口、右上角工具與主動教練浮動入口</figcaption>
         </figure>
       </section>
 
@@ -82,11 +82,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onCoach }) => {
             </div>
             <div className="landing-step">
               <strong>安放</strong>
-              <p>留下記錄，也留下一個能真的開始的小行動。</p>
+              <p>把感覺和需要放到安全的位置。</p>
+            </div>
+            <div className="landing-step">
+              <strong>回應</strong>
+              <p>留下一個能真的開始的小行動。</p>
             </div>
           </div>
           <figure className="landing-screen-panel">
-            <img src="/landing/home-desktop-latest.png" alt="今心四象限心情選擇畫面" />
+            <img src="/landing/home-desktop-latest.png" alt="今心四色狀態心情選擇畫面" />
           </figure>
         </div>
       </section>

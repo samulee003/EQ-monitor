@@ -97,7 +97,7 @@ describe('EmotionGrid', () => {
         fireEvent.click(screen.getByText('憤怒的'));
         fireEvent.click(screen.getByText('下一步'));
 
-        expect(screen.getByText('Labeling 標記強度')).toBeInTheDocument();
+        expect(screen.getByText('命名感覺與強度')).toBeInTheDocument();
         expect(screen.getByText('這些感覺目前有多強烈？')).toBeInTheDocument();
     });
 

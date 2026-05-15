@@ -23,29 +23,29 @@ describe('rulerBot', () => {
 
   const userId = 'test-user-001';
 
-  describe('完整 RULER 流程', () => {
+  describe('完整今心四步流程', () => {
     it('7 步對話：觸發 -> 胸口 -> 焦慮 -> 安全感 -> 碎紙 -> 呼吸 -> 好多了', async () => {
       // Step 1: idle -> recognize
       const r1 = await processMessage(userId, '你好');
-      expect(r1.text).toContain('第一步：覺察');
+      expect(r1.text).toContain('第一步：看見');
       expect(r1.quickReplies?.some((q) => q.label === '胸口')).toBe(true);
       expect(getSessionStatus(userId)).toContain('recognize');
 
       // Step 2: recognize -> understand
       const r2 = await processMessage(userId, '胸口');
-      expect(r2.text).toContain('第二步：理解');
+      expect(r2.text).toContain('第二步：命名');
       expect(r2.quickReplies?.some((q) => q.label === '焦慮')).toBe(true);
 
       // Step 3: understand -> label (精確匹配)
       const r3 = await processMessage(userId, '焦慮');
-      expect(r3.text).toContain('第三步：標記');
+      expect(r3.text).toContain('第三步：安放');
       expect(r3.text).toContain('焦慮');
       expect(r3.quickReplies?.length).toBeGreaterThan(0);
       expect(r3.quickReplies?.some((q) => q.label === '安全感')).toBe(true);
 
       // Step 4: label -> express
       const r4 = await processMessage(userId, '安全感');
-      expect(r4.text).toContain('第四步：表達');
+      expect(r4.text).toContain('第三步：安放');
       expect(r4.quickReplies?.some((q) => q.label === '開始碎紙')).toBe(true);
 
       // Step 5: express -> regulate
@@ -70,7 +70,7 @@ describe('rulerBot', () => {
       await processMessage(userId, '測試');
       const r2 = await processMessage(userId, '說不出來');
       expect(r2.text).toContain('沒關係，身體的感覺有時候很模糊');
-      expect(r2.text).toContain('第二步：理解');
+      expect(r2.text).toContain('第二步：命名');
     });
 
     it('跳過表達步驟', async () => {
@@ -79,7 +79,7 @@ describe('rulerBot', () => {
       await processMessage(userId, '疲憊');
       await processMessage(userId, '休息');
       const r5 = await processMessage(userId, '跳過');
-      expect(r5.text).toContain('第五步：調節');
+      expect(r5.text).toContain('第四步：回應');
       expect(r5.quickReplies?.some((q) => q.label?.includes('呼吸引導'))).toBe(true);
     });
 
@@ -314,7 +314,7 @@ describe('rulerBot', () => {
       expect(getSessionStatus(userId)).toBe('無活躍會話');
 
       const r = await processMessage(userId, '新的開始');
-      expect(r.text).toContain('第一步：覺察');
+      expect(r.text).toContain('第一步：看見');
     });
   });
 

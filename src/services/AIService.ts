@@ -34,32 +34,32 @@ class AIService {
             empatheticQuote: "「情緒不是障礙，而是內在智慧的信使。」"
         },
         "red": {
-            summary: "你正經歷高能量但不舒適的狀態。這種「戰或逃」反應是身體保護你的方式。",
-            underlyingPatterns: ["急性壓力", "界限被侵犯", "未滿足的控制感需求"],
-            suggestedAction: "進行 5-4-3-2-1 五感接地練習，或嘗試深呼吸，讓神經系統逐漸平復。",
+            summary: "你正經歷很滿、卡住的狀態。這種「戰或逃」反應是身體保護你的方式。",
+            underlyingPatterns: ["壓力累積", "界限被侵犯", "未滿足的控制感需求"],
+            suggestedAction: "進行 5-4-3-2-1 五感接地練習，或嘗試深呼吸，讓身體慢慢降速。",
             empatheticQuote: "「在刺激與反應之間，有一個空間；在那個空間裡，我們有選擇權。」— 維克多·弗蘭克",
-            colorTheory: "紅色象限的高喚醒感來自交感神經的活化，這是身體的自然保護機制。"
+            colorTheory: "紅色狀態代表高能量、不舒服的時刻，通常需要先暫停，讓身體有機會回到可承受範圍。"
         },
         "yellow": {
             summary: "你正處於充滿活力與正向的狀態！這種能量是創造與連結的絕佳時機。",
             underlyingPatterns: ["成就達成", "社交連結", "期待實現"],
             suggestedAction: "將這份能量傳遞給重要的人，或記錄下此刻的感受，作為未來低潮時的養分。",
             empatheticQuote: "「快樂不是終點，而是一種旅行的方式。」",
-            colorTheory: "黃色象限代表最佳表現區域，適合創意工作與社交互動。"
+            colorTheory: "黃色狀態代表被點亮、較順心的時刻，適合創意工作與社交互動。"
         },
         "blue": {
-            summary: "低能量與不適感可能讓你覺得沉重。請記得，允許自己在此刻放慢腳步。",
+            summary: "很慢、卡住的感受可能讓你覺得沉重。請記得，允許自己在此刻放慢腳步。",
             underlyingPatterns: ["疲憊累積", "失落感", "連結斷裂"],
             suggestedAction: "給自己一個柔軟的擁抱，或進行一件微小但滋養自己的事，如泡杯熱茶。",
             empatheticQuote: "「有些日子你會創造歷史，有些日子你只需要撐過去。」",
-            colorTheory: "藍色象限需要自我慈悲，這不是軟弱的表現，而是復原的起點。"
+            colorTheory: "藍色狀態需要自我慈悲，這不是軟弱的表現，而是復原的起點。"
         },
         "green": {
             summary: "你正處於平靜而滿足的狀態。這份寧靜是內心充電的寶貴時刻。",
             underlyingPatterns: ["內在平衡", "感恩連結", "安全感滿足"],
             suggestedAction: "在這個狀態下進行反思或感恩練習，效果會特別好。",
             empatheticQuote: "「平靜不是沒有風暴，而是在風暴中心安然自處。」",
-            colorTheory: "綠色象限是恢復與整合的狀態，是建立新習慣和深度思考的最佳時機。"
+            colorTheory: "綠色狀態是恢復與整合的狀態，是建立新習慣和深度思考的最佳時機。"
         }
     };
 
@@ -181,31 +181,31 @@ class AIService {
             const weekMockInsights: Record<string, AIInsight> = {
                 red: {
                     summary: "本週你經歷了許多高能量的挑戰時刻。這些「紅色」時光顯示你對生活充滿投入，但也需要學會在刺激與反應之間找到緩衝空間。",
-                    underlyingPatterns: ["急性壓力反應", "高標準自我要求"],
+                    underlyingPatterns: ["壓力累積", "高標準自我要求"],
                     suggestedAction: "下週嘗試「3分鐘暫停」練習：每當感到情緒升溫時，先進行三次深呼吸再回應。",
                     empatheticQuote: "「真正的力量不是從不跌倒，而是每次跌倒後都能溫柔地扶起自己。」",
-                    colorTheory: "紅色象限佔比高時，身體處於交感神經主導狀態。試著在一天結束時引入綠色活動（如靜坐）來平衡。"
+                    colorTheory: "紅色狀態佔比高時，身體多半處於較警覺的狀態。試著在一天結束時引入綠色活動（如靜坐）來平衡。"
                 },
                 yellow: {
                     summary: "這是一個充滿活力與創造的週次！你的「黃色」時光顯示正向能量充沛，這是建立新習慣和深化關係的絕佳時機。",
                     underlyingPatterns: ["成就動機", "社交連結需求"],
                     suggestedAction: "趁著這股能量，寫下三件本週你為自己感到驕傲的事，作為未來低潮時的儲備。",
                     empatheticQuote: "快樂不是終點，而是一種旅行的方式。你已經在路上了。",
-                    colorTheory: "黃色象限代表最佳表現區。善用這段時間處理重要決定，但也要注意別過度消耗。"
+                    colorTheory: "黃色狀態代表被點亮、較順心的時刻。善用這段時間處理重要決定，但也要注意別過度消耗。"
                 },
                 blue: {
                     summary: "本週的「藍色」時光較多，這不是軟弱，而是身體在誠實地告訴你：它需要休息與被傾聽。",
-                    underlyingPatterns: ["能量耗竭", "深層情緒處理"],
+                    underlyingPatterns: ["能量偏低", "需要休息與陪伴"],
                     suggestedAction: "下週每天給自己15分鐘「無目的時間」——不做任何事，只是存在。",
                     empatheticQuote: "有些季節是為了開花，有些是為了扎根。此刻的你正在扎根。",
-                    colorTheory: "藍色象限是身體的修復信號。像對待摯友一樣對待自己，給予溫柔與耐心。"
+                    colorTheory: "藍色狀態提醒你可能需要休息與照顧。像對待重要的人一樣對待自己，給予溫柔與耐心。"
                 },
                 green: {
                     summary: "你的本週充滿平靜與整合的「綠色」時光。這種內在穩定是情緒韌性的基石，也是創意萌發的沃土。",
                     underlyingPatterns: ["內在平衡", "自我照顧實踐"],
                     suggestedAction: "在這個平穩狀態下，試著記錄一個小目標：下週你想培養的一個微小習慣。",
                     empatheticQuote: "平靜不是沒有風暴，而是在風暴中心依然能夠深呼吸。",
-                    colorTheory: "綠色象限代表副交感神經主導的恢復狀態。這是整合經驗、建立新神經迴路的最佳時機。"
+                    colorTheory: "綠色狀態代表較能恢復與整合的狀態。這是沉澱經驗、建立新習慣的好時機。"
                 }
             };
             return weekMockInsights[dominantQuadrant] || weekMockInsights['green'];
@@ -275,9 +275,11 @@ class AIService {
 1. 以溫暖、同理心的方式回應
 2. 使用繁體中文（台灣用語）
 3. 回答簡潔但深入（100-200字）
-4. 適時引用心理學概念（如 RULER 框架）
+4. 適時引用心理學概念，但優先使用今心自己的四步語言
 5. 提供具體可行的建議
 6. 避免過度醫療化或診斷
+7. 方法來源要誠實：今心是 RULER 啟發、ACT-informed、IFS-informed、Dan Siegel-informed 的自有整合練習
+8. 不宣稱與 Yale、RULER Approach、ACT、IFS 或 Dan Siegel / Mindsight Institute 有官方關係
 
 用戶歷史情緒記錄：${JSON.stringify(context)}` 
                         },
@@ -306,27 +308,28 @@ class AIService {
     private getMockChatResponse(message: string): string {
         const lowerMessage = message.toLowerCase();
         
-        if (lowerMessage.includes('ruler') || lowerMessage.includes('框架')) {
-            return `RULER 是耶魯大學情緒智能中心開發的框架，包含五個步驟：
+        if (lowerMessage.includes('ruler') || lowerMessage.includes('框架') || lowerMessage.includes('五步') || lowerMessage.includes('四步')) {
+            return `今心四步是我們自己的前台整理語言，幫你把混亂感受拆成可以開始的小步：
 
-**R**ecognizing（辨別）：覺察當下的情緒信號
-**U**nderstanding（理解）：探索情緒的成因和影響
-**L**abeling（標記）：用精準的詞彙命名情緒
-**E**xpressing（表達）：找到健康的方式表達情緒
-**R**egulating（調節）：使用策略管理情緒反應
+1. **看見**：先注意身體與此刻狀態
+2. **命名**：用更準確的詞靠近感覺
+3. **安放**：理解它和哪個情境、需要或內在部分有關，並把想說的話安全放下來
+4. **回應**：選一個不傷害自己或他人的小行動
 
-這個框架幫助我們從「被情緒控制」轉向「與情緒合作」。`;
+這套練習靈感來自 RULER 的情緒覺察技能，也參考 ACT 的接納與價值行動、IFS-informed 的內在部分覺察，以及 Dan Siegel-informed 的 mindsight 與身心腦整合觀點；今心不是 Yale、RULER Approach、ACT、IFS 或 Dan Siegel / Mindsight Institute 官方產品，也不是心理治療。
+
+重點不是把情緒變好，而是讓你從「被情緒推著走」回到「我可以選下一步」。`;
         }
         
         if (lowerMessage.includes('建議') || lowerMessage.includes('怎麼辦')) {
-            return `當情緒來襲時，試試「RAIN」技巧：
+            return `可以先用今心四步做一個很小的版本：
 
-**R**ecognize（認知）：承認「我現在感到焦慮/生氣/難過」
-**A**llow（允許）：不評判地接納這個感受，告訴自己「這很正常」
-**I**nvestigate（探索）：身體哪裡有感覺？這個情緒想告訴我什麼？
-**N**urture（滋養）：問自己「此刻我需要什麼？」可能是深呼吸、喝水、或找人聊聊
+1. **看見**：先停 10 秒，注意身體最明顯的一個感覺。
+2. **命名**：用一句話說「我現在比較像是……」。
+3. **安放**：問自己，這份感覺可能在提醒我哪個需要或界線？
+4. **回應**：選一個不傷害自己或他人的小動作，例如喝水、離開現場 2 分鐘、傳訊息給可信任的人。
 
-記得，情緒就像天氣，會來也會走。你的任務不是阻止它，而是學會在雨中撐傘。☔️`;
+先不用把事情想清楚，能多一點停頓，就已經是在把主導權拿回來。`;
         }
         
         if (lowerMessage.includes('記錄') || lowerMessage.includes('為什麼')) {
@@ -344,7 +347,7 @@ class AIService {
 無論你此刻感受到什麼，那都是真實且重要的。情緒不是敵人，而是內在智慧傳遞訊息的方式。
 
 如果你想深入探索，可以：
-• 問我關於 RULER 框架的問題
+• 問我關於今心四步的問題
 • 請我分析你最近的情緒模式
 • 聊聊具體的調節策略
 

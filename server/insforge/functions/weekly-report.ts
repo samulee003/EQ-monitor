@@ -118,31 +118,31 @@ async function generateReportForUser(client: ReturnType<typeof createClient>, us
   const weekMockInsights: Record<string, Record<string, unknown>> = {
     red: {
       summary: '本週你經歷了許多高能量的挑戰時刻。這些「紅色」時光顯示你對生活充滿投入，但也需要學會在刺激與反應之間找到緩衝空間。',
-      underlyingPatterns: ['急性壓力反應', '高標準自我要求'],
+      underlyingPatterns: ['壓力累積', '高標準自我要求'],
       suggestedAction: '下週嘗試「3分鐘暫停」練習：每當感到情緒升溫時，先進行三次深呼吸再回應。',
       empatheticQuote: '「真正的力量不是從不跌倒，而是每次跌倒後都能溫柔地扶起自己。」',
-      colorTheory: '紅色象限佔比高時，身體處於交感神經主導狀態。試著在一天結束時引入綠色活動（如靜坐）來平衡。',
+      colorTheory: '紅色象限佔比高時，代表你近期有較多高能量、不舒服的時刻。試著在一天結束時引入綠色活動（如靜坐）來平衡。',
     },
     yellow: {
       summary: '這是一個充滿活力與創造的週次！你的「黃色」時光顯示正向能量充沛，這是建立新習慣和深化關係的絕佳時機。',
       underlyingPatterns: ['成就動機', '社交連結需求'],
       suggestedAction: '趁著這股能量，寫下三件本週你為自己感到驕傲的事，作為未來低潮時的儲備。',
       empatheticQuote: '快樂不是終點，而是一種旅行的方式。你已經在路上了。',
-      colorTheory: '黃色象限代表最佳表現區。善用這段時間處理重要決定，但也要注意別過度消耗。',
+      colorTheory: '黃色象限代表較有能量、較順心的時刻。善用這段時間處理重要決定，但也要注意別過度消耗。',
     },
     blue: {
       summary: '本週的「藍色」時光較多，這不是軟弱，而是身體在誠實地告訴你：它需要休息與被傾聽。',
-      underlyingPatterns: ['能量耗竭', '深層情緒處理'],
+      underlyingPatterns: ['能量偏低', '需要休息與陪伴'],
       suggestedAction: '下週每天給自己15分鐘「無目的時間」——不做任何事，只是存在。',
       empatheticQuote: '有些季節是為了開花，有些是為了扎根。此刻的你正在扎根。',
-      colorTheory: '藍色象限是身體的修復信號。像對待摯友一樣對待自己，給予溫柔與耐心。',
+      colorTheory: '藍色象限提醒你可能需要休息與照顧。像對待重要的人一樣對待自己，給予溫柔與耐心。',
     },
     green: {
       summary: '你的本週充滿平靜與整合的「綠色」時光。這種內在穩定是情緒韌性的基石，也是創意萌發的沃土。',
       underlyingPatterns: ['內在平衡', '自我照顧實踐'],
       suggestedAction: '在這個平穩狀態下，試著記錄一個小目標：下週你想培養的一個微小習慣。',
       empatheticQuote: '平靜不是沒有風暴，而是在風暴中心依然能夠深呼吸。',
-      colorTheory: '綠色象限代表副交感神經主導的恢復狀態。這是整合經驗、建立新神經迴路的最佳時機。',
+      colorTheory: '綠色象限代表較平穩、較舒服的時刻。可以趁這些時候沉澱經驗，選一個小習慣慢慢延續。',
     },
   };
 

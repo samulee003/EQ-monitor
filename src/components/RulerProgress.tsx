@@ -10,21 +10,20 @@ interface RulerProgressProps {
     selectedQuadrant: Quadrant | null | undefined;
 }
 
-// Map internal steps to display steps
+// Map internal flow states to 今心四步 display steps.
 const getDisplaySteps = (isFullFlow: boolean, t: (s: string) => string) => {
     if (isFullFlow) {
         return [
-            { key: 'recognizing', label: t('覺察'), letter: 'N', color: 'red' },
-            { key: 'understanding', label: t('理解'), letter: 'U', color: 'blue' },
-            { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
-            { key: 'expressing', label: t('表達'), letter: 'E', color: 'yellow' },
-            { key: 'regulating', label: t('調節'), letter: 'R', color: 'green' },
+            { key: 'recognizing', label: t('看見'), letter: '1', color: 'red' },
+            { key: 'labeling', label: t('命名'), letter: '2', color: 'yellow' },
+            { key: 'understanding', label: t('安放'), letter: '3', color: 'blue' },
+            { key: 'regulating', label: t('回應'), letter: '4', color: 'green' },
         ];
     }
     // Quick mode
     return [
-        { key: 'recognizing', label: t('覺察'), letter: 'N', color: 'red' },
-        { key: 'labeling', label: t('標記'), letter: 'L', color: 'yellow' },
+        { key: 'recognizing', label: t('看見'), letter: '1', color: 'red' },
+        { key: 'labeling', label: t('命名'), letter: '2', color: 'yellow' },
     ];
 };
 
@@ -39,7 +38,7 @@ const getStepIndex = (step: RulerStep, isFullFlow: boolean, t: (s: string) => st
         'bodyScan': 'recognizing',
         'labeling': 'labeling',
         'understanding': 'understanding',
-        'expressing': 'expressing',
+        'expressing': 'understanding',
         'regulating': 'regulating',
         'neuroCheck': 'regulating',
         'summary': 'regulating',

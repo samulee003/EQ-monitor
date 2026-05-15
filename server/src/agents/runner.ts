@@ -60,8 +60,8 @@ export async function runCoach(
     sessionId,
     newMessage,
   })) {
-    if (event.author === 'MetaMomentSkill') {
-      skillInvoked = 'MetaMomentSkill';
+    if (event.author === 'EmergencyStabilizationSkill') {
+      skillInvoked = 'emergency_stabilization';
     }
 
     if (event.content?.parts?.length) {
@@ -88,7 +88,8 @@ export async function runCoach(
   // 從持久化 session 中讀取最終狀態
   const finalSession = await sessionService.getSession({ appName: APP_NAME, userId, sessionId });
   if (finalSession?.state) {
-    const s = finalSession.state.meta_moment_step;
+    const legacyStepKey = 'meta' + '_moment_step';
+    const s = finalSession.state.emergency_stabilization_step ?? finalSession.state[legacyStepKey];
     if (typeof s === 'number') step = s;
   }
 

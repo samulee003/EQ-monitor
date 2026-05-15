@@ -47,7 +47,7 @@
     color: var(--text-secondary, #b8b8b8);
 }
 
-/* 象限選擇 */
+/* 狀態區選擇 */
 .quadrant-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

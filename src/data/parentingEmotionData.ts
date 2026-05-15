@@ -11,7 +11,7 @@ export interface ParentingEmotion {
     parentScenario: string; // 典型育兒觸發情境
 }
 
-// 紅色象限：高能量、不舒服
+// 紅色狀態：很滿、卡住
 export const redEmotions: ParentingEmotion[] = [
     {
         id: 'red_angry',
@@ -57,7 +57,7 @@ export const redEmotions: ParentingEmotion[] = [
     }
 ];
 
-// 黃色象限：高能量、開心
+// 黃色狀態：很滿、順心
 export const yellowEmotions: ParentingEmotion[] = [
     {
         id: 'yellow_gratified',
@@ -68,7 +68,7 @@ export const yellowEmotions: ParentingEmotion[] = [
     },
     {
         id: 'yellow_healed',
-        name: '被療癒',
+        name: '被安撫',
         quadrant: 'yellow',
         description: '孩子的擁抱或笑聲',
         parentScenario: '累了一天，孩子突然說「我愛你」'
@@ -96,7 +96,7 @@ export const yellowEmotions: ParentingEmotion[] = [
     }
 ];
 
-// 藍色象限：低能量、不舒服
+// 藍色狀態：很慢、卡住
 export const blueEmotions: ParentingEmotion[] = [
     {
         id: 'blue_guilty',
@@ -149,7 +149,7 @@ export const blueEmotions: ParentingEmotion[] = [
     }
 ];
 
-// 綠色象限：低能量、平靜
+// 綠色狀態：很慢、順心
 export const greenEmotions: ParentingEmotion[] = [
     {
         id: 'green_calm',
@@ -196,7 +196,7 @@ export const parentingEmotions: ParentingEmotion[] = [
     ...greenEmotions
 ];
 
-// 快速選擇：每個象限最常用的 3 個
+// 快速選擇：每個狀態色彩最常用的 3 個
 export const quickEmotions: Record<Quadrant, ParentingEmotion[]> = {
     red: redEmotions.slice(0, 3),
     yellow: yellowEmotions.slice(0, 3),
@@ -223,7 +223,7 @@ export function getEmotionById(id: string): ParentingEmotion | undefined {
     return parentingEmotions.find(e => e.id === id);
 }
 
-// 根據象限獲取情緒
+// 根據狀態色彩獲取情緒
 export function getEmotionsByQuadrant(quadrant: Quadrant): ParentingEmotion[] {
     return parentingEmotions.filter(e => e.quadrant === quadrant);
 }

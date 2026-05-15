@@ -34,10 +34,10 @@ const BotDashboard: React.FC<BotDashboardProps> = ({ lineUserId }) => {
     const dist = weeklyReport.quadrantDistribution;
     const total = dist.red + dist.yellow + dist.blue + dist.green || 1;
     return [
-      { key: 'red', label: t('高能量\n不適'), count: dist.red, color: 'var(--color-red)' },
-      { key: 'yellow', label: t('高能量\n愉悅'), count: dist.yellow, color: 'var(--color-yellow)' },
-      { key: 'blue', label: t('低能量\n不適'), count: dist.blue, color: 'var(--color-blue)' },
-      { key: 'green', label: t('低能量\n平靜'), count: dist.green, color: 'var(--color-green)' },
+      { key: 'red', label: t('很滿\n卡住'), count: dist.red, color: 'var(--color-red)' },
+      { key: 'yellow', label: t('很滿\n順心'), count: dist.yellow, color: 'var(--color-yellow)' },
+      { key: 'blue', label: t('很慢\n卡住'), count: dist.blue, color: 'var(--color-blue)' },
+      { key: 'green', label: t('很慢\n順心'), count: dist.green, color: 'var(--color-green)' },
     ].map((d) => ({ ...d, percent: Math.round((d.count / total) * 100) }));
   }, [weeklyReport, t]);
 
