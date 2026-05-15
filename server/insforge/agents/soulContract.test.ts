@@ -9,12 +9,13 @@ function readProjectFile(path: string): string {
   return readFileSync(resolve(repoRoot, path), 'utf8');
 }
 
-describe('今心教練 soul 契約', () => {
-  it('AI 端應該有 soul.md 作為主動教練人格與邊界規格', () => {
+describe('阿念教練 soul 契約', () => {
+  it('AI 端應該有 soul.md 作為阿念教練人格與邊界規格', () => {
     const soul = readProjectFile('server/insforge/agents/soul.md');
 
-    expect(soul).toContain('今心教練 Soul');
+    expect(soul).toContain('阿念教練 Soul');
     expect(soul).toContain('主動但不打擾');
+    expect(soul).toContain('慢慢看懂使用者的節奏');
     expect(soul).toContain('同理 → 觀察 → 下一步');
     expect(soul).toContain('不做診斷');
     expect(soul).toContain('緊急安定');
@@ -40,10 +41,12 @@ describe('今心教練 soul 契約', () => {
     expect(promptSource).toContain('function buildProductionCoachSystemPrompt()');
     expect(promptSource).toContain('const SYSTEM_PROMPT = buildProductionCoachSystemPrompt();');
     expect(promptSource).not.toContain('const SYSTEM_PROMPT = `你是「今心教練」');
+    expect(promptSource).toContain('你是「阿念教練」');
 
     for (const phrase of [
       'server/insforge/agents/soul.md',
       '主動但不打擾',
+      '慢慢看懂使用者的節奏',
       '同理 → 觀察 → 下一步',
       '不是客服、不是占卜、不是診斷工具',
       'REST fallback',

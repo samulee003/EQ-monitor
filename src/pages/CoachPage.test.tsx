@@ -29,21 +29,27 @@ describe('CoachPage', () => {
 
   it('應該顯示阿念教練預設開場訊息', () => {
     render(<CoachPage />);
-    expect(screen.getByText('我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。')).toBeInTheDocument();
+    expect(screen.getByText('先說一句就好')).toBeInTheDocument();
+    expect(screen.getByText('不用整理完整。我會陪你把現在的感受，變成一個比較能承受的小下一步。')).toBeInTheDocument();
   });
 
   it('Coach 頁面應顯示 Beta 內測標籤與使用上限提示', () => {
     render(<CoachPage />);
 
-    expect(screen.getAllByLabelText('Beta 內測版').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText(/目前是內測期間/)).toBeInTheDocument();
-    expect(screen.getByText(/AI 教練回合可能會有使用上限/)).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Beta 內測版').length).toBeGreaterThan(0);
+    expect(screen.getByText('內測中')).toBeInTheDocument();
   });
 
-  it('應該顯示阿念教練開場訊息與建議提示', () => {
+  it('Coach 首屏應該短到可以立刻開始，不顯示大段功能說明', () => {
     render(<CoachPage />);
-    expect(screen.getByText('你不需要先想好怎麼說。只要留下一句話，阿念會接住前後脈絡，判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。')).toBeInTheDocument();
-    expect(screen.getByText('我現在只想聊聊')).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: '我現在很煩' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '先做呼吸' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '開始 7 日陪跑' })).toBeInTheDocument();
+    expect(screen.queryByText('主動提下一步')).not.toBeInTheDocument();
+    expect(screen.queryByText('串起 LINE 與 APP')).not.toBeInTheDocument();
+    expect(screen.queryByText('越來越懂你')).not.toBeInTheDocument();
+    expect(screen.queryByText(/你不需要先想好怎麼說/)).not.toBeInTheDocument();
   });
 
   it('應該顯示阿念教練畫面骨架與快速回覆', () => {
@@ -51,12 +57,9 @@ describe('CoachPage', () => {
 
     expect(screen.getByRole('region', { name: '阿念教練畫布' })).toBeInTheDocument();
     expect(screen.getByText(/^今日，/)).toBeInTheDocument();
-    expect(screen.getByText('主動提下一步')).toBeInTheDocument();
-    expect(screen.getByText('串起 LINE 與 APP')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '好的，一起試試' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '我現在只想聊聊' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '先做呼吸' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '好的，一起試試' }));
+    fireEvent.click(screen.getByRole('button', { name: '先做呼吸' }));
     expect(screen.getByText('跟著阿念一起呼吸')).toBeInTheDocument();
   });
 
@@ -72,21 +75,19 @@ describe('CoachPage', () => {
     expect(screen.queryByText('安定室')).not.toBeInTheDocument();
   });
 
-  it('Coach 空狀態應該提供三個阿念教練情境入口', () => {
+  it('Coach 空狀態應該提供三個低負擔開始入口', () => {
     render(<CoachPage />);
 
-    expect(screen.getByText('你現在可能想找我做什麼')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '我最近晚上都很焦慮' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '我剛對孩子發脾氣' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '我想看阿念觀察到什麼' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我現在很煩' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '先做呼吸' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '開始 7 日陪跑' })).toBeInTheDocument();
   });
 
-  it('Coach 首屏提供 7 日小陪跑入口', () => {
+  it('Coach 首屏提供簡短 7 日小陪跑入口', () => {
     render(<CoachPage />);
 
-    expect(screen.getByText('7 日小陪跑')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '開始 7 日小陪跑' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '每天做一個照顧自己的小動作' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '開始 7 日陪跑' }));
+    expect(screen.getByText('我想開始 7 日小陪跑：每天做一個照顧自己的小動作')).toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {
@@ -342,6 +343,10 @@ describe('CoachPage', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
+    saveChatHistory([
+      { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+    ], 'user_local_001');
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
     fireEvent.click(screen.getByText('綁定'));
@@ -359,6 +364,10 @@ describe('CoachPage', () => {
   });
 
   it('LINE Bot 綁定區顯示官方帳號與加好友入口', () => {
+    saveChatHistory([
+      { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+    ], 'user_local_001');
     render(<CoachPage />);
 
     const panel = screen.getByTestId('line-binding-panel');
@@ -379,6 +388,10 @@ describe('CoachPage', () => {
     const fetchMock = vi.fn().mockReturnValue(fetchPromise);
     vi.stubGlobal('fetch', fetchMock);
 
+    saveChatHistory([
+      { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+    ], 'user_local_001');
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
     fireEvent.click(screen.getByRole('button', { name: '綁定' }));
@@ -404,6 +417,10 @@ describe('CoachPage', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
+    saveChatHistory([
+      { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+    ], 'user_local_001');
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
     fireEvent.click(screen.getByText('綁定'));

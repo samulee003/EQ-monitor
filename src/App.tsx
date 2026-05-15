@@ -8,7 +8,7 @@ import SkipLink from './components/SkipLink';
 import A11yAnnouncer from './components/A11yAnnouncer';
 import CombinedProviders from './components/CombinedProviders';
 import MigrationProgress from './components/MigrationProgress';
-import LandingPage from './components/LandingPage';
+import AboutPage from './components/LandingPage';
 import { useAppStore } from './stores/appStore';
 import { useFocusVisible } from './hooks/useA11y';
 import { useAuth } from './services/AuthContext';
@@ -39,24 +39,6 @@ function AppContent() {
     unlock,
   } = useAppStore();
 
-  if (currentView === 'landing') {
-    return (
-      <>
-        <LandingPage
-          onStart={() => {
-            dismissSplash();
-            setView('home');
-          }}
-          onCoach={() => {
-            dismissSplash();
-            setView('coach');
-          }}
-        />
-        <A11yAnnouncer />
-      </>
-    );
-  }
-
   if (showSplash) {
     return <SplashScreen onComplete={dismissSplash} />;
   }
@@ -82,7 +64,13 @@ function AppContent() {
             {currentView === 'growth' && <GrowthDashboard />}
             {currentView === 'achievement' && <AchievementPage />}
             {currentView === 'coach' && <CoachPage />}
-            {currentView !== 'home' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && (
+            {currentView === 'about' && (
+              <AboutPage
+                onStart={() => setView('home')}
+                onCoach={() => setView('coach')}
+              />
+            )}
+            {currentView !== 'home' && currentView !== 'history' && currentView !== 'growth' && currentView !== 'achievement' && currentView !== 'coach' && currentView !== 'about' && (
               <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
                 <h2>{t('頁面未找到')}</h2>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{t('這個頁面不存在。')}</p>

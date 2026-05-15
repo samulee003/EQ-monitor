@@ -5,7 +5,7 @@ import { WelcomeCard } from './WelcomeCard';
 describe('WelcomeCard', () => {
   it('應該顯示歡迎標題', () => {
     render(<WelcomeCard onPromptClick={vi.fn()} />);
-    expect(screen.getByText('歡迎來到今心教練')).toBeInTheDocument();
+    expect(screen.getByText('歡迎來到阿念教練')).toBeInTheDocument();
   });
 
   it('應該顯示建議提示', () => {

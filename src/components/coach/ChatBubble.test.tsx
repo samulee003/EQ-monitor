@@ -32,12 +32,12 @@ describe('ChatBubble', () => {
         message={{
           id: '1',
           role: 'model',
-          content: '我是今心教練',
+          content: '我是阿念教練',
           timestamp: new Date().toISOString(),
         }}
       />
     );
-    expect(screen.getByText('我是今心教練')).toBeInTheDocument();
+    expect(screen.getByText('我是阿念教練')).toBeInTheDocument();
   });
 
   it('應該顯示時間戳為「剛剛」', () => {

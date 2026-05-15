@@ -3,6 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MainLayout from './MainLayout';
 import { useAuth } from '../services/AuthContext';
 
+const mockSettingsStore = vi.hoisted(() => ({
+  isOnboardingCompleted: vi.fn(() => true),
+  setOnboardingCompleted: vi.fn(),
+}));
+
 vi.mock('../services/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
@@ -24,10 +29,7 @@ vi.mock('../services/NotificationService', () => ({
 }));
 
 vi.mock('../adapters', () => ({
-  settingsStore: {
-    isOnboardingCompleted: () => true,
-    setOnboardingCompleted: vi.fn(),
-  },
+  settingsStore: mockSettingsStore,
 }));
 
 vi.mock('./AchievementToast', () => ({
@@ -35,7 +37,7 @@ vi.mock('./AchievementToast', () => ({
 }));
 
 vi.mock('./OnboardingFlow', () => ({
-  default: () => null,
+  default: () => <div role="dialog">初次導覽</div>,
 }));
 
 vi.mock('./coach/CoachFAB', () => ({
@@ -53,6 +55,7 @@ vi.mock('./UserProfile', () => ({
 describe('MainLayout 帳號入口', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSettingsStore.isOnboardingCompleted.mockReturnValue(true);
     (useAuth as ReturnType<typeof vi.fn>).mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -86,6 +89,19 @@ describe('MainLayout 帳號入口', () => {
     expect(coachNav).toBeInTheDocument();
     expect(within(coachNav).getByText('Beta')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '安定室' })).not.toBeInTheDocument();
+  });
+
+  it('第一次進入會自動顯示 App 導覽', () => {
+    mockSettingsStore.isOnboardingCompleted.mockReturnValue(false);
+
+    render(
+      <MainLayout currentView="home" onNavigate={vi.fn()}>
+        <div>主要內容</div>
+      </MainLayout>
+    );
+
+    expect(screen.getByText('主要內容')).toBeInTheDocument();
+    expect(screen.getByText('初次導覽')).toBeInTheDocument();
   });
 
   it('頁首行動按鈕使用純圖示並保留清楚可及名稱', () => {
@@ -126,13 +142,14 @@ describe('MainLayout 帳號入口', () => {
     expect(screen.getByText('帳號設定')).toBeInTheDocument();
   });
 
-  it('頁尾提供隱私、資料刪除與回報問題入口', () => {
+  it('頁尾提供關於我們、隱私、資料刪除與回報問題入口', () => {
     render(
       <MainLayout currentView="home" onNavigate={vi.fn()}>
         <div>主要內容</div>
       </MainLayout>
     );
 
+    expect(screen.getByRole('link', { name: '關於我們' })).toHaveAttribute('href', '#about');
     expect(screen.getByRole('link', { name: '隱私與免責聲明' })).toHaveAttribute('href', '/privacy.html');
     expect(screen.getByRole('link', { name: '資料刪除申請' })).toHaveAttribute('href', '/account-deletion.html');
     expect(screen.getByRole('link', { name: '回報問題' })).toHaveAttribute(

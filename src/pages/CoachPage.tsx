@@ -32,26 +32,19 @@ const WELCOME_MSG: CoachMessage = {
 type ErrorType = 'network' | 'api' | 'timeout';
 type CoachView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
 
-const QUICK_REPLIES = ['好的，一起試試', '我現在只想聊聊'];
-const COACH_SCENARIOS = [
+const START_ACTIONS = [
   {
-    label: '我最近晚上都很焦慮',
-    prompt: '我最近晚上都很焦慮，想請阿念陪我整理可能的模式和下一步。',
+    label: '我現在很煩',
+    prompt: '我現在很煩，先陪我整理一下。',
   },
   {
-    label: '我剛對孩子發脾氣',
-    prompt: '我剛對孩子發脾氣，現在有點後悔，也想知道接下來可以怎麼修復。',
+    label: '先做呼吸',
+    action: 'breathing' as const,
   },
   {
-    label: '我想看阿念觀察到什麼',
-    prompt: '我想看阿念根據我最近的情緒線索觀察到什麼。',
+    label: '開始 7 日陪跑',
+    companionGoal: '每天做一個照顧自己的小動作',
   },
-];
-
-const COMPANION_GOALS = [
-  '睡前焦慮少一點',
-  '親子衝突後快一點回來',
-  '每天做一個照顧自己的小動作',
 ];
 
 const TOOL_TRACE_NAMES = [
@@ -311,17 +304,24 @@ export default function CoachPage() {
     }
   }, [error, doSend]);
 
-  const handleQuickReply = useCallback(
-    (prompt: string) => {
-      if (prompt === '好的，一起試試') {
+  const handleStartAction = useCallback(
+    (item: typeof START_ACTIONS[number]) => {
+      if (item.action === 'breathing') {
         setPendingAction({ action: 'start_breathing', reason: '跟著阿念一起呼吸' });
         setShowBreathing(true);
         return;
       }
 
-      handleSend(prompt);
+      if (item.companionGoal) {
+        handleStartCompanionRun(item.companionGoal);
+        return;
+      }
+
+      if (item.prompt) {
+        handleSend(item.prompt);
+      }
     },
-    [handleSend]
+    [handleSend, handleStartCompanionRun]
   );
 
   const handleNavigate = useCallback((view: CoachView) => {
@@ -390,85 +390,22 @@ export default function CoachPage() {
                   <p className={styles.agentEyebrow}>阿念教練</p>
                   <span className={styles.betaBadge} aria-label="Beta 內測版">Beta</span>
                 </div>
-                <h2>你不用自己想下一步</h2>
+                <h2>先說一句就好</h2>
                 <p className={styles.agentDescription}>
-                  我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。
+                  不用整理完整。我會陪你把現在的感受，變成一個比較能承受的小下一步。
                 </p>
                 <p className={styles.betaNotice}>
-                  目前是內測期間，AI 教練回合可能會有使用上限；你仍可以回來回報小行動，讓阿念陪你把下一步變小。
+                  內測中
                 </p>
-                <div className={styles.agentFeatureGrid} aria-label="阿念教練特色">
-                  <div className={styles.agentFeature}>
-                    <strong>主動提下一步</strong>
-                    <span>聊天、記錄、呼吸或緊急安定，我會幫你判斷先做什麼。</span>
-                  </div>
-                  <div className={styles.agentFeature}>
-                    <strong>串起 LINE 與 APP</strong>
-                    <span>日常在 LINE 留下片段，回到 APP 就能看見脈絡。</span>
-                  </div>
-                  <div className={styles.agentFeature}>
-                    <strong>越來越懂你</strong>
-                    <span>把最近的情緒、強度與需求整理成更容易行動的提醒。</span>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.modelBubble}>
-                <p>你不需要先想好怎麼說。只要留下一句話，阿念會接住前後脈絡，判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。</p>
-              </div>
-              <div className={styles.modelBubble}>
-                <p>例如你說「我今天很焦慮」，我會先陪你釐清觸發點，再把它轉成可以完成的一小步。</p>
-              </div>
-              <div className={styles.modelBubble}>
-                <p>我們試著先深呼吸幾次，把注意力帶回當下。你願意和我一起做個簡短的呼吸練習嗎？</p>
-              </div>
-              <div className={styles.quickReplies} aria-label="快速回覆">
-                {QUICK_REPLIES.map((prompt) => (
-                  <button
-                    type="button"
-                    key={prompt}
-                    className={styles.quickReply}
-                    onClick={() => handleQuickReply(prompt)}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-              <div className={styles.momentumPanel} aria-label="7 日小陪跑">
-                <div className={styles.momentumHeader}>
-                  <p>7 日小陪跑</p>
-                  <h3>讓阿念推你前進一點點</h3>
-                </div>
-                <button
-                  type="button"
-                  className={styles.momentumPrimary}
-                  onClick={() => handleStartCompanionRun('每天做一個照顧自己的小動作')}
-                >
-                  開始 7 日小陪跑
-                </button>
-                <div className={styles.momentumGoals}>
-                  {COMPANION_GOALS.map((goal) => (
+                <div className={styles.startActions} aria-label="阿念教練開始選項">
+                  {START_ACTIONS.map((item) => (
                     <button
                       type="button"
-                      key={goal}
-                      className={styles.momentumGoal}
-                      onClick={() => handleStartCompanionRun(goal)}
+                      key={item.label}
+                      className={styles.startActionButton}
+                      onClick={() => handleStartAction(item)}
                     >
-                      {goal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.scenarioPanel} aria-label="阿念教練情境入口">
-                <p>你現在可能想找我做什麼</p>
-                <div className={styles.scenarioGrid}>
-                  {COACH_SCENARIOS.map(({ label, prompt }) => (
-                    <button
-                      type="button"
-                      key={label}
-                      className={styles.scenarioButton}
-                      onClick={() => handleSend(prompt)}
-                    >
-                      {label}
+                      {item.label}
                     </button>
                   ))}
                 </div>
@@ -490,6 +427,7 @@ export default function CoachPage() {
           onReportAction={handleReportMicroAction}
         />
 
+        {!showWelcome && (
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
             <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
@@ -538,6 +476,7 @@ export default function CoachPage() {
             </p>
           )}
         </section>
+        )}
 
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />

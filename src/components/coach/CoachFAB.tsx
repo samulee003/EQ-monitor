@@ -11,11 +11,11 @@ export function CoachFAB({ onClick, visible }: Props) {
   return (
     <button
       onClick={onClick}
-      aria-label="開啟今心主動教練"
+      aria-label="開啟阿念教練"
       className={styles.fab}
     >
       <span aria-hidden="true" className={styles.icon}>✦</span>
-      <span className={styles.label}>主動教練</span>
+      <span className={styles.label}>阿念教練</span>
     </button>
   );
 }

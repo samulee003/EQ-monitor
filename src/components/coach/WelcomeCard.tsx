@@ -20,10 +20,10 @@ export function WelcomeCard({ onPromptClick }: Props) {
         </div>
 
         <h2 className={styles.title}>
-          歡迎來到今心教練
+          歡迎來到阿念教練
         </h2>
         <p className={styles.description}>
-          我是你的主動情緒教練，在這裡陪你用知心四式：心照、喚名、安神、動念，整理情緒，練習選一個可承受的下一步。
+          我是阿念，會陪你用知心四式：心照、喚名、安神、動念，整理情緒線索，練習選一個可承受的下一步。
         </p>
 
         <div className={styles.promptList}>

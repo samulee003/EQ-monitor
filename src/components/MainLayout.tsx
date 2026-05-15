@@ -12,10 +12,12 @@ import UserProfile from './UserProfile';
 import { useAuth } from '../services/AuthContext';
 import './MainLayout.css';
 
+type MainLayoutNavView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
+
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'home' | 'history' | 'growth' | 'achievement' | 'coach';
-  onNavigate: (view: 'home' | 'history' | 'growth' | 'achievement' | 'coach') => void;
+  currentView: MainLayoutNavView | 'about';
+  onNavigate: (view: MainLayoutNavView) => void;
 }
 
 type HeaderIconType = 'achievement' | 'moon' | 'sun' | 'system' | 'bell' | 'account' | 'loading';
@@ -255,7 +257,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
 
       <footer>
         <div className="footer-main">
-          {t('每日情緒覺察 • 主動教練陪你整理下一步')}
+          {t('每日情緒覺察 • 阿念陪你整理下一步')}
         </div>
         <div className="footer-disclaimer">
           {t('本工具非醫療器材，不能取代專業心理治療。')}
@@ -264,6 +266,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           </span>
         </div>
         <div className="footer-links" aria-label={t('產品資訊')}>
+          <a href="#about">{t('關於我們')}</a>
           <a href="/privacy.html" target="_blank" rel="noopener noreferrer">{t('隱私與免責聲明')}</a>
           <a href="/account-deletion.html" target="_blank" rel="noopener noreferrer">{t('資料刪除申請')}</a>
           <a href="https://github.com/samulee003/EQ-monitor/issues/new" target="_blank" rel="noopener noreferrer">{t('回報問題')}</a>
