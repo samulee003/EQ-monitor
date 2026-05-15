@@ -2,7 +2,69 @@ export type EmotionalQuadrant = 'red' | 'blue' | 'green' | 'yellow';
 
 export type ZhixinMove = '心照' | '喚名' | '安神' | '動念';
 
-export type MicroActionStatus = 'proposed' | 'accepted' | 'completed' | 'skipped' | 'expired';
+export type CompanionGoalKey = 'sleep_anxiety' | 'parent_repair' | 'daily_care';
+
+export type MicroActionCategory = 'body_downshift' | 'settling' | 'repair' | 'daily_care';
+
+export type MicroActionStatus =
+  | 'proposed'
+  | 'accepted'
+  | 'active'
+  | 'completed'
+  | 'partial'
+  | 'skipped'
+  | 'expired';
+
+export interface MicroActionRow {
+  id: string;
+  title: string;
+  category: MicroActionCategory;
+  status: MicroActionStatus;
+  due_at: string;
+  created_at: string;
+  goal_key?: CompanionGoalKey | null;
+  task_key?: string | null;
+  report_text?: string | null;
+}
+
+export interface GamificationStats {
+  total_xp: number;
+  coin_balance: number;
+  lifetime_coins: number;
+  total_reported: number;
+  completed_count: number;
+  partial_count: number;
+  skipped_count: number;
+  current_review_streak: number;
+  longest_review_streak: number;
+  last_review_date: string | null;
+}
+
+export interface CoachLoopContext {
+  nowIso: string;
+  userId: string;
+  sessionId: string;
+  activeMicroAction: MicroActionRow | null;
+  gamification: GamificationStats;
+  recentEmotionSummary: unknown;
+}
+
+export interface TaskTemplate {
+  key: string;
+  goalKey: CompanionGoalKey;
+  category: MicroActionCategory;
+  title: string;
+  dueHours: number;
+}
+
+export type CoachIntent =
+  | { kind: 'sos'; reason: 'crisis_text_detected' }
+  | { kind: 'start_companion_run'; goalKey: CompanionGoalKey }
+  | { kind: 'propose_micro_action'; goalKey: CompanionGoalKey; task: TaskTemplate }
+  | { kind: 'create_micro_action'; task: TaskTemplate; confirmationText: string }
+  | { kind: 'report_micro_action'; microActionId: string; status: 'completed' | 'partial' | 'skipped' }
+  | { kind: 'show_gamification_summary' }
+  | { kind: 'chat' };
 
 export interface CoachActionLoopInput {
   userId: string;
@@ -67,6 +129,159 @@ const HIGH_RISK_PATTERNS = [
   /hurt my child/i,
   /harm my child/i,
 ];
+
+export const TASK_TEMPLATES: TaskTemplate[] = [
+  {
+    key: 'sleep_breath_3min',
+    goalKey: 'sleep_anxiety',
+    category: 'settling',
+    title: '睡前做 3 分鐘安神呼吸',
+    dueHours: 24,
+  },
+  {
+    key: 'repair_step_away_2min',
+    goalKey: 'parent_repair',
+    category: 'repair',
+    title: '情緒升高時先離開現場 2 分鐘',
+    dueHours: 24,
+  },
+  {
+    key: 'drink_water_and_need',
+    goalKey: 'daily_care',
+    category: 'daily_care',
+    title: '喝一杯水，坐下來寫一句「我現在其實需要……」',
+    dueHours: 24,
+  },
+];
+
+export function isCrisisText(text: string): boolean {
+  return HIGH_RISK_PATTERNS.some((pattern) => pattern.test(text)) || /救命|撐不下去|活不下去|SOS/i.test(text);
+}
+
+export function normalizeCompanionGoal(text: string): CompanionGoalKey {
+  if (/睡|失眠|睡前|夜晚|焦慮/.test(text)) return 'sleep_anxiety';
+  if (/親子|孩子|小孩|修復|道歉|吵架|情緒升高|離開現場/.test(text)) return 'parent_repair';
+  return 'daily_care';
+}
+
+export function pickDefaultTaskForGoal(goalKey: CompanionGoalKey): TaskTemplate {
+  return TASK_TEMPLATES.find((task) => task.goalKey === goalKey) ?? TASK_TEMPLATES[2];
+}
+
+export function classifyCoachIntent(text: string, context: CoachLoopContext): CoachIntent {
+  if (isCrisisText(text)) return { kind: 'sos', reason: 'crisis_text_detected' };
+
+  const normalized = text.trim();
+  const active = context.activeMicroAction;
+
+  if (/金幣|XP|等級|復盤連續|排行榜/i.test(normalized)) {
+    return { kind: 'show_gamification_summary' };
+  }
+
+  if (/7\s*日小陪跑|7日小陪跑|開始陪跑/.test(normalized)) {
+    return { kind: 'start_companion_run', goalKey: normalizeCompanionGoal(normalized) };
+  }
+
+  if (active) {
+    if (/沒做到|沒有做到|沒做|先換/.test(normalized)) {
+      return { kind: 'report_micro_action', microActionId: active.id, status: 'skipped' };
+    }
+    if (/有做到|完成|做到了/.test(normalized)) {
+      return { kind: 'report_micro_action', microActionId: active.id, status: 'completed' };
+    }
+    if (/一半|部分|有做一點/.test(normalized)) {
+      return { kind: 'report_micro_action', microActionId: active.id, status: 'partial' };
+    }
+    return { kind: 'chat' };
+  }
+
+  if (/^(好|可以|就這個|設為今天的小行動)$/.test(normalized)) {
+    return {
+      kind: 'create_micro_action',
+      task: pickDefaultTaskForGoal(normalizeCompanionGoal(normalized)),
+      confirmationText: normalized,
+    };
+  }
+
+  return { kind: 'chat' };
+}
+
+export function expireMicroActions(
+  rows: MicroActionRow[],
+  nowIso: string
+): { expiredIds: string[]; active: MicroActionRow | null } {
+  const nowMs = Date.parse(nowIso);
+  const expiredIds = rows
+    .filter((row) => row.status === 'active' && Date.parse(row.due_at) <= nowMs)
+    .map((row) => row.id);
+  const active =
+    rows
+      .filter((row) => row.status === 'active' && Date.parse(row.due_at) > nowMs)
+      .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))[0] ?? null;
+  return { expiredIds, active };
+}
+
+export function computeMicroActionReward(status: 'completed' | 'partial' | 'skipped' | 'expired') {
+  switch (status) {
+    case 'completed':
+      return { xp: 20, coins: 10 };
+    case 'partial':
+      return { xp: 15, coins: 7 };
+    case 'skipped':
+      return { xp: 10, coins: 5 };
+    case 'expired':
+      return { xp: 0, coins: 0 };
+  }
+}
+
+export function updateReviewStreak(input: {
+  current: number;
+  longest: number;
+  lastReviewDate: string | null;
+  reportDate: string;
+}): { current: number; longest: number; lastReviewDate: string } {
+  if (input.lastReviewDate === input.reportDate) {
+    return {
+      current: input.current,
+      longest: input.longest,
+      lastReviewDate: input.reportDate,
+    };
+  }
+
+  const lastMs = input.lastReviewDate ? Date.parse(`${input.lastReviewDate}T00:00:00.000Z`) : null;
+  const reportMs = Date.parse(`${input.reportDate}T00:00:00.000Z`);
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const current = lastMs !== null && reportMs - lastMs === oneDayMs ? input.current + 1 : 1;
+
+  return {
+    current,
+    longest: Math.max(input.longest, current),
+    lastReviewDate: input.reportDate,
+  };
+}
+
+export function getLevelFromXp(totalXp: number): {
+  level: number;
+  title: string;
+  currentXp: number;
+  nextLevelXp: number | null;
+} {
+  const xp = Math.max(0, totalXp);
+  const levels = [
+    { level: 1, title: '起步覺察者', minXp: 0, nextLevelXp: 100 },
+    { level: 2, title: '穩定練習者', minXp: 100, nextLevelXp: 250 },
+    { level: 3, title: '安神同行者', minXp: 250, nextLevelXp: 500 },
+    { level: 4, title: '動念實踐者', minXp: 500, nextLevelXp: 900 },
+    { level: 5, title: '知心守護者', minXp: 900, nextLevelXp: null },
+  ];
+  const current = [...levels].reverse().find((level) => xp >= level.minXp) ?? levels[0];
+  return {
+    level: current.level,
+    title: current.title,
+    currentXp: xp,
+    nextLevelXp: current.nextLevelXp,
+  };
+}
 
 export function buildCoachActionLoop(input: CoachActionLoopInput): CoachActionLoopMetadata {
   const now = requireInjectedNow(input.now);

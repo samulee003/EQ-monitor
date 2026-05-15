@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { buildCoachActionLoop, type CoachActionLoopInput } from './coachActionLoop.js';
+import {
+  buildCoachActionLoop,
+  classifyCoachIntent,
+  computeMicroActionReward,
+  expireMicroActions,
+  getLevelFromXp,
+  isCrisisText,
+  pickDefaultTaskForGoal,
+  updateReviewStreak,
+  type CoachActionLoopInput,
+  type CoachLoopContext,
+  type MicroActionRow,
+} from './coachActionLoop.js';
 
 const fixedNow = new Date('2026-05-15T08:00:00.000Z');
 
@@ -131,5 +143,205 @@ describe('buildCoachActionLoop', () => {
         .filter((value): value is number => typeof value === 'number')
         .every((value) => value >= 0)
     ).toBe(true);
+  });
+});
+
+const baseLoopContext: CoachLoopContext = {
+  nowIso: '2026-05-15T08:00:00.000Z',
+  userId: 'user-1',
+  sessionId: 'session-1',
+  activeMicroAction: null,
+  gamification: {
+    total_xp: 0,
+    coin_balance: 0,
+    lifetime_coins: 0,
+    total_reported: 0,
+    completed_count: 0,
+    partial_count: 0,
+    skipped_count: 0,
+    current_review_streak: 0,
+    longest_review_streak: 0,
+    last_review_date: null,
+  },
+  recentEmotionSummary: { recent_logs_count: 0 },
+};
+
+const activeMicroAction: MicroActionRow = {
+  id: 'action-1',
+  title: '喝一杯水，坐下來寫一句「我現在其實需要……」',
+  category: 'daily_care',
+  status: 'active',
+  due_at: '2026-05-16T08:00:00.000Z',
+  created_at: '2026-05-15T08:00:00.000Z',
+  goal_key: 'daily_care',
+  task_key: 'drink_water_and_need',
+};
+
+describe('Coach action loop runtime helpers', () => {
+  it('辨識危機文字，但不誤判一般陪跑文字', () => {
+    expect(isCrisisText('我快撐不下去了，救命')).toBe(true);
+    expect(isCrisisText('我想開始 7 日小陪跑，每天照顧自己')).toBe(false);
+  });
+
+  it('危機文字分類為 sos intent', () => {
+    expect(classifyCoachIntent('我快撐不下去了，救命', baseLoopContext)).toEqual({
+      kind: 'sos',
+      reason: 'crisis_text_detected',
+    });
+  });
+
+  it('7 日小陪跑預設開始 daily_care', () => {
+    expect(classifyCoachIntent('我想開始 7 日小陪跑', baseLoopContext)).toEqual({
+      kind: 'start_companion_run',
+      goalKey: 'daily_care',
+    });
+  });
+
+  it('有 active micro action 且使用者說有做到時回報 completed', () => {
+    expect(
+      classifyCoachIntent('我今天有做到', {
+        ...baseLoopContext,
+        activeMicroAction,
+      })
+    ).toEqual({
+      kind: 'report_micro_action',
+      microActionId: 'action-1',
+      status: 'completed',
+    });
+  });
+
+  it('有 active micro action 且使用者說做了一半時回報 partial', () => {
+    expect(
+      classifyCoachIntent('我做了一半', {
+        ...baseLoopContext,
+        activeMicroAction,
+      })
+    ).toEqual({
+      kind: 'report_micro_action',
+      microActionId: 'action-1',
+      status: 'partial',
+    });
+  });
+
+  it('有 active micro action 且使用者說沒有做到時回報 skipped', () => {
+    expect(
+      classifyCoachIntent('我今天沒有做到', {
+        ...baseLoopContext,
+        activeMicroAction,
+      })
+    ).toEqual({
+      kind: 'report_micro_action',
+      microActionId: 'action-1',
+      status: 'skipped',
+    });
+  });
+
+  it('沒有 active micro action 且使用者確認可以時建立 micro action', () => {
+    const intent = classifyCoachIntent('可以', {
+      ...baseLoopContext,
+      activeMicroAction: null,
+    });
+
+    expect(intent.kind).toBe('create_micro_action');
+    if (intent.kind === 'create_micro_action') {
+      expect(intent.task.key).toBe('drink_water_and_need');
+      expect(intent.confirmationText).toBe('可以');
+    }
+  });
+
+  it('已有 active micro action 時，可以 不會重複建立 active action', () => {
+    expect(
+      classifyCoachIntent('可以', {
+        ...baseLoopContext,
+        activeMicroAction,
+      }).kind
+    ).not.toBe('create_micro_action');
+  });
+
+  it('daily_care 預設小行動是喝水與需要句', () => {
+    expect(pickDefaultTaskForGoal('daily_care')).toMatchObject({
+      key: 'drink_water_and_need',
+      title: '喝一杯水，坐下來寫一句「我現在其實需要……」',
+      dueHours: 24,
+    });
+  });
+
+  it('expireMicroActions 會過期逾期 active，並回傳最新未過期 active', () => {
+    const rows: MicroActionRow[] = [
+      {
+        ...activeMicroAction,
+        id: 'expired-action',
+        due_at: '2026-05-15T07:59:59.000Z',
+        created_at: '2026-05-14T08:00:00.000Z',
+      },
+      {
+        ...activeMicroAction,
+        id: 'older-active',
+        due_at: '2026-05-16T08:00:00.000Z',
+        created_at: '2026-05-15T07:00:00.000Z',
+      },
+      {
+        ...activeMicroAction,
+        id: 'newer-active',
+        due_at: '2026-05-16T08:00:00.000Z',
+        created_at: '2026-05-15T08:00:00.000Z',
+      },
+    ];
+
+    expect(expireMicroActions(rows, '2026-05-15T08:00:00.000Z')).toEqual({
+      expiredIds: ['expired-action'],
+      active: expect.objectContaining({ id: 'newer-active' }),
+    });
+  });
+
+  it('micro action reward 只給正向獎勵，過期為零', () => {
+    expect(computeMicroActionReward('completed')).toEqual({ xp: 20, coins: 10 });
+    expect(computeMicroActionReward('partial')).toEqual({ xp: 15, coins: 7 });
+    expect(computeMicroActionReward('skipped')).toEqual({ xp: 10, coins: 5 });
+    expect(computeMicroActionReward('expired')).toEqual({ xp: 0, coins: 0 });
+  });
+
+  it('updateReviewStreak 支援同日、隔日與中斷後重算', () => {
+    expect(
+      updateReviewStreak({
+        current: 2,
+        longest: 4,
+        lastReviewDate: '2026-05-15',
+        reportDate: '2026-05-15',
+      })
+    ).toEqual({ current: 2, longest: 4, lastReviewDate: '2026-05-15' });
+
+    expect(
+      updateReviewStreak({
+        current: 2,
+        longest: 4,
+        lastReviewDate: '2026-05-15',
+        reportDate: '2026-05-16',
+      })
+    ).toEqual({ current: 3, longest: 4, lastReviewDate: '2026-05-16' });
+
+    expect(
+      updateReviewStreak({
+        current: 2,
+        longest: 4,
+        lastReviewDate: '2026-05-15',
+        reportDate: '2026-05-18',
+      })
+    ).toEqual({ current: 1, longest: 4, lastReviewDate: '2026-05-18' });
+  });
+
+  it('getLevelFromXp 回傳基本等級進度', () => {
+    expect(getLevelFromXp(0)).toEqual({
+      level: 1,
+      title: '起步覺察者',
+      currentXp: 0,
+      nextLevelXp: 100,
+    });
+    expect(getLevelFromXp(120)).toEqual({
+      level: 2,
+      title: '穩定練習者',
+      currentXp: 120,
+      nextLevelXp: 250,
+    });
   });
 });

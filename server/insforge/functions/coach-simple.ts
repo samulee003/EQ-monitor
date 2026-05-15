@@ -1,4 +1,20 @@
 import { createClient } from 'npm:@insforge/sdk';
+import {
+  classifyCoachIntent,
+  computeMicroActionReward,
+  expireMicroActions,
+  getLevelFromXp,
+  isCrisisText,
+  pickDefaultTaskForGoal,
+  updateReviewStreak,
+  type CoachIntent,
+  type CoachLoopContext,
+  type CompanionGoalKey,
+  type GamificationStats,
+  type MicroActionCategory,
+  type MicroActionRow,
+  type TaskTemplate,
+} from './_shared/coachActionLoop.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +25,8 @@ const corsHeaders = {
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
 
+const MAX_AGENTIC_STEPS = 3;
+
 // ═══════════════════════════════════════════════════════════════
 // System Prompt
 // ═══════════════════════════════════════════════════════════════
@@ -17,12 +35,12 @@ const COACH_SOUL_SOURCE_PATH = 'server/insforge/agents/soul.md';
 
 function buildEmotionCoachGlobalInstruction(): string {
   return `
-你是「今心教練」，一位主動但不打擾的 AI 情緒教練。
+你是「阿念教練」，今心裡一位主動但不打擾的 AI 情緒教練。
 
 你的所有回應都必須遵守 ${COACH_SOUL_SOURCE_PATH} 的 soul 契約：
 - 你不是客服、不是占卜、不是診斷工具，也不是單純聊天機器人。
 - 你的核心節奏是「同理 → 觀察 → 下一步」。
-- 你會主動整理使用者留下的情緒線索，但不把所有情緒都導向功能操作。
+- 你會主動整理使用者留下的情緒線索，慢慢看懂使用者的節奏，但不把所有情緒都導向功能操作。
 - 當資料不足時，明確說「目前資料還不夠」，不要假裝看見長期模式。
 - 不做診斷、不承諾治療效果、不取代心理師、醫師或緊急救援。
 - 使用繁體中文與台灣用語，語氣溫暖、穩定、清楚。
@@ -99,10 +117,11 @@ ${buildEmotionCoachInstruction()}
 這個上線入口不是完整 ADK Runner，而是與 Gemini function calling 串接的 REST fallback。
 因此你必須特別遵守：
 
-- 工具名稱只使用 get_user_emotion_summary、get_emotion_trend、save_ruler_log、trigger_action。
+- 工具名稱只使用 get_user_emotion_summary、get_emotion_trend、save_ruler_log、trigger_action、get_active_micro_action、create_micro_action、report_micro_action、get_gamification_summary。
 - 使用者問「最近怎麼樣」「有沒有進步」「我是不是常常...」時，必須先呼叫 get_emotion_trend 或 get_user_emotion_summary。
 - 使用者明確提供情緒、強度與觸發點時，優先呼叫 save_ruler_log；資訊不足時只問一個最小問題。
 - 需要前端協助呼吸、紀錄、SOS、歷史或成長頁時，呼叫 trigger_action。
+- 需要確認、建立、回報 24 小時小行動或查看個人 XP / 金幣 / 復盤連續時，使用對應 micro action 與 gamification 工具；這些都是個人進度，不提供社交排行榜。
 - 危機語句出現時，直接進入緊急安定語氣，並呼叫 trigger_action(open_sos)。
 - 最終回覆仍維持「同理 → 觀察 → 下一步」，不可提及工具名稱，也不可把工具結果原樣貼給使用者。
 `.trim();
@@ -113,6 +132,10 @@ const TOOL_TRACE_NAMES = [
   'get_user_emotion_summary',
   'get_emotion_trend',
   'trigger_action',
+  'get_active_micro_action',
+  'create_micro_action',
+  'report_micro_action',
+  'get_gamification_summary',
 ];
 
 function sanitizeCoachResponse(content: string): string {
@@ -163,7 +186,7 @@ function sanitizeCoachResponse(content: string): string {
 
 const SYSTEM_PROMPT = buildProductionCoachSystemPrompt();
 
-const EMERGENCY_STABILIZATION_PROMPT = `你是「今心教練」的緊急情緒調節專員，負責在使用者情緒高漲或危機時啟動今心緊急安定四步流程。
+const EMERGENCY_STABILIZATION_PROMPT = `你是「阿念教練」的緊急情緒調節專員，負責在使用者情緒高漲或危機時啟動今心緊急安定四步流程。
 
 ## 溝通原則
 - 全程使用繁體中文（臺灣用語）
@@ -217,7 +240,7 @@ const EMOTION_HINTS = [
 
 function isCrisis(message: string): boolean {
   const lower = message.toLowerCase();
-  return CRISIS_KEYWORDS.some((kw) => lower.includes(kw));
+  return isCrisisText(message) || CRISIS_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
 }
 
 function extractExplicitRulerLog(message: string, userId: string) {
@@ -312,6 +335,57 @@ const TOOLS = [
       required: ['action'],
     },
   },
+  {
+    name: 'get_active_micro_action',
+    description: '查詢使用者目前 active 的 24 小時小行動。',
+    parameters: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', description: '使用者的 UUID 或 app user id' },
+      },
+      required: ['userId'],
+    },
+  },
+  {
+    name: 'create_micro_action',
+    description: '建立使用者已確認的 24 小時小行動，若已有 active 小行動則不可重複建立。',
+    parameters: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', description: '使用者的 UUID 或 app user id' },
+        goalKey: { type: 'string', enum: ['sleep_anxiety', 'parent_repair', 'daily_care'] },
+        taskKey: { type: 'string' },
+        title: { type: 'string' },
+        category: { type: 'string', enum: ['body_downshift', 'settling', 'repair', 'daily_care'] },
+      },
+      required: ['userId', 'goalKey', 'taskKey', 'title', 'category'],
+    },
+  },
+  {
+    name: 'report_micro_action',
+    description: '回報 24 小時小行動結果，只接受 completed、partial、skipped，且只給正向獎勵。',
+    parameters: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', description: '使用者的 UUID 或 app user id' },
+        microActionId: { type: 'string' },
+        status: { type: 'string', enum: ['completed', 'partial', 'skipped'] },
+        reportText: { type: 'string' },
+      },
+      required: ['userId', 'microActionId', 'status'],
+    },
+  },
+  {
+    name: 'get_gamification_summary',
+    description: '查詢使用者個人 XP、金幣、等級與復盤連續摘要；這不是社交排行榜。',
+    parameters: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', description: '使用者的 UUID 或 app user id' },
+      },
+      required: ['userId'],
+    },
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -399,6 +473,297 @@ async function getUserEmotionSummary(userId: string) {
     current_streak: streak?.current_streak ?? 0,
     longest_streak: streak?.longest_streak ?? 0,
     total_logs: streak?.total_logs ?? 0,
+  };
+}
+
+function userSelector(userId: string): { column: 'user_id' | 'app_user_id'; value: string; uuid: boolean } {
+  const uuid = isUuid(userId);
+  return { column: uuid ? 'user_id' : 'app_user_id', value: userId, uuid };
+}
+
+function normalizeMicroActionRow(row: Record<string, unknown>): MicroActionRow {
+  return {
+    id: String(row.id),
+    title: String(row.title ?? ''),
+    category: row.category as MicroActionCategory,
+    status: row.status as MicroActionRow['status'],
+    due_at: String(row.due_at ?? ''),
+    created_at: String(row.created_at ?? ''),
+    goal_key: (row.goal_key as CompanionGoalKey | null | undefined) ?? null,
+    task_key: (row.task_key as string | null | undefined) ?? null,
+    report_text: (row.report_text as string | null | undefined) ?? null,
+  };
+}
+
+async function loadActiveMicroAction(userId: string, nowIso: string): Promise<MicroActionRow | null> {
+  const client = getClient();
+  const selector = userSelector(userId);
+  const { data, error } = await client.database
+    .from('coach_micro_actions')
+    .select('id, title, category, status, due_at, created_at, goal_key, task_key, report_text')
+    .eq(selector.column, selector.value)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('loadActiveMicroAction error:', error);
+    return null;
+  }
+
+  const rows = (data ?? []).map((row: Record<string, unknown>) => normalizeMicroActionRow(row));
+  const { expiredIds, active } = expireMicroActions(rows, nowIso);
+  if (expiredIds.length > 0) {
+    await client.database
+      .from('coach_micro_actions')
+      .update({ status: 'expired', updated_at: nowIso, xp_awarded: 0, coins_awarded: 0 })
+      .in('id', expiredIds);
+  }
+  return active;
+}
+
+function emptyGamificationStats(): GamificationStats {
+  return {
+    total_xp: 0,
+    coin_balance: 0,
+    lifetime_coins: 0,
+    total_reported: 0,
+    completed_count: 0,
+    partial_count: 0,
+    skipped_count: 0,
+    current_review_streak: 0,
+    longest_review_streak: 0,
+    last_review_date: null,
+  };
+}
+
+function normalizeGamificationStats(row: Partial<GamificationStats> | null | undefined): GamificationStats {
+  const empty = emptyGamificationStats();
+  if (!row) return empty;
+  return {
+    total_xp: Math.max(0, Number(row.total_xp ?? empty.total_xp)),
+    coin_balance: Math.max(0, Number(row.coin_balance ?? empty.coin_balance)),
+    lifetime_coins: Math.max(0, Number(row.lifetime_coins ?? empty.lifetime_coins)),
+    total_reported: Math.max(0, Number(row.total_reported ?? empty.total_reported)),
+    completed_count: Math.max(0, Number(row.completed_count ?? empty.completed_count)),
+    partial_count: Math.max(0, Number(row.partial_count ?? empty.partial_count)),
+    skipped_count: Math.max(0, Number(row.skipped_count ?? empty.skipped_count)),
+    current_review_streak: Math.max(0, Number(row.current_review_streak ?? empty.current_review_streak)),
+    longest_review_streak: Math.max(0, Number(row.longest_review_streak ?? empty.longest_review_streak)),
+    last_review_date: row.last_review_date ?? null,
+  };
+}
+
+async function loadGamificationStats(userId: string): Promise<GamificationStats> {
+  const client = getClient();
+  const selector = userSelector(userId);
+  const { data, error } = await client.database
+    .from('coach_gamification_stats')
+    .select(
+      'total_xp, coin_balance, lifetime_coins, total_reported, completed_count, partial_count, skipped_count, current_review_streak, longest_review_streak, last_review_date'
+    )
+    .eq(selector.column, selector.value)
+    .maybeSingle();
+
+  if (error) {
+    console.error('loadGamificationStats error:', error);
+    return emptyGamificationStats();
+  }
+  return normalizeGamificationStats(data as Partial<GamificationStats> | null);
+}
+
+async function loadLoopContext(userId: string, sessionId: string, nowIso: string): Promise<CoachLoopContext> {
+  const [activeMicroAction, gamification, recentEmotionSummary] = await Promise.all([
+    loadActiveMicroAction(userId, nowIso),
+    loadGamificationStats(userId),
+    getUserEmotionSummary(userId),
+  ]);
+  return {
+    nowIso,
+    userId,
+    sessionId,
+    activeMicroAction,
+    gamification,
+    recentEmotionSummary,
+  };
+}
+
+async function persistTraceEvent(input: {
+  userId: string;
+  sessionId: string;
+  step: number;
+  phase: 'observe' | 'orient' | 'plan' | 'act' | 'persist' | 'evaluate' | 'adjust';
+  intent?: CoachIntent;
+  toolName?: string;
+  guardrailResult?: string;
+  payload?: Record<string, unknown>;
+}) {
+  const client = getClient();
+  const selector = userSelector(input.userId);
+  const { error } = await client.database.from('coach_agent_traces').insert({
+    id: crypto.randomUUID(),
+    [selector.column]: selector.value,
+    session_id: input.sessionId,
+    step: input.step,
+    phase: input.phase,
+    intent: input.intent?.kind,
+    tool_name: input.toolName,
+    guardrail_result: input.guardrailResult,
+    payload: {
+      ...(input.payload ?? {}),
+      intent: input.intent ?? null,
+    },
+  });
+
+  if (error) console.error('persistTraceEvent error:', error);
+}
+
+function taskFromIntentOrTask(intentOrTask: TaskTemplate | CoachIntent): TaskTemplate | null {
+  if ('key' in intentOrTask) return intentOrTask;
+  if (intentOrTask.kind === 'create_micro_action') return intentOrTask.task;
+  if (intentOrTask.kind === 'propose_micro_action') return intentOrTask.task;
+  return null;
+}
+
+async function createMicroAction(userId: string, intentOrTask: TaskTemplate | CoachIntent) {
+  const nowIso = new Date().toISOString();
+  const active = await loadActiveMicroAction(userId, nowIso);
+  if (active) {
+    return { success: false, reason: 'active_micro_action_exists', microAction: active };
+  }
+
+  const task = taskFromIntentOrTask(intentOrTask);
+  if (!task) return { success: false, error: 'missing_task' };
+
+  const client = getClient();
+  const selector = userSelector(userId);
+  const dueAt = new Date(Date.parse(nowIso) + task.dueHours * 60 * 60 * 1000).toISOString();
+  const { data, error } = await client.database
+    .from('coach_micro_actions')
+    .insert({
+      id: crypto.randomUUID(),
+      [selector.column]: selector.value,
+      source: 'coach',
+      goal_key: task.goalKey,
+      task_key: task.key,
+      title: task.title,
+      category: task.category,
+      status: 'active',
+      due_at: dueAt,
+      xp_awarded: 0,
+      coins_awarded: 0,
+      created_at: nowIso,
+      updated_at: nowIso,
+    })
+    .select('id, title, category, status, due_at, created_at, goal_key, task_key, report_text')
+    .maybeSingle();
+
+  if (error) {
+    console.error('createMicroAction error:', error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, microAction: normalizeMicroActionRow(data as Record<string, unknown>) };
+}
+
+async function incrementGamification(
+  userId: string,
+  reward: { xp: number; coins: number; reportStatus?: 'completed' | 'partial' | 'skipped' }
+): Promise<GamificationStats> {
+  const client = getClient();
+  const selector = userSelector(userId);
+  const current = await loadGamificationStats(userId);
+  const xp = Math.max(0, reward.xp);
+  const coins = Math.max(0, reward.coins);
+  const reportDate = new Date().toISOString().slice(0, 10);
+  const streak = reward.reportStatus
+    ? updateReviewStreak({
+        current: current.current_review_streak,
+        longest: current.longest_review_streak,
+        lastReviewDate: current.last_review_date,
+        reportDate,
+      })
+    : {
+        current: current.current_review_streak,
+        longest: current.longest_review_streak,
+        lastReviewDate: current.last_review_date,
+      };
+  const next: GamificationStats = {
+    total_xp: current.total_xp + xp,
+    coin_balance: current.coin_balance + coins,
+    lifetime_coins: current.lifetime_coins + coins,
+    total_reported: current.total_reported + (reward.reportStatus ? 1 : 0),
+    completed_count: current.completed_count + (reward.reportStatus === 'completed' ? 1 : 0),
+    partial_count: current.partial_count + (reward.reportStatus === 'partial' ? 1 : 0),
+    skipped_count: current.skipped_count + (reward.reportStatus === 'skipped' ? 1 : 0),
+    current_review_streak: streak.current,
+    longest_review_streak: streak.longest,
+    last_review_date: streak.lastReviewDate,
+  };
+  const nowIso = new Date().toISOString();
+  const { data: existing } = await client.database
+    .from('coach_gamification_stats')
+    .select('id')
+    .eq(selector.column, selector.value)
+    .maybeSingle();
+  const payload = {
+    [selector.column]: selector.value,
+    ...next,
+    updated_at: nowIso,
+  };
+  const result = existing?.id
+    ? await client.database.from('coach_gamification_stats').update(payload).eq('id', existing.id)
+    : await client.database.from('coach_gamification_stats').insert({ id: crypto.randomUUID(), ...payload });
+
+  if (result.error) console.error('incrementGamification error:', result.error);
+  return next;
+}
+
+async function reportMicroAction(
+  userId: string,
+  microActionId: string,
+  status: 'completed' | 'partial' | 'skipped',
+  reportText?: string
+) {
+  const nowIso = new Date().toISOString();
+  const reward = computeMicroActionReward(status);
+  const client = getClient();
+  const selector = userSelector(userId);
+  const { data, error } = await client.database
+    .from('coach_micro_actions')
+    .update({
+      status,
+      reported_at: nowIso,
+      report_text: reportText ?? null,
+      xp_awarded: reward.xp,
+      coins_awarded: reward.coins,
+      updated_at: nowIso,
+    })
+    .eq('id', microActionId)
+    .eq(selector.column, selector.value)
+    .select('id, title, category, status, due_at, created_at, goal_key, task_key, report_text')
+    .maybeSingle();
+
+  if (error) {
+    console.error('reportMicroAction error:', error);
+    return { success: false, error: error.message };
+  }
+
+  const gamification = await incrementGamification(userId, {
+    ...reward,
+    reportStatus: status,
+  });
+  return {
+    success: true,
+    microAction: data ? normalizeMicroActionRow(data as Record<string, unknown>) : null,
+    reward,
+    gamification: buildGamificationSummary(gamification),
+  };
+}
+
+function buildGamificationSummary(stats: GamificationStats) {
+  return {
+    ...stats,
+    level: getLevelFromXp(stats.total_xp),
   };
 }
 
@@ -589,6 +954,31 @@ async function executeTool(name: string, args: Record<string, unknown>, userId: 
           message: `已準備好「${args.action}」，請確認開始。`,
         };
       }
+      case 'get_active_micro_action': {
+        return await loadActiveMicroAction(userId, new Date().toISOString());
+      }
+      case 'create_micro_action': {
+        const active = await loadActiveMicroAction(userId, new Date().toISOString());
+        if (active) return { success: false, reason: 'active_micro_action_exists', microAction: active };
+        return await createMicroAction(userId, {
+          key: String(args.taskKey ?? 'drink_water_and_need'),
+          goalKey: (args.goalKey as CompanionGoalKey) ?? 'daily_care',
+          category: (args.category as MicroActionCategory) ?? 'daily_care',
+          title: String(args.title ?? '喝一杯水，坐下來寫一句「我現在其實需要……」'),
+          dueHours: 24,
+        });
+      }
+      case 'report_micro_action': {
+        return await reportMicroAction(
+          userId,
+          String(args.microActionId ?? ''),
+          args.status as 'completed' | 'partial' | 'skipped',
+          args.reportText as string | undefined
+        );
+      }
+      case 'get_gamification_summary': {
+        return buildGamificationSummary(await loadGamificationStats(userId));
+      }
       default:
         return { error: `Unknown tool: ${name}` };
     }
@@ -596,6 +986,187 @@ async function executeTool(name: string, args: Record<string, unknown>, userId: 
     console.error(`Tool ${name} error:`, e);
     return { error: (e as Error).message };
   }
+}
+
+async function runAgenticActionLoop(input: {
+  message: string;
+  userId: string;
+  sessionId: string;
+  crisis: boolean;
+}): Promise<{
+  intent: CoachIntent;
+  loopContext: CoachLoopContext;
+  toolResult: unknown;
+  activeMicroAction: MicroActionRow | null;
+  gamification: ReturnType<typeof buildGamificationSummary>;
+}> {
+  const nowIso = new Date().toISOString();
+  let loopContext = await loadLoopContext(input.userId, input.sessionId, nowIso);
+  const recentSummary = loopContext.recentEmotionSummary as { recent_logs_count?: number };
+
+  await persistTraceEvent({
+    userId: input.userId,
+    sessionId: input.sessionId,
+    step: 0,
+    phase: 'observe',
+    payload: {
+      hasActiveMicroAction: Boolean(loopContext.activeMicroAction),
+      recentLogs: recentSummary?.recent_logs_count ?? 0,
+    },
+  });
+
+  if (input.crisis || isCrisisText(input.message)) {
+    const intent: CoachIntent = { kind: 'sos', reason: 'crisis_text_detected' };
+    await persistTraceEvent({
+      userId: input.userId,
+      sessionId: input.sessionId,
+      step: 0,
+      phase: 'evaluate',
+      intent,
+      guardrailResult: 'crisis_reward_blocked',
+      payload: { crisis_reward_blocked: true },
+    });
+    return {
+      intent,
+      loopContext,
+      toolResult: { crisis_reward_blocked: true },
+      activeMicroAction: loopContext.activeMicroAction,
+      gamification: buildGamificationSummary(loopContext.gamification),
+    };
+  }
+
+  let intent = classifyCoachIntent(input.message, loopContext);
+  let toolResult: unknown = null;
+  await persistTraceEvent({
+    userId: input.userId,
+    sessionId: input.sessionId,
+    step: 1,
+    phase: 'orient',
+    intent,
+  });
+
+  for (let step = 1; step <= MAX_AGENTIC_STEPS; step += 1) {
+    if (intent.kind === 'start_companion_run') {
+      const task = pickDefaultTaskForGoal(intent.goalKey);
+      intent = { kind: 'propose_micro_action', goalKey: intent.goalKey, task };
+      toolResult = { proposal: task };
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'plan',
+        intent,
+        payload: { proposal: task },
+      });
+      break;
+    }
+
+    if (intent.kind === 'create_micro_action') {
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'plan',
+        intent,
+        payload: { task: intent.task },
+      });
+      toolResult = await createMicroAction(input.userId, intent);
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'act',
+        intent,
+        toolName: 'create_micro_action',
+        payload: { toolResult: toolResult as Record<string, unknown> },
+      });
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'persist',
+        intent,
+        toolName: 'create_micro_action',
+        payload: { success: Boolean((toolResult as { success?: boolean })?.success) },
+      });
+      break;
+    }
+
+    if (intent.kind === 'report_micro_action') {
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'plan',
+        intent,
+      });
+      toolResult = await reportMicroAction(
+        input.userId,
+        intent.microActionId,
+        intent.status,
+        input.message
+      );
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'act',
+        intent,
+        toolName: 'report_micro_action',
+        payload: { toolResult: toolResult as Record<string, unknown> },
+      });
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'persist',
+        intent,
+        toolName: 'report_micro_action',
+        payload: {
+          success: Boolean((toolResult as { success?: boolean })?.success),
+          reward: (toolResult as { reward?: unknown })?.reward ?? null,
+        },
+      });
+      break;
+    }
+
+    if (intent.kind === 'show_gamification_summary') {
+      toolResult = buildGamificationSummary(loopContext.gamification);
+      await persistTraceEvent({
+        userId: input.userId,
+        sessionId: input.sessionId,
+        step,
+        phase: 'act',
+        intent,
+        toolName: 'get_gamification_summary',
+        payload: { toolResult: toolResult as Record<string, unknown> },
+      });
+      break;
+    }
+
+    break;
+  }
+
+  loopContext = await loadLoopContext(input.userId, input.sessionId, new Date().toISOString());
+  await persistTraceEvent({
+    userId: input.userId,
+    sessionId: input.sessionId,
+    step: MAX_AGENTIC_STEPS,
+    phase: 'evaluate',
+    intent,
+    payload: {
+      activeMicroActionId: loopContext.activeMicroAction?.id ?? null,
+      totalXp: loopContext.gamification.total_xp,
+    },
+  });
+
+  return {
+    intent,
+    loopContext,
+    toolResult,
+    activeMicroAction: loopContext.activeMicroAction,
+    gamification: buildGamificationSummary(loopContext.gamification),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -673,6 +1244,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const crisis = isCrisis(message);
+    const agenticLoop = await runAgenticActionLoop({ message, userId, sessionId, crisis });
     const explicitLog = extractExplicitRulerLog(message, userId);
     const explicitLogResult = explicitLog ? await saveRulerLog(explicitLog) : null;
     const explicitLogStatus = explicitLogResult
@@ -682,9 +1254,15 @@ export default async function (req: Request): Promise<Response> {
             : `紀錄失敗：${explicitLogResult.error ?? '未知錯誤'}`
         }`
       : '';
+    const loopContextStatus = `\n\n【內部 Agentic Action Loop 狀態】
+- intent: ${agenticLoop.intent.kind}
+- activeMicroAction: ${agenticLoop.activeMicroAction?.title ?? 'none'}
+- totalXp: ${agenticLoop.gamification.total_xp}
+- coins: ${agenticLoop.gamification.coin_balance}
+請只把這些狀態轉成自然教練回覆，不要向使用者列出工具名稱或 trace。`;
     const systemText = (crisis
       ? `${EMERGENCY_STABILIZATION_PROMPT}\n\n【緊急狀態】使用者可能處於危機中，請直接進入今心緊急安定四步流程。`
-      : SYSTEM_PROMPT) + explicitLogStatus;
+      : SYSTEM_PROMPT) + explicitLogStatus + loopContextStatus;
 
     // 確保 session 存在
     await getOrCreateSession(APP_NAME, userId, sessionId);
@@ -781,6 +1359,12 @@ export default async function (req: Request): Promise<Response> {
           skillInvoked,
           action,
           actionReason,
+          intent: agenticLoop.intent.kind,
+          microActionProposal:
+            agenticLoop.intent.kind === 'propose_micro_action' ? agenticLoop.intent.task : null,
+          activeMicroAction: agenticLoop.activeMicroAction,
+          gamification: agenticLoop.gamification,
+          toolResult: agenticLoop.toolResult,
         },
         error: null,
       }),
