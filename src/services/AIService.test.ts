@@ -230,10 +230,13 @@ describe('AIService', () => {
             const result = await aiService.chatWithAssistant('什麼是 RULER 框架？');
             
             expect(result).toContain('知心四式');
-            expect(result).toContain('心照式');
-            expect(result).toContain('喚名式');
-            expect(result).toContain('安神式');
-            expect(result).toContain('動念式');
+            expect(result).toContain('心照');
+            expect(result).toContain('喚名');
+            expect(result).toContain('安神');
+            expect(result).toContain('動念');
+            for (const staleName of ['心照', '喚名', '安神', '動念'].map((name) => `${name}式`)) {
+                expect(result).not.toContain(staleName);
+            }
             expect(result).toContain('一念可轉');
             expect(result).toContain('Dan Siegel-informed');
             expect(result).toContain('mindsight');

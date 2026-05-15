@@ -311,10 +311,10 @@ class AIService {
         if (lowerMessage.includes('ruler') || lowerMessage.includes('框架') || lowerMessage.includes('五步') || lowerMessage.includes('四步') || lowerMessage.includes('四式')) {
             return `知心四式是今心自己的前台整理語言，有一點像溫柔的內功心法：不急著勝過情緒，先把心穩住，再動下一念。
 
-1. **心照式**：心照一念，先看清身體與此刻狀態
-2. **喚名式**：喚其真名，用更準確的詞靠近感覺
-3. **安神式**：安住心神，理解它和哪個情境、需要或內在部分有關，並把想說的話安全放下來
-4. **動念式**：一念可轉，選一個不傷害自己或他人的小行動
+1. **心照**：心照一念，先看清身體與此刻狀態
+2. **喚名**：喚其真名，用更準確的詞靠近感覺
+3. **安神**：安住心神，理解它和哪個情境、需要或內在部分有關，並把想說的話安全放下來
+4. **動念**：一念可轉，選一個不傷害自己或他人的小行動
 
 這套練習靈感來自 RULER 的情緒覺察技能，也參考 ACT 的接納與價值行動、IFS-informed 的內在部分覺察，以及 Dan Siegel-informed 的 mindsight 與身心腦整合觀點；今心不是 Yale、RULER Approach、ACT、IFS 或 Dan Siegel / Mindsight Institute 官方產品，也不是心理治療。
 
