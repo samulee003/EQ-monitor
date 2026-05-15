@@ -75,4 +75,39 @@ describe('發布前 P0/P1 守門', () => {
     expect(source).toContain('get_gamification_summary');
     expect(source).toContain('crisis_reward_blocked');
   });
+
+  it('production coach 危機路徑不可開放 micro action mutating tools', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain('RESTRICTED_CRISIS_TOOLS');
+    expect(source).toContain('MUTATING_ACTION_LOOP_TOOLS');
+    expect(source).toContain('executeTool(fc.name, fc.args, userId, { crisis })');
+    expect(source).toContain('{ success: false, crisis_reward_blocked: true }');
+    expect(source).toContain('crisis ? RESTRICTED_CRISIS_TOOLS : TOOLS');
+  });
+
+  it('production coach 回報 micro action 必須限 active row，避免重複發獎勵', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain(".eq('status', 'active')");
+    expect(source).toContain(".is('reported_at', null)");
+    expect(source).toContain('micro_action_not_active');
+    expect(source.indexOf('if (!data)')).toBeLessThan(source.indexOf('incrementGamification(userId'));
+  });
+
+  it('production coach public endpoint 不接受任意 app_user_id 寫入', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain("if (!isUuid(userId))");
+    expect(source).toContain('Public coach endpoint requires UUID userId');
+  });
+
+  it('action loop schema 必須限制每個使用者只能有一個 active micro action', () => {
+    const schema = readProjectFile('server/insforge/schema/011_coach_action_loop.sql');
+
+    expect(schema).toContain('idx_coach_micro_actions_one_active_user');
+    expect(schema).toContain('idx_coach_micro_actions_one_active_app_user');
+    expect(schema).toContain("where user_id is not null and status = 'active'");
+    expect(schema).toContain("where app_user_id is not null and status = 'active'");
+  });
 });

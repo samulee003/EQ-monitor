@@ -45,6 +45,7 @@ export interface CoachLoopContext {
   userId: string;
   sessionId: string;
   activeMicroAction: MicroActionRow | null;
+  pendingProposal: PendingMicroActionProposal | null;
   gamification: GamificationStats;
   recentEmotionSummary: unknown;
 }
@@ -55,6 +56,11 @@ export interface TaskTemplate {
   category: MicroActionCategory;
   title: string;
   dueHours: number;
+}
+
+export interface PendingMicroActionProposal {
+  task: TaskTemplate;
+  proposedAt: string;
 }
 
 export type CoachIntent =
@@ -195,10 +201,10 @@ export function classifyCoachIntent(text: string, context: CoachLoopContext): Co
     return { kind: 'chat' };
   }
 
-  if (/^(好|可以|就這個|設為今天的小行動)$/.test(normalized)) {
+  if (/^(好|可以|就這個|設為今天的小行動)$/.test(normalized) && context.pendingProposal) {
     return {
       kind: 'create_micro_action',
-      task: pickDefaultTaskForGoal(normalizeCompanionGoal(normalized)),
+      task: context.pendingProposal.task,
       confirmationText: normalized,
     };
   }

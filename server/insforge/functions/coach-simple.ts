@@ -13,6 +13,7 @@ import {
   type GamificationStats,
   type MicroActionCategory,
   type MicroActionRow,
+  type PendingMicroActionProposal,
   type TaskTemplate,
 } from './_shared/coachActionLoop.ts';
 
@@ -26,6 +27,8 @@ const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
 
 const MAX_AGENTIC_STEPS = 3;
+const APP_NAME = 'imxin_emotion_coach';
+const PENDING_MICRO_ACTION_STATE_KEY = 'pendingMicroActionProposal';
 
 // ═══════════════════════════════════════════════════════════════
 // System Prompt
@@ -388,6 +391,9 @@ const TOOLS = [
   },
 ];
 
+const RESTRICTED_CRISIS_TOOLS = TOOLS.filter((tool) => tool.name === 'trigger_action');
+const MUTATING_ACTION_LOOP_TOOLS = new Set(['create_micro_action', 'report_micro_action']);
+
 // ═══════════════════════════════════════════════════════════════
 // Database Helpers
 // ═══════════════════════════════════════════════════════════════
@@ -495,6 +501,78 @@ function normalizeMicroActionRow(row: Record<string, unknown>): MicroActionRow {
   };
 }
 
+function normalizePendingMicroActionProposal(value: unknown): PendingMicroActionProposal | null {
+  if (!value || typeof value !== 'object') return null;
+  const proposal = value as Partial<PendingMicroActionProposal>;
+  const task = proposal.task;
+  if (!task || typeof task !== 'object') return null;
+  if (
+    typeof task.key !== 'string' ||
+    typeof task.goalKey !== 'string' ||
+    typeof task.category !== 'string' ||
+    typeof task.title !== 'string' ||
+    typeof task.dueHours !== 'number'
+  ) {
+    return null;
+  }
+  return {
+    task: {
+      key: task.key,
+      goalKey: task.goalKey as CompanionGoalKey,
+      category: task.category as MicroActionCategory,
+      title: task.title,
+      dueHours: task.dueHours,
+    },
+    proposedAt: typeof proposal.proposedAt === 'string' ? proposal.proposedAt : new Date().toISOString(),
+  };
+}
+
+async function loadSessionState(userId: string, sessionId: string): Promise<Record<string, unknown>> {
+  const client = getClient();
+  const { data, error } = await client.database
+    .from('adk_sessions')
+    .select('state')
+    .eq('id', sessionId)
+    .eq('app_name', APP_NAME)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('loadSessionState error:', error);
+    return {};
+  }
+  return ((data as { state?: Record<string, unknown> } | null)?.state ?? {}) as Record<string, unknown>;
+}
+
+async function loadPendingMicroActionProposal(
+  userId: string,
+  sessionId: string
+): Promise<PendingMicroActionProposal | null> {
+  const state = await loadSessionState(userId, sessionId);
+  return normalizePendingMicroActionProposal(state[PENDING_MICRO_ACTION_STATE_KEY]);
+}
+
+async function savePendingMicroActionProposal(
+  userId: string,
+  sessionId: string,
+  proposal: PendingMicroActionProposal | null
+) {
+  const client = getClient();
+  const state = await loadSessionState(userId, sessionId);
+  const nextState = {
+    ...state,
+    [PENDING_MICRO_ACTION_STATE_KEY]: proposal,
+  };
+  const { error } = await client.database
+    .from('adk_sessions')
+    .update({ state: nextState, update_time: new Date().toISOString() })
+    .eq('id', sessionId)
+    .eq('app_name', APP_NAME)
+    .eq('user_id', userId);
+
+  if (error) console.error('savePendingMicroActionProposal error:', error);
+}
+
 async function loadActiveMicroAction(userId: string, nowIso: string): Promise<MicroActionRow | null> {
   const client = getClient();
   const selector = userSelector(userId);
@@ -573,8 +651,9 @@ async function loadGamificationStats(userId: string): Promise<GamificationStats>
 }
 
 async function loadLoopContext(userId: string, sessionId: string, nowIso: string): Promise<CoachLoopContext> {
-  const [activeMicroAction, gamification, recentEmotionSummary] = await Promise.all([
+  const [activeMicroAction, pendingProposal, gamification, recentEmotionSummary] = await Promise.all([
     loadActiveMicroAction(userId, nowIso),
+    loadPendingMicroActionProposal(userId, sessionId),
     loadGamificationStats(userId),
     getUserEmotionSummary(userId),
   ]);
@@ -583,6 +662,7 @@ async function loadLoopContext(userId: string, sessionId: string, nowIso: string
     userId,
     sessionId,
     activeMicroAction,
+    pendingProposal,
     gamification,
     recentEmotionSummary,
   };
@@ -625,6 +705,14 @@ function taskFromIntentOrTask(intentOrTask: TaskTemplate | CoachIntent): TaskTem
   return null;
 }
 
+function isUniqueConflict(error: { code?: string; message?: string } | null | undefined): boolean {
+  return Boolean(
+    error?.code === '23505' ||
+      error?.message?.includes('duplicate key') ||
+      error?.message?.includes('idx_coach_micro_actions_one_active')
+  );
+}
+
 async function createMicroAction(userId: string, intentOrTask: TaskTemplate | CoachIntent) {
   const nowIso = new Date().toISOString();
   const active = await loadActiveMicroAction(userId, nowIso);
@@ -659,6 +747,13 @@ async function createMicroAction(userId: string, intentOrTask: TaskTemplate | Co
     .maybeSingle();
 
   if (error) {
+    if (isUniqueConflict(error)) {
+      return {
+        success: false,
+        reason: 'active_micro_action_exists',
+        microAction: await loadActiveMicroAction(userId, new Date().toISOString()),
+      };
+    }
     console.error('createMicroAction error:', error);
     return { success: false, error: error.message };
   }
@@ -740,12 +835,18 @@ async function reportMicroAction(
     })
     .eq('id', microActionId)
     .eq(selector.column, selector.value)
+    .eq('status', 'active')
+    .is('reported_at', null)
     .select('id, title, category, status, due_at, created_at, goal_key, task_key, report_text')
     .maybeSingle();
 
   if (error) {
     console.error('reportMicroAction error:', error);
     return { success: false, error: error.message };
+  }
+
+  if (!data) {
+    return { success: false, reason: 'micro_action_not_active', reward: { xp: 0, coins: 0 } };
   }
 
   const gamification = await incrementGamification(userId, {
@@ -929,8 +1030,17 @@ async function appendEvent(
 // Tool Executor
 // ═══════════════════════════════════════════════════════════════
 
-async function executeTool(name: string, args: Record<string, unknown>, userId: string) {
+async function executeTool(
+  name: string,
+  args: Record<string, unknown>,
+  userId: string,
+  options: { crisis?: boolean } = {}
+) {
   try {
+    if (options.crisis && MUTATING_ACTION_LOOP_TOOLS.has(name)) {
+      return { success: false, crisis_reward_blocked: true };
+    }
+
     switch (name) {
       case 'get_user_emotion_summary': {
         return await getUserEmotionSummary(userId);
@@ -1050,6 +1160,10 @@ async function runAgenticActionLoop(input: {
       const task = pickDefaultTaskForGoal(intent.goalKey);
       intent = { kind: 'propose_micro_action', goalKey: intent.goalKey, task };
       toolResult = { proposal: task };
+      await savePendingMicroActionProposal(input.userId, input.sessionId, {
+        task,
+        proposedAt: new Date().toISOString(),
+      });
       await persistTraceEvent({
         userId: input.userId,
         sessionId: input.sessionId,
@@ -1071,6 +1185,9 @@ async function runAgenticActionLoop(input: {
         payload: { task: intent.task },
       });
       toolResult = await createMicroAction(input.userId, intent);
+      if ((toolResult as { success?: boolean })?.success) {
+        await savePendingMicroActionProposal(input.userId, input.sessionId, null);
+      }
       await persistTraceEvent({
         userId: input.userId,
         sessionId: input.sessionId,
@@ -1106,6 +1223,9 @@ async function runAgenticActionLoop(input: {
         intent.status,
         input.message
       );
+      if ((toolResult as { success?: boolean })?.success) {
+        await savePendingMicroActionProposal(input.userId, input.sessionId, null);
+      }
       await persistTraceEvent({
         userId: input.userId,
         sessionId: input.sessionId,
@@ -1210,8 +1330,6 @@ interface CoachRequestBody {
   sessionId: string;
 }
 
-const APP_NAME = 'imxin_emotion_coach';
-
 export default async function (req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -1235,6 +1353,13 @@ export default async function (req: Request): Promise<Response> {
       );
     }
 
+    if (!isUuid(userId)) {
+      return new Response(
+        JSON.stringify({ error: 'Public coach endpoint requires UUID userId' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const authorizationError = await assertAuthorizedUser(req, userId);
     if (authorizationError) return authorizationError;
 
@@ -1244,6 +1369,8 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const crisis = isCrisis(message);
+    // 確保 session 存在，讓 action loop 可以使用 ADK session state 存放 pending proposal。
+    await getOrCreateSession(APP_NAME, userId, sessionId);
     const agenticLoop = await runAgenticActionLoop({ message, userId, sessionId, crisis });
     const explicitLog = extractExplicitRulerLog(message, userId);
     const explicitLogResult = explicitLog ? await saveRulerLog(explicitLog) : null;
@@ -1264,9 +1391,6 @@ export default async function (req: Request): Promise<Response> {
       ? `${EMERGENCY_STABILIZATION_PROMPT}\n\n【緊急狀態】使用者可能處於危機中，請直接進入今心緊急安定四步流程。`
       : SYSTEM_PROMPT) + explicitLogStatus + loopContextStatus;
 
-    // 確保 session 存在
-    await getOrCreateSession(APP_NAME, userId, sessionId);
-
     // 載入歷史對話
     const history = await getSessionEvents(APP_NAME, userId, sessionId, 20);
 
@@ -1280,7 +1404,7 @@ export default async function (req: Request): Promise<Response> {
       apiKey,
       { parts: [{ text: systemText }] },
       contents,
-      TOOLS
+      crisis ? RESTRICTED_CRISIS_TOOLS : TOOLS
     );
 
     let responseText = '抱歉，我無法回應。';
@@ -1303,7 +1427,7 @@ export default async function (req: Request): Promise<Response> {
       // 執行工具
       const toolResult = fc.name === 'save_ruler_log' && explicitLogResult?.success
         ? explicitLogResult
-        : await executeTool(fc.name, fc.args, userId);
+        : await executeTool(fc.name, fc.args, userId, { crisis });
 
       // 檢查 trigger_action
       if (fc.name === 'trigger_action') {
