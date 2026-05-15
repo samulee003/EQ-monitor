@@ -26,7 +26,7 @@
 - 新資料表：`server/insforge/schema/011_coach_action_loop.sql`，包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 - Runtime：`server/insforge/functions/coach-simple.ts` 已接上 max-3-step action loop；危機 path 會 `crisis_reward_blocked`，不得建立小行動或獎勵。
 - Core helpers：`server/insforge/functions/_shared/coachActionLoop.ts` 負責 intent classification、pending proposal、expiry、reward、review streak、level。
-- Frontend：`src/pages/CoachPage.tsx` 已接 7 日小陪跑 CTA、`MicroActionCard`、`GamificationStrip`、`CoachResponse` metadata，並顯示 `Beta` 內測標籤與 AI 回合使用上限提示。
+- Frontend：`src/pages/CoachPage.tsx` 已接 7 日小陪跑 CTA、`MicroActionCard`、`GamificationStrip`、`CoachResponse` metadata；首屏卡片、外層主導覽「教練」與 Coach 底部「教練」入口都顯示 `Beta` 內測標籤與 AI 回合使用上限提示。
 - 內測額度決策：未來要限制會呼叫 Gemini 的「AI 對話回合」；提醒、小行動回報、SOS / 緊急安定應走 deterministic template 或狀態機，不應因 AI 回合用完而失效。
 - 測試：focused frontend 3 files / 30 tests passed；focused server loop/eval/guardrail 3 files / 41 tests passed；frontend/server build passed；`git diff --check` passed。
 - 注意：小行動第一版只在 PWA Coach 建立與回報，LINE Bot 暫不建立小行動狀態機。

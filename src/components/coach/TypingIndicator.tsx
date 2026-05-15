@@ -10,7 +10,7 @@ export function TypingIndicator() {
 
       <div className={styles.bubble}>
         <span className={styles.typingLabel}>
-          教練正在思考...
+          阿念正在整理...
         </span>
         <div className={styles.dots}>
           <span className={`${styles.dot} ${styles.dot1}`} />

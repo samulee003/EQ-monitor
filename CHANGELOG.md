@@ -75,7 +75,7 @@
 - 新增 `MicroActionCard`：顯示小行動提案、明確確認、active 小行動回報 completed / partial / skipped。
 - 新增 `GamificationStrip`：顯示等級、XP、金幣與復盤連續。
 - `CoachPage` 首屏新增 `7 日小陪跑` 入口與三個方向：睡前焦慮、親子修復、每日自我照顧。
-- `CoachPage` 首屏阿念介紹卡新增 `Beta` 內測標籤，並補上 AI 教練回合可能有使用上限的短提示。
+- `CoachPage` 首屏阿念介紹卡、外層主導覽「教練」入口與 Coach 底部「教練」入口都顯示 `Beta` 內測標籤，並補上 AI 教練回合可能有使用上限的短提示。
 - 內測額度產品決策：未來限制會呼叫 Gemini 的 AI 對話回合；提醒、小行動回報、SOS / 緊急安定不應跟 AI 回合共用額度。
 - 前端回報文字已與後端 classifier 對齊，避免 UI 看起來有閉環但實際落成普通聊天。
 

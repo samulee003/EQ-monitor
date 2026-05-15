@@ -576,7 +576,10 @@ export default function CoachPage() {
         </button>
         <button type="button" className={styles.activeNav} aria-current="page">
           <span aria-hidden="true">✦</span>
-          <span>教練</span>
+          <span className={styles.navLabelWithBeta}>
+            教練
+            <span className={styles.navBetaBadge} aria-label="Beta 內測版">Beta</span>
+          </span>
         </button>
         <button type="button" onClick={() => handleNavigate('growth')}>
           <span aria-hidden="true">▥</span>

@@ -185,9 +185,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
           <button
             className={`nav-link ${currentView === 'coach' ? 'active' : ''}`}
             onClick={() => onNavigate('coach')}
-            title={t('今心主動教練')}
+            title={t('阿念教練')}
+            aria-label={t('教練')}
           >
-            {t('教練')}
+            <span>{t('教練')}</span>
+            <span className="nav-beta-badge" aria-hidden="true">Beta</span>
           </button>
         </nav>
         <div className="header-actions" aria-label={t('快捷操作')}>
