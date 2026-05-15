@@ -43,4 +43,16 @@ describe('發布前 P0/P1 守門', () => {
       source.indexOf('for (const spec of DATA_DELETE_SPECS)')
     );
   });
+
+  it('完整 Agentic Action Loop 必須有 micro action、gamification 與 trace schema', () => {
+    const schema = readProjectFile('server/insforge/schema/011_coach_action_loop.sql');
+
+    expect(schema).toContain('create table if not exists public.coach_micro_actions');
+    expect(schema).toContain('create table if not exists public.coach_gamification_stats');
+    expect(schema).toContain('create table if not exists public.coach_agent_traces');
+    expect(schema).toContain("check (status in ('active', 'completed', 'partial', 'skipped', 'expired'))");
+    expect(schema).toContain('Service role full access coach micro actions');
+    expect(schema).toContain('Service role full access coach gamification stats');
+    expect(schema).toContain('Service role full access coach agent traces');
+  });
 });
