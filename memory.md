@@ -4,12 +4,13 @@
 
 ---
 
-## 目前主線（2026-05-14）
+## 目前主線（2026-05-15）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- 目前主線：`main` / `origin/main` 均已指向 `cc21e8d fix: 補齊公開前刪帳與推送守門`。
+- 目前本地主線：`main` 已指向 `636b8e4 Rename 知心四式 moves`；前一個方法語言風險收斂 commit 為 `582659e Reduce method language overlap risk`。
+- `origin/main` 可能仍停在較舊的 V1.0 baseline；push / PR 前先重新確認 remote 狀態。
 - 前一個發布工作分支：`codex/stitch-ui-release-20260513`，已快轉合入 `main`。
-- 工作區仍可能有未追蹤規格書：`docs/superpowers/specs/2026-05-14-imxin-current-app-spec.md`，不要未確認就混進產品提交。
+- 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
 
 ## V1.0 已完成的產品面
@@ -21,6 +22,8 @@
 - Header 右上角為純 SVG 圖示列：成就、主題、提醒、帳號。
 - 首頁與 Coach 首屏用一般人能懂的語氣呈現「主動 AI 教練」，不要把第一層文案改成內部技術語。
 - Coach 危機語句會回公開 enum `emergency_stabilization` 並觸發 `open_sos`。
+- 前台方法語言定稿為 **知心四式：心照、喚名、安神、動念**。保留輕武俠心法感，但不要浮誇或神秘化。
+- Active 前台 / prompt 語言已清掉 `How We Feel`、`Mood Meter`、`Meta-Moment` 等容易混淆的品牌化表述；保留 RULER-inspired / ACT-informed / IFS-informed / Dan Siegel-informed 的誠實來源與非官方邊界。
 
 ## V1.0 已完成的技術面
 
@@ -41,14 +44,15 @@
 
 ## 最新驗證基線
 
-- `npm run test:run` → 372 tests / 40 files passed
-- `cd server && npm run test:run` → 160 tests / 16 files passed
-- `npx tsc --noEmit` → passed
+- `npm run test:run` → 368 tests / 40 files passed
+- `cd server && npm run test:run` → 164 tests / 17 files passed
 - `npm run build` → passed
 - `cd server && npm run build` → passed
 - `npm run lint` → 0 errors / 31 warnings
+- `cd server && npm run lint` → 0 errors / 24 warnings
+- `npm run test:e2e` → 4 passed
 - `git diff --check` → passed
-- Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。
+- Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。方法語言更名後尚未重新部署 production。
 
 ## 主要守門檔案
 
