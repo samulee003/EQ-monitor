@@ -74,7 +74,15 @@
 
 ## 最新驗證基線
 
-- `npm run test:run` → 368 tests / 40 files passed
+- 2026-05-15 PM 驗收修正：onboarding 角色選擇移除單字大圖示；隱私導覽改成未登入本機保存、登入同意同步、可匯出/刪帳；模式導覽改成每日提醒/週洞察/成就收藏；Coach 首屏壓成「先說一句就好」與三個低負擔開始按鈕；提醒時間頁新增通知內容預覽與試發提醒；個人中心匯出資料改為等待實際 logs 載入。
+- 2026-05-15 追加修正：提醒時間導覽最後一步不再等待通知權限 Promise；`開始旅程` 會先完成 onboarding，通知開啟改為背景 best-effort。`NotificationService.getSettings()` 改用同步快取讀取本機提醒設定。
+- 追加修正驗證：`npm run test:run -- src/components/OnboardingFlow.test.tsx` → 6 tests passed；`npm run build` passed；`git diff --check` passed；正式站 deployment `6a073696bbc71468fc730cbc` 已 RUNNING，bundle `index-B-9lzdP6.js`，live smoke 模擬通知權限永不回應時仍可離開導覽並進入 `今日心情`。
+- PM 驗收修正驗證：`npm run test:run -- src/pages/CoachPage.test.tsx src/components/OnboardingFlow.test.tsx src/components/UserProfile.test.tsx` → 32 tests / 3 files passed；`npm run build` passed；`npm run lint` 0 errors / 31 warnings；`git diff --check` passed；Playwright mobile 截圖確認 Coach 首屏與提醒時間頁主按鈕可見。
+- 2026-05-15 PWA final Live Mock：`today-mood.zeabur.app` 已部署並切到 bundle `index-B-9lzdP6.js`；Zeabur deployment `6a073696bbc71468fc730cbc` 狀態 `RUNNING`。
+- Live Mock 覆蓋：frontend root、Bot root、Bot `/health`、`home / history / growth / achievement / coach / about / privacy.html / account-deletion.html` 的 desktop / tablet / mobile 檢視，以及 check-in、header 工具、guest login、history filter/edit/export、Coach 7 日小陪跑、LINE 綁定 mock、SOS、onboarding、privacy lock、unknown hash。結果：有效 35/35 passed，console/page errors 0。
+- 這輪 Live Mock 使用 mock 攔截 Coach / LINE 綁定 mutating requests，避免污染 production 資料；production DB trace/stats 的 live data path 仍需另跑。
+- 本輪修正：`src/stores/appStore.ts` 讓無 hash / unknown hash 導回 `#home`、舊 `#landing` 導到 `#about`，並讓應用鎖首次啟用時進入 PIN 設定；`src/adapters/storage.ts` 讓 log update 產生新列表引用，修正記錄回顧編輯後畫面不刷新。
+- `npm run test:run` → 384 tests / 43 files passed
 - `cd server && npm run test:run` → 164 tests / 17 files passed
 - `npx vitest run src/pages/CoachPage.test.tsx src/components/coach/MicroActionCard.test.tsx src/components/coach/GamificationStrip.test.tsx` → 30 tests / 3 files passed
 - `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed
@@ -84,7 +92,7 @@
 - `cd server && npm run lint` → 0 errors / 24 warnings
 - `npm run test:e2e` → 4 passed
 - `git diff --check` → passed
-- Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。方法語言更名後尚未重新部署 production。
+- Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。2026-05-15 PWA Live Mock 已重跑並部署；Agentic Action Loop 的 production DB trace/stats live data path 仍待最後確認。
 
 ## 主要守門檔案
 
@@ -108,7 +116,7 @@
 
 ## 下一步
 
-1. 部署 Agentic Action Loop schema + Edge Function + PWA 後，做 live smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 DB trace/stats。
+1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
 3. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄；暫不測 LINE 建立小行動。
 4. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。

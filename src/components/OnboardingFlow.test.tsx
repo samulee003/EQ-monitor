@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import OnboardingFlow from './OnboardingFlow';
 
@@ -7,6 +7,10 @@ const notificationMock = vi.hoisted(() => ({
     setReminderTime: vi.fn(),
     sendTestNotification: vi.fn(),
     getDailyReminderPreview: vi.fn(() => '今天給自己一分鐘，看看此刻的感受。'),
+}));
+
+const settingsStoreMock = vi.hoisted(() => ({
+    setUserRole: vi.fn(),
 }));
 
 vi.mock('../services/LanguageContext', () => ({
@@ -18,12 +22,16 @@ vi.mock('../services/NotificationService', () => ({
 }));
 
 vi.mock('../adapters', () => ({
-    settingsStore: {
-        setUserRole: vi.fn(),
-    },
+    settingsStore: settingsStoreMock,
 }));
 
 describe('OnboardingFlow', () => {
+    afterEach(() => {
+        vi.clearAllMocks();
+        notificationMock.setEnabled.mockResolvedValue(true);
+        notificationMock.getDailyReminderPreview.mockReturnValue('今天給自己一分鐘，看看此刻的感受。');
+    });
+
     const goToStep = (targetStep: number) => {
         fireEvent.click(screen.getByRole('button', { name: '我了解，開始導覽' }));
         for (let step = 2; step < targetStep; step += 1) {
@@ -92,5 +100,20 @@ describe('OnboardingFlow', () => {
         await waitFor(() => expect(notificationMock.setEnabled).toHaveBeenCalledWith(true));
         await waitFor(() => expect(notificationMock.sendTestNotification).toHaveBeenCalledWith('general'));
         expect(await screen.findByText('已送出測試提醒。如果沒有看到，請檢查瀏覽器通知權限。')).toBeInTheDocument();
+    });
+
+    it('開始旅程不應被通知權限流程卡住', () => {
+        const onComplete = vi.fn();
+        notificationMock.setEnabled.mockImplementation(() => new Promise(() => undefined));
+
+        render(<OnboardingFlow onComplete={onComplete} />);
+
+        fireEvent.click(screen.getByRole('button', { name: '跳過導覽' }));
+        fireEvent.click(screen.getByRole('button', { name: '開始旅程 ✨' }));
+
+        expect(settingsStoreMock.setUserRole).toHaveBeenCalledWith('general');
+        expect(notificationMock.setReminderTime).toHaveBeenCalledWith(21, 0);
+        expect(notificationMock.setEnabled).toHaveBeenCalledWith(true);
+        expect(onComplete).toHaveBeenCalledTimes(1);
     });
 });

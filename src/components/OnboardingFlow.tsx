@@ -23,10 +23,15 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     const handleNext = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
     const handlePrev = () => setStep(s => Math.max(s - 1, 1));
     
-    const handleFinish = async () => {
+    const handleFinish = () => {
         settingsStore.setUserRole(userRole);
         notificationService.setReminderTime(reminderHour, 0);
-        await notificationService.setEnabled(true);
+
+        // Notification permission can be blocked or delayed by mobile/in-app browsers.
+        // Do not make onboarding completion depend on that optional permission path.
+        void notificationService.setEnabled(true).catch(() => {
+            // Users can retry from the reminder test button or settings later.
+        });
         onComplete();
     };
 

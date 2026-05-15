@@ -18,13 +18,13 @@
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
+- 2026-05-15 已將 PWA 部署到 Zeabur 並完成 final Live Mock；正式站目前 serve bundle `index-B-9lzdP6.js`。
 
 ## 下一步
 
-1. 部署 Agentic Action Loop schema、`coach` Edge Function 與 PWA。
-2. 重跑 live smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
-3. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
-4. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
+2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
+3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
 ---
 
@@ -38,6 +38,30 @@
 - **方法語言已收斂**：前台不再使用容易被看成直接沿用 How We Feel / Mood Meter / Meta-Moment 的 active 品牌化語言。
 - **知心四式定稿**：前台四式命名為 `心照 → 喚名 → 安神 → 動念`。
 - **來源說法更誠實**：保留 RULER-inspired、ACT-informed、IFS-informed、Dan Siegel-informed，但明確寫清楚今心不是 Yale、RULER Approach、ACT、IFS、Dan Siegel / Mindsight Institute 或任何治療機構的官方產品，也不是心理治療。
+
+### PWA final Live Mock
+
+- 部署 PWA 至 Zeabur；最新 production deployment `6a073696bbc71468fc730cbc`，狀態 `RUNNING`。
+- 正式站 `https://today-mood.zeabur.app/` 已切到 bundle `index-B-9lzdP6.js`。
+- Live Mock 覆蓋 frontend root、Bot root、Bot `/health`、8 個頁面在 desktop / tablet / mobile 的檢視，以及 check-in、header 工具、guest login、history filter/edit/export、Coach 7 日小陪跑、LINE 綁定 mock、SOS、onboarding、privacy lock、unknown hash。
+- 結果：有效 35/35 passed，console/page errors 0。
+- 本輪 Live Mock 攔截 Coach / LINE 綁定 mutating requests，避免污染 production 資料；production DB trace/stats live API smoke 仍是下一個 gate。
+- 修正 `src/adapters/storage.ts` 的 log update：更新記錄時產生新列表引用，解決記錄回顧編輯後畫面不刷新。
+- 修正 `src/stores/appStore.ts`：無 hash / unknown hash 導回 `#home`、舊 `#landing` 導到 `#about`；應用鎖首次啟用但尚未設定 PIN 時會進入 PIN 設定畫面。
+- 驗證：`npm run test:run` 384 tests / 43 files passed；`npm run test:e2e` 4 passed；`npm run build` passed；`npm run lint` 0 errors / 31 warnings；`git diff --check` passed。
+
+### PWA PM 驗收修正
+
+- 初次導覽角色選擇移除「育 / 通 / 學 / 職」單字大圖示，改為「照顧孩子的父母」「一般日常使用」「學生」「職場工作者」等可理解選項。
+- 隱私導覽改為只承諾已落實的行為：未登入本機保存、登入同意才同步、可匯出本機記錄與登入後刪除帳號雲端資料。
+- 模式導覽改為「每日提醒 / 週洞察 / 成就收藏」，避免把尚需 opt-in / LINE 綁定的主動推送說成無條件主動提醒。
+- Coach 首屏從說明書式大段文字改成「先說一句就好」與三個低負擔開始按鈕：我現在很煩、先做呼吸、開始 7 日陪跑；LINE 綁定設定移到開始對話後再出現。
+- 提醒時間導覽新增通知預覽與「試發提醒」，明確顯示通知標題 `今心 • 每日心情記錄` 與訊息內容，並提示 LINE / WeChat 內建瀏覽器可能受通知權限限制。
+- 修正提醒時間導覽最後一步卡住：`開始旅程` 不再等待通知權限流程完成；通知開啟改為背景 best-effort，權限被擋、延遲或內建瀏覽器不回應時也會先完成導覽進入 App。
+- 修正通知設定讀取流程：`NotificationService` 改用同步快取讀取本機提醒設定，避免把 async getter 當成已載入的設定物件。
+- 修正個人中心匯出資料會把 Promise 寫進 JSON 的問題，現在會等待實際情緒記錄載入完成再匯出。
+- 驗證：`npm run test:run -- src/pages/CoachPage.test.tsx src/components/OnboardingFlow.test.tsx src/components/UserProfile.test.tsx` ✅ 32 tests / 3 files；`npm run build` ✅；`npm run lint` ✅ 0 errors / 31 warnings；`git diff --check` ✅；Playwright mobile 截圖確認 Coach 首屏與提醒導覽主按鈕可見。
+- 追加驗證：`npm run test:run -- src/components/OnboardingFlow.test.tsx` ✅ 6 tests；`npm run build` ✅；`git diff --check` ✅；正式站 deployment `6a073696bbc71468fc730cbc` / bundle `index-B-9lzdP6.js` live smoke 確認通知權限 Promise 不回應時仍可完成導覽。
 
 ### 產品與文件
 

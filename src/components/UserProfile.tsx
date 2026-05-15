@@ -92,8 +92,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
         }
     };
 
-    const handleExportData = () => {
-        const logs = storageService.getLogs();
+    const handleExportData = async () => {
+        const logs = await storageService.getLogs();
         const data = {
             user: {
                 email: user.email,
