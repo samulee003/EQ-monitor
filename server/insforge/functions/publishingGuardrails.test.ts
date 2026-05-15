@@ -51,6 +51,12 @@ describe('發布前 P0/P1 守門', () => {
     expect(schema).toContain('create table if not exists public.coach_gamification_stats');
     expect(schema).toContain('create table if not exists public.coach_agent_traces');
     expect(schema).toContain("check (status in ('active', 'completed', 'partial', 'skipped', 'expired'))");
+    expect(schema).toContain('check (xp_awarded >= 0)');
+    expect(schema).toContain('check (coins_awarded >= 0)');
+    expect(schema).toContain('check (total_xp >= 0)');
+    expect(schema).toContain('check (coin_balance >= 0)');
+    expect(schema).toContain('check (lifetime_coins >= 0)');
+    expect(schema).toContain('check (current_review_streak >= 0)');
     expect(schema).toContain('Service role full access coach micro actions');
     expect(schema).toContain('Service role full access coach gamification stats');
     expect(schema).toContain('Service role full access coach agent traces');
