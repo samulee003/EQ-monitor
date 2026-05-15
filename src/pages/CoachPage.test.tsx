@@ -32,6 +32,14 @@ describe('CoachPage', () => {
     expect(screen.getByText('我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。')).toBeInTheDocument();
   });
 
+  it('Coach 頁面應顯示 Beta 內測標籤與使用上限提示', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByLabelText('Beta 內測版')).toBeInTheDocument();
+    expect(screen.getByText(/目前是內測期間/)).toBeInTheDocument();
+    expect(screen.getByText(/AI 教練回合可能會有使用上限/)).toBeInTheDocument();
+  });
+
   it('應該顯示阿念教練開場訊息與建議提示', () => {
     render(<CoachPage />);
     expect(screen.getByText('你不需要先想好怎麼說。只要留下一句話，阿念會接住前後脈絡，判斷適合先聊天、記錄、呼吸，或打開緊急安定練習。')).toBeInTheDocument();

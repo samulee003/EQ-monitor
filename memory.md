@@ -26,14 +26,23 @@
 - 新資料表：`server/insforge/schema/011_coach_action_loop.sql`，包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 - Runtime：`server/insforge/functions/coach-simple.ts` 已接上 max-3-step action loop；危機 path 會 `crisis_reward_blocked`，不得建立小行動或獎勵。
 - Core helpers：`server/insforge/functions/_shared/coachActionLoop.ts` 負責 intent classification、pending proposal、expiry、reward、review streak、level。
-- Frontend：`src/pages/CoachPage.tsx` 已接 7 日小陪跑 CTA、`MicroActionCard`、`GamificationStrip` 與 `CoachResponse` metadata。
+- Frontend：`src/pages/CoachPage.tsx` 已接 7 日小陪跑 CTA、`MicroActionCard`、`GamificationStrip`、`CoachResponse` metadata，並顯示 `Beta` 內測標籤與 AI 回合使用上限提示。
+- 內測額度決策：未來要限制會呼叫 Gemini 的「AI 對話回合」；提醒、小行動回報、SOS / 緊急安定應走 deterministic template 或狀態機，不應因 AI 回合用完而失效。
 - 測試：focused frontend 3 files / 30 tests passed；focused server loop/eval/guardrail 3 files / 41 tests passed；frontend/server build passed；`git diff --check` passed。
 - 注意：小行動第一版只在 PWA Coach 建立與回報，LINE Bot 暫不建立小行動狀態機。
+
+## 對話資料與模型路線（2026-05-15）
+
+- **短期（現在到下一輪封測）**：不要急著 fine-tune。先補 20-50 條高品質對話樣本與 eval case，重點放在語氣、角色邊界、危機守門、intent routing、提出一個小行動與回報後的調整語句。樣本要從真對話整理，但必須先匿名化、去除敏感識別資訊，再由人標註。
+- **中期（1-2 個月）**：建立「對話資料飛輪」：收集同意後的聊天片段 -> 匿名化 -> 標註 intent / 危機 / 回報類型 / 好壞案例 -> 產生 golden set 與回歸測試 -> 用 few-shot 範例與 prompt 版本比較改善。這一階段優先做評估與路由，不優先做模型訓練。
+- **長期（3 個月以上）**：如果真的需要模型層改善，再考慮平台是否支援 tuning，或用更強的模型負責摘要/複盤，Flash-Lite 維持低延遲回合。若有 fine-tuning 能力，也只拿高信心、已審核的樣本做離線訓練，不把原始對話直接拿去線上自我學習。
+- **自我進化的真相**：對話歷史可以幫產品「變好」，但通常不是模型自己在線上自動學會。比較正確的做法是：歷史對話 -> 資料治理 -> 樣本/標註 -> 評估 -> 更新 prompt / 路由 / 規則 /（必要時）離線 tuning。這比較像產品資料飛輪，不是模型即時長出新能力。
+- **對今心的意思**：阿念可以越來越懂人，但要靠人類整理樣本與守門，不能靠 raw logs 自動進化成失控的代理。
 
 ## V1.0 已完成的產品面
 
 - PWA 已可作為共同入口：朋友用 LINE、WeChat 或其他通訊軟體，都可以直接打開 `https://today-mood.zeabur.app/` 使用網頁版。
-- 無 hash 的根網址應直接進入 `#home` 今日心情；產品說明改放在 App 內 `#about`「關於我們」，先由頁尾產品資訊進入，舊 `#landing` 只作相容轉址。
+- 無 hash 的根網址應直接進入 `#home` 今日心情；初次使用者看完動畫後仍會看到 App onboarding，已完成 onboarding 的使用者則直接露出四色選擇。產品說明改放在 App 內 `#about`「關於我們」，先由頁尾產品資訊進入，舊 `#landing` 只作相容轉址。
 - LINE 是 V1.0 已驗證的對話入口：官方帳號 `鋅鋰師拔麻的小小額葉養成手札`，Basic ID `@980pqrhn`。
 - WeChat 朋友先走 PWA 網頁，不做 WeChat Bot；WeChat Official Account / Bot 放 P2。
 - 主導覽維持原版文案：`今日心情`、`記錄回顧`、`成長看板`、`教練`。

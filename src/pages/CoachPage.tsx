@@ -386,10 +386,16 @@ export default function CoachPage() {
             </div>
             <div className={styles.openingStack}>
               <div className={styles.agentIntro}>
-                <p className={styles.agentEyebrow}>阿念教練</p>
+                <div className={styles.agentMeta}>
+                  <p className={styles.agentEyebrow}>阿念教練</p>
+                  <span className={styles.betaBadge} aria-label="Beta 內測版">Beta</span>
+                </div>
                 <h2>你不用自己想下一步</h2>
                 <p className={styles.agentDescription}>
                   我是阿念，會依你的情緒記錄、LINE 互動與當下訊息，陪你用知心四式：心照、喚名、安神、動念，慢慢整理出下一步。
+                </p>
+                <p className={styles.betaNotice}>
+                  目前是內測期間，AI 教練回合可能會有使用上限；你仍可以回來回報小行動，讓阿念陪你把下一步變小。
                 </p>
                 <div className={styles.agentFeatureGrid} aria-label="阿念教練特色">
                   <div className={styles.agentFeature}>
