@@ -49,6 +49,10 @@ nav {
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -61,6 +65,22 @@ nav {
   white-space: nowrap;
   flex-shrink: 0;
   border-radius: 999px;
+}
+
+.nav-beta-badge {
+  min-height: 16px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  border: 1px solid rgba(91, 112, 73, 0.28);
+  border-radius: 999px;
+  background: rgba(231, 238, 219, 0.76);
+  color: #46563a;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 12px;
+  letter-spacing: 0;
+  pointer-events: none;
 }
 
 .nav-link:hover {
@@ -228,9 +248,17 @@ footer {
   .glass-header .nav-link {
     min-height: 44px;
     padding: 10px 8px;
+    flex-direction: column;
+    gap: 2px;
     border-radius: 22px;
     font-size: 0.76rem;
     text-align: center;
+  }
+  .glass-header .nav-beta-badge {
+    min-height: 14px;
+    padding: 0 5px;
+    font-size: 9px;
+    line-height: 12px;
   }
   .glass-header .nav-link.active {
     color: #1f1b16;

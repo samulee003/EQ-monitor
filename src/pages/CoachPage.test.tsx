@@ -35,7 +35,7 @@ describe('CoachPage', () => {
   it('Coach 頁面應顯示 Beta 內測標籤與使用上限提示', () => {
     render(<CoachPage />);
 
-    expect(screen.getByLabelText('Beta 內測版')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Beta 內測版').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/目前是內測期間/)).toBeInTheDocument();
     expect(screen.getByText(/AI 教練回合可能會有使用上限/)).toBeInTheDocument();
   });

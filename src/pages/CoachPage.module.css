@@ -649,6 +649,27 @@
   line-height: 18px;
 }
 
+.navLabelWithBeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navBetaBadge {
+  min-height: 13px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  border: 1px solid rgba(91, 112, 73, 0.24);
+  border-radius: 999px;
+  background: rgba(231, 238, 219, 0.78);
+  color: #46563a;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 10px;
+  letter-spacing: 0;
+}
+
 .bottomNav button:hover {
   transform: scale(1.04);
   opacity: 1;
@@ -726,6 +747,25 @@
 @media (min-width: 768px) {
   .coachPage {
     box-shadow: 0 0 100px rgba(0, 0, 0, 0.18);
+  }
+}
+
+@media (min-width: 769px) {
+  .chatArea {
+    padding-bottom: 128px;
+  }
+
+  .inputDock {
+    bottom: 0;
+    padding-bottom: 20px;
+  }
+
+  .errorBanner {
+    bottom: 92px;
+  }
+
+  .bottomNav {
+    display: none;
   }
 }
 

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MainLayout from './MainLayout';
 import { useAuth } from '../services/AuthContext';
@@ -82,7 +82,9 @@ describe('MainLayout 帳號入口', () => {
     expect(screen.getByRole('button', { name: '今日心情' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '記錄回顧' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '成長看板' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '教練' })).toBeInTheDocument();
+    const coachNav = screen.getByRole('button', { name: '教練' });
+    expect(coachNav).toBeInTheDocument();
+    expect(within(coachNav).getByText('Beta')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '安定室' })).not.toBeInTheDocument();
   });
 
