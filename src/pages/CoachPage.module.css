@@ -211,6 +211,42 @@
   line-height: 16px;
 }
 
+.lineEntryCard {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  color: #172018;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(82, 98, 70, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(56, 72, 50, 0.08);
+}
+
+.lineEntryCard:focus-visible {
+  outline: 3px solid rgba(170, 176, 155, 0.5);
+  outline-offset: 3px;
+}
+
+.lineEntryKicker {
+  color: #526246;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 16px;
+}
+
+.lineEntryCard strong {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 22px;
+}
+
+.lineEntryCard span:last-child {
+  color: #5a5a5a;
+  font-size: 12px;
+  line-height: 18px;
+}
+
 .startActions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

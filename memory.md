@@ -12,7 +12,7 @@
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
-- 同一個整合版也包含後續 Debug / Review 修正：登入使用者情緒記錄同步 `ruler_logs`、`setUserId()` 真正切換 user cache、Timeline / Coach 深色模式對比、匯入/快速記錄後刷新成長進度、achievement-checker 補齊前台成就規則、阿念教練文案收斂、Coach 首屏保留 LINE 綁定入口。
+- 同一個整合版也包含後續 Debug / Review 修正：登入使用者情緒記錄同步 `ruler_logs`、`setUserId()` 真正切換 user cache、Timeline / Coach 深色模式對比、匯入/快速記錄後刷新成長進度、achievement-checker 補齊前台成就規則、阿念教練文案收斂、Coach 首屏保留 LINE 綁定入口並新增 LINE 對話入口卡。
 - 重要前序：`636b8e4 Rename 知心四式 moves`（心照/喚名/安神/動念 命名）；`582659e Reduce method language overlap risk`（清掉 Mood Meter / Meta-Moment）。
 - 前一個發布工作分支：`codex/stitch-ui-release-20260513`，已快轉合入 `main`。
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。

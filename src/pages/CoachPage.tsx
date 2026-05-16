@@ -397,6 +397,17 @@ export default function CoachPage() {
                 <p className={styles.betaNotice}>
                   內測中
                 </p>
+                <a
+                  className={styles.lineEntryCard}
+                  href={LINE_BOT_ADD_FRIEND_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`加入 LINE 官方帳號 ${LINE_BOT_BASIC_ID}，用 LINE 和阿念對話`}
+                >
+                  <span className={styles.lineEntryKicker}>也可以用 LINE 對話</span>
+                  <strong>{LINE_BOT_BASIC_ID}</strong>
+                  <span>加入後輸入「綁定」，再回來貼上 6 位碼。</span>
+                </a>
                 <div className={styles.startActions} aria-label="阿念教練開始選項">
                   {START_ACTIONS.map((item) => (
                     <button

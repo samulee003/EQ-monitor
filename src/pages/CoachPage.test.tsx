@@ -85,6 +85,14 @@ describe('CoachPage', () => {
     expect(screen.getByRole('button', { name: '開始 7 日陪跑' })).toBeInTheDocument();
   });
 
+  it('Coach 首屏應該讓使用者知道也能透過 LINE 對話', () => {
+    render(<CoachPage />);
+
+    expect(screen.getByText('也可以用 LINE 對話')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /加入 LINE 官方帳號 @980pqrhn/ })).toBeInTheDocument();
+    expect(screen.getByText('加入後輸入「綁定」，再回來貼上 6 位碼。')).toBeInTheDocument();
+  });
+
   it('Coach 首屏提供簡短 7 日小陪跑入口', () => {
     render(<CoachPage />);
 

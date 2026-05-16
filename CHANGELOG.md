@@ -50,6 +50,7 @@
 - InsForge adapter 補強結構化錯誤日誌，讓 production 問題較容易追查。
 - 登入使用者新增情緒記錄時同步寫入 `ruler_logs`，並讓 `storageService.setUserId()` 真正切換使用者資料 cache。
 - Coach 首屏保留 LINE 綁定入口，修復 E2E 找不到綁定面板的問題。
+- Coach 首屏新增「也可以用 LINE 對話」入口卡，讓使用者不用先進入綁定表單也能看懂 LINE 官方帳號入口。
 - Timeline / Coach 深色模式補強文字對比；匯入記錄與快速記錄後會刷新成長進度。
 - `achievement-checker` 補齊前台可見成就規則，避免畫面看得到但 backend 不會解鎖。
 - 文案持續收斂為「阿念教練」，降低「AI 教練」泛稱造成的角色漂移。
