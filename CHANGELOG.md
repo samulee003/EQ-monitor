@@ -13,7 +13,7 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`，以及今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`，以及安全分流修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
@@ -24,12 +24,24 @@
 - 2026-05-16 13:20 已再次部署 InsForge `coach` Edge Function；mutating tool args 由 deterministic code 驗證後才可建立或回報小行動。
 - 2026-05-16 16:50 已重新部署 PWA；App onboarding 第 3 步改用情緒心理學科普常用的「身體喚醒程度」與「感受愉悅度」說法，live bundle 已切到 `index-DdGwYiyB.js`。
 - 2026-05-16 22:29 已重新部署 PWA；今日心情封測打磨已上 production，live bundle 已切到 `index-BIi8Bv0J.js`，Zeabur deployment 已切到 `RUNNING`。
+- 2026-05-16 23:07 已重新部署 PWA 與 InsForge `coach`；安全分流修補已上 production，live bundle 已切到 `index-DVu8hHQG.js`，`coach` 線上 code 已回讀確認包含 final response safety guard。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩：今日心情 → 保存 → 記錄回顧，再試 `#coach` 的登入後 7 日小陪跑。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+
+## [V1.0.0] - 2026-05-16 — 今日心情安全分流與 SOS 收束
+
+- 目前狀態：分支 `codex/clinical-ai-safety-polish-20260516` 已快轉合入 `main` / `origin/main`，commit `f6340e4`，並已部署到 PWA production；live bundle 為 `index-DVu8hHQG.js`。
+- 今日心情喚名時，若選到高風險情緒或強度 8/10 以上，會先顯示「先確認安全」彈窗；未確認安全前不保存記錄，彈窗提供 119 / 110、安心專線 1925、生命線 1909，以及「我現在安全，保存這筆記錄 / 先去找阿念做 SOS」。
+- 強度頁新增 8/10 以上的安全提示；完成頁在高強度情緒下改為低慶祝的「已記下這一刻」，避免把沉重情緒當成一般任務完成來慶祝。
+- 身體掃描新增「改做外在接地」替代路徑，使用者可用看見 5 個物品、聽見 3 種聲音、感覺雙腳踩地，跳過內在身體掃描後進入情緒標記。
+- Coach SOS 第 3 步從「想成為的自己」改為「看見安全的一步」，降低高壓狀態下的自我要求；完成 SOS 後只在本地顯示安全收束訊息，不再自動送回 production Coach API。
+- AI 洞察卡將「潛在模式」改為「可能線索」，fallback 洞察改用「可能 / 看起來」等假設語氣；`SummaryStep` 也改用使用者實際選擇的 emotion intensity，不再固定 5。
+- Production `coach` Edge Function 新增 `guardFinalCoachResponse`，最終可見回覆會移除危機路徑中的 XP / 金幣 / 小行動獎勵語言，補上 119 / 110 與緊急安定練習提示，並消除診斷或保證治療效果的確定性語句。
+- 驗證：`npm run test:run` → 413 tests / 44 files passed；`cd server && npm run test:run` → 214 tests / 19 files passed；`npm run test:e2e` → 5 passed；`npm run build` → passed；`cd server && npm run build` → passed；`npm run lint` → 0 errors / 31 warnings；`cd server && npm run lint` → 0 errors / 24 warnings；`git diff --check` → passed。Live smoke 確認正式站強度 8/10 安全確認、柔性完成頁、SOS 本地收束皆可完成；`coach` code 回讀確認包含 safety guard，`OPTIONS /coach` 回 204，未授權有效 UUID `POST /coach` 回 401。
 
 ## [V1.0.0] - 2026-05-16 — 今日心情第一屏封測打磨
 
