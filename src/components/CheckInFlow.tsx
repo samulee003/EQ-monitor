@@ -26,10 +26,15 @@ const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
     const setView = useAppStore((state) => state.setView);
     const [showCrisisModal, setShowCrisisModal] = useState(false);
+    const [pendingEmotionSelection, setPendingEmotionSelection] = useState<{
+        emotions: Emotion[];
+        intensity: number;
+    } | null>(null);
     const {
         step,
         selectedQuadrants,
         selectedEmotions,
+        emotionIntensity,
         showResumePrompt,
         isFullFlow,
         setStep,
@@ -47,11 +52,22 @@ const CheckInFlow: React.FC = () => {
     } = useRulerFlow();
 
     const handleEmotionSelectWithCrisisCheck = (emotions: Emotion[], intensity: number) => {
-        handleEmotionSelect(emotions, intensity);
         const hasHighRisk = emotions.some(e => HIGH_RISK_EMOTION_IDS.has(e.id));
-        if (hasHighRisk) {
+        const hasHighIntensity = intensity >= 8;
+        if (hasHighRisk || hasHighIntensity) {
+            setPendingEmotionSelection({ emotions, intensity });
             setShowCrisisModal(true);
+            return;
         }
+        handleEmotionSelect(emotions, intensity);
+    };
+
+    const confirmSafetyAndSaveEmotion = () => {
+        if (pendingEmotionSelection) {
+            handleEmotionSelect(pendingEmotionSelection.emotions, pendingEmotionSelection.intensity);
+        }
+        setPendingEmotionSelection(null);
+        setShowCrisisModal(false);
     };
 
     const handleContinueFullFlow = () => {
@@ -149,6 +165,7 @@ const CheckInFlow: React.FC = () => {
                         {step === 'summary' && selectedEmotions.length > 0 && (
                             <SummaryStep
                                 selectedEmotions={selectedEmotions}
+                                emotionIntensity={emotionIntensity}
                                 isFullFlow={isFullFlow}
                                 onReset={resetFlow}
                                 onContinueFullFlow={!isFullFlow ? handleContinueFullFlow : undefined}
@@ -161,27 +178,42 @@ const CheckInFlow: React.FC = () => {
 
             {/* 危機介入彈窗 */}
             {showCrisisModal && (
-                <div className="crisis-modal-overlay fade-in" role="dialog" aria-modal="true" aria-label={t('心理支持資源')}>
+                <div className="crisis-modal-overlay fade-in" role="dialog" aria-modal="true" aria-label={t('先確認安全')}>
                     <div className="crisis-modal">
-                        <div className="crisis-icon">🤝</div>
-                        <h3>{t('你不需要獨自面對')}</h3>
-                        <p>{t('你剛才選擇了一個很沉重的情緒。今心陪伴你覺察，但如果你正在經歷嚴重的痛苦，專業的支持更能幫助你。')}</p>
+                        <div className="crisis-icon" aria-hidden="true">+</div>
+                        <h3>{t('先確認安全')}</h3>
+                        <p>{t('你剛才標記的是高強度或很沉重的感受。今心可以幫你記下來，但在保存之前，先確認：你現在身邊是安全的嗎？')}</p>
+                        <p className="crisis-emergency-copy">
+                            {t('如果你或身邊的人有立即危險，請先離開危險環境並聯絡當地緊急服務；台灣可撥 119 或 110。')}
+                        </p>
                         <div className="crisis-hotlines">
                             <a href="tel:1925" className="crisis-hotline-btn">
-                                📞 {t('安心專線')} <strong>1925</strong>
+                                {t('安心專線')} <strong>1925</strong>
                                 <span>{t('24小時免費')}</span>
                             </a>
                             <a href="tel:1909" className="crisis-hotline-btn">
-                                📞 {t('生命線')} <strong>1909</strong>
+                                {t('生命線')} <strong>1909</strong>
                                 <span>{t('24小時免費')}</span>
                             </a>
                         </div>
-                        <button
-                            className="crisis-continue-btn"
-                            onClick={() => setShowCrisisModal(false)}
-                        >
-                            {t('我知道了，繼續覺察')}
-                        </button>
+                        <div className="crisis-modal-actions">
+                            <button
+                                className="crisis-continue-btn"
+                                onClick={confirmSafetyAndSaveEmotion}
+                            >
+                                {t('我現在安全，保存這筆記錄')}
+                            </button>
+                            <button
+                                className="morandi-outline-btn"
+                                onClick={() => {
+                                    setPendingEmotionSelection(null);
+                                    setShowCrisisModal(false);
+                                    setView('coach');
+                                }}
+                            >
+                                {t('先去找阿念做 SOS')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

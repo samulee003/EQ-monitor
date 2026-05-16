@@ -364,6 +364,29 @@ describe('CoachPage', () => {
     });
   });
 
+  it('完成 SOS 緊急安定練習後只做本地安全收束，不自動送回 Coach API', async () => {
+    const sendMessageSpy = vi.spyOn(client, 'sendMessage').mockResolvedValue({
+      response: '不應該被送出',
+    });
+
+    render(<CoachPage />);
+
+    fireEvent.click(screen.getByLabelText('SOS 緊急協助'));
+    fireEvent.click(screen.getByText('我準備好了，開始呼吸'));
+    fireEvent.click(screen.getByText('呼吸完成'));
+    fireEvent.change(screen.getByLabelText('寫下現在最安全的一步'), {
+      target: { value: '先放下手機' },
+    });
+    fireEvent.click(screen.getByText('下一步'));
+    fireEvent.click(screen.getByText('喝一杯水'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('emergency-stabilization-overlay')).not.toBeInTheDocument();
+    });
+    expect(sendMessageSpy).not.toHaveBeenCalled();
+    expect(screen.getByText(/安定練習先收在這裡/)).toBeInTheDocument();
+  });
+
   it('Agent 回傳 show_growth action 時切到成長頁', async () => {
     vi.spyOn(client, 'sendMessage').mockResolvedValue({
       response: '我幫你打開成長趨勢。',

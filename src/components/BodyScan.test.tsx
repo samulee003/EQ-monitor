@@ -116,6 +116,23 @@ describe('BodyScan', () => {
         expect(screen.queryByRole('note')).not.toBeInTheDocument();
     });
 
+    it('身體內觀不適合時可改做外在接地再進入情緒標記', () => {
+        render(<BodyScan quadrant="red" onComplete={mockOnComplete} onBack={mockOnBack} />);
+
+        fireEvent.click(screen.getByText('改做外在接地'));
+
+        expect(screen.getByRole('region', { name: '外在接地練習' })).toBeInTheDocument();
+        expect(screen.getByText('看見 5 個物品')).toBeInTheDocument();
+        expect(screen.getByText('聽見 3 種聲音')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('用外在接地進入情緒標記'));
+
+        expect(mockOnComplete).toHaveBeenCalledWith({
+            location: '外在環境',
+            sensation: '五感接地：看見 5 個物品、聽見 3 種聲音、感覺雙腳踩地',
+        });
+    });
+
     it('應該在瀏覽器不支持語音時禁用播放按鈕', () => {
         (voiceGuideService.isSupported as ReturnType<typeof vi.fn>).mockReturnValue(false);
 

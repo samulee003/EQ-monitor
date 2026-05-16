@@ -19,8 +19,13 @@
   line-height: 1.6;
   margin: 0;
 }
+.body-scan-warning-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
 .body-scan-warning-dismiss {
-  align-self: flex-end;
   background: transparent;
   border: 1px solid var(--glass-border);
   border-radius: 20px;
@@ -33,6 +38,21 @@
 .body-scan-warning-dismiss:hover {
   color: var(--text-primary);
   border-color: var(--text-secondary);
+}
+.body-scan-grounding-btn {
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border: 1px solid var(--text-primary);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: var(--s-1) var(--s-4);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.body-scan-grounding-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .step-header {
@@ -79,6 +99,35 @@
   font-size: 1rem;
   line-height: 1.7;
   opacity: 0.9;
+}
+.external-grounding-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  padding: var(--s-6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+}
+.grounding-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+.grounding-steps span {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--s-3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .audio-guide-card {
@@ -276,6 +325,9 @@
 }
 
 @media (max-width: 480px) {
+  .grounding-steps {
+    grid-template-columns: 1fr;
+  }
   .location-grid,
   .sensation-grid {
     grid-template-columns: repeat(2, 1fr);

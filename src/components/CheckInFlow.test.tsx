@@ -20,14 +20,23 @@ const mockResumeDraft = vi.fn();
 const mockSetStep = vi.fn();
 const mockSetIsFullFlow = vi.fn();
 const mockSetShowResumePrompt = vi.fn();
+const flowMockState = vi.hoisted(() => ({
+    step: 'recognizing',
+    selectedQuadrants: [] as string[],
+    selectedEmotions: [] as unknown[],
+    showResumePrompt: false,
+    isFullFlow: false,
+    emotionIntensity: 5,
+}));
 
 vi.mock('../hooks/useRulerFlow', () => ({
     useRulerFlow: () => ({
-        step: 'recognizing',
-        selectedQuadrants: [],
-        selectedEmotions: [],
-        showResumePrompt: false,
-        isFullFlow: false,
+        step: flowMockState.step,
+        selectedQuadrants: flowMockState.selectedQuadrants,
+        selectedEmotions: flowMockState.selectedEmotions,
+        showResumePrompt: flowMockState.showResumePrompt,
+        isFullFlow: flowMockState.isFullFlow,
+        emotionIntensity: flowMockState.emotionIntensity,
         setStep: mockSetStep,
         setIsFullFlow: mockSetIsFullFlow,
         setShowResumePrompt: mockSetShowResumePrompt,
@@ -53,10 +62,13 @@ vi.mock('./EmotionQuadrantPicker', () => ({
 }));
 
 vi.mock('./EmotionGrid', () => ({
-    default: ({ onSelectEmotions, onBack }: { onSelectEmotions: (es: unknown[]) => void; onBack: () => void }) => (
+    default: ({ onSelectEmotions, onBack }: { onSelectEmotions: (es: unknown[], intensity: number) => void; onBack: () => void }) => (
         <div data-testid="emotion-grid">
-            <button onClick={() => onSelectEmotions([{ id: 'angry', name: '生氣的', quadrant: 'red', energy: 3, pleasantness: 3 }])}>
+            <button onClick={() => onSelectEmotions([{ id: 'angry', name: '生氣的', quadrant: 'red', energy: 3, pleasantness: 3 }], 5)}>
                 選擇情緒
+            </button>
+            <button onClick={() => onSelectEmotions([{ id: 'enraged', name: '憤怒的', quadrant: 'red', energy: 5, pleasantness: 1 }], 9)}>
+                選擇高強度情緒
             </button>
             <button onClick={onBack}>返回</button>
         </div>
@@ -132,6 +144,12 @@ describe('CheckInFlow', () => {
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
+        flowMockState.step = 'recognizing';
+        flowMockState.selectedQuadrants = [];
+        flowMockState.selectedEmotions = [];
+        flowMockState.showResumePrompt = false;
+        flowMockState.isFullFlow = false;
+        flowMockState.emotionIntensity = 5;
     });
 
     it('初始首頁只渲染四色狀態入口，不顯示額外入口', () => {
@@ -150,5 +168,26 @@ describe('CheckInFlow', () => {
 
         fireEvent.click(screen.getByText('選擇紅色象限'));
         expect(mockHandleMoodComplete).toHaveBeenCalledWith(['red'], 5);
+    });
+
+    it('高強度或高風險情緒要先確認安全，再保存記錄', () => {
+        flowMockState.step = 'labeling';
+        flowMockState.selectedQuadrants = ['red'];
+
+        render(<CheckInFlow />);
+
+        fireEvent.click(screen.getByText('選擇高強度情緒'));
+
+        expect(screen.getByRole('dialog', { name: '先確認安全' })).toBeInTheDocument();
+        expect(screen.getByText(/如果你或身邊的人有立即危險/)).toBeInTheDocument();
+        expect(screen.getByText(/119 或 110/)).toBeInTheDocument();
+        expect(mockHandleEmotionSelect).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByRole('button', { name: '我現在安全，保存這筆記錄' }));
+
+        expect(mockHandleEmotionSelect).toHaveBeenCalledWith(
+            [{ id: 'enraged', name: '憤怒的', quadrant: 'red', energy: 5, pleasantness: 1 }],
+            9
+        );
     });
 });

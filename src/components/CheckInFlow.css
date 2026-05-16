@@ -564,6 +564,9 @@
     position: relative; overflow: hidden;
 }
 .summary-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top right, var(--glass-bg), transparent); pointer-events: none; }
+.summary-card-soft-landing {
+    border-color: rgba(197, 139, 138, 0.35);
+}
 .summary-icon {
     width: 80px; height: 80px; margin: 0 auto var(--s-4);
     color: var(--text-primary); opacity: 0.8;
@@ -571,6 +574,17 @@
 }
 .summary-icon svg { width: 100%; height: 100%; }
 .summary-icon.celebration-bounce { animation: celebrationBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.summary-safety-note {
+    margin: 0 0 var(--s-6);
+    padding: var(--s-4);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(197, 139, 138, 0.3);
+    background: rgba(197, 139, 138, 0.08);
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+    text-align: left;
+}
 
 @keyframes celebrationBounce {
     0% { transform: scale(0.5); opacity: 0; }
@@ -729,6 +743,13 @@
 .crisis-icon { font-size: 3rem; margin-bottom: var(--s-4); }
 .crisis-modal h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: var(--s-3); }
 .crisis-modal p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-bottom: var(--s-6); }
+.crisis-emergency-copy {
+    padding: var(--s-3);
+    border-radius: var(--radius-md);
+    background: rgba(197, 139, 138, 0.09);
+    border: 1px solid rgba(197, 139, 138, 0.28);
+    text-align: left;
+}
 .crisis-hotlines { display: flex; flex-direction: column; gap: var(--s-3); margin-bottom: var(--s-6); }
 .crisis-hotline-btn {
     display: flex; align-items: center; justify-content: space-between;
@@ -741,13 +762,17 @@
 }
 .crisis-hotline-btn:hover { background: hsla(30, 50%, 60%, 0.2); transform: translateY(-2px); }
 .crisis-hotline-btn span { font-size: 0.75rem; color: var(--text-secondary); font-weight: 400; }
+.crisis-modal-actions {
+    display: grid;
+    gap: var(--s-3);
+}
 .crisis-continue-btn {
     width: 100%; padding: var(--s-3);
-    background: transparent; border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md); color: var(--text-secondary);
-    cursor: pointer; font-size: 0.9rem; transition: var(--transition);
+    background: var(--text-primary); border: 1px solid var(--text-primary);
+    border-radius: var(--radius-md); color: var(--bg-color);
+    cursor: pointer; font-size: 0.9rem; font-weight: 800; transition: var(--transition);
 }
-.crisis-continue-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+.crisis-continue-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
 .centering-state { height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s-8); }
 .centering-circle {

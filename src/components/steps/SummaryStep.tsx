@@ -9,14 +9,22 @@ import { type Emotion } from '../../data/emotionData';
 
 interface SummaryStepProps {
     selectedEmotions: Emotion[];
+    emotionIntensity?: number;
     isFullFlow: boolean;
     onReset: () => void;
     onContinueFullFlow?: () => void;
     onViewHistory?: () => void;
 }
 
+const HIGH_RISK_EMOTION_IDS = new Set([
+    'hopeless', 'helpless', 'desolate',
+    'miserable', 'despondent', 'depressed',
+    'enraged', 'furious', 'panicked',
+]);
+
 export const SummaryStep: React.FC<SummaryStepProps> = ({
     selectedEmotions,
+    emotionIntensity = 5,
     isFullFlow,
     onReset,
     onContinueFullFlow,
@@ -36,7 +44,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
             const insight = await aiService.analyzeFeeling(
                 {
                     emotion: selectedEmotions[0],
-                    intensity: 5,
+                    intensity: emotionIntensity,
                 },
                 history,
                 { sleepHours: 7, activityLevel: 3, heartRate: 0 }
@@ -58,6 +66,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
 
     const primaryEmotion = selectedEmotions[0];
     const quadrant = primaryEmotion?.quadrant;
+    const needsSoftLanding = emotionIntensity >= 8 || selectedEmotions.some((emotion) => HIGH_RISK_EMOTION_IDS.has(emotion.id));
 
     // 快速調節建議（適合父母情境）
     const getQuickRegulateChips = () => {
@@ -71,9 +80,9 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
     };
 
     return (
-        <div className="summary-card">
+        <div className={`summary-card${needsSoftLanding ? ' summary-card-soft-landing' : ''}`}>
             {/* Confetti celebration */}
-            <div className="confetti-container">
+            {!needsSoftLanding && <div className="confetti-container">
                 {[...Array(12)].map((_, i) => (
                     <div
                         key={i}
@@ -86,9 +95,14 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                         } as React.CSSProperties}
                     />
                 ))}
-            </div>
-            <div className="summary-icon celebration-bounce">{uiIcons.sparkle}</div>
-            <h2>{t('覺察之旅完成')}</h2>
+            </div>}
+            <div className={`summary-icon${needsSoftLanding ? '' : ' celebration-bounce'}`}>{uiIcons.sparkle}</div>
+            <h2>{t(needsSoftLanding ? '已記下這一刻' : '覺察之旅完成')}</h2>
+            {needsSoftLanding && (
+                <div className="summary-safety-note" role="note">
+                    {t('這筆感受強度很高。先讓自己回到安全和可承受範圍，再決定要不要繼續完整覺察練習。')}
+                </div>
+            )}
 
             <div className="ruler-checklist">
                 <div className="checklist-item done">

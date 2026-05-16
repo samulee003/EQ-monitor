@@ -60,7 +60,7 @@ export const AIInsightCard: React.FC<AIInsightCardProps> = ({
 
                 {insight.underlyingPatterns && insight.underlyingPatterns.length > 0 && (
                     <div className="insight-patterns">
-                        <span className="section-label">{t('潛在模式')}</span>
+                        <span className="section-label">{t('可能線索')}</span>
                         <div className="pattern-tags">
                             {insight.underlyingPatterns.map((pattern: string, idx: number) => (
                                 <span key={idx} className="pattern-tag">{t(pattern)}</span>

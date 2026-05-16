@@ -199,6 +199,7 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
     const [currentSection, setCurrentSection] = useState(0);
     const [isSupported, setIsSupported] = useState(true);
     const [warningDismissed, setWarningDismissed] = useState(false);
+    const [useExternalGrounding, setUseExternalGrounding] = useState(false);
 
     const bodyLocations = useMemo(() => [
         { id: 'head', label: t('頭部'), icon: icons.head, popular: true },
@@ -312,12 +313,48 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
                     <p className="body-scan-warning-text">
                         ⚠️ {t('身體掃描需要將注意力引導至身體內部。若您有創傷、解離症狀、驚恐發作或飲食障礙的歷史，建議先諮詢心理師再使用語音引導功能。')}
                     </p>
-                    <button className="body-scan-warning-dismiss" onClick={() => setWarningDismissed(true)}>
-                        {t('我了解，繼續')}
-                    </button>
+                    <div className="body-scan-warning-actions">
+                        <button className="body-scan-warning-dismiss" onClick={() => setWarningDismissed(true)}>
+                            {t('我了解，繼續')}
+                        </button>
+                        <button
+                            className="body-scan-grounding-btn"
+                            onClick={() => {
+                                setWarningDismissed(true);
+                                setUseExternalGrounding(true);
+                                voiceGuideService.stop();
+                                setIsAudioPlaying(false);
+                            }}
+                        >
+                            {t('改做外在接地')}
+                        </button>
+                    </div>
                 </div>
             )}
 
+            {useExternalGrounding ? (
+                <section className="external-grounding-card" role="region" aria-label={t('外在接地練習')}>
+                    <div className="section-intro">
+                        <h2>{t('先看外面，不急著看裡面')}</h2>
+                        <p className="intro-text">{t('如果身體內觀太強，先把注意力放到外在環境，讓神經系統多一點安全訊號。')}</p>
+                    </div>
+                    <div className="grounding-steps">
+                        <span>{t('看見 5 個物品')}</span>
+                        <span>{t('聽見 3 種聲音')}</span>
+                        <span>{t('感覺雙腳踩地')}</span>
+                    </div>
+                    <button
+                        className="morandi-main-btn"
+                        onClick={() => onComplete({
+                            location: t('外在環境'),
+                            sensation: t('五感接地：看見 5 個物品、聽見 3 種聲音、感覺雙腳踩地'),
+                        })}
+                    >
+                        {t('用外在接地進入情緒標記')}
+                    </button>
+                </section>
+            ) : (
+            <>
             <div className="audio-guide-card">
                 <button
                     className={`audio-play-btn ${isAudioPlaying ? 'playing' : ''}`}
@@ -397,6 +434,8 @@ const BodyScan: React.FC<BodyScanProps> = ({ quadrant, onComplete, onBack }) => 
             >
                 {t('進入情緒標記')}
             </button>
+            </>
+            )}
 
         </div>
     );

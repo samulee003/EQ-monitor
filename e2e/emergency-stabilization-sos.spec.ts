@@ -3,7 +3,7 @@ import { bypassSplashViaSession, skipSplash } from './helpers';
 
 /**
  * 緊急安定 SOS 關鍵路徑：
- * #coach → 點 SOS 按鈕 → 4 步驟覆蓋層出現（感覺身體 → 呼吸暫停 → 記得想成為的自己 → 選一個照顧動作）
+ * #coach → 點 SOS 按鈕 → 4 步驟覆蓋層出現（感覺身體 → 呼吸暫停 → 看見安全的一步 → 選一個照顧動作）
  */
 test.describe('緊急安定 SOS 流程', () => {
   test.beforeEach(async ({ page }) => {
@@ -34,11 +34,12 @@ test.describe('緊急安定 SOS 流程', () => {
     await expect(title).toContainText('第 2 步');
     await expect(title).toContainText('呼吸暫停');
 
-    // 第 2 步 → 第 3 步（想成為的自己）
+    // 第 2 步 → 第 3 步（看見安全的一步）
     await page.getByTestId('emergency-stabilization-next').click();
     await expect(overlay).toHaveAttribute('data-step', '2');
     await expect(title).toContainText('第 3 步');
-    await expect(title).toContainText('想成為的自己');
+    await expect(title).toContainText('看見安全的一步');
+    await expect(page.getByLabel('寫下現在最安全的一步')).toBeVisible();
 
     // 第 3 步 → 第 4 步（照顧動作）
     await page.getByTestId('emergency-stabilization-next').click();

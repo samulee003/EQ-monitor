@@ -4,7 +4,7 @@ import styles from './EmergencyStabilizationOverlay.module.css';
 
 interface Props {
   onClose: () => void;
-  onComplete: (result: { bestSelf: string; strategy: string }) => void;
+  onComplete: (result: { safeStep: string; strategy: string }) => void;
 }
 
 const STEPS = [
@@ -18,9 +18,9 @@ const STEPS = [
     content: '讓我們一起深呼吸，給情緒一些空間。',
   },
   {
-    title: '第 3 步：記得想成為的自己',
+    title: '第 3 步：看見安全的一步',
     content:
-      '想一想，當你處於最好的狀態時，你是什麼樣子？充滿耐心？冷靜？有同理心？',
+      '不用變成最好的人。只要想一想：接下來哪一個動作，最能保護你，也比較不會讓你後悔？',
   },
   {
     title: '第 4 步：選一個照顧動作',
@@ -38,7 +38,7 @@ const STRATEGIES = [
 
 export function EmergencyStabilizationOverlay({ onClose, onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [bestSelf, setBestSelf] = useState('');
+  const [safeStep, setSafeStep] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -103,11 +103,11 @@ export function EmergencyStabilizationOverlay({ onClose, onComplete }: Props) {
         {step === 2 && (
           <input
             type="text"
-            value={bestSelf}
-            onChange={(e) => setBestSelf(e.target.value)}
-            placeholder="例如：冷靜、有耐心"
+            value={safeStep}
+            onChange={(e) => setSafeStep(e.target.value)}
+            placeholder="例如：先放下手機、離開現場一分鐘"
             className={styles.bestSelfInput}
-            aria-label="描述你最好的自己"
+            aria-label="寫下現在最安全的一步"
           />
         )}
 
@@ -116,7 +116,7 @@ export function EmergencyStabilizationOverlay({ onClose, onComplete }: Props) {
             {STRATEGIES.map((s) => (
               <button
                 key={s}
-                onClick={() => onComplete({ bestSelf, strategy: s })}
+                onClick={() => onComplete({ safeStep, strategy: s })}
                 className={styles.strategyButton}
               >
                 <span>✓</span>

@@ -27,6 +27,8 @@ describe('AIService', () => {
             expect(result.summary).toContain('很滿');
             expect(result.underlyingPatterns).toContain('壓力累積');
             expect(result.colorTheory).toContain('紅色');
+            expect(result.summary).toMatch(/可能|看起來/);
+            expect(result.suggestedAction).toContain('如果你現在是安全的');
         });
 
         it('應該返回黃色狀態的 mock insight', async () => {
@@ -42,6 +44,8 @@ describe('AIService', () => {
             expect(result.summary).toContain('活力');
             expect(result.underlyingPatterns).toContain('成就達成');
             expect(result.colorTheory).toContain('黃色');
+            expect(result.summary).toMatch(/可能|看起來/);
+            expect(result.summary).not.toContain('絕佳時機');
         });
 
         it('應該返回藍色狀態的 mock insight', async () => {

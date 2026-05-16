@@ -152,6 +152,17 @@ describe('發布前 P0/P1 守門', () => {
     expect(source).not.toContain("args.status as 'completed' | 'partial' | 'skipped'");
   });
 
+  it('production coach 最終可見回覆必須經 deterministic safety guard', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain('function guardFinalCoachResponse');
+    expect(source).toContain('stripCrisisRewardLanguage');
+    expect(source).toContain('guardFinalCoachResponse(responseText, {');
+    expect(source).toContain('crisis_reward_blocked');
+    expect(source).toContain('緊急安定練習');
+    expect(source).toContain('119 或 110');
+  });
+
   it('action loop schema 必須限制每個使用者只能有一個 active micro action', () => {
     const schema = readProjectFile('server/insforge/schema/011_coach_action_loop.sql');
 

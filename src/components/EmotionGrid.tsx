@@ -121,6 +121,12 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
             <span>{t('中等')}</span>
             <span>{t('極度')}</span>
           </div>
+          {intensity >= 8 && (
+            <div className="intensity-safety-note" role="note">
+              <strong>{t('先確認安全')}</strong>
+              <p>{t('強度 8/10 以上時，先確認你現在是安全的。可以先喝水、離開現場一分鐘，或找可信任的人在旁邊。')}</p>
+            </div>
+          )}
         </div>
 
         <button className="morandi-main-btn" onClick={handleConfirm}>

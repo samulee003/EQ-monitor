@@ -153,6 +153,22 @@ describe('EmotionGrid', () => {
         expect(mockOnSelect.mock.calls[0][1]).toBe(8);
     });
 
+    it('強度 8 以上時應提醒先確認安全與降低負荷', () => {
+        render(
+            <EmotionGrid
+                quadrants={['red']}
+                onSelectEmotions={mockOnSelect}
+                onBack={mockOnBack}
+            />
+        );
+
+        fireEvent.click(screen.getByText('憤怒的'));
+        fireEvent.click(screen.getByText('下一步'));
+        fireEvent.change(screen.getByRole('slider'), { target: { value: '8' } });
+
+        expect(screen.getByText(/強度 8\/10 以上時，先確認你現在是安全的/)).toBeInTheDocument();
+    });
+
     it('應該觸發 onBack 當點擊返回', () => {
         render(
             <EmotionGrid

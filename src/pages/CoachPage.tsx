@@ -305,6 +305,23 @@ export default function CoachPage() {
     [handleSend]
   );
 
+  const handleSOSComplete = useCallback((result: { safeStep: string; strategy: string }) => {
+    const safeStep = result.safeStep.trim() || '先待在安全的地方';
+    const localMsg: CoachMessage = {
+      id: crypto.randomUUID(),
+      role: 'model',
+      content:
+        `安定練習先收在這裡。你剛剛選的是「${result.strategy}」，也提醒自己「${safeStep}」。接下來先照顧身體，不需要立刻分析；如果有立即危險，請先聯絡 119 或 110，或找身邊可信任的人陪你。`,
+      timestamp: new Date().toISOString(),
+      metadata: {
+        skillInvoked: 'emergency_stabilization',
+        action: 'local_sos_complete',
+        actionReason: 'SOS completion stays local and does not call Coach API',
+      },
+    };
+    setMessages((prev) => [...prev, localMsg]);
+  }, []);
+
   const handleRetry = useCallback(() => {
     if (error) {
       setError(null);
@@ -583,11 +600,9 @@ export default function CoachPage() {
       {showSOS && (
         <EmergencyStabilizationOverlay
           onClose={() => setShowSOS(false)}
-          onComplete={({ bestSelf, strategy }) => {
+          onComplete={(result) => {
             setShowSOS(false);
-            handleSend(
-              `我完成了緊急安定練習。看見的自己是：${bestSelf}，選擇的策略是：${strategy}`
-            );
+            handleSOSComplete(result);
           }}
         />
       )}

@@ -20,6 +20,26 @@
 .morandi-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--glass-bg); outline: none; transition: 0.2s; }
 .morandi-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--dynamic-color); cursor: pointer; border: 4px solid var(--bg-secondary); box-shadow: 0 0 15px var(--dynamic-color); }
 .slider-labels { display: flex; justify-content: space-between; margin-top: 1rem; color: var(--text-secondary); font-size: 0.8rem; }
+.intensity-safety-note {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(197, 139, 138, 0.35);
+    border-radius: var(--radius-md);
+    background: rgba(197, 139, 138, 0.08);
+    color: var(--text-secondary);
+    text-align: left;
+}
+.intensity-safety-note strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+.intensity-safety-note p {
+    margin: 0;
+    line-height: 1.55;
+    font-size: 0.85rem;
+}
 .morandi-main-btn { width: 100%; padding: 1.25rem; background: var(--text-primary); color: var(--bg-color); font-weight: 700; font-size: 1.1rem; border: none; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
 
 .current-contexts { display: flex; gap: 8px; flex-wrap: wrap; }

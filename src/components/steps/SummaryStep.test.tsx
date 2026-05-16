@@ -26,6 +26,8 @@ vi.mock('../../adapters', () => ({
     },
 }));
 
+const { aiService } = await import('../../services/AIService');
+
 describe('SummaryStep', () => {
     const mockEmotions = [
         { id: 'happy', name: '開心的', quadrant: 'yellow' as const, energy: 3, pleasantness: 3 },
@@ -166,6 +168,46 @@ describe('SummaryStep', () => {
         await waitFor(() => {
             expect(screen.getByText('今心洞察')).toBeInTheDocument();
         });
+    });
+
+    it('AI 洞察應使用使用者實際選擇的情緒強度', async () => {
+        await act(async () => {
+            render(
+                <SummaryStep
+                    selectedEmotions={mockEmotions}
+                    emotionIntensity={9}
+                    isFullFlow={true}
+                    onReset={mockOnReset}
+                />
+            );
+        });
+
+        await waitFor(() => {
+            expect(aiService.analyzeFeeling).toHaveBeenCalledWith(
+                expect.objectContaining({ intensity: 9 }),
+                expect.any(Array),
+                expect.any(Object)
+            );
+        });
+    });
+
+    it('高強度情緒完成頁應降低慶祝感並提示先回到安全範圍', async () => {
+        await act(async () => {
+            render(
+                <SummaryStep
+                    selectedEmotions={[
+                        { id: 'enraged', name: '憤怒的', quadrant: 'red' as const, energy: 5, pleasantness: 1 },
+                    ]}
+                    emotionIntensity={9}
+                    isFullFlow={false}
+                    onReset={mockOnReset}
+                />
+            );
+        });
+
+        expect(screen.getByText('已記下這一刻')).toBeInTheDocument();
+        expect(screen.getByText(/先讓自己回到安全和可承受範圍/)).toBeInTheDocument();
+        expect(screen.queryByText('覺察之旅完成')).not.toBeInTheDocument();
     });
 
     it('應該處理 AI 洞察載入失敗並隱藏載入狀態', async () => {

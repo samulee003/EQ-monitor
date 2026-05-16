@@ -62,6 +62,11 @@ test.describe('知心四式關鍵路徑', () => {
     await page.getByRole('slider').fill('8');
     await page.getByRole('button', { name: '確認並前往下一步' }).click();
 
+    await expect(page.getByRole('dialog', { name: '先確認安全' })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/119 或 110/)).toBeVisible();
+    await page.getByRole('button', { name: '我現在安全，保存這筆記錄' }).click();
+
+    await expect(page.getByRole('heading', { name: '已記下這一刻' })).toBeVisible({ timeout: 8_000 });
     await expect(page.getByText('已保存到記錄回顧')).toBeVisible({ timeout: 8_000 });
     await page.getByRole('button', { name: '查看記錄' }).click();
 
