@@ -13,7 +13,7 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 目前指向 `0ef72fd fix: 整合 Debug Review 修正`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
@@ -26,6 +26,12 @@
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
+## [Unreleased] - 2026-05-16 — Coach 首屏 LINE 對話入口補強
+
+- Coach 開場卡新增「也可以用 LINE 對話」輕量入口，直接顯示 LINE Basic ID `@980pqrhn` 與「輸入綁定」步驟，避免使用者必須滑到下方綁定表單才知道 LINE 可作為對話入口。
+- 下方原本的 LINE 官方帳號、加好友連結與 6 位綁定碼表單保留，讓已拿到綁定碼的使用者仍可完成同步。
+- 本機驗證：`npm run test:run -- src/pages/CoachPage.test.tsx` → 28 tests passed。
+
 ---
 
 ## [V1.0.0] - 2026-05-16 — Debug Review 整合與 production 同步
@@ -33,7 +39,7 @@
 ### 同步狀態
 
 - 合入 Claude 安全修正分支 `claude/festive-fermi-fe3154`，並把整合版推到 `main` / `origin/main`：`0ef72fd fix: 整合 Debug Review 修正`。
-- PWA 已重新部署到 Zeabur；最新 live bundle 為 `index-CEnu7gE2.js`，deployment `6a07ee11bbc71468fc733b81` 為 `RUNNING`。
+- PWA 已重新部署到 Zeabur；最新 live bundle 為 `index-CEnu7gE2.js`，後續 docs-only push 可能觸發新的 Zeabur deployment，但不改變 app bundle。
 - Bot Server 已重新部署到 Zeabur；deployment `6a07ee2bbbc71468fc733b92` 為 `RUNNING`，`/health` uptime 已重置，adapter 為 `insforge`。
 - Live check：PWA root 取得 `index-CEnu7gE2.js`；Bot `/health` 回 healthy；Bot `/webhook` 無簽名回 `401`。
 
