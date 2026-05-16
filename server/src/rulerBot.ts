@@ -11,6 +11,7 @@ import {
   recordRulerSessionCompleted,
   recordRulerSessionTimedOut,
 } from './utils/metrics.js';
+import { isCrisisText, CRISIS_SOS_TEXT } from './crisisKeywords.js';
 
 /**
  * 今心對話式四步狀態機
@@ -65,6 +66,26 @@ function advanceStep(session: UserSession, nextStep: RulerStep): void {
 // ═══════════════════════════════════════════════════════════════
 
 export async function processMessage(userId: string, text: string): Promise<BotResponse> {
+  // ── 危機字詞優先處理 ──
+  // 命中即回 SOS，不建立或推進知心四式 session，也不發放任何遊戲化獎勵。
+  // 與 PWA Coach Edge Function（coach-simple.ts）共用 crisisKeywords.ts 字典。
+  if (isCrisisText(text)) {
+    const currentStep = sessions.get(userId)?.step ?? 'idle';
+    try {
+      await db.getOrCreateUser(userId);
+      await db.saveMessage(userId, 'in', text, currentStep);
+      await db.saveMessage(userId, 'out', CRISIS_SOS_TEXT, currentStep);
+    } catch (err) {
+      logger.error('Failed to persist crisis-flagged exchange', {
+        userId,
+        step: currentStep,
+        error: (err as Error).message,
+      });
+    }
+    logger.warn('Crisis keyword detected', { userId, step: currentStep });
+    return { text: CRISIS_SOS_TEXT };
+  }
+
   const session = getOrCreateSession(userId);
 
   // 確保用戶存在於數據庫

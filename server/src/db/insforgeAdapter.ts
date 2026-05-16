@@ -3,6 +3,13 @@ import pg from 'pg';
 import { RulerData } from '../types.js';
 import { generateBindingCode } from './bindingCode.js';
 import type { DbSession, DbUser, LineBindingCode } from './memoryAdapter.js';
+import { logger } from '../utils/logger.js';
+
+// 注意：以下 catch 區塊目前回傳 stub 值以保持 LINE Bot 流程不中斷。
+// 這會掩蓋寫入失敗（使用者以為練習已保存，但資料其實丟了）。
+// 短期：把錯誤從 console.* 換成結構化 logger 以便監控；
+// 長期 ticket：在寫入路徑（createSession/updateSession/saveMessage）改為向上拋，
+// 由 handleTextMessage 統一回覆使用者「我這邊有點狀況」。
 
 /**
  * InsForge PostgreSQL 適配器
@@ -108,7 +115,7 @@ export function createInsforgeAdapter(connectionString: string) {
   });
 
   pool.on('error', (err) => {
-    console.error('[InsForge] pg pool error:', err);
+    logger.error('[InsForge] pg pool error', { error: err.message });
   });
 
   return {
@@ -130,7 +137,10 @@ export function createInsforgeAdapter(connectionString: string) {
         );
         return dbUserFromRow(inserted.rows[0]);
       } catch (err) {
-        console.error('[InsForge] getOrCreateUser error:', err);
+        logger.error('[InsForge] getOrCreateUser failed, returning stub', {
+          lineUserId,
+          error: (err as Error).message,
+        });
         return {
           lineUserId,
           displayName,
@@ -160,7 +170,13 @@ export function createInsforgeAdapter(connectionString: string) {
         );
         return dbSessionFromRow(inserted.rows[0]);
       } catch (err) {
-        console.error('[InsForge] createSession error:', err);
+        logger.error(
+          '[InsForge] createSession failed, returning stub with fabricated id',
+          {
+            lineUserId,
+            error: (err as Error).message,
+          }
+        );
         return {
           id: generateId(),
           lineUserId,
@@ -205,7 +221,10 @@ export function createInsforgeAdapter(connectionString: string) {
           values
         );
       } catch (err) {
-        console.error('[InsForge] updateSession error:', err);
+        logger.error('[InsForge] updateSession failed', {
+          sessionId,
+          error: (err as Error).message,
+        });
       }
     },
 
@@ -217,7 +236,9 @@ export function createInsforgeAdapter(connectionString: string) {
         );
         const sessionRow = sessionResult.rows[0];
         if (!sessionRow) {
-          console.warn('[InsForge] completeSession: session not found', sessionId);
+          logger.warn('[InsForge] completeSession: session not found', {
+            sessionId,
+          });
           return;
         }
 
@@ -314,7 +335,10 @@ export function createInsforgeAdapter(connectionString: string) {
           );
         }
       } catch (err) {
-        console.error('[InsForge] completeSession error:', err);
+        logger.error('[InsForge] completeSession failed', {
+          sessionId,
+          error: (err as Error).message,
+        });
       }
     },
 
@@ -345,7 +369,11 @@ export function createInsforgeAdapter(connectionString: string) {
           [userId, lineUserId, sessionId, direction, content, step ?? null]
         );
       } catch (err) {
-        console.error('[InsForge] saveMessage error:', err);
+        logger.error('[InsForge] saveMessage failed', {
+          lineUserId,
+          direction,
+          error: (err as Error).message,
+        });
       }
     },
 
@@ -367,7 +395,10 @@ export function createInsforgeAdapter(connectionString: string) {
             createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
           }));
       } catch (err) {
-        console.error('[InsForge] getUserHistory error:', err);
+        logger.error('[InsForge] getUserHistory failed', {
+          lineUserId,
+          error: (err as Error).message,
+        });
         return [];
       }
     },
@@ -384,7 +415,10 @@ export function createInsforgeAdapter(connectionString: string) {
           streakDays: (row?.streak_days as number) ?? 0,
         };
       } catch (err) {
-        console.error('[InsForge] getWeeklyStats error:', err);
+        logger.error('[InsForge] getWeeklyStats failed', {
+          lineUserId,
+          error: (err as Error).message,
+        });
         return { totalSessions: 0, streakDays: 0 };
       }
     },
@@ -394,7 +428,9 @@ export function createInsforgeAdapter(connectionString: string) {
         const result = await pool.query('SELECT * FROM bot_users');
         return result.rows.map((row) => dbUserFromRow(row));
       } catch (err) {
-        console.error('[InsForge] getAllUsers error:', err);
+        logger.error('[InsForge] getAllUsers failed', {
+          error: (err as Error).message,
+        });
         return [];
       }
     },
@@ -404,7 +440,9 @@ export function createInsforgeAdapter(connectionString: string) {
         const result = await pool.query('SELECT * FROM ruler_sessions');
         return result.rows.map((row) => dbSessionFromRow(row));
       } catch (err) {
-        console.error('[InsForge] getAllSessions error:', err);
+        logger.error('[InsForge] getAllSessions failed', {
+          error: (err as Error).message,
+        });
         return [];
       }
     },
@@ -454,7 +492,11 @@ export function createInsforgeAdapter(connectionString: string) {
           claimedAt: row.claimed_at ? new Date(row.claimed_at).getTime() : undefined,
         };
       } catch (err) {
-        console.error('[InsForge] claimLineBindingCode error:', err);
+        logger.error('[InsForge] claimLineBindingCode failed', {
+          code,
+          appUserId,
+          error: (err as Error).message,
+        });
         return null;
       }
     },

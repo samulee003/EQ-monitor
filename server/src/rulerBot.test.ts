@@ -173,6 +173,49 @@ describe('rulerBot', () => {
     });
   });
 
+  describe('危機字詞偵測', () => {
+    it('使用者直接輸入「想結束一切」走 SOS 不進入練習流程', async () => {
+      const r = await processMessage(userId, '我真的撐不下去了想結束一切');
+      expect(r.text).toContain('1925');
+      expect(r.text).toContain('119');
+      expect(r.text).not.toContain('第一式：心照');
+      // 危機回覆不應建立或推進知心四式 session
+      expect(getActiveSessionCount()).toBe(0);
+    });
+
+    it('使用者輸入「我想死」單獨命中關鍵字', async () => {
+      const r = await processMessage(userId, '我想死');
+      expect(r.text).toContain('1925');
+      expect(r.text).not.toContain('心照一念');
+    });
+
+    it('危機字詞在知心四式流程中途也會中斷推進', async () => {
+      await processMessage(userId, '開始');
+      await processMessage(userId, '胸口');
+      // 此時應在 understand step；以危機字詞回覆不應推進到 label
+      const r = await processMessage(userId, '我想自殺');
+      expect(r.text).toContain('1925');
+      expect(r.text).not.toContain('第三式');
+      // session 仍存在但不再推進
+      expect(getSessionStatus(userId)).toContain('understand');
+    });
+
+    it('「結束」不會誤觸危機關鍵字（只匹配完整短語）', async () => {
+      await processMessage(userId, '開始');
+      const r = await processMessage(userId, '結束');
+      expect(r.text).toContain('練習已結束');
+      expect(r.text).not.toContain('1925');
+    });
+
+    it('一般情緒詞如「焦慮」不應觸發危機回覆', async () => {
+      await processMessage(userId, '開始');
+      await processMessage(userId, '胸口');
+      const r = await processMessage(userId, '焦慮');
+      expect(r.text).not.toContain('1925');
+      expect(r.text).toContain('第三式：安神');
+    });
+  });
+
   describe('全局指令', () => {
     it('「幫助」返回使用說明', async () => {
       const r = await processMessage(userId, '幫助');
