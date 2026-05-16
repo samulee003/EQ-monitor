@@ -13,12 +13,12 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正` 與 Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
-- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-CEnu7gE2.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
+- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-C0yGyERj.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 
 ## 下一步
 
@@ -39,9 +39,9 @@
 ### 同步狀態
 
 - 合入 Claude 安全修正分支 `claude/festive-fermi-fe3154`，並把整合版推到 `main` / `origin/main`：`0ef72fd fix: 整合 Debug Review 修正`。
-- PWA 已重新部署到 Zeabur；最新 live bundle 為 `index-CEnu7gE2.js`，後續 docs-only push 可能觸發新的 Zeabur deployment，但不改變 app bundle。
+- PWA 已重新部署到 Zeabur；最新 live bundle 為 `index-C0yGyERj.js`，後續 docs-only push 可能觸發新的 Zeabur deployment，但不改變 app bundle。
 - Bot Server 已重新部署到 Zeabur；deployment `6a07ee2bbbc71468fc733b92` 為 `RUNNING`，`/health` uptime 已重置，adapter 為 `insforge`。
-- Live check：PWA root 取得 `index-CEnu7gE2.js`；Bot `/health` 回 healthy；Bot `/webhook` 無簽名回 `401`。
+- Live check：PWA root 取得 `index-C0yGyERj.js`；Bot `/health` 回 healthy；Bot `/webhook` 無簽名回 `401`。
 
 ### 修正摘要
 
