@@ -53,7 +53,7 @@ export type RulerFlowAction =
   | { type: 'TOGGLE_QUADRANT'; quadrant: Quadrant }
   | { type: 'SET_MOOD_COMPLETE'; quadrants: Quadrant[]; intensity: number }
   | { type: 'SET_BODY_SCAN'; data: BodyScanData }
-  | { type: 'SELECT_EMOTIONS'; emotions: Emotion[] }
+  | { type: 'SELECT_EMOTIONS'; emotions: Emotion[]; intensity?: number }
   | { type: 'SET_UNDERSTANDING'; data: UnderstandingData }
   | { type: 'SET_EXPRESSING'; data: ExpressingData }
   | { type: 'SET_REGULATING'; data: RegulatingData }
@@ -113,12 +113,14 @@ function rulerReducer(state: RulerFlowState, action: RulerFlowAction): RulerFlow
         return {
           ...state,
           selectedEmotions: action.emotions,
+          emotionIntensity: action.intensity ?? state.emotionIntensity,
           step: 'understanding',
         };
       }
       return {
         ...state,
         selectedEmotions: action.emotions,
+        emotionIntensity: action.intensity ?? state.emotionIntensity,
         step: 'summary',
       };
     }
@@ -362,11 +364,11 @@ export const useRulerFlow = () => {
     dispatch({ type: 'SET_BODY_SCAN', data });
   };
 
-  const handleEmotionSelect = async (emotions: Emotion[]) => {
-    dispatch({ type: 'SELECT_EMOTIONS', emotions });
+  const handleEmotionSelect = async (emotions: Emotion[], intensity: number = state.emotionIntensity) => {
+    dispatch({ type: 'SELECT_EMOTIONS', emotions, intensity });
     // 如果不是完整流程，自動保存
     if (!state.isFullFlow) {
-      await saveLog(emotions, null, null, null, '', state.emotionIntensity);
+      await saveLog(emotions, null, null, null, '', intensity);
     }
   };
 

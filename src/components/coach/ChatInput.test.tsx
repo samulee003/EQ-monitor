@@ -41,6 +41,26 @@ describe('ChatInput', () => {
     expect(screen.getByLabelText('送出訊息')).toBeDisabled();
   });
 
+  it('只鎖定訊息時仍保留 SOS 緊急協助', () => {
+    const onSOS = vi.fn();
+    render(
+      <ChatInput
+        onSend={vi.fn()}
+        onSOS={onSOS}
+        messageDisabled
+        placeholder="登入後可以和阿念對話"
+      />
+    );
+
+    expect(screen.getByLabelText('輸入訊息')).toBeDisabled();
+    expect(screen.getByPlaceholderText('登入後可以和阿念對話')).toBeInTheDocument();
+    expect(screen.getByLabelText('送出訊息')).toBeDisabled();
+    expect(screen.getByLabelText('SOS 緊急協助')).not.toBeDisabled();
+
+    fireEvent.click(screen.getByLabelText('SOS 緊急協助'));
+    expect(onSOS).toHaveBeenCalledOnce();
+  });
+
   it('空訊息不應該觸發 onSend', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} onSOS={vi.fn()} />);

@@ -135,6 +135,24 @@ describe('EmotionGrid', () => {
         expect(mockOnSelect.mock.calls[0][0][0].id).toBe('enraged');
     });
 
+    it('確認時應該把使用者調整的強度一起送出', () => {
+        render(
+            <EmotionGrid
+                quadrants={['green']}
+                onSelectEmotions={mockOnSelect}
+                onBack={mockOnBack}
+            />
+        );
+
+        fireEvent.click(screen.getByText('平靜的'));
+        fireEvent.click(screen.getByText('下一步'));
+        fireEvent.change(screen.getByRole('slider'), { target: { value: '8' } });
+        fireEvent.click(screen.getByText('確認並前往下一步'));
+
+        expect(mockOnSelect).toHaveBeenCalledOnce();
+        expect(mockOnSelect.mock.calls[0][1]).toBe(8);
+    });
+
     it('應該觸發 onBack 當點擊返回', () => {
         render(
             <EmotionGrid

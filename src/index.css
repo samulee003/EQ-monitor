@@ -161,6 +161,10 @@ html {
   scroll-margin-top: var(--sticky-header-offset, 84px);
 }
 
+.app-container.is-coach-view .main-content {
+  z-index: 220;
+}
+
 .app-container::before {
   content: '';
   position: fixed;

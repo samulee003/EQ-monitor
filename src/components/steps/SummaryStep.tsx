@@ -12,13 +12,15 @@ interface SummaryStepProps {
     isFullFlow: boolean;
     onReset: () => void;
     onContinueFullFlow?: () => void;
+    onViewHistory?: () => void;
 }
 
 export const SummaryStep: React.FC<SummaryStepProps> = ({
     selectedEmotions,
     isFullFlow,
     onReset,
-    onContinueFullFlow
+    onContinueFullFlow,
+    onViewHistory
 }) => {
     const { t } = useLanguage();
     const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
@@ -115,6 +117,14 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                 )}
             </div>
 
+            <div className="summary-save-note" role="status">
+                <span className="summary-save-dot" aria-hidden="true"></span>
+                <div>
+                    <strong>{t('已保存到記錄回顧')}</strong>
+                    <p>{t('這一筆會留在時間軸裡，之後阿念也能接上你的脈絡。')}</p>
+                </div>
+            </div>
+
             {/* AI 洞察卡片 */}
             <AIInsightCard
                 insight={aiInsight}
@@ -137,7 +147,12 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
                 </div>
             )}
 
-            <button className="morandi-main-btn" onClick={onReset}>{t('返回')}</button>
+            <div className="summary-actions">
+                {onViewHistory && (
+                    <button className="morandi-main-btn" onClick={onViewHistory}>{t('查看記錄')}</button>
+                )}
+                <button className="morandi-outline-btn" onClick={onReset}>{t('再記一筆')}</button>
+            </div>
         </div>
     );
 };

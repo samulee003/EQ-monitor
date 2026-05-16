@@ -605,6 +605,50 @@
 .step-tag.e { background: var(--color-yellow); }
 .step-tag.r2 { background: var(--color-green); }
 
+.summary-save-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-3);
+    text-align: left;
+    margin: 0 0 var(--s-6);
+    padding: var(--s-4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+}
+.summary-save-dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 0.35rem;
+    border-radius: 999px;
+    background: var(--color-green);
+    box-shadow: 0 0 0 5px rgba(170, 176, 155, 0.16);
+    flex: 0 0 auto;
+}
+.summary-save-note strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+.summary-save-note p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+.summary-actions {
+    display: grid;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+}
+.summary-actions .morandi-outline-btn {
+    width: 100%;
+    margin-bottom: 0;
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--radius-md);
+}
+
 .mood-shift-options { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; margin-bottom: var(--s-10); }
 .option-chip {
     padding: var(--s-2) var(--s-5); background: var(--glass-bg);

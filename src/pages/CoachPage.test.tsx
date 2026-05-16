@@ -113,17 +113,24 @@ describe('CoachPage', () => {
     expect(screen.getByText('我想開始 7 日小陪跑：每天做一個照顧自己的小動作')).toBeInTheDocument();
   });
 
-  it('未登入使用者啟動 Coach 時不應呼叫 API，並提示先登入', () => {
+  it('未登入使用者看到登入門檻，不會誤以為能直接開始 7 日陪跑', () => {
     authMock.user = null;
     const sendMessageSpy = vi.spyOn(client, 'sendMessage');
 
     render(<CoachPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: '開始 7 日陪跑' }));
+    expect(screen.getByText('登入後，阿念才能記住你的陪跑進度')).toBeInTheDocument();
+    expect(screen.getByText('你仍然可以先做呼吸，或回到今日心情記一筆；要開始 7 日小陪跑時，再從右上角登入。')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '我現在很煩' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '開始 7 日陪跑' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: '先做呼吸' }));
 
     expect(sendMessageSpy).not.toHaveBeenCalled();
-    expect(screen.getByText('請先登入或註冊帳號，再使用阿念教練與 7 日小陪跑')).toBeInTheDocument();
+    expect(screen.getByText('跟著阿念一起呼吸')).toBeInTheDocument();
     expect(screen.queryByText('我想開始 7 日小陪跑：每天做一個照顧自己的小動作')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('輸入訊息')).toBeDisabled();
+    expect(screen.getByLabelText('SOS 緊急協助')).not.toBeDisabled();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {
@@ -508,5 +515,12 @@ describe('CoachPage', () => {
     expect(css).toContain(':global([data-theme="dark"]) .coachPage');
     expect(css).toContain(':global([data-theme="dark"]) .agentIntro');
     expect(css).toContain(':global([data-theme="dark"]) .inputDock');
+  });
+
+  it('Coach 底部導覽的 Beta 標籤不應擠壓教練文字', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/pages/CoachPage.module.css'), 'utf8');
+
+    expect(css).toMatch(/\.navLabelWithBeta\s*{[^}]*flex-direction:\s*column/s);
+    expect(css).toMatch(/\.navLabelWithBeta\s*{[^}]*white-space:\s*nowrap/s);
   });
 });

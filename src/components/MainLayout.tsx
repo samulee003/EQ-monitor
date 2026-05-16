@@ -159,7 +159,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onNaviga
       : t('登入或註冊帳號');
 
   return (
-    <div className="app-container">
+    <div className={`app-container${currentView === 'coach' ? ' is-coach-view' : ''}`}>
       <header className="glass-header">
         <div className="logo-section" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
           <img src="/logo.png" alt="今心 Logo" className="logo-image" />

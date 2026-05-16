@@ -86,7 +86,7 @@ describe('SummaryStep', () => {
         expect(screen.queryByText('定位觸發因素')).not.toBeInTheDocument();
     });
 
-    it('應該觸發 onReset 當點擊返回', async () => {
+    it('應該觸發 onReset 當點擊再記一筆', async () => {
         await act(async () => {
             render(
                 <SummaryStep
@@ -97,8 +97,26 @@ describe('SummaryStep', () => {
             );
         });
 
-        fireEvent.click(screen.getByText('返回'));
+        fireEvent.click(screen.getByText('再記一筆'));
         expect(mockOnReset).toHaveBeenCalled();
+    });
+
+    it('應該顯示已保存狀態並能前往記錄回顧', async () => {
+        const onViewHistory = vi.fn();
+        await act(async () => {
+            render(
+                <SummaryStep
+                    selectedEmotions={mockEmotions}
+                    isFullFlow={false}
+                    onReset={mockOnReset}
+                    onViewHistory={onViewHistory}
+                />
+            );
+        });
+
+        expect(screen.getByText('已保存到記錄回顧')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('查看記錄'));
+        expect(onViewHistory).toHaveBeenCalledOnce();
     });
 
     it('應該顯示繼續完整流程按鈕當提供 onContinueFullFlow', async () => {

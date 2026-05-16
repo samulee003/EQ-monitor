@@ -152,6 +152,7 @@ function executeCoachAction(action: CoachAction, reason?: string): string {
 export default function CoachPage() {
   const { user } = useAuth();
   const userId = user?.id ?? 'guest';
+  const isSignedIn = Boolean(user?.id);
 
   const [messages, setMessages] = useState<CoachMessage[]>([WELCOME_MSG]);
   const [loading, setLoading] = useState(false);
@@ -211,7 +212,7 @@ export default function CoachPage() {
 
   const doSend = useCallback(async (text: string, addUserMsg = true) => {
     setError(null);
-    if (!user?.id) {
+    if (!isSignedIn) {
       setError({ type: 'auth', retryText: text });
       return;
     }
@@ -266,7 +267,7 @@ export default function CoachPage() {
     } finally {
       setLoading(false);
     }
-  }, [handleAction, user?.id, userId]);
+  }, [handleAction, isSignedIn, userId]);
 
   const handleSend = useCallback(
     (text: string) => doSend(text, true),
@@ -319,6 +320,8 @@ export default function CoachPage() {
         return;
       }
 
+      if (!isSignedIn) return;
+
       if (item.companionGoal) {
         handleStartCompanionRun(item.companionGoal);
         return;
@@ -328,7 +331,7 @@ export default function CoachPage() {
         handleSend(item.prompt);
       }
     },
-    [handleSend, handleStartCompanionRun]
+    [handleSend, handleStartCompanionRun, isSignedIn]
   );
 
   const handleNavigate = useCallback((view: CoachView) => {
@@ -409,6 +412,19 @@ export default function CoachPage() {
                 <p className={styles.betaNotice}>
                   內測中
                 </p>
+                {!isSignedIn && (
+                  <div className={styles.guestGate} role="note">
+                    <strong>登入後，阿念才能記住你的陪跑進度</strong>
+                    <p>你仍然可以先做呼吸，或回到今日心情記一筆；要開始 7 日小陪跑時，再從右上角登入。</p>
+                    <button
+                      type="button"
+                      className={styles.guestGateButton}
+                      onClick={() => handleNavigate('home')}
+                    >
+                      回到今日心情登入
+                    </button>
+                  </div>
+                )}
                 <div className={styles.lineEntryRow} aria-label={`LINE 官方帳號 ${LINE_BOT_BASIC_ID}`}>
                   <span>也可以用 LINE 對話</span>
                   <strong>{LINE_BOT_BASIC_ID}</strong>
@@ -430,16 +446,20 @@ export default function CoachPage() {
                   我已有 6 位碼
                 </button>
                 <div className={styles.startActions} aria-label="阿念教練開始選項">
-                  {START_ACTIONS.map((item) => (
+                  {START_ACTIONS.map((item) => {
+                    const requiresSignIn = !item.action && !isSignedIn;
+                    return (
                     <button
                       type="button"
                       key={item.label}
-                      className={styles.startActionButton}
+                      className={`${styles.startActionButton} ${requiresSignIn ? styles.startActionButtonLocked : ''}`}
                       onClick={() => handleStartAction(item)}
+                      disabled={requiresSignIn}
                     >
                       {item.label}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -533,6 +553,8 @@ export default function CoachPage() {
           onSend={handleSend}
           onSOS={() => setShowSOS(true)}
           disabled={loading}
+          messageDisabled={!isSignedIn}
+          placeholder={isSignedIn ? '告訴我你的感受...' : '登入後可以和阿念對話'}
         />
       </div>
 

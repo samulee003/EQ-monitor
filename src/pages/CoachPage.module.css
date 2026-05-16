@@ -211,6 +211,42 @@
   line-height: 16px;
 }
 
+.guestGate {
+  display: grid;
+  gap: 6px;
+  padding-top: 4px;
+  color: #30372e;
+}
+
+.guestGate strong {
+  color: #172018;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 20px;
+}
+
+.guestGate p {
+  margin: 0;
+  color: #4a5744;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.guestGateButton {
+  width: fit-content;
+  min-height: 34px;
+  margin-top: 2px;
+  padding: 0 12px;
+  color: #f5f3ef;
+  background: #1a1a1a;
+  border: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 16px;
+  cursor: pointer;
+}
+
 .lineEntryRow {
   display: flex;
   flex-wrap: wrap;
@@ -294,6 +330,14 @@
   background: #ebe7e0;
   border-color: rgba(107, 143, 168, 0.34);
   transform: translateY(-1px);
+}
+
+.startActionButton:disabled,
+.startActionButtonLocked {
+  color: rgba(26, 26, 26, 0.46);
+  background: rgba(245, 243, 239, 0.54);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .agentFeatureGrid {
@@ -738,8 +782,11 @@
 
 .navLabelWithBeta {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
+  white-space: nowrap;
+  line-height: 13px;
 }
 
 .navBetaBadge {
@@ -929,6 +976,7 @@
 :global([data-theme="dark"]) .headerTitle,
 :global([data-theme="dark"]) .agentIntro,
 :global([data-theme="dark"]) .agentIntro h2,
+:global([data-theme="dark"]) .guestGate strong,
 :global([data-theme="dark"]) .lineEntryRow strong,
 :global([data-theme="dark"]) .modelBubble,
 :global([data-theme="dark"]) .bindingPanel,
@@ -943,6 +991,8 @@
 
 :global([data-theme="dark"]) .dateDivider span,
 :global([data-theme="dark"]) .agentDescription,
+:global([data-theme="dark"]) .guestGate,
+:global([data-theme="dark"]) .guestGate p,
 :global([data-theme="dark"]) .lineEntryRow,
 :global([data-theme="dark"]) .agentFeature span,
 :global([data-theme="dark"]) .bindingHint,

@@ -37,7 +37,10 @@
 - 首屏文案改成「先選一個最像現在的狀態」，副文提示「不用想很準，選接近的就好」，確認按鈕改為「用這個狀態開始」。
 - 選取狀態後會提示「下一步：幫你找一個更準的情緒詞」，讓使用者知道按下去會發生什麼。
 - 首次導覽的「跳過導覽」改為「先試一次」，並直接進入今日心情，不再先跳到提醒設定；完整導覽仍可從「看完整導覽」進入。
-- 驗證：`npm run test:run -- src/components/EmotionQuadrantPicker.test.tsx src/components/CheckInFlow.test.tsx src/components/OnboardingFlow.test.tsx` → 22 tests / 3 files passed；`npm run test:e2e -- e2e/check-in-flow.spec.ts` → 1 passed；Playwright 截圖確認 390×844 今日心情第一屏與首次導覽主按鈕可見。
+- 今日心情完整閉環補強：喚名頁的強度滑桿現在會寫入保存紀錄；完成頁新增「已保存到記錄回顧」與「查看記錄」，可直接回到時間軸確認剛才那一筆。
+- Coach 未登入體驗補強：未登入時會先說明「登入後，阿念才能記住你的陪跑進度」，對話與 7 日陪跑入口鎖定；仍保留呼吸練習、SOS 與回今日心情入口，避免封測者誤以為伺服器壞掉。
+- 修正 Coach 浮層層級與手機底部導覽 Beta 標籤擠壓問題，避免主 App 頁首壓住 Coach 畫布或「教練 Beta」在窄螢幕變形。
+- 驗證：`npm run test:run` → 407 tests / 44 files passed；`npm run test:e2e` → 5 passed；`npm run build` → passed；`npm run lint` → 0 errors / 31 warnings；`git diff --check` → passed；Playwright 截圖確認 390×844 今日心情保存頁、記錄回顧與未登入 Coach 入口可見。
 
 ## [V1.0.0] - 2026-05-16 — 導覽情緒科普文案修正
 

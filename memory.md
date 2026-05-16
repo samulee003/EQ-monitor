@@ -8,7 +8,7 @@
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
 - `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`，以及導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`。
-- 2026-05-16 晚間本地分支 `codex/product-polish-agent-team-20260516` 已完成第一輪今日心情封測打磨：第一屏改為手機優先 2×2 狀態卡、常駐顯示四個狀態文案、選取後提示下一步、首次導覽「先試一次」直接進今日心情。此分支尚未合入 `main`，也尚未上 production。
+- 2026-05-16 晚間本地分支 `codex/product-polish-agent-team-20260516` 已完成今日心情封測打磨：第一屏改為手機優先 2×2 狀態卡、常駐顯示四個狀態文案、選取後提示下一步、首次導覽「先試一次」直接進今日心情；後續又補上喚名強度保存、完成頁「已保存到記錄回顧 / 查看記錄」、完整保存到時間軸 E2E，以及未登入 Coach 的預先說明 / 鎖定 7 日陪跑 / 保留呼吸與 SOS。此分支尚未合入 `main`，也尚未上 production。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`

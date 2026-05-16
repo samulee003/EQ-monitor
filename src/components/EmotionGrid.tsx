@@ -6,7 +6,7 @@ import './EmotionGrid.css';
 
 interface EmotionGridProps {
   quadrants: Quadrant[];
-  onSelectEmotions: (es: Emotion[]) => void;
+  onSelectEmotions: (es: Emotion[], intensity: number) => void;
   onBack: () => void;
 }
 
@@ -69,7 +69,7 @@ const EmotionGrid: React.FC<EmotionGridProps> = ({ quadrants, onSelectEmotions, 
   }, []);
 
   const handleConfirm = () => {
-    onSelectEmotions(selectedEmotions);
+    onSelectEmotions(selectedEmotions, intensity);
   };
 
   // Calculate dynamic color interpolate based on intensity

@@ -124,6 +124,16 @@ describe('MainLayout 帳號入口', () => {
     });
   });
 
+  it('Coach 視圖會標記外層版面，避免主頁首壓住 Coach 畫布', () => {
+    const { container } = render(
+      <MainLayout currentView="coach" onNavigate={vi.fn()}>
+        <div>Coach 內容</div>
+      </MainLayout>
+    );
+
+    expect(container.querySelector('.app-container')).toHaveClass('is-coach-view');
+  });
+
   it('已登入時帳號圖示會開啟個人中心', () => {
     (useAuth as ReturnType<typeof vi.fn>).mockReturnValue({
       user: { id: 'user_1', email: 'sam@example.com', displayName: 'Sam' },

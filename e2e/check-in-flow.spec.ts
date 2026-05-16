@@ -41,4 +41,33 @@ test.describe('知心四式關鍵路徑', () => {
     await expect(progress).toBeVisible({ timeout: 5_000 });
     await expect(progress).not.toHaveAttribute('data-current-step', 'recognizing');
   });
+
+  test('使用者完成今日心情後可以在記錄回顧看到保存結果', async ({ page }) => {
+    await page.goto('/#home');
+    await skipSplash(page);
+
+    await page.getByTestId('emotion-quadrant-green').click();
+    await page.getByTestId('emotion-confirm').click();
+
+    await expect(page.getByText('感受你的身體')).toBeVisible({ timeout: 8_000 });
+    await page.getByRole('button', { name: /胸口/ }).click();
+    await page.getByRole('button', { name: /平穩/ }).click();
+    await page.getByRole('button', { name: '進入情緒標記' }).click();
+
+    await expect(page.getByRole('heading', { name: '精確標記你的感受' })).toBeVisible();
+    await page.getByRole('button', { name: '平靜的' }).click();
+    await page.getByRole('button', { name: '下一步' }).click();
+
+    await expect(page.getByText('喚名感覺與強度')).toBeVisible();
+    await page.getByRole('slider').fill('8');
+    await page.getByRole('button', { name: '確認並前往下一步' }).click();
+
+    await expect(page.getByText('已保存到記錄回顧')).toBeVisible({ timeout: 8_000 });
+    await page.getByRole('button', { name: '查看記錄' }).click();
+
+    await expect(page).toHaveURL(/#history/);
+    await expect(page.getByText('你已累積 1 筆紀錄')).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByRole('heading', { name: '平靜的' })).toBeVisible();
+    await expect(page.getByText('強度 8/10')).toBeVisible();
+  });
 });

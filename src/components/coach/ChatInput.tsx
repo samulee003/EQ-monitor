@@ -5,14 +5,23 @@ interface Props {
   onSend: (text: string) => void;
   onSOS: () => void;
   disabled?: boolean;
+  messageDisabled?: boolean;
+  placeholder?: string;
 }
 
-export function ChatInput({ onSend, onSOS, disabled }: Props) {
+export function ChatInput({
+  onSend,
+  onSOS,
+  disabled = false,
+  messageDisabled = false,
+  placeholder = '告訴我你的感受...',
+}: Props) {
   const [text, setText] = useState('');
+  const textDisabled = disabled || messageDisabled;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() || disabled) return;
+    if (!text.trim() || textDisabled) return;
     onSend(text.trim());
     setText('');
   };
@@ -43,8 +52,8 @@ export function ChatInput({ onSend, onSOS, disabled }: Props) {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="告訴我你的感受..."
-          disabled={disabled}
+          placeholder={placeholder}
+          disabled={textDisabled}
           aria-label="輸入訊息"
           className={styles.textInput}
         />
@@ -52,7 +61,7 @@ export function ChatInput({ onSend, onSOS, disabled }: Props) {
         {/* Send Button */}
         <button
           type="submit"
-          disabled={disabled || !hasText}
+          disabled={textDisabled || !hasText}
           aria-label="送出訊息"
           className={`${styles.sendButton} ${hasText ? styles.sendButtonActive : styles.sendButtonInactive}`}
         >

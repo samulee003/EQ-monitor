@@ -13,6 +13,7 @@ import CenteringStep from './steps/CenteringStep';
 import { useRulerFlow } from '../hooks/useRulerFlow';
 import { useLanguage } from '../services/LanguageContext';
 import { type Emotion } from '../data/emotionData';
+import { useAppStore } from '../stores/appStore';
 
 // 高風險情緒 ID：選擇時提供安全資源
 const HIGH_RISK_EMOTION_IDS = new Set([
@@ -23,6 +24,7 @@ const HIGH_RISK_EMOTION_IDS = new Set([
 
 const CheckInFlow: React.FC = () => {
     const { t } = useLanguage();
+    const setView = useAppStore((state) => state.setView);
     const [showCrisisModal, setShowCrisisModal] = useState(false);
     const {
         step,
@@ -44,8 +46,8 @@ const CheckInFlow: React.FC = () => {
         handleNeuroCheckComplete
     } = useRulerFlow();
 
-    const handleEmotionSelectWithCrisisCheck = (emotions: Emotion[]) => {
-        handleEmotionSelect(emotions);
+    const handleEmotionSelectWithCrisisCheck = (emotions: Emotion[], intensity: number) => {
+        handleEmotionSelect(emotions, intensity);
         const hasHighRisk = emotions.some(e => HIGH_RISK_EMOTION_IDS.has(e.id));
         if (hasHighRisk) {
             setShowCrisisModal(true);
@@ -150,6 +152,7 @@ const CheckInFlow: React.FC = () => {
                                 isFullFlow={isFullFlow}
                                 onReset={resetFlow}
                                 onContinueFullFlow={!isFullFlow ? handleContinueFullFlow : undefined}
+                                onViewHistory={() => setView('history')}
                             />
                         )}
                     </div>
