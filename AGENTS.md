@@ -78,6 +78,22 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
 - 若使用者明確說「同步到最新」「已經上線，幫我整理」「修 live bug」，可視為授權執行 push / deploy / live smoke；但仍不得做破壞性資料操作或資料庫遷移，除非另行確認。
 - 若本次只做本機修改而不部署，最終回覆必須明講「尚未上 production」，並把 `memory.md` 標成未部署狀態。
 
+### InsForge Edge Function 部署注意
+
+- `delete-account`、`weekly-report`、`achievement-checker` 目前可用原始檔直接部署。
+- `coach` production 入口使用 `server/insforge/functions/coach-simple.ts`，且會 import `server/insforge/functions/_shared/coachActionLoop.ts`。目前 InsForge CLI 直接部署原檔可能在 build 階段出現 `Module not found "file:///src/functions/_shared/coachActionLoop.ts"`；部署 `coach` 時先打包成單檔再 deploy：
+
+```bash
+npx esbuild server/insforge/functions/coach-simple.ts \
+  --bundle --platform=neutral --format=esm \
+  --external:npm:@insforge/sdk \
+  --outfile=/tmp/imxin-coach-edge-bundled.ts
+
+npx @insforge/cli functions deploy coach --file /tmp/imxin-coach-edge-bundled.ts
+```
+
+- 部署後要用 `npx @insforge/cli functions code coach` 回讀線上 code，確認新邏輯真的在 production。
+
 ## 常用驗證
 
 ```bash
@@ -94,7 +110,7 @@ git diff --check
 目前最新本地基線（2026-05-16）：
 
 - Frontend tests: 44 files / 393 tests passed
-- Server tests: 19 files / 211 tests passed
+- Server tests: 19 files / 212 tests passed
 - E2E: 4 passed
 - Frontend lint: 0 errors / 31 warnings
 - Server lint: 0 errors / 24 warnings

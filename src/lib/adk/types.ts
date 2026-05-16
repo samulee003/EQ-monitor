@@ -79,6 +79,8 @@ export interface CoachResponse {
   metadata?: {
     emotions_detected?: string[];
     suggested_intensity?: number;
+    conversationPersisted?: boolean;
+    conversationPersistFailedRoles?: Array<'user' | 'model'>;
   };
 }
 

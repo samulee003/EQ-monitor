@@ -1007,16 +1007,23 @@ async function getSessionEvents(appName: string, userId: string, sessionId: stri
   });
 }
 
+type ConversationEventRole = 'user' | 'model';
+
+type ConversationPersistResult = {
+  conversationPersisted: boolean;
+  conversationPersistFailedRoles: ConversationEventRole[];
+};
+
 async function appendEvent(
   appName: string,
   userId: string,
   sessionId: string,
-  role: string,
+  role: ConversationEventRole,
   content: string
 ) {
   const client = getClient();
   const now = new Date().toISOString();
-  await client.database.from('adk_events').insert({
+  const { error } = await client.database.from('adk_events').insert({
     id: crypto.randomUUID(),
     app_name: appName,
     user_id: userId,
@@ -1024,6 +1031,34 @@ async function appendEvent(
     timestamp: now,
     event_data: { role, content },
   });
+
+  if (error) throw new Error(`adk_events ${role}: ${error.message}`);
+}
+
+async function persistConversationEvents(
+  appName: string,
+  userId: string,
+  sessionId: string,
+  message: string,
+  responseText: string
+): Promise<ConversationPersistResult> {
+  const events: Array<{ role: ConversationEventRole; content: string }> = [
+    { role: 'user', content: message },
+    { role: 'model', content: responseText },
+  ];
+  const results = await Promise.allSettled(
+    events.map(event => appendEvent(appName, userId, sessionId, event.role, event.content))
+  );
+  const failedRoles = results.flatMap((result, index) => {
+    if (result.status === 'fulfilled') return [];
+    console.error('append conversation event error:', result.reason);
+    return [events[index].role];
+  });
+
+  return {
+    conversationPersisted: failedRoles.length === 0,
+    conversationPersistFailedRoles: failedRoles,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1468,12 +1503,12 @@ export default async function (req: Request): Promise<Response> {
       actionReason = actionReason ?? '偵測到你可能需要緊急情緒調節協助';
     }
 
-    // 持久化對話（fire-and-forget）
-    appendEvent(APP_NAME, userId, sessionId, 'user', message).catch((e) =>
-      console.error('append user event error:', e)
-    );
-    appendEvent(APP_NAME, userId, sessionId, 'model', responseText).catch((e) =>
-      console.error('append model event error:', e)
+    const conversationPersistence = await persistConversationEvents(
+      APP_NAME,
+      userId,
+      sessionId,
+      message,
+      responseText
     );
 
     return new Response(
@@ -1489,6 +1524,7 @@ export default async function (req: Request): Promise<Response> {
           activeMicroAction: agenticLoop.activeMicroAction,
           gamification: agenticLoop.gamification,
           toolResult: agenticLoop.toolResult,
+          metadata: conversationPersistence,
         },
         error: null,
       }),

@@ -33,6 +33,8 @@ Live checks：
 - Bot `/webhook` 無 `x-line-signature` 時回 `401`。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；線上 code 回讀確認刪帳清單包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 - `delete-account` live smoke：`OPTIONS /delete-account` 回 204；未帶 Authorization 的 `POST /delete-account` 回 401。
+- 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；線上 code 回讀確認包含 `persistConversationEvents` / `conversationPersisted`，未授權有效 UUID `POST /coach` 回 401，`OPTIONS /coach` 回 204。
+- 注意：`coach` 直接用 `npx @insforge/cli functions deploy coach --file server/insforge/functions/coach-simple.ts` 會因 `_shared/coachActionLoop.ts` module resolution 失敗；目前要先用 esbuild bundle 成 `/tmp/imxin-coach-edge-bundled.ts` 再 deploy。
 
 ## 部署指令（誰要部署都從這裡抄）
 
@@ -144,9 +146,9 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 - 這輪 Live Mock 使用 mock 攔截 Coach / LINE 綁定 mutating requests，避免污染 production 資料；production DB trace/stats 的 live data path 仍需另跑。
 - 本輪修正：`src/stores/appStore.ts` 讓無 hash / unknown hash 導回 `#home`、舊 `#landing` 導到 `#about`，並讓應用鎖首次啟用時進入 PIN 設定；`src/adapters/storage.ts` 讓 log update 產生新列表引用，修正記錄回顧編輯後畫面不刷新。
 - `npm run test:run` → 384 tests / 43 files passed
-- `cd server && npm run test:run` → 211 tests / 19 files passed（2026-05-16 刪帳範圍修補後重跑）
+- `cd server && npm run test:run` → 212 tests / 19 files passed（2026-05-16 Coach 對話持久化修補後重跑）
 - `npx vitest run src/pages/CoachPage.test.tsx src/components/coach/MicroActionCard.test.tsx src/components/coach/GamificationStrip.test.tsx` → 30 tests / 3 files passed
-- `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed；`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 11 tests passed（刪帳守門追加後）
+- `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed；`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 12 tests passed（刪帳與對話持久化守門追加後）
 - `npm run build` → passed
 - `cd server && npm run build` → passed
 - `npm run lint` → 0 errors / 31 warnings
@@ -192,9 +194,8 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 後續 ticket（這次掃描挖到但沒修）
 
-詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌、#4 `delete-account` 補清 Agentic Action Loop 三張資料表並已部署。**待修**：
+詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌、#4 `delete-account` 補清 Agentic Action Loop 三張資料表並已部署、#5 `coach` 對話持久化改等待寫入結果並已部署。**待修**：
 
-- Coach Edge Function `appendEvent()` fire-and-forget，conversation 失敗可能漏存 → 改 await + 重試或在 response metadata 標記失敗。
 - PWA 三處直接 localStorage 繞過 adapter 加密：`src/services/ThemeContext.tsx`、`src/services/BotSyncService.ts`、`src/lib/adk/storage.ts`（這個是阿念教練 chat history，沒加密）。
 - `rulerBot.ts` session 永不過期（每次互動 reset `updatedAt`，使用者 29 分內回一次就活下去）。
 - Coach 第一輪 crisis 後第二輪 Gemini call 沒重檢 crisis。

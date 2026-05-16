@@ -128,6 +128,17 @@ describe('發布前 P0/P1 守門', () => {
     expect(source).toContain('Public coach endpoint requires UUID userId');
   });
 
+  it('production coach 必須等待對話持久化並回傳持久化狀態', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain('async function persistConversationEvents');
+    expect(source).toContain('await persistConversationEvents');
+    expect(source).toContain('conversationPersisted');
+    expect(source).toContain('conversationPersistFailedRoles');
+    expect(source).toContain('throw new Error(`adk_events ${role}: ${error.message}`)');
+    expect(source).not.toContain('appendEvent(APP_NAME, userId, sessionId, \'user\', message).catch');
+  });
+
   it('action loop schema 必須限制每個使用者只能有一個 active micro action', () => {
     const schema = readProjectFile('server/insforge/schema/011_coach_action_loop.sql');
 

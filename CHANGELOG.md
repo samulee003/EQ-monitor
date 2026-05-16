@@ -20,12 +20,22 @@
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
 - 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-C0yGyERj.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；刪帳清除範圍已納入 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，並已回讀線上 function code 確認。
+- 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；對話事件持久化不再 fire-and-forget，response metadata 會標記 `conversationPersisted` 與失敗角色。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+
+## [V1.0.0] - 2026-05-16 — Coach 對話持久化狀態補強
+
+- `coach` Edge Function 的 user / model 對話事件改為等待寫入結果，不再 fire-and-forget。
+- `appendEvent()` 現在會檢查 `adk_events` 寫入錯誤；若事件未寫入，response metadata 會回傳 `conversationPersisted: false` 與 `conversationPersistFailedRoles`，避免使用者端或後續監控誤以為教練記憶已保存。
+- 新增發布守門測試，避免 production coach 退回不等待持久化的寫法。
+- Production 已重新部署 `coach`；因 InsForge CLI 直接部署含 `_shared` import 的原檔會遇到 module resolution 失敗，本次先用 esbuild 打包成單檔後部署，並以 `functions code coach` 回讀確認線上版本包含 `persistConversationEvents`。
+- Live smoke：`OPTIONS /coach` 回 204；未帶 Authorization 的有效 UUID `POST /coach` 回 401。
+- 驗證：`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 12 tests passed；`cd server && npm run test:run` → 212 tests / 19 files passed；`cd server && npm run build` → passed；`cd server && npm run lint` → 0 errors / 24 warnings；`npm run build` → passed；`git diff --check` → passed。
 
 ## [V1.0.0] - 2026-05-16 — 刪帳範圍補齊 Agentic Action Loop 資料
 
