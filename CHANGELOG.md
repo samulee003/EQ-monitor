@@ -13,21 +13,31 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正` 與 Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`，以及未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
-- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-C0yGyERj.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
+- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-3JqI49Ya.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；刪帳清除範圍已納入 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，並已回讀線上 function code 確認。
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；對話事件持久化不再 fire-and-forget，response metadata 會標記 `conversationPersisted` 與失敗角色。
 - 2026-05-16 13:20 已再次部署 InsForge `coach` Edge Function；mutating tool args 由 deterministic code 驗證後才可建立或回報小行動。
+- 2026-05-16 14:35 已重新部署 PWA；未登入時啟動 Coach 或 LINE 綁定會直接提示登入，不再打 production API 後顯示「伺服器暫時忙碌」。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+
+## [V1.0.0] - 2026-05-16 — 未登入 Coach 守門修補
+
+- 移除 Coach 前端送 API 時的 `test-user` fallback；未登入使用者點「開始 7 日小陪跑」或送出 Coach 訊息時，不再呼叫 production `coach` API。
+- 未登入時改顯示「請先登入或註冊帳號，再使用阿念教練與 7 日小陪跑」，避免把 401 / 400 誤包成「伺服器暫時忙碌」。
+- LINE 綁定碼提交也加上未登入守門，未登入時不送 `/api/line-binding/claim`，直接提示先登入。
+- Production 已重新部署 PWA；live bundle 已切到 `index-3JqI49Ya.js`，deployment `6a080ffdbbc71468fc734854` 為 `RUNNING`。
+- Browser live smoke：正式站 `#coach` 可見 `@980pqrhn` LINE 入口；未登入點「開始 7 日小陪跑」顯示登入提示；未登入輸入綁定碼顯示登入提示；SOS 彈窗仍顯示 119 / 110、安心專線 1925、生命線 1909。
+- 驗證：`npm run test:run -- src/pages/CoachPage.test.tsx` → 30 tests passed；`npm run build` → passed；`npm run lint` → 0 errors / 31 warnings；`git diff --check` → passed。
 
 ## [V1.0.0] - 2026-05-16 — Coach mutating tool args 驗證補強
 

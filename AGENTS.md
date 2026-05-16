@@ -119,9 +119,13 @@ git diff --check
 
 ## 最新主線
 
+- `1c4a634 fix: 未登入 Coach 顯示登入提示`
+  - 未登入使用者點 Coach 或 7 日小陪跑時不再呼叫 production `coach` API；會直接提示先登入。
+  - 未登入提交 LINE 綁定碼也不再送出 claim request。
+  - PWA production 已確認 live bundle `index-3JqI49Ya.js`。
 - `34b549c fix: 補 Coach 首屏 LINE 入口`
   - Coach 開場卡新增「也可以用 LINE 對話」入口，直接露出 `@980pqrhn` 與綁定步驟。
-  - PWA production 已確認 live bundle `index-C0yGyERj.js`。
+  - 舊 PWA production 曾確認 live bundle `index-C0yGyERj.js`；目前以更新後的 `index-3JqI49Ya.js` 為準。
 - `0ef72fd fix: 整合 Debug Review 修正`
   - 合入 Claude 安全修正與 Debug / Review 修正。
   - 包含 LINE 危機字詞、production 簽名強制、InsForge adapter 結構化日誌、登入使用者 `ruler_logs` 同步、深色模式對比、成就檢查規則與相關測試。

@@ -7,7 +7,7 @@
 ## 目前主線（2026-05-16）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正` 與 Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`，以及未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
@@ -17,24 +17,25 @@
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
 
-## 部署現況（2026-05-16 12:13 GMT+8）
+## 部署現況（2026-05-16 14:36 GMT+8）
 
-**重點：production 已重新部署到 `main` 最新整合版 `0ef72fd`。** 後續修改完代碼仍要重新部署，否則 LINE / PWA 使用者會看到舊版。
+**重點：production PWA 已重新部署到含未登入 Coach 守門的 `1c4a634`；InsForge `coach` / `delete-account` Edge Functions 也已同步最新修補。**
 
 | 服務 | URL | 目前跑的代碼 | 對齊 main? | 證據 |
 |---|---|---|---|---|
-| PWA | `today-mood.zeabur.app` | `34b549c` app 修正版，bundle `index-C0yGyERj.js` | 是 | live bundle 已比對；PWA 可能因 docs-only push 觸發新 deployment，仍以 live bundle 為準 |
+| PWA | `today-mood.zeabur.app` | `1c4a634` app 修正版，bundle `index-3JqI49Ya.js` | 是 | Zeabur deployment `6a080ffdbbc71468fc734854` RUNNING；live browser smoke 已比對 |
 | Bot Server | `imxin-bot.zeabur.app` | `0ef72fd` 整合版 | 是 | Zeabur deployment `6a07ee2bbbc71468fc733b92` RUNNING；`/health` uptime 已重置、adapter=`insforge` |
 
 Live checks：
 
-- PWA root 回 `index-C0yGyERj.js`。
+- PWA root 回 `index-3JqI49Ya.js`。
 - Bot `/health` 回 `status=healthy`、`adapter=insforge`。
 - Bot `/webhook` 無 `x-line-signature` 時回 `401`。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；線上 code 回讀確認刪帳清單包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 - `delete-account` live smoke：`OPTIONS /delete-account` 回 204；未帶 Authorization 的 `POST /delete-account` 回 401。
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；線上 code 回讀確認包含 `persistConversationEvents` / `conversationPersisted`，未授權有效 UUID `POST /coach` 回 401，`OPTIONS /coach` 回 204。
 - 2026-05-16 13:20 已重新部署 InsForge `coach` Edge Function；線上 code 回讀確認包含 `validateCreateMicroActionArgs` / `validateReportMicroActionArgs`，mutating tool args 不再直接信任 LLM cast。
+- 2026-05-16 14:35 已重新部署 PWA；live browser smoke 確認未登入點「開始 7 日小陪跑」顯示登入提示、不再顯示伺服器忙碌；未登入送 LINE 綁定碼也顯示先登入；SOS 彈窗仍正常顯示 119 / 110、1925、1909。
 - 注意：`coach` 直接用 `npx @insforge/cli functions deploy coach --file server/insforge/functions/coach-simple.ts` 會因 `_shared/coachActionLoop.ts` module resolution 失敗；目前要先用 esbuild bundle 成 `/tmp/imxin-coach-edge-bundled.ts` 再 deploy。
 
 ## 部署指令（誰要部署都從這裡抄）
@@ -141,6 +142,7 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 - 2026-05-15 PM 驗收修正：onboarding 角色選擇移除單字大圖示；隱私導覽改成未登入本機保存、登入同意同步、可匯出/刪帳；模式導覽改成每日提醒/週洞察/成就收藏；Coach 首屏壓成「先說一句就好」與三個低負擔開始按鈕；提醒時間頁新增通知內容預覽與試發提醒；個人中心匯出資料改為等待實際 logs 載入。
 - 2026-05-15 追加修正：提醒時間導覽最後一步不再等待通知權限 Promise；`開始旅程` 會先完成 onboarding，通知開啟改為背景 best-effort。`NotificationService.getSettings()` 改用同步快取讀取本機提醒設定。
 - 追加修正驗證：`npm run test:run -- src/components/OnboardingFlow.test.tsx` → 6 tests passed；`npm run build` passed；`git diff --check` passed；正式站 deployment `6a073696bbc71468fc730cbc` 已 RUNNING，bundle `index-B-9lzdP6.js`，live smoke 模擬通知權限永不回應時仍可離開導覽並進入 `今日心情`。
+- 2026-05-16 live browser smoke 後修正：未登入 Coach 不再送 production API；`npm run test:run -- src/pages/CoachPage.test.tsx` → 30 tests passed；`npm run build` passed；`npm run lint` → 0 errors / 31 warnings；`git diff --check` passed；PWA live bundle `index-3JqI49Ya.js`。
 - PM 驗收修正驗證：`npm run test:run -- src/pages/CoachPage.test.tsx src/components/OnboardingFlow.test.tsx src/components/UserProfile.test.tsx` → 32 tests / 3 files passed；`npm run build` passed；`npm run lint` 0 errors / 31 warnings；`git diff --check` passed；Playwright mobile 截圖確認 Coach 首屏與提醒時間頁主按鈕可見。
 - 2026-05-15 PWA final Live Mock：`today-mood.zeabur.app` 已部署並切到 bundle `index-B-9lzdP6.js`；Zeabur deployment `6a073696bbc71468fc730cbc` 狀態 `RUNNING`。
 - Live Mock 覆蓋：frontend root、Bot root、Bot `/health`、`home / history / growth / achievement / coach / about / privacy.html / account-deletion.html` 的 desktop / tablet / mobile 檢視，以及 check-in、header 工具、guest login、history filter/edit/export、Coach 7 日小陪跑、LINE 綁定 mock、SOS、onboarding、privacy lock、unknown hash。結果：有效 35/35 passed，console/page errors 0。
@@ -195,7 +197,7 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 後續 ticket（這次掃描挖到但沒修）
 
-詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌、#4 `delete-account` 補清 Agentic Action Loop 三張資料表並已部署、#5 `coach` 對話持久化改等待寫入結果並已部署、#6 `coach` mutating tool args 驗證並已部署。**待修**：
+詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌、#4 `delete-account` 補清 Agentic Action Loop 三張資料表並已部署、#5 `coach` 對話持久化改等待寫入結果並已部署、#6 `coach` mutating tool args 驗證並已部署、#7 PWA 未登入 Coach / LINE 綁定守門並已部署。**待修**：
 
 - PWA 三處直接 localStorage 繞過 adapter 加密：`src/services/ThemeContext.tsx`、`src/services/BotSyncService.ts`、`src/lib/adk/storage.ts`（這個是阿念教練 chat history，沒加密）。
 - `rulerBot.ts` session 永不過期（每次互動 reset `updatedAt`，使用者 29 分內回一次就活下去）。
