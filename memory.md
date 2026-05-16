@@ -7,7 +7,7 @@
 ## 目前主線（2026-05-16）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`，以及未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`，以及導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
@@ -17,18 +17,18 @@
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
 
-## 部署現況（2026-05-16 14:36 GMT+8）
+## 部署現況（2026-05-16 16:50 GMT+8）
 
-**重點：production PWA 已重新部署到含未登入 Coach 守門的 `1c4a634`；InsForge `coach` / `delete-account` Edge Functions 也已同步最新修補。**
+**重點：production PWA 已重新部署到含導覽情緒科普文案修正的 `688f954`；InsForge `coach` / `delete-account` Edge Functions 也已同步最新修補。**
 
 | 服務 | URL | 目前跑的代碼 | 對齊 main? | 證據 |
 |---|---|---|---|---|
-| PWA | `today-mood.zeabur.app` | `1c4a634` app 修正版，bundle `index-3JqI49Ya.js` | 是 | Zeabur deployment `6a080ffdbbc71468fc734854` RUNNING；live browser smoke 已比對 |
+| PWA | `today-mood.zeabur.app` | `688f954` app 修正版，bundle `index-DdGwYiyB.js` | 是 | Zeabur deploy 回 `Service deployed successfully`；live root 與 bundle 內容已比對 |
 | Bot Server | `imxin-bot.zeabur.app` | `0ef72fd` 整合版 | 是 | Zeabur deployment `6a07ee2bbbc71468fc733b92` RUNNING；`/health` uptime 已重置、adapter=`insforge` |
 
 Live checks：
 
-- PWA root 回 `index-3JqI49Ya.js`。
+- PWA root 回 `index-DdGwYiyB.js`。
 - Bot `/health` 回 `status=healthy`、`adapter=insforge`。
 - Bot `/webhook` 無 `x-line-signature` 時回 `401`。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；線上 code 回讀確認刪帳清單包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
@@ -36,6 +36,7 @@ Live checks：
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；線上 code 回讀確認包含 `persistConversationEvents` / `conversationPersisted`，未授權有效 UUID `POST /coach` 回 401，`OPTIONS /coach` 回 204。
 - 2026-05-16 13:20 已重新部署 InsForge `coach` Edge Function；線上 code 回讀確認包含 `validateCreateMicroActionArgs` / `validateReportMicroActionArgs`，mutating tool args 不再直接信任 LLM cast。
 - 2026-05-16 14:35 已重新部署 PWA；live browser smoke 確認未登入點「開始 7 日小陪跑」顯示登入提示、不再顯示伺服器忙碌；未登入送 LINE 綁定碼也顯示先登入；SOS 彈窗仍正常顯示 119 / 110、1925、1909。
+- 2026-05-16 16:50 已重新部署 PWA；App onboarding 第 3 步改用「身體喚醒程度」與「感受愉悅度」的情緒心理學科普說法，live bundle 內容確認包含新文案。
 - 注意：`coach` 直接用 `npx @insforge/cli functions deploy coach --file server/insforge/functions/coach-simple.ts` 會因 `_shared/coachActionLoop.ts` module resolution 失敗；目前要先用 esbuild bundle 成 `/tmp/imxin-coach-edge-bundled.ts` 再 deploy。
 
 ## 部署指令（誰要部署都從這裡抄）
