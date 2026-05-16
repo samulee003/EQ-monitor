@@ -6,8 +6,12 @@ import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
 import { saveChatHistory } from '../lib/adk/storage';
 
+const authMock = vi.hoisted(() => ({
+  user: { id: 'user_local_001' } as { id: string } | null,
+}));
+
 vi.mock('../services/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'user_local_001' } }),
+  useAuth: () => ({ user: authMock.user }),
 }));
 
 const appStoreMock = vi.hoisted(() => ({
@@ -21,6 +25,7 @@ vi.mock('../stores/appStore', () => ({
 describe('CoachPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    authMock.user = { id: 'user_local_001' };
     localStorage.clear();
     Element.prototype.scrollIntoView = vi.fn();
   });
@@ -98,6 +103,19 @@ describe('CoachPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '開始 7 日陪跑' }));
     expect(screen.getByText('我想開始 7 日小陪跑：每天做一個照顧自己的小動作')).toBeInTheDocument();
+  });
+
+  it('未登入使用者啟動 Coach 時不應呼叫 API，並提示先登入', () => {
+    authMock.user = null;
+    const sendMessageSpy = vi.spyOn(client, 'sendMessage');
+
+    render(<CoachPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: '開始 7 日陪跑' }));
+
+    expect(sendMessageSpy).not.toHaveBeenCalled();
+    expect(screen.getByText('請先登入或註冊帳號，再使用阿念教練與 7 日小陪跑')).toBeInTheDocument();
+    expect(screen.queryByText('我想開始 7 日小陪跑：每天做一個照顧自己的小動作')).not.toBeInTheDocument();
   });
 
   it('送出訊息後應該呼叫 API 並顯示回應', async () => {
@@ -371,6 +389,19 @@ describe('CoachPage', () => {
       );
     });
     expect(await screen.findByText('已綁定 LINE Bot：U123')).toBeInTheDocument();
+  });
+
+  it('未登入使用者提交 LINE Bot 綁定碼時不應送出請求', () => {
+    authMock.user = null;
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<CoachPage />);
+    fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
+    fireEvent.click(screen.getByText('綁定'));
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText('請先登入或註冊帳號，再綁定 LINE Bot')).toBeInTheDocument();
   });
 
   it('LINE Bot 綁定區顯示官方帳號與加好友入口', () => {

@@ -29,7 +29,7 @@ const WELCOME_MSG: CoachMessage = {
   timestamp: new Date().toISOString(),
 };
 
-type ErrorType = 'network' | 'api' | 'timeout';
+type ErrorType = 'network' | 'api' | 'timeout' | 'auth';
 type CoachView = 'home' | 'history' | 'growth' | 'achievement' | 'coach';
 
 const START_ACTIONS = [
@@ -62,6 +62,8 @@ function getErrorMessage(type: ErrorType): string {
       return '伺服器暫時忙碌，請稍後再試';
     case 'timeout':
       return '連線有點慢，請稍後再試';
+    case 'auth':
+      return '請先登入或註冊帳號，再使用阿念教練與 7 日小陪跑';
   }
 }
 
@@ -149,8 +151,7 @@ function executeCoachAction(action: CoachAction, reason?: string): string {
 
 export default function CoachPage() {
   const { user } = useAuth();
-  // TODO: Remove 'test-user' fallback once auth is fully wired for all users
-  const userId = user?.id || 'test-user';
+  const userId = user?.id ?? 'guest';
 
   const [messages, setMessages] = useState<CoachMessage[]>([WELCOME_MSG]);
   const [loading, setLoading] = useState(false);
@@ -209,6 +210,11 @@ export default function CoachPage() {
 
   const doSend = useCallback(async (text: string, addUserMsg = true) => {
     setError(null);
+    if (!user?.id) {
+      setError({ type: 'auth', retryText: text });
+      return;
+    }
+
     if (addUserMsg) {
       const userMsg: CoachMessage = {
         id: crypto.randomUUID(),
@@ -259,7 +265,7 @@ export default function CoachPage() {
     } finally {
       setLoading(false);
     }
-  }, [handleAction, userId]);
+  }, [handleAction, user?.id, userId]);
 
   const handleSend = useCallback(
     (text: string) => doSend(text, true),
@@ -336,10 +342,14 @@ export default function CoachPage() {
       setBindingMessage('請輸入 LINE Bot 給你的綁定碼');
       return;
     }
+    if (!user?.id) {
+      setBindingMessage('請先登入或註冊帳號，再綁定 LINE Bot');
+      return;
+    }
 
     setBindingSubmitting(true);
     try {
-      const result = await botSyncService.claimLineBinding(code, userId);
+      const result = await botSyncService.claimLineBinding(code, user.id);
       if (result.error) {
         setBindingMessage(`綁定失敗：${result.error.message}`);
         return;
@@ -350,7 +360,7 @@ export default function CoachPage() {
     } finally {
       setBindingSubmitting(false);
     }
-  }, [bindingCode, bindingSubmitting, userId]);
+  }, [bindingCode, bindingSubmitting, user?.id]);
 
   const showWelcome = messages.length <= 1;
   const visibleMessages = showWelcome
