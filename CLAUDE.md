@@ -8,9 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Dual-entry, Bot-First architecture:**
 - LINE Bot (primary) — 知心四式 conversation state machine via `server/src/rulerBot.ts`
-- PWA Dashboard (secondary) — history, heatmap, achievements, AI coach
+- PWA Dashboard (secondary) — history, heatmap, achievements, 阿念 AI coach
 
-**All UI text, comments, commit messages must be in Traditional Chinese (Taiwan).**
+**Current product focus: Agentic Action Loop (阿念教練 7 日小陪跑).** Coach is not a chat box — it runs `Observe → Orient → Plan → Act → Persist → Evaluate → Adjust` per interaction. LLM does semantic judgement; deterministic code owns state transitions, rewards, expiry and crisis-gating. See `AGENTS.md` for full agent rules and `CONTEXT.md` for product-language definitions.
+
+**All UI text, comments, commit messages must be in Traditional Chinese (Taiwan).** Front-stage method names are **心照 / 喚名 / 安神 / 動念**. Do NOT use `Mood Meter`, `Meta-Moment`, `How We Feel`, or `RULER 五步` as user-facing or active-prompt language. Internal identifiers (`ruler_logs`, `RulerLogEntry`, `useRulerFlow`, `rulerBot.ts`) stay as-is for compatibility.
 
 ---
 
@@ -23,7 +25,7 @@ npm run dev          # Dev server → http://localhost:5173
 npm run build        # Production build → dist/
 npm run preview      # Preview production build
 npm run test         # Vitest watch mode
-npm run test:run     # Single run (265 tests)
+npm run test:run     # Single run (~368 tests across 40 files, baseline 2026-05-15)
 npm run test:e2e     # Playwright E2E (4 critical paths)
 npm run test:e2e:ui  # Playwright interactive UI
 npx vitest run src/path/to/file.test.ts  # Run single test file
@@ -41,7 +43,7 @@ npm run migrate      # Run InsForge LocalStorage→InsForge data migration
 npm run dev          # tsx watch → http://localhost:3000
 npm run build        # tsc → dist/
 npm run start        # Run compiled
-npm run test:run     # 52 tests pass (1 file fails due to dotenv)
+npm run test:run     # ~164 tests across 17 files (1 env.ts test fails due to dotenv — expected)
 node test-bot.cjs    # End-to-end conversation simulation
 ```
 
@@ -97,7 +99,20 @@ import { insforge } from '@/lib/insforge/client';
 ```
 Project linked at `.insforge/project.json` (do not commit). OSS host: `https://b88egxiz.ap-southeast.insforge.app`
 
-**AI Coach** (`src/lib/adk/`): REST fetch wrapper to the `coach` edge function. Chat history stored in localStorage.
+**AI Coach (阿念) — Agentic Action Loop**: PWA Coach is a multi-step agent, not a chat wrapper.
+- Frontend: `src/lib/adk/` (REST client + types), `src/pages/CoachPage.tsx` (7 日小陪跑 UI, 小行動提案卡, active 回顧卡, XP / 金幣 / 復盤連續進度列).
+- Backend runtime: `server/insforge/functions/coach-simple.ts` is the **production `coach` Edge Function** (self-contained prompt builder, multi-step loop, trace persistence, gamification metadata).
+- Shared loop logic: `server/insforge/functions/_shared/coachActionLoop.ts`.
+- Schema: `server/insforge/schema/011_coach_action_loop.sql` (`coach_micro_actions`, `coach_gamification_stats`, `coach_agent_traces`; DB enforces one active 小行動 per user).
+- Reference (not deployed): `server/src/agents/soulInstruction.ts`, `server/insforge/agents/soul.md`.
+
+**When modifying coach method-language or action-loop behaviour, update all of: `coach-simple.ts`, `soulInstruction.ts`, `soul.md`, `coachActionLoop.ts`, `src/lib/adk/types.ts`, `CoachPage.tsx`, and the corresponding tests in lockstep.**
+
+Hard rules enforced by code (do not bypass):
+- 危機語句 → `crisis_reward_blocked`; never create a 小行動 or award XP/金幣 on a crisis path.
+- A 回報 (completed/partial/skipped) only rewards an active, unreported row.
+- A 小行動 can only be created from a pending proposal that the user has explicitly confirmed.
+- Gamification is personal-tool only: XP / 等級 / 金幣 / 復盤連續 allowed; **no social leaderboards, no point deductions, no demotion, no shaming reminders**.
 
 ### Backend (`server/`)
 
@@ -114,9 +129,15 @@ Express 5 + TypeScript. Entry: `server/src/index.ts`.
 
 ### InsForge Backend
 
-5 tables (all RLS-enabled): `profiles`, `ruler_logs`, `ruler_drafts`, `achievement_records`, `streaks`.
-2 storage buckets (private): `voice-recordings`, `exports`.
-1 active edge function: `coach` (AI coach REST API using Gemini).
+Tables (all RLS-enabled, see `server/insforge/schema/`):
+- Core: `profiles`, `ruler_logs`, `ruler_drafts`, `achievement_records`, `streaks`.
+- Coach: `coach_messages`, `coach_context`, `coach_micro_actions`, `coach_gamification_stats`, `coach_agent_traces`.
+- Ops: `notification_log`, `account_deletions`.
+
+Storage (2 private buckets): `voice-recordings`, `exports`.
+
+Edge Functions (`server/insforge/functions/`): `coach-simple.ts` is the deployed `coach` function; `coach.ts` is legacy reference. Other functions: `achievement-checker`, `weekly-report`, `delete-account`.
+
 Auth trigger: `on_auth_user_created` auto-creates `profiles` row.
 
 ---
@@ -205,6 +226,14 @@ InsForge SDK is mocked in tests via alias: `@insforge/sdk` → `src/test/mocks/i
 | `uak_` (user API key) unreachable headlessly | Use direct SQL + MCP tools for infra tasks |
 
 ---
+
+## Companion Docs (read when in doubt)
+
+- `AGENTS.md` — agent handoff rules, current baseline test counts, recent main-branch commits, next-step priorities.
+- `CONTEXT.md` — product language dictionary (what each term means and what to avoid).
+- `memory.md` — short-lived handoff notes between sessions.
+- `CHANGELOG.md` — product change log; update after meaningful renames, deploys, or verification milestones.
+- `docs/adr/` — architectural decision records (incl. Agentic Action Loop ADR).
 
 ## Regression Risk
 
