@@ -60,6 +60,16 @@ describe('OnboardingFlow', () => {
         expect(screen.queryByText('職')).not.toBeInTheDocument();
     });
 
+    it('四色狀態導覽應使用情緒心理學科普語言', () => {
+        render(<OnboardingFlow onComplete={vi.fn()} />);
+
+        goToStep(3);
+
+        expect(screen.getByText('情緒的四種常見狀態')).toBeInTheDocument();
+        expect(screen.getByText('情緒心理學常用「身體喚醒程度」和「感受愉悅度」來理解當下狀態：高喚醒又不舒服時，可能是緊張、憤怒或焦慮；高喚醒又舒服時，可能是興奮、期待或有活力；低喚醒又不舒服時，可能是低落、疲憊或失望；低喚醒又舒服時，可能是平靜、放鬆或安心。這不是診斷，也不是把情緒分好壞，而是先幫你看見身體和感受正在往哪裡走。')).toBeInTheDocument();
+        expect(screen.queryByText(/心裡順卡/)).not.toBeInTheDocument();
+    });
+
     it('隱私導覽應只承諾已落實的資料保存與同步行為', () => {
         render(<OnboardingFlow onComplete={vi.fn()} />);
 

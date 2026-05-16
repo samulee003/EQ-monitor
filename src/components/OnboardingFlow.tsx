@@ -130,8 +130,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                             <div className="q-box blue"></div>
                             <div className="q-box green"></div>
                         </div>
-                        <h2>{t('情緒的四色狀態')}</h2>
-                        <p>{t('今心用「身體速度」和「心裡順卡」幫你先定位此刻。紅色像緊繃卡住，黃色像有勁順心，藍色像低落卡住，綠色像安穩順心。沒有「好」或「壞」的情緒，只有需要被看見的感受。')}</p>
+                        <h2>{t('情緒的四種常見狀態')}</h2>
+                        <p>{t('情緒心理學常用「身體喚醒程度」和「感受愉悅度」來理解當下狀態：高喚醒又不舒服時，可能是緊張、憤怒或焦慮；高喚醒又舒服時，可能是興奮、期待或有活力；低喚醒又不舒服時，可能是低落、疲憊或失望；低喚醒又舒服時，可能是平靜、放鬆或安心。這不是診斷，也不是把情緒分好壞，而是先幫你看見身體和感受正在往哪裡走。')}</p>
                         <div className="step-actions">
                             <button className="morandi-outline-btn" onClick={handlePrev}>{t('上一步')}</button>
                             <button className="morandi-main-btn" onClick={handleNext}>{t('下一步')}</button>
