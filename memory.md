@@ -7,9 +7,10 @@
 ## 目前主線（2026-05-16）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`，以及臨床 / 神經科學 / AI 顧問建議修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`、臨床 / 神經科學 / AI 顧問建議修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`，以及交接文件同步 `23a8b63 docs: 同步安全分流部署狀態`。
 - 2026-05-16 晚間分支 `codex/product-polish-agent-team-20260516` 已快轉合入 `main` / `origin/main` 並部署到 PWA production：第一屏改為手機優先 2×2 狀態卡、常駐顯示四個狀態文案、選取後提示下一步、首次導覽「先試一次」直接進今日心情；後續又補上喚名強度保存、完成頁「已保存到記錄回顧 / 查看記錄」、完整保存到時間軸 E2E，以及未登入 Coach 的預先說明 / 鎖定 7 日陪跑 / 保留呼吸與 SOS。
 - 2026-05-16 深夜分支 `codex/clinical-ai-safety-polish-20260516` 已快轉合入 `main` / `origin/main` 並部署：今日心情在高風險情緒或強度 8/10 以上時會先開安全確認，不會直接把高強度情緒當一般完成；身體掃描新增「改做外在接地」；完成頁高強度情緒改為低慶祝的「已記下這一刻」；SOS 第 3 步改成「看見安全的一步」，完成後只做本地安全收束，不再自動送回 Coach API；production `coach` Edge Function 新增最終回覆 deterministic safety guard。
+- 2026-05-16 深夜 `23a8b63` 後，三份交接文件已對齊：`AGENTS.md` 補入今日心情 / SOS 安全規格，`memory.md` 記錄 production 真實狀態，`CHANGELOG.md` 記錄 release history 與驗證證據。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
@@ -21,11 +22,11 @@
 
 ## 部署現況（2026-05-16 23:07 GMT+8）
 
-**重點：production PWA 已重新部署到含安全分流與 SOS 收束的 `f6340e4`；InsForge `coach` Edge Function 已重新打包部署並回讀確認含 final response safety guard。**
+**重點：`main` / `origin/main` 最新為 docs-only `23a8b63`；production PWA 已重新部署到含安全分流與 SOS 收束的 app build `f6340e4`，live bundle `index-DVu8hHQG.js`；InsForge `coach` Edge Function 已重新打包部署並回讀確認含 final response safety guard。**
 
 | 服務 | URL | 目前跑的代碼 | 對齊 main? | 證據 |
 |---|---|---|---|---|
-| PWA | `today-mood.zeabur.app` | `f6340e4` 安全分流修正版，bundle `index-DVu8hHQG.js` | 是 | Zeabur deployment 已成功；live root、bundle 與 browser smoke 已比對 |
+| PWA | `today-mood.zeabur.app` | app code `f6340e4` 安全分流修正版，bundle `index-DVu8hHQG.js`；`main` 最新 `23a8b63` 是 docs-only | 是 | Zeabur deployment 已成功；live root、bundle 與 browser smoke 已比對 |
 | Bot Server | `imxin-bot.zeabur.app` | `0ef72fd` 整合版 | 是 | Zeabur deployment `6a07ee2bbbc71468fc733b92` RUNNING；`/health` uptime 已重置、adapter=`insforge` |
 
 Live checks：
@@ -145,6 +146,7 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 最新驗證基線
 
+- 2026-05-16 安全分流與 SOS 收束：`npm run test:run` → 413 tests / 44 files passed；`cd server && npm run test:run` → 214 tests / 19 files passed；`npm run test:e2e` → 5 passed；`npm run build`、`cd server && npm run build` passed；`npm run lint` → 0 errors / 31 warnings；`cd server && npm run lint` → 0 errors / 24 warnings；`git diff --check` passed；live smoke 確認強度 8/10 安全確認、柔性完成頁、SOS 本地收束與 `coach` final response safety guard。
 - 2026-05-16 今日心情第一屏本地打磨：`npm run test:run -- src/components/EmotionQuadrantPicker.test.tsx src/components/CheckInFlow.test.tsx src/components/OnboardingFlow.test.tsx` → 22 tests / 3 files passed；`npm run test:e2e -- e2e/check-in-flow.spec.ts` → 1 passed；Playwright mobile 390×844 截圖確認今日心情第一屏與首次導覽「先試一次」主路徑可見。
 - 2026-05-15 PM 驗收修正：onboarding 角色選擇移除單字大圖示；隱私導覽改成未登入本機保存、登入同意同步、可匯出/刪帳；模式導覽改成每日提醒/週洞察/成就收藏；Coach 首屏壓成「先說一句就好」與三個低負擔開始按鈕；提醒時間頁新增通知內容預覽與試發提醒；個人中心匯出資料改為等待實際 logs 載入。
 - 2026-05-15 追加修正：提醒時間導覽最後一步不再等待通知權限 Promise；`開始旅程` 會先完成 onboarding，通知開啟改為背景 best-effort。`NotificationService.getSettings()` 改用同步快取讀取本機提醒設定。
@@ -155,15 +157,15 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 - Live Mock 覆蓋：frontend root、Bot root、Bot `/health`、`home / history / growth / achievement / coach / about / privacy.html / account-deletion.html` 的 desktop / tablet / mobile 檢視，以及 check-in、header 工具、guest login、history filter/edit/export、Coach 7 日小陪跑、LINE 綁定 mock、SOS、onboarding、privacy lock、unknown hash。結果：有效 35/35 passed，console/page errors 0。
 - 這輪 Live Mock 使用 mock 攔截 Coach / LINE 綁定 mutating requests，避免污染 production 資料；production DB trace/stats 的 live data path 仍需另跑。
 - 本輪修正：`src/stores/appStore.ts` 讓無 hash / unknown hash 導回 `#home`、舊 `#landing` 導到 `#about`，並讓應用鎖首次啟用時進入 PIN 設定；`src/adapters/storage.ts` 讓 log update 產生新列表引用，修正記錄回顧編輯後畫面不刷新。
-- `npm run test:run` → 384 tests / 43 files passed
-- `cd server && npm run test:run` → 213 tests / 19 files passed（2026-05-16 Coach mutating tool args 驗證修補後重跑）
+- `npm run test:run` → 413 tests / 44 files passed（2026-05-16 安全分流與 SOS 收束後重跑）
+- `cd server && npm run test:run` → 214 tests / 19 files passed（2026-05-16 safety guard 發布守門後重跑）
 - `npx vitest run src/pages/CoachPage.test.tsx src/components/coach/MicroActionCard.test.tsx src/components/coach/GamificationStrip.test.tsx` → 30 tests / 3 files passed
 - `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed；`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 13 tests passed（刪帳、對話持久化、mutating args 守門追加後）
 - `npm run build` → passed
 - `cd server && npm run build` → passed
 - `npm run lint` → 0 errors / 31 warnings
 - `cd server && npm run lint` → 0 errors / 24 warnings
-- `npm run test:e2e` → 4 passed
+- `npm run test:e2e` → 5 passed
 - `git diff --check` → passed
 - Production smoke：PWA、LINE 綁定、LINE 情緒資料流、Coach、週報、主動排程、刪帳流程均已跑過；測試資料已清理。2026-05-15 PWA Live Mock 已重跑並部署；Agentic Action Loop 的 production DB trace/stats live data path 仍待最後確認。
 

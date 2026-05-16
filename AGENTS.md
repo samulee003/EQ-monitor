@@ -32,6 +32,18 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
 - 危機語句必須 `crisis_reward_blocked`，不得建立小行動或發放獎勵。
 - 遊戲化只能是個人工具層：允許 XP、等級、金幣、復盤連續；不做社交排行榜，不做扣分、失敗、降級或羞辱式提醒。
 
+## 今日心情與 SOS 安全體驗
+
+臨床心理 / 情緒神經科學 / AI 顧問 review 後，今日心情與 SOS 的安全規格如下：
+
+- 今日心情「喚名」階段若選到高風險情緒，或強度為 `8/10` 以上，必須先顯示「先確認安全」分流；使用者未確認安全前不得直接保存成一般完成狀態。
+- 高強度情緒完成頁要低慶祝、低壓力；使用「已記下這一刻」這類安全收束語，不用 confetti / 任務勝利感強的語氣。
+- 身體掃描必須保留外在接地替代路徑，讓不適合內在身體掃描的使用者可以改做五感接地後再進入情緒標記。
+- SOS / 緊急安定練習第 3 步定稿為「看見安全的一步」，不要再要求使用者在高壓狀態下描述「想成為的自己」或最佳版本。
+- 使用者完成 SOS 後只做本地安全收束，不自動送回 production Coach API，不建立小行動，不發 XP / 金幣。
+- AI 洞察要用假設語氣，例如「可能」「看起來」「也許」，避免把短期情緒紀錄講成確定模式或診斷。
+- production `coach` Edge Function 的最終可見回覆必須經 deterministic safety guard：危機路徑移除獎勵 / 小行動語言，補上 119 / 110 與緊急安定練習提示，並過濾診斷或承諾治療效果的確定性語句。
+
 ## 工作原則
 
 - 使用繁體中文（台灣）更新 UI 文案、文件與 commit message。
@@ -39,7 +51,7 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
 - 保留內部資料模型與相容命名，例如 `ruler_logs`、`RulerLogEntry`、`useRulerFlow`、`server/src/rulerBot.ts`，除非使用者明確要求資料遷移。
 - `server/insforge/functions/coach-simple.ts` 是 production `coach` Edge Function 自包含 prompt builder；改 AI 教練方法語言時要同步它、`server/src/agents/soulInstruction.ts`、`server/insforge/agents/soul.md` 與相關測試。
 - 改 Agentic Action Loop 時要同步 `server/insforge/functions/_shared/coachActionLoop.ts`、`server/insforge/functions/coach-simple.ts`、`server/insforge/schema/011_coach_action_loop.sql`、`src/lib/adk/types.ts`、`src/pages/CoachPage.tsx` 與相關測試。
-- 根目錄 `memory.md` 是短交接板；`CHANGELOG.md` 是產品變更紀錄；兩者要在重要命名、部署、驗證狀態變更後同步更新。
+- 根目錄 `memory.md` 是短交接板；`CHANGELOG.md` 是產品變更紀錄；`AGENTS.md` 是長期工程與產品規範。重要命名、安全邊界、部署、驗證狀態變更後三者要同步更新。
 
 ## 防漂移工作規範
 
@@ -67,7 +79,7 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
    - PWA live bundle 與預期一致。
    - Bot `/health` 正常，且 webhook 無簽名回 `401`。
    - 若有新 UI 入口，至少用 E2E 或 browser smoke 確認 live 頁面可見。
-5. `memory.md` 與 `CHANGELOG.md` 已同步真實狀態，不能留下「本地未部署」「待合入」等過期句子。
+5. `AGENTS.md`、`memory.md` 與 `CHANGELOG.md` 已同步真實狀態，不能留下「本地未部署」「待合入」等過期句子。
 6. 最後確認 `git status --short --branch` 乾淨，並在回覆中用人話說明：本地、GitHub、production、交接文件是否已同步。
 
 ### 多 agent 整合規則
@@ -109,8 +121,8 @@ git diff --check
 
 目前最新本地基線（2026-05-16）：
 
-- Frontend tests: 44 files / 407 tests passed
-- Server tests: 19 files / 213 tests passed
+- Frontend tests: 44 files / 413 tests passed
+- Server tests: 19 files / 214 tests passed
 - E2E: 5 passed
 - Frontend lint: 0 errors / 31 warnings
 - Server lint: 0 errors / 24 warnings
@@ -119,19 +131,27 @@ git diff --check
 
 ## 最新主線
 
+- `23a8b63 docs: 同步安全分流部署狀態`
+  - `AGENTS.md`、`memory.md`、`CHANGELOG.md` 已同步安全分流與 SOS 收束的 production 真實狀態。
+  - 這是 docs-only commit；PWA live bundle 仍是安全分流 build `index-DVu8hHQG.js`。
+- `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`
+  - 今日心情高風險情緒或強度 8/10 以上會先開安全確認；確認安全後才保存。
+  - 高強度完成頁改為「已記下這一刻」；身體掃描新增外在接地替代路徑。
+  - SOS 第 3 步改為「看見安全的一步」，完成後只做本地安全收束，不自動送回 Coach API。
+  - production `coach` Edge Function 已部署 final response safety guard；PWA production 已確認 live bundle `index-DVu8hHQG.js`。
 - `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`
   - 今日心情完整閉環補強：喚名強度會保存到紀錄，完成頁顯示「已保存到記錄回顧 / 查看記錄」，可直接回時間軸確認。
   - 未登入 Coach 改成預先說明登入需求，鎖定對話與 7 日陪跑，但保留呼吸與 SOS。
-  - PWA production 已確認 live bundle `index-BIi8Bv0J.js`，Zeabur deployment 已切到 `RUNNING`。
+  - 先前 PWA production 曾確認 live bundle `index-BIi8Bv0J.js`；目前以更新後的 `index-DVu8hHQG.js` 為準。
 - `93b308c fix: 打磨今日心情封測入口`
   - 今日心情第一屏改為手機優先 2×2 狀態卡；首次導覽新增「先試一次」，可直接進入今日心情。
 - `1c4a634 fix: 未登入 Coach 顯示登入提示`
   - 未登入使用者點 Coach 或 7 日小陪跑時不再呼叫 production `coach` API；會直接提示先登入。
   - 未登入提交 LINE 綁定碼也不再送出 claim request。
-  - 先前 PWA production 曾確認 live bundle `index-3JqI49Ya.js`；目前以更新後的 `index-BIi8Bv0J.js` 為準。
+  - 先前 PWA production 曾確認 live bundle `index-3JqI49Ya.js`；目前以更新後的 `index-DVu8hHQG.js` 為準。
 - `34b549c fix: 補 Coach 首屏 LINE 入口`
   - Coach 開場卡新增「也可以用 LINE 對話」入口，直接露出 `@980pqrhn` 與綁定步驟。
-  - 舊 PWA production 曾確認 live bundle `index-C0yGyERj.js`；目前以更新後的 `index-BIi8Bv0J.js` 為準。
+  - 舊 PWA production 曾確認 live bundle `index-C0yGyERj.js`；目前以更新後的 `index-DVu8hHQG.js` 為準。
 - `0ef72fd fix: 整合 Debug Review 修正`
   - 合入 Claude 安全修正與 Debug / Review 修正。
   - 包含 LINE 危機字詞、production 簽名強制、InsForge adapter 結構化日誌、登入使用者 `ruler_logs` 同步、深色模式對比、成就檢查規則與相關測試。
@@ -154,6 +174,6 @@ git diff --check
 ## 近期下一步
 
 1. 找 1 位非開發者用手機完整試玩：今日心情 → 保存 → 記錄回顧，再試 `#coach` 的登入後 7 日小陪跑。
-2. 觀察使用者是否理解「先記一筆」與「阿念推動我生活一點點」，以及「回來看一眼，不是成績單」。
+2. 觀察使用者是否理解強度 8/10 安全確認、外在接地替代路徑，以及 SOS「看見安全的一步」不是成績單。
 3. 驗證 production schema / Edge Function 部署後，再做一次 live API smoke，確認 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces` 都有最小資料流。
 4. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。

@@ -13,18 +13,19 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`，以及安全分流修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`、安全分流修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`，以及交接文件同步 `23a8b63 docs: 同步安全分流部署狀態`。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
-- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-3JqI49Ya.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
+- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；刪帳清除範圍已納入 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，並已回讀線上 function code 確認。
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；對話事件持久化不再 fire-and-forget，response metadata 會標記 `conversationPersisted` 與失敗角色。
 - 2026-05-16 13:20 已再次部署 InsForge `coach` Edge Function；mutating tool args 由 deterministic code 驗證後才可建立或回報小行動。
 - 2026-05-16 16:50 已重新部署 PWA；App onboarding 第 3 步改用情緒心理學科普常用的「身體喚醒程度」與「感受愉悅度」說法，live bundle 已切到 `index-DdGwYiyB.js`。
 - 2026-05-16 22:29 已重新部署 PWA；今日心情封測打磨已上 production，live bundle 已切到 `index-BIi8Bv0J.js`，Zeabur deployment 已切到 `RUNNING`。
 - 2026-05-16 23:07 已重新部署 PWA 與 InsForge `coach`；安全分流修補已上 production，live bundle 已切到 `index-DVu8hHQG.js`，`coach` 線上 code 已回讀確認包含 final response safety guard。
+- 2026-05-16 深夜已更新 `AGENTS.md`、`memory.md`、`CHANGELOG.md`：`AGENTS.md` 補入今日心情 / SOS 安全規格，`memory.md` 標明 `main` 最新 `23a8b63` 為 docs-only、production app build 為 `f6340e4`，`CHANGELOG.md` 移除舊 bundle 摘要殘留。
 
 ## 下一步
 
@@ -35,6 +36,7 @@
 ## [V1.0.0] - 2026-05-16 — 今日心情安全分流與 SOS 收束
 
 - 目前狀態：分支 `codex/clinical-ai-safety-polish-20260516` 已快轉合入 `main` / `origin/main`，commit `f6340e4`，並已部署到 PWA production；live bundle 為 `index-DVu8hHQG.js`。
+- 交接狀態：`23a8b63 docs: 同步安全分流部署狀態` 已補齊 `AGENTS.md`、`memory.md`、`CHANGELOG.md`；此 commit 為 docs-only，production app bundle 不變。
 - 今日心情喚名時，若選到高風險情緒或強度 8/10 以上，會先顯示「先確認安全」彈窗；未確認安全前不保存記錄，彈窗提供 119 / 110、安心專線 1925、生命線 1909，以及「我現在安全，保存這筆記錄 / 先去找阿念做 SOS」。
 - 強度頁新增 8/10 以上的安全提示；完成頁在高強度情緒下改為低慶祝的「已記下這一刻」，避免把沉重情緒當成一般任務完成來慶祝。
 - 身體掃描新增「改做外在接地」替代路徑，使用者可用看見 5 個物品、聽見 3 種聲音、感覺雙腳踩地，跳過內在身體掃描後進入情緒標記。
