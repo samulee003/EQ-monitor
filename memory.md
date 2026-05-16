@@ -8,7 +8,6 @@
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
 - `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正` 與 Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`；其後若只有 docs-only deployment note commit，不改變線上 app bundle。
-- 2026-05-16 本地未部署變更：Coach 開場卡已補「也可以用 LINE 對話」入口，直接顯示 `@980pqrhn` 與「加入後輸入綁定」步驟；已跑 `npm run test:run -- src/pages/CoachPage.test.tsx` 28 tests passed。部署前 production 仍是 `0ef72fd`。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`

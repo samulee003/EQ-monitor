@@ -26,11 +26,12 @@
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
-## [Unreleased] - 2026-05-16 — Coach 首屏 LINE 對話入口補強
+## [V1.0.0] - 2026-05-16 — Coach 首屏 LINE 對話入口補強
 
 - Coach 開場卡新增「也可以用 LINE 對話」輕量入口，直接顯示 LINE Basic ID `@980pqrhn` 與「輸入綁定」步驟，避免使用者必須滑到下方綁定表單才知道 LINE 可作為對話入口。
 - 下方原本的 LINE 官方帳號、加好友連結與 6 位綁定碼表單保留，讓已拿到綁定碼的使用者仍可完成同步。
 - 本機驗證：`npm run test:run -- src/pages/CoachPage.test.tsx` → 28 tests passed。
+- Production 驗證：PWA deployment `6a07f08abbc71468fc733ca9` 曾以 `34b549c` 跑到 `RUNNING`；後續 docs-only deployment 不改變 app bundle，live bundle 維持 `index-C0yGyERj.js`。
 
 ---
 

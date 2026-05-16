@@ -41,6 +41,43 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
 - 改 Agentic Action Loop 時要同步 `server/insforge/functions/_shared/coachActionLoop.ts`、`server/insforge/functions/coach-simple.ts`、`server/insforge/schema/011_coach_action_loop.sql`、`src/lib/adk/types.ts`、`src/pages/CoachPage.tsx` 與相關測試。
 - 根目錄 `memory.md` 是短交接板；`CHANGELOG.md` 是產品變更紀錄；兩者要在重要命名、部署、驗證狀態變更後同步更新。
 
+## 防漂移工作規範
+
+> 這段是硬規範：Codex / Claude / 其他 agent 不可以把整合、部署、版本判斷交給使用者。使用者不是 release manager；agent 必須把狀態收斂成單一可信版本。
+
+### 接手前必查
+
+開始任何開發、debug、review、上線修正前，先確認四件事：
+
+1. `git status --short --branch`：確認目前 branch 與是否有未提交修改。
+2. `git log --oneline --decorate -5` 和 `git fetch origin` 後的 `origin/main`：確認主線最新 commit。
+3. 是否存在 `claude/`、`codex/` 或其他工作分支含未合入修正。
+4. Production 實際跑哪版：
+   - PWA：抓 `https://today-mood.zeabur.app` 的 `index-*.js` bundle，與本機 build 或最新部署紀錄比對。
+   - Bot：查 `https://imxin-bot.zeabur.app/health`，確認 `adapter=insforge`，必要時用 uptime 判斷是否重啟。
+
+### 任務完成定義
+
+除非使用者明確說「只要分析，不要改」，否則開發任務完成前必須做到：
+
+1. 修正已落在正確分支，不留散落未提交修改。
+2. 相關測試已跑，至少包含 touched area focused tests；上線相關改動還要跑 build / lint / E2E 或清楚說明未跑原因。
+3. 需要上線時：已 push 到 `main` 或指定 release branch，並完成 Zeabur deployment。
+4. 不能把「部署指令成功」當完成；必須做 live smoke：
+   - PWA live bundle 與預期一致。
+   - Bot `/health` 正常，且 webhook 無簽名回 `401`。
+   - 若有新 UI 入口，至少用 E2E 或 browser smoke 確認 live 頁面可見。
+5. `memory.md` 與 `CHANGELOG.md` 已同步真實狀態，不能留下「本地未部署」「待合入」等過期句子。
+6. 最後確認 `git status --short --branch` 乾淨，並在回覆中用人話說明：本地、GitHub、production、交接文件是否已同步。
+
+### 多 agent 整合規則
+
+- 如果 Claude / Codex 同時動過 repo，不能只列出分支差異給使用者決定；接手 agent 要建立或使用一條整合線，把可保留修正合到一起。
+- 如果 production 跑的是某個 agent 分支，但 `main` 沒有該修正，這是 P0 drift。修正順序是：合回 `main` → push → deploy → live smoke → 更新 `memory.md` / `CHANGELOG.md`。
+- 如果文件、GitHub、production 三者互相矛盾，以 live production 與最新 git 狀態為準，並立即修文件。
+- 若使用者明確說「同步到最新」「已經上線，幫我整理」「修 live bug」，可視為授權執行 push / deploy / live smoke；但仍不得做破壞性資料操作或資料庫遷移，除非另行確認。
+- 若本次只做本機修改而不部署，最終回覆必須明講「尚未上 production」，並把 `memory.md` 標成未部署狀態。
+
 ## 常用驗證
 
 ```bash
@@ -54,12 +91,10 @@ cd server && npm run lint
 git diff --check
 ```
 
-目前最新本地基線（2026-05-15）：
+目前最新本地基線（2026-05-16）：
 
-- Frontend tests: 40 files / 368 tests passed
-- Server tests: 17 files / 164 tests passed
-- Agentic focused frontend tests: 3 files / 30 tests passed
-- Agentic focused server tests: 3 files / 41 tests passed
+- Frontend tests: 44 files / 393 tests passed
+- Server tests: 19 files / 210 tests passed
 - E2E: 4 passed
 - Frontend lint: 0 errors / 31 warnings
 - Server lint: 0 errors / 24 warnings
@@ -68,6 +103,12 @@ git diff --check
 
 ## 最新主線
 
+- `34b549c fix: 補 Coach 首屏 LINE 入口`
+  - Coach 開場卡新增「也可以用 LINE 對話」入口，直接露出 `@980pqrhn` 與綁定步驟。
+  - PWA production 已確認 live bundle `index-C0yGyERj.js`。
+- `0ef72fd fix: 整合 Debug Review 修正`
+  - 合入 Claude 安全修正與 Debug / Review 修正。
+  - 包含 LINE 危機字詞、production 簽名強制、InsForge adapter 結構化日誌、登入使用者 `ruler_logs` 同步、深色模式對比、成就檢查規則與相關測試。
 - `baa6275 docs: 同步 Agentic Action Loop 實作計畫`
   - `origin/main` 已包含 Agentic Action Loop MVP 相關 commits。
   - 新增 `CONTEXT.md`、Agentic Action Loop ADR、7 日推動感規格與 implementation plan。
