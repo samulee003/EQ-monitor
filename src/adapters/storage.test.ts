@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   auth,
   logs,
@@ -12,6 +12,20 @@ import { type Quadrant } from '../data/emotionData';
 import { type UserProgress } from '../types/HabitTypes';
 import { _injectMasterKey, _resetKeyCache } from '../utils/crypto';
 
+const insforgeMocks = vi.hoisted(() => ({
+    from: vi.fn(),
+    insert: vi.fn().mockResolvedValue({ error: null }),
+    upsert: vi.fn().mockResolvedValue({ error: null }),
+}));
+
+vi.mock('@/lib/insforge/client', () => ({
+    insforge: {
+        database: {
+            from: insforgeMocks.from,
+        },
+    },
+}));
+
 const TEST_MASTER_KEY = Array.from(crypto.getRandomValues(new Uint8Array(32)))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -21,6 +35,12 @@ describe('storage', () => {
         _resetKeyCache();
         _injectMasterKey(TEST_MASTER_KEY);
         clearLogsCache();
+        insforgeMocks.insert.mockResolvedValue({ error: null });
+        insforgeMocks.upsert.mockResolvedValue({ error: null });
+        insforgeMocks.from.mockImplementation((table: string) => ({
+            insert: table === 'ruler_logs' ? insforgeMocks.insert : vi.fn().mockResolvedValue({ error: null }),
+            upsert: table === 'coach_context' ? insforgeMocks.upsert : vi.fn().mockResolvedValue({ error: null }),
+        }));
         await initialize();
     });
 
@@ -128,6 +148,9 @@ describe('storage', () => {
             _resetKeyCache();
             _injectMasterKey(TEST_MASTER_KEY);
             clearLogsCache();
+            insforgeMocks.insert.mockClear();
+            insforgeMocks.upsert.mockClear();
+            insforgeMocks.from.mockClear();
             await initialize();
             await auth.signUp('loguser@example.com', '[REDACTED]');
         });
@@ -146,6 +169,33 @@ describe('storage', () => {
 
             expect(log.id).toBeTruthy();
             expect(log.emotions[0].id).toBe('happy');
+        });
+
+        it('登入使用者新增日誌時應同步寫入 InsForge ruler_logs', async () => {
+            storageService.setUserId('0f6a5a96-7e44-4db2-b533-ec26b5b92f12');
+
+            await logs.create({
+                emotions: [{ id: 'happy', name: '開心', quadrant: 'yellow' as Quadrant, energy: 3, pleasantness: 3 }],
+                intensity: 6,
+                bodyScan: null,
+                understanding: null,
+                expressing: null,
+                regulating: null,
+                postMood: '',
+                timestamp: '2026-05-15T10:00:00.000Z',
+                isFullFlow: false,
+            });
+
+            await vi.waitFor(() => {
+                expect(insforgeMocks.from).toHaveBeenCalledWith('ruler_logs');
+                expect(insforgeMocks.insert).toHaveBeenCalledWith([
+                    expect.objectContaining({
+                        user_id: '0f6a5a96-7e44-4db2-b533-ec26b5b92f12',
+                        intensity: 6,
+                        created_at: '2026-05-15T10:00:00.000Z',
+                    }),
+                ]);
+            });
         });
 
         it('應列出日誌並按時間降序排列', async () => {

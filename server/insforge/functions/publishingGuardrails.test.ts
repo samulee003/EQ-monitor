@@ -20,6 +20,24 @@ describe('發布前 P0/P1 守門', () => {
     }
   });
 
+  it('achievement-checker 必須覆蓋前台所有可見成就規則', () => {
+    const source = readProjectFile('server/insforge/functions/achievement-checker.ts');
+
+    for (const key of [
+      'first_log',
+      'streak_3',
+      'streak_7',
+      'streak_30',
+      'emotions_10',
+      'full_ruler_5',
+      'repair_master',
+      'gentle_awareness',
+      'self_compassion',
+    ]) {
+      expect(source).toContain(`key: '${key}'`);
+    }
+  });
+
   it('production coach 必須驗證 Authorization 所屬 userId，避免任意 userId 查詢', () => {
     const source = readProjectFile('server/insforge/functions/coach-simple.ts');
 

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>今心 APP 產品特色海報</title>
+    <style>
+      :root {
+        --ink: #272625;
+        --muted: #625d56;
+        --deep: #0c5f55;
+        --line: rgba(52, 46, 38, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 1080px;
+        height: 1350px;
+        overflow: hidden;
+        background: #f7f0e4;
+        color: var(--ink);
+        font-family:
+          "PingFang TC",
+          "Noto Sans TC",
+          "Heiti TC",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+      }
+
+      .poster {
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        padding: 68px 78px;
+        isolation: isolate;
+      }
+
+      .poster::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background-image: url("../../public/marketing/jinxin-poster-background-watercolor.png");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .poster::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+          linear-gradient(90deg, rgba(255, 252, 245, 0.9) 0%, rgba(255, 252, 245, 0.64) 54%, rgba(255, 252, 245, 0.28) 100%),
+          linear-gradient(180deg, rgba(255, 252, 245, 0.3), rgba(255, 252, 245, 0.08));
+      }
+
+      .edge {
+        position: absolute;
+        inset: 30px;
+        border: 1px solid rgba(52, 46, 38, 0.11);
+        border-radius: 42px;
+        pointer-events: none;
+      }
+
+      header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .brand img {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+      }
+
+      .brand span {
+        font-size: 46px;
+        font-weight: 850;
+        letter-spacing: 0;
+      }
+
+      .tag {
+        color: #587056;
+        font-size: 21px;
+        font-weight: 800;
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        width: 690px;
+        margin-top: 118px;
+      }
+
+      .kicker {
+        margin: 0 0 22px;
+        color: var(--deep);
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 95px;
+        font-weight: 900;
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        width: 620px;
+        margin: 34px 0 0;
+        color: #5d5852;
+        font-size: 31px;
+        font-weight: 700;
+        line-height: 1.52;
+        letter-spacing: 0;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 23px 44px;
+        width: 680px;
+        margin-top: 84px;
+        padding-top: 34px;
+        border-top: 1px solid var(--line);
+      }
+
+      .feature {
+        display: grid;
+        grid-template-columns: 62px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .number {
+        color: rgba(12, 95, 85, 0.72);
+        font-size: 40px;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .feature b {
+        display: block;
+        font-size: 27px;
+        line-height: 1.18;
+      }
+
+      .feature span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 18px;
+        font-weight: 750;
+        line-height: 1.42;
+      }
+
+      .coach-line {
+        position: absolute;
+        left: 78px;
+        bottom: 284px;
+        width: 555px;
+        padding-top: 26px;
+        border-top: 1px solid var(--line);
+        color: var(--deep);
+        font-size: 30px;
+        font-weight: 900;
+        line-height: 1.42;
+      }
+
+      .coach-line span {
+        display: block;
+        margin-top: 10px;
+        color: #625d56;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1.48;
+      }
+
+      .qr-card {
+        position: absolute;
+        right: 78px;
+        bottom: 78px;
+        z-index: 2;
+        width: 304px;
+        padding: 20px 18px 22px;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        border-radius: 34px;
+        background: rgba(255, 253, 247, 0.9);
+        box-shadow: 0 18px 46px rgba(65, 54, 39, 0.11);
+        text-align: center;
+      }
+
+      .qr-card img {
+        width: 222px;
+        height: 222px;
+        object-fit: contain;
+        border-radius: 20px;
+        background: #fff;
+      }
+
+      .qr-card b {
+        display: block;
+        margin-top: 13px;
+        font-size: 23px;
+        line-height: 1.15;
+      }
+
+      .qr-card span {
+        display: block;
+        margin-top: 6px;
+        color: #6a655f;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .boundary {
+        position: absolute;
+        left: 78px;
+        bottom: 78px;
+        z-index: 1;
+        width: 560px;
+        color: rgba(39, 38, 37, 0.74);
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="poster" aria-label="今心 APP 產品特色海報">
+      <div class="edge"></div>
+
+      <header>
+        <div class="brand">
+          <img src="../../Logo_去背.png" alt="" />
+          <span>今心 APP</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <p class="kicker">知心四式 × AI 教練「阿念」</p>
+          <h1>情緒上來時，<br />先回到此刻。</h1>
+          <p class="lead">看見感受、安住自己，再選一個今天做得到的小行動。</p>
+        </section>
+
+        <section class="features" aria-label="今心產品特色">
+          <div class="feature">
+            <div class="number">01</div>
+            <div><b>心照</b><span>先看清此刻的狀態。</span></div>
+          </div>
+          <div class="feature">
+            <div class="number">02</div>
+            <div><b>喚名</b><span>讓模糊的感受有名字。</span></div>
+          </div>
+          <div class="feature">
+            <div class="number">03</div>
+            <div><b>安神</b><span>讓需要有地方安放。</span></div>
+          </div>
+          <div class="feature">
+            <div class="number">04</div>
+            <div><b>動念</b><span>選一個可做的小行動。</span></div>
+          </div>
+        </section>
+      </main>
+
+      <section class="coach-line" aria-label="AI 教練阿念">
+        AI 教練「阿念」會慢慢看懂你的節奏
+        <span>陪你判斷此刻適合記錄、呼吸、聊一聊，還是先安定。</span>
+      </section>
+
+      <p class="boundary">今心不是心理治療或醫療建議；只是陪你在今天，好好回到自己的心。</p>
+
+      <section class="qr-card" aria-label="掃描開始練習">
+        <img src="../../QR code for today mood .png" alt="" />
+        <b>掃描開始練習</b>
+        <span>today-mood.zeabur.app</span>
+      </section>
+    </section>
+  </body>
+</html>

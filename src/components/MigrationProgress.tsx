@@ -37,10 +37,10 @@ const MigrationProgress: React.FC<Props> = ({ userId, onComplete }) => {
     }}>
       <div style={{ fontSize: 48 }}>☁️</div>
       <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--text, #fff)' }}>
-        正在備份你的記錄
+        正在同步你的記錄
       </div>
       <div style={{ fontSize: 13, color: 'var(--text-muted, #888)', textAlign: 'center' }}>
-        把本機 {total} 筆情緒記錄安全地傳送到雲端
+        把本機 {total} 筆情緒記錄傳送到雲端，讓阿念能接續你的脈絡
       </div>
       {error ? (
         <div style={{ color: '#C58B8A', fontSize: 13 }}>{error}（已跳過，稍後可重試）</div>

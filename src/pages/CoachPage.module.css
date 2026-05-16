@@ -849,3 +849,127 @@
     width: 64px;
   }
 }
+
+:global([data-theme="dark"]) .coachPage {
+  background: var(--bg-color);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .header {
+  background: rgba(26, 26, 26, 0.94);
+  border-bottom-color: var(--glass-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .headerIconButton,
+:global([data-theme="dark"]) .coachAvatar {
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .headerTitle,
+:global([data-theme="dark"]) .agentIntro,
+:global([data-theme="dark"]) .agentIntro h2,
+:global([data-theme="dark"]) .modelBubble,
+:global([data-theme="dark"]) .bindingPanel,
+:global([data-theme="dark"]) .bindingTitle,
+:global([data-theme="dark"]) .bindingAccount,
+:global([data-theme="dark"]) .bindingInput,
+:global([data-theme="dark"]) .errorMessage,
+:global([data-theme="dark"]) .breathingText,
+:global([data-theme="dark"]) .bottomNav .activeNav {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .dateDivider span,
+:global([data-theme="dark"]) .agentDescription,
+:global([data-theme="dark"]) .agentFeature span,
+:global([data-theme="dark"]) .bindingHint,
+:global([data-theme="dark"]) .bottomNav button {
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .agentIntro {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(36, 36, 36, 0.84)),
+    linear-gradient(135deg, rgba(197, 139, 138, 0.12), rgba(151, 166, 180, 0.12));
+  border-color: var(--glass-border);
+  box-shadow: var(--shadow-luxe);
+}
+
+:global([data-theme="dark"]) .agentFeature,
+:global([data-theme="dark"]) .momentumPanel,
+:global([data-theme="dark"]) .scenarioPanel,
+:global([data-theme="dark"]) .bindingAccount,
+:global([data-theme="dark"]) .breathingCard {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--divider);
+}
+
+:global([data-theme="dark"]) .modelBubble,
+:global([data-theme="dark"]) .bindingPanel,
+:global([data-theme="dark"]) .bindingInput,
+:global([data-theme="dark"]) .bottomNav .activeNav {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border);
+}
+
+:global([data-theme="dark"]) .startActionButton,
+:global([data-theme="dark"]) .momentumGoal,
+:global([data-theme="dark"]) .scenarioButton,
+:global([data-theme="dark"]) .quickReply {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--divider);
+}
+
+:global([data-theme="dark"]) .startActionButton:hover,
+:global([data-theme="dark"]) .momentumGoal:hover,
+:global([data-theme="dark"]) .scenarioButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(151, 166, 180, 0.34);
+}
+
+:global([data-theme="dark"]) .quickReply:hover,
+:global([data-theme="dark"]) .momentumPrimary,
+:global([data-theme="dark"]) .bindingButton,
+:global([data-theme="dark"]) .bindingAddFriendLink,
+:global([data-theme="dark"]) .retryButton,
+:global([data-theme="dark"]) .breathingButton {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-color);
+}
+
+:global([data-theme="dark"]) .bindingInput::placeholder {
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .bindingInput:focus {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(78, 168, 222, 0.2);
+}
+
+:global([data-theme="dark"]) .bindingMessage {
+  color: #c8ddbd;
+}
+
+:global([data-theme="dark"]) .inputDock {
+  background: linear-gradient(to top, rgba(26, 26, 26, 1) 68%, rgba(26, 26, 26, 0));
+}
+
+:global([data-theme="dark"]) .bottomNav {
+  background: rgba(36, 36, 36, 0.88);
+  border-top-color: var(--glass-border);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .breathingOverlay {
+  background: rgba(26, 26, 26, 0.76);
+}
+
+:global([data-theme="dark"]) .errorBanner {
+  background: rgba(95, 39, 39, 0.9);
+  border-color: rgba(255, 107, 107, 0.32);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.12);
+}

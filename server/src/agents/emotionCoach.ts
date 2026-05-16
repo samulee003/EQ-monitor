@@ -16,7 +16,7 @@ export function createEmotionCoachAgent(model: BaseLlm | string) {
   return new LlmAgent({
     name: 'EmotionCoachAgent',
     model,
-    description: '今心 APP 的主動 AI 情緒教練，依知心四式提供陪伴、洞察與下一步。',
+    description: '今心 APP 的阿念教練，依知心四式提供陪伴、洞察與下一步。',
     globalInstruction: buildEmotionCoachGlobalInstruction(),
     instruction: buildEmotionCoachInstruction(),
     tools: [rulerDataTool, saveRulerLogTool, getEmotionTrendTool, triggerActionTool],

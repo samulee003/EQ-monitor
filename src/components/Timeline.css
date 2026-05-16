@@ -1,6 +1,58 @@
 .timeline-loading-hero { margin-bottom: 2rem; }
 .timeline-loading-list { display: flex; flex-direction: column; gap: 1.25rem; }
 
+:root {
+    --timeline-card-bg: rgba(255,255,255,0.24);
+    --timeline-card-border: rgba(255,255,255,0.34);
+    --timeline-panel-bg: rgba(255,255,255,0.24);
+    --timeline-panel-border: rgba(255,255,255,0.38);
+    --timeline-chip-bg: rgba(255,255,255,0.24);
+    --timeline-chip-border: var(--glass-border);
+    --timeline-muted-text: var(--text-secondary);
+    --timeline-soft-text: var(--text-secondary);
+    --timeline-kicker-bg: rgba(255,255,255,0.38);
+    --timeline-kicker-border: rgba(255,255,255,0.5);
+    --timeline-secondary-button-bg: rgba(255,255,255,0.32);
+    --timeline-secondary-button-border: rgba(170, 176, 155, 0.75);
+    --timeline-secondary-button-hover: rgba(255,255,255,0.44);
+    --timeline-secondary-button-text: var(--text-primary);
+    --timeline-empty-hero-bg:
+        radial-gradient(circle at top left, rgba(213, 193, 165, 0.22), transparent 35%),
+        radial-gradient(circle at right center, rgba(151, 166, 180, 0.2), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.18));
+    --timeline-hero-bg:
+        radial-gradient(circle at top left, rgba(213, 193, 165, 0.28), transparent 30%),
+        radial-gradient(circle at right center, rgba(151, 166, 180, 0.22), transparent 32%),
+        radial-gradient(circle at bottom left, rgba(170, 176, 155, 0.18), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0.18));
+}
+
+[data-theme="dark"] {
+    --timeline-card-bg: rgba(255,255,255,0.08);
+    --timeline-card-border: rgba(255,255,255,0.14);
+    --timeline-panel-bg: rgba(255,255,255,0.09);
+    --timeline-panel-border: rgba(255,255,255,0.18);
+    --timeline-chip-bg: rgba(255,255,255,0.08);
+    --timeline-chip-border: rgba(255,255,255,0.14);
+    --timeline-muted-text: rgba(232, 232, 232, 0.92);
+    --timeline-soft-text: rgba(232, 232, 232, 0.78);
+    --timeline-kicker-bg: rgba(255,255,255,0.1);
+    --timeline-kicker-border: rgba(255,255,255,0.16);
+    --timeline-secondary-button-bg: rgba(255,255,255,0.1);
+    --timeline-secondary-button-border: rgba(170, 176, 155, 0.48);
+    --timeline-secondary-button-hover: rgba(255,255,255,0.16);
+    --timeline-secondary-button-text: rgba(232, 232, 232, 0.94);
+    --timeline-empty-hero-bg:
+        radial-gradient(circle at top left, rgba(213, 193, 165, 0.18), transparent 35%),
+        radial-gradient(circle at right center, rgba(151, 166, 180, 0.16), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+    --timeline-hero-bg:
+        radial-gradient(circle at top left, rgba(213, 193, 165, 0.18), transparent 30%),
+        radial-gradient(circle at right center, rgba(151, 166, 180, 0.16), transparent 32%),
+        radial-gradient(circle at bottom left, rgba(170, 176, 155, 0.12), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+}
+
 .timeline-shell {
     position: relative;
     display: flex;
@@ -13,10 +65,7 @@
     padding: 3.5rem 1.5rem;
     border-radius: 32px;
     text-align: center;
-    background:
-        radial-gradient(circle at top left, rgba(213, 193, 165, 0.22), transparent 35%),
-        radial-gradient(circle at right center, rgba(151, 166, 180, 0.2), transparent 32%),
-        linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.18));
+    background: var(--timeline-empty-hero-bg);
     border: 1px solid var(--glass-border);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
 }
@@ -53,11 +102,11 @@
     display: inline-flex;
     padding: 0.45rem 0.9rem;
     border-radius: 999px;
-    background: rgba(255,255,255,0.38);
-    border: 1px solid rgba(255,255,255,0.5);
+    background: var(--timeline-kicker-bg);
+    border: 1px solid var(--timeline-kicker-border);
     font-size: 0.78rem;
     letter-spacing: 0.08em;
-    color: var(--text-secondary);
+    color: var(--timeline-muted-text);
     margin-bottom: 1rem;
 }
 .timeline-empty-hero h2 {
@@ -73,7 +122,7 @@
     z-index: 1;
     max-width: 34rem;
     margin: 0 auto;
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
     line-height: 1.75;
 }
 .timeline-empty-feature-grid {
@@ -88,8 +137,8 @@
     text-align: left;
     padding: 1rem;
     border-radius: 22px;
-    background: rgba(255,255,255,0.26);
-    border: 1px solid rgba(255,255,255,0.38);
+    background: var(--timeline-panel-bg);
+    border: 1px solid var(--timeline-panel-border);
     backdrop-filter: blur(18px);
 }
 .timeline-empty-feature strong {
@@ -99,7 +148,7 @@
 }
 .timeline-empty-feature span {
     display: block;
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
     font-size: 0.88rem;
     line-height: 1.6;
 }
@@ -112,9 +161,9 @@
     min-height: 52px;
     padding: 0.9rem 1.35rem;
     border-radius: 999px;
-    border: 1px dashed rgba(170, 176, 155, 0.75);
-    background: rgba(255,255,255,0.32);
-    color: var(--text-primary);
+    border: 1px dashed var(--timeline-secondary-button-border);
+    background: var(--timeline-secondary-button-bg);
+    color: var(--timeline-secondary-button-text);
     cursor: pointer;
     transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 }
@@ -144,7 +193,7 @@
     transform: translateY(-1px);
 }
 .timeline-import-prompt:hover {
-    background: rgba(255,255,255,0.44);
+    background: var(--timeline-secondary-button-hover);
     border-color: rgba(170, 176, 155, 1);
 }
 .timeline-import-icon { font-size: 1rem; }
@@ -182,11 +231,7 @@
     gap: 1rem;
     padding: 1.35rem;
     border-radius: 32px;
-    background:
-        radial-gradient(circle at top left, rgba(213, 193, 165, 0.28), transparent 30%),
-        radial-gradient(circle at right center, rgba(151, 166, 180, 0.22), transparent 32%),
-        radial-gradient(circle at bottom left, rgba(170, 176, 155, 0.18), transparent 26%),
-        linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0.18));
+    background: var(--timeline-hero-bg);
     border: 1px solid var(--glass-border);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
 }
@@ -199,11 +244,11 @@
     display: inline-flex;
     padding: 0.45rem 0.9rem;
     border-radius: 999px;
-    background: rgba(255,255,255,0.34);
-    border: 1px solid rgba(255,255,255,0.48);
+    background: var(--timeline-kicker-bg);
+    border: 1px solid var(--timeline-kicker-border);
     font-size: 0.78rem;
     letter-spacing: 0.08em;
-    color: var(--text-secondary);
+    color: var(--timeline-muted-text);
     margin-bottom: 1rem;
 }
 .timeline-hero-copy h2 {
@@ -215,7 +260,7 @@
 .timeline-hero-copy p {
     margin: 0;
     max-width: 38rem;
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
     line-height: 1.75;
 }
 .timeline-hero-panel {
@@ -225,8 +270,8 @@
     gap: 0.9rem;
     padding: 1rem;
     border-radius: 26px;
-    background: rgba(255,255,255,0.24);
-    border: 1px solid rgba(255,255,255,0.38);
+    background: var(--timeline-panel-bg);
+    border: 1px solid var(--timeline-panel-border);
     backdrop-filter: blur(18px);
 }
 .timeline-hero-metric {
@@ -240,7 +285,7 @@
 .timeline-hero-label {
     display: block;
     margin-bottom: 0.25rem;
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
     font-size: 0.82rem;
 }
 .timeline-hero-metric strong {
@@ -273,9 +318,9 @@
     color: var(--bg-color);
 }
 .timeline-action.secondary {
-    border: 1px dashed rgba(170, 176, 155, 0.8);
-    background: rgba(255,255,255,0.34);
-    color: var(--text-primary);
+    border: 1px dashed var(--timeline-secondary-button-border);
+    background: var(--timeline-secondary-button-bg);
+    color: var(--timeline-secondary-button-text);
 }
 .timeline-chip-row {
     display: flex;
@@ -294,8 +339,8 @@
     padding: 0.75rem 1rem;
     border-radius: 999px;
     border: 1px solid var(--glass-border);
-    background: rgba(255,255,255,0.24);
-    color: var(--text-secondary);
+    background: var(--timeline-chip-bg);
+    color: var(--timeline-soft-text);
     backdrop-filter: blur(18px);
 }
 .timeline-chip.active {
@@ -318,9 +363,9 @@
     gap: 0.75rem;
     padding: 0.9rem 1rem;
     border-radius: 22px;
-    background: rgba(255,255,255,0.22);
+    background: var(--timeline-chip-bg);
     border: 1px solid var(--glass-border);
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
 }
 .timeline-inline-import-note p {
     margin: 0;
@@ -390,8 +435,8 @@
     overflow: hidden;
     padding: 1.2rem;
     border-radius: 28px;
-    background: rgba(255,255,255,0.24);
-    border: 1px solid rgba(255,255,255,0.34);
+    background: var(--timeline-card-bg);
+    border: 1px solid var(--timeline-card-border);
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(18px);
 }
@@ -452,7 +497,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.35rem;
-    color: var(--text-secondary);
+    color: var(--timeline-soft-text);
     font-size: 0.84rem;
     line-height: 1.6;
 }
@@ -471,8 +516,8 @@
     justify-content: center;
     border: none;
     border-radius: 999px;
-    background: rgba(255,255,255,0.3);
-    color: var(--text-secondary);
+    background: var(--timeline-chip-bg);
+    color: var(--timeline-soft-text);
     cursor: pointer;
     transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
@@ -496,16 +541,16 @@
     min-height: 30px;
     padding: 0.35rem 0.8rem;
     border-radius: 999px;
-    background: rgba(255,255,255,0.28);
-    border: 1px solid rgba(255,255,255,0.34);
-    color: var(--text-secondary);
+    background: var(--timeline-chip-bg);
+    border: 1px solid var(--timeline-card-border);
+    color: var(--timeline-soft-text);
     font-size: 0.78rem;
 }
 .timeline-story-block {
     border-radius: 22px;
     padding: 1rem;
-    background: rgba(255,255,255,0.28);
-    border: 1px solid rgba(255,255,255,0.36);
+    background: var(--timeline-panel-bg);
+    border: 1px solid var(--timeline-panel-border);
 }
 .card-note {
     margin: 0;

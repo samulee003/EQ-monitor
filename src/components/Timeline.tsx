@@ -5,6 +5,7 @@ import { dataAdapter } from '../adapters';
 import { type ImportResult } from '../adapters/types';
 import { type RulerLogEntry } from '../types/RulerTypes';
 import { useAppStore } from '../stores/appStore';
+import { useHabit } from '../services/HabitContext';
 import ExportPanel from './ExportPanel';
 import Skeleton from './Skeleton';
 import './Timeline.css';
@@ -58,6 +59,7 @@ const Timeline: React.FC = () => {
     const [importResult, setImportResult] = useState<ImportResult | null>(null);
     const [showExport, setShowExport] = useState(false);
     const [activeFilter, setActiveFilter] = useState<TimelineFilterKey>('all');
+    const { refreshProgress } = useHabit();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const listTopRef = useRef<HTMLDivElement>(null);
 
@@ -182,6 +184,7 @@ const Timeline: React.FC = () => {
 
             if (result.success && result.imported > 0) {
                 await loadLogs();
+                await refreshProgress();
             }
         };
         reader.onerror = () => {

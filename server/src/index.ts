@@ -27,8 +27,25 @@ import coachRoutes from './routes/coach.js';
 const CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
 const CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || '';
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 if (!CHANNEL_ACCESS_TOKEN || !CHANNEL_SECRET) {
+  if (IS_PRODUCTION) {
+    // Production 不允許 demo mode — 否則 /webhook 會跳過簽名驗證，等同於對外開放接受偽造事件。
+    const missing = [
+      !CHANNEL_ACCESS_TOKEN && 'LINE_CHANNEL_ACCESS_TOKEN',
+      !CHANNEL_SECRET && 'LINE_CHANNEL_SECRET',
+    ]
+      .filter(Boolean)
+      .join(', ');
+    logger.error(
+      `CRITICAL: Required LINE credentials missing in production: ${missing}. ` +
+        'Refusing to start to prevent unsigned webhook acceptance.'
+    );
+    throw new Error(
+      `Missing required LINE credentials in production: ${missing}`
+    );
+  }
   logger.warn(
     'LINE_CHANNEL_ACCESS_TOKEN or LINE_CHANNEL_SECRET not set. ' +
       'Bot will start in demo mode (no actual LINE messaging). ' +

@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import Timeline from './Timeline';
 import { dataAdapter } from '../adapters';
 import { useAppStore } from '../stores/appStore';
@@ -7,7 +9,8 @@ import { type RulerLogEntry } from '../types/RulerTypes';
 import { type Quadrant } from '../data/emotionData';
 
 const mocks = vi.hoisted(() => ({
-    setView: vi.fn()
+    setView: vi.fn(),
+    refreshProgress: vi.fn()
 }));
 
 vi.mock('../services/LanguageContext', () => ({
@@ -29,6 +32,10 @@ vi.mock('../stores/appStore', () => ({
     useAppStore: {
         getState: () => ({ setView: mocks.setView })
     }
+}));
+
+vi.mock('../services/HabitContext', () => ({
+    useHabit: () => ({ refreshProgress: mocks.refreshProgress })
 }));
 
 const makeLog = (id: string, quadrant: Quadrant, expression: string): RulerLogEntry => ({
@@ -69,6 +76,7 @@ describe('Timeline', () => {
         });
         vi.mocked(dataAdapter.logs.delete).mockResolvedValue();
         mocks.setView.mockClear();
+        mocks.refreshProgress.mockClear();
     });
 
     afterEach(() => {
@@ -128,5 +136,13 @@ describe('Timeline', () => {
         fireEvent.click(screen.getByTestId('timeline-empty-start'));
 
         expect(useAppStore.getState().setView).toHaveBeenCalledWith('home');
+    });
+
+    it('Timeline 深色模式樣式應保留較高文字對比 token', () => {
+        const css = readFileSync(resolve(process.cwd(), 'src/components/Timeline.css'), 'utf8');
+
+        expect(css).toContain('[data-theme="dark"]');
+        expect(css).toContain('--timeline-muted-text: rgba(232, 232, 232, 0.92);');
+        expect(css).toContain('--timeline-soft-text: rgba(232, 232, 232, 0.78);');
     });
 });

@@ -64,6 +64,7 @@ server/.env
 coverage/
 
 # Playwright
+/output/
 /test-results/
 /playwright-report/
 /playwright/.cache/

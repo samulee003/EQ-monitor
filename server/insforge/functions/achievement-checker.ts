@@ -21,6 +21,9 @@ interface UserStats {
   fullFlowCount: number;
   uniqueEmotions: number;
   currentStreak: number;
+  repairCount: number;
+  gentleAwarenessCount: number;
+  selfCompassionCount: number;
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -65,6 +68,31 @@ function hasConsecutiveDays(days: string[], minDays: number): boolean {
     }
   }
   return streak >= minDays;
+}
+
+function calculateCurrentStreak(days: string[], now = new Date()): number {
+  if (days.length === 0) return 0;
+  const daySet = new Set(days);
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const yesterday = new Date(today.getTime() - 86_400_000);
+  let cursor = daySet.has(today.toISOString().slice(0, 10)) ? today : yesterday;
+  let streak = 0;
+
+  while (daySet.has(cursor.toISOString().slice(0, 10))) {
+    streak++;
+    cursor = new Date(cursor.getTime() - 86_400_000);
+  }
+
+  return streak;
+}
+
+function getSelectedStrategies(regulating: unknown): string[] {
+  const value = regulating as { selectedStrategies?: unknown; strategy?: unknown; technique?: unknown } | null;
+  if (!value || typeof value !== 'object') return [];
+  if (Array.isArray(value.selectedStrategies)) {
+    return value.selectedStrategies.filter((item): item is string => typeof item === 'string');
+  }
+  return [value.strategy, value.technique].filter((item): item is string => typeof item === 'string');
 }
 
 const CARE_MESSAGES: Record<string, string> = {
@@ -217,7 +245,7 @@ async function runCheck(client: ReturnType<typeof createClient>, userId: string)
 
   const { data: logs, error: logsError } = await client.database
     .from(uuid ? 'ruler_logs' : 'agent_ruler_logs')
-    .select('emotions, is_full_flow')
+    .select('emotions, regulating, is_full_flow, created_at')
     .eq(uuid ? 'user_id' : 'app_user_id', userId);
 
   if (logsError) return jsonResponse({ data: null, error: logsError.message }, 500);
@@ -228,29 +256,54 @@ async function runCheck(client: ReturnType<typeof createClient>, userId: string)
 
   if (streakError) return jsonResponse({ data: null, error: streakError.message }, 500);
 
-  const totalLogs = logs?.length ?? 0;
-  const fullFlowCount = (logs ?? []).filter((log) => log.is_full_flow === true).length;
+  const logRows = logs ?? [];
+  const totalLogs = logRows.length;
+  const fullFlowCount = logRows.filter((log) => log.is_full_flow === true).length;
 
   const uniqueEmotionSet = new Set<string>();
-  for (const log of logs ?? []) {
+  const logDays: string[] = [];
+  let repairCount = 0;
+  let gentleAwarenessCount = 0;
+  let selfCompassionCount = 0;
+  const repairStrategies = ['暫停卡', '修復對話'];
+  const selfCompassionStrategies = ['自我慈悲三步驟', '不完美宣言', '自我慈悲'];
+
+  for (const log of logRows) {
+    if (log.created_at) logDays.push(String(log.created_at).slice(0, 10));
     const emotions = (log.emotions ?? []) as Array<{ name?: string; id?: string }>;
     for (const emotion of emotions) {
       uniqueEmotionSet.add(emotion.name ?? emotion.id ?? 'unknown');
+    }
+    const strategies = getSelectedStrategies(log.regulating);
+    if (strategies.some((strategy) => repairStrategies.includes(strategy))) repairCount++;
+    if (strategies.some((strategy) => selfCompassionStrategies.includes(strategy))) selfCompassionCount++;
+    if (
+      emotions.some((emotion) => emotion.quadrant === 'red') &&
+      strategies.includes('暫停卡')
+    ) {
+      gentleAwarenessCount++;
     }
   }
   const stats: UserStats = {
     totalLogs,
     fullFlowCount,
     uniqueEmotions: uniqueEmotionSet.size,
-    currentStreak: streakData?.current_streak ?? 0,
+    currentStreak: streakData?.current_streak ?? calculateCurrentStreak(logDays),
+    repairCount,
+    gentleAwarenessCount,
+    selfCompassionCount,
   };
 
   const rules: AchievementRule[] = [
     { key: 'first_log', check: (s) => s.totalLogs >= 1 },
     { key: 'streak_3', check: (s) => s.currentStreak >= 3 },
     { key: 'streak_7', check: (s) => s.currentStreak >= 7 },
+    { key: 'streak_30', check: (s) => s.currentStreak >= 30 },
     { key: 'emotions_10', check: (s) => s.uniqueEmotions >= 10 },
     { key: 'full_ruler_5', check: (s) => s.fullFlowCount >= 5 },
+    { key: 'repair_master', check: (s) => s.repairCount >= 3 },
+    { key: 'gentle_awareness', check: (s) => s.gentleAwarenessCount >= 5 },
+    { key: 'self_compassion', check: (s) => s.selfCompassionCount >= 10 },
   ];
 
   if (!uuid) {

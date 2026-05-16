@@ -5,6 +5,7 @@ import SOSMode from './SOSMode';
 import QuickCheckIn, { type QuickCheckInData } from './QuickCheckIn';
 import { dataAdapter } from '../adapters';
 import { type RulerLogEntry } from '../types/RulerTypes';
+import { useHabit } from '../services/HabitContext';
 
 // 深度覺察沿用現有的 CheckInFlow
 const CheckInFlow = React.lazy(() => import('./CheckInFlow'));
@@ -16,6 +17,7 @@ const ParentHome: React.FC = () => {
     const [greeting, setGreeting] = useState('');
     const [todayCount, setTodayCount] = useState(0);
     const [streakDays, setStreakDays] = useState(0);
+    const { refreshProgress } = useHabit();
     // const { t } = useLanguage();
 
     useEffect(() => {
@@ -92,6 +94,7 @@ const ParentHome: React.FC = () => {
 
         try {
             await dataAdapter.logs.create(logEntry);
+            await refreshProgress();
             setMode('home');
         } catch (error) {
             logger.error('[ParentHome] Save failed', { error: String(error) });

@@ -427,7 +427,6 @@ export default function CoachPage() {
           onReportAction={handleReportMicroAction}
         />
 
-        {!showWelcome && (
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
             <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
@@ -476,7 +475,6 @@ export default function CoachPage() {
             </p>
           )}
         </section>
-        )}
 
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />

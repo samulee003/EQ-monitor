@@ -4,6 +4,7 @@ import { isMigrationNeeded } from '@/lib/insforge/localStorageMigration';
 import { getCoachContext } from '@/lib/insforge/coachContext';
 import { insforgeAuthService } from './InsForgeAuthService';
 import { type UserProfile } from '@/adapters/types';
+import { storageService } from '@/adapters';
 
 export interface User {
     id: string;
@@ -64,6 +65,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             try {
                 const currentUser = await insforgeAuthService.getUser();
                 if (currentUser) {
+                    storageService.setUserId(currentUser.id);
                     setUser(toContextUser(currentUser));
                 }
             } catch {
@@ -79,6 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const result = await insforgeAuthService.signIn(email, password);
         if (result.success && result.user) {
             const signedInUserId = result.user.id;
+            storageService.setUserId(signedInUserId);
             setUser(toContextUser(result.user));
             getCoachContext(signedInUserId)
                 .then(ctx => {
@@ -103,6 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ): Promise<{ success: boolean; error?: string }> => {
         const result = await insforgeAuthService.signUp(email, password, displayName);
         if (result.success && result.user) {
+            storageService.setUserId(result.user.id);
             setUser(toContextUser(result.user));
 
             // Initialize coach_context (fire-and-forget)
@@ -114,6 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const continueAsGuest = (displayName: string = '訪客用戶') => {
         const now = new Date().toISOString();
+        storageService.setUserId(null);
         setUser({
             id: `guest_${Date.now()}`,
             email: '',
@@ -131,6 +136,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // 登出即使遠端失敗，也先清除本地 UI 狀態，避免卡在已登入畫面。
             }
         }
+        storageService.setUserId(null);
         setUser(null);
     };
 

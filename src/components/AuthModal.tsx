@@ -207,7 +207,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                     required
                                 />
                                 <span>
-                                    {t('我同意將情緒輪廓備份至雲端，數據僅用於提供個人化主動教練功能，不作商業用途。')}
+                                    {t('我同意建立雲端帳號，並同步必要的情緒記錄與教練脈絡；資料只用於提供今心與阿念教練功能，不作商業用途。')}
                                     {' '}
                                     <a href="/privacy.html" target="_blank" rel="noopener noreferrer">{t('隱私聲明')}</a>
                                 </span>
@@ -218,7 +218,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMode = 'l
                                     checked={coachOptIn}
                                     onChange={e => setCoachOptIn(e.target.checked)}
                                 />
-                                <span>{t('允許主動教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）')}</span>
+                                <span>{t('允許阿念教練根據我的情緒模式主動傳送關心訊息（可隨時關閉）')}</span>
                             </label>
                         </div>
                     )}

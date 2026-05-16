@@ -20,6 +20,7 @@ import { type UserProgress } from '../types/HabitTypes';
 import { encryptData, decryptData, isEncrypted } from '../utils/crypto';
 import { hashPassword, verifyPassword, isLegacyHash } from '../utils/passwordHash';
 import { upsertCoachContext, buildCoachContextPatch } from '@/lib/insforge/coachContext';
+import { insforge } from '@/lib/insforge/client';
 
 // ============================================
 // 工具函數
@@ -41,6 +42,30 @@ const safeParse = <T>(json: string | null, fallback: T): T => {
 
 const userKey = (base: string, uid?: string | null): string =>
   uid ? `${base}_${uid}` : base;
+
+const isUuid = (value: string | null): value is string =>
+  Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value));
+
+const clampIntensity = (value: number): number =>
+  Math.min(10, Math.max(1, Math.round(value || 1)));
+
+const toCloudRulerLogRow = (userId: string, log: RulerLogEntry) => {
+  const now = new Date().toISOString();
+  return {
+    user_id: userId,
+    emotions: log.emotions ?? [],
+    intensity: clampIntensity(log.intensity),
+    body_scan: log.bodyScan ?? null,
+    understanding: log.understanding ?? null,
+    expressing: log.expressing ?? null,
+    regulating: log.regulating ?? null,
+    physical_context: log.physicalContext ?? null,
+    post_mood: log.postMood || null,
+    is_full_flow: log.isFullFlow ?? false,
+    created_at: log.timestamp || now,
+    updated_at: now,
+  };
+};
 
 // ============================================
 // 加密存儲底層
@@ -250,6 +275,14 @@ export function clearLogsCache(): void {
   logsCache = null;
 }
 
+async function syncLogsToCloud(entries: RulerLogEntry[]): Promise<void> {
+  if (!isUuid(currentUserId) || entries.length === 0) return;
+  const { error } = await insforge.database
+    .from('ruler_logs')
+    .insert(entries.map(entry => toCloudRulerLogRow(currentUserId, entry)));
+  if (error) throw new Error(`ruler_logs sync failed: ${error.message}`);
+}
+
 export const logs = {
   async create(log: Omit<RulerLogEntry, 'id'> & { id?: string }): Promise<RulerLogEntry> {
     await getAllLogs();
@@ -261,10 +294,11 @@ export const logs = {
     if (logsCache) logsCache.unshift(entry);
     await storeSet(userKey(StorageKeys.LOGS, currentUserId), logsCache || [entry]);
 
-    // 背景同步元數據至 coach_context（非關鍵路徑）
+    // 背景同步完整記錄與元數據至 InsForge（非關鍵路徑）
     ;(async () => {
       try {
         if (!currentUserId) return;
+        await syncLogsToCloud([entry]);
         // 直接用記憶體中的 logsCache，避免 O(n) 從 localStorage 重新讀取
         const allLogs = logsCache || [entry];
         const patch = buildCoachContextPatch(currentUserId, allLogs);
@@ -317,6 +351,7 @@ export const logs = {
       );
       logsCache = merged;
       await storeSet(userKey(StorageKeys.LOGS, currentUserId), merged);
+      await syncLogsToCloud(newEntries);
     }
 
     return {
@@ -553,7 +588,11 @@ export function setUserRole(role: string): void {
 // ============================================
 
 export const storageService = {
-  setUserId: (_userId: string | null): void => { /* 保留向後兼容 */ },
+  setUserId: (userId: string | null): void => {
+    if (currentUserId === userId) return;
+    currentUserId = userId;
+    clearLogsCache();
+  },
   saveProgress: (p: UserProgress) => profile.saveProgress(p),
   getProgress: () => profile.getProgress(),
   saveLog: (entry: Omit<RulerLogEntry, 'id'> & { id?: string }) => logs.create(entry),

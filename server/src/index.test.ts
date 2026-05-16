@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import type { Express } from 'express';
 
@@ -205,5 +205,36 @@ describe('Express app', () => {
     // dashboardRoutes 內部會呼叫 db.getOrCreateUser，而 mock db 為空物件
     // 因此會進入 catch，返回 500
     expect(res.status).toBe(500);
+  });
+});
+
+describe('Production boot guard', () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+    vi.resetModules();
+  });
+
+  it('production 環境若缺 LINE_CHANNEL_SECRET 必須拒絕啟動', async () => {
+    vi.resetModules();
+    process.env.NODE_ENV = 'production';
+    process.env.LINE_CHANNEL_SECRET = '';
+    process.env.LINE_CHANNEL_ACCESS_TOKEN = 'token-only';
+    process.env.PORT = '0';
+
+    await expect(import('./index.js')).rejects.toThrow(
+      /Missing required LINE credentials/
+    );
+  });
+
+  it('non-production 環境缺 secret 仍可啟動為 demo mode', async () => {
+    vi.resetModules();
+    process.env.NODE_ENV = 'development';
+    process.env.LINE_CHANNEL_SECRET = '';
+    process.env.LINE_CHANNEL_ACCESS_TOKEN = '';
+    process.env.PORT = '0';
+
+    await expect(import('./index.js')).resolves.toBeDefined();
   });
 });

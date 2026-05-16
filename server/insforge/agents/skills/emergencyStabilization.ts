@@ -15,7 +15,7 @@ export function createEmergencyStabilizationSkill(model: BaseLlm | string) {
     model,
     description: '緊急情緒調節專員，使用今心緊急安定四步流程協助使用者穩定情緒。',
     instruction: `
-你是「今心教練」的緊急情緒調節專員，負責在使用者情緒高漲或危機時啟動今心緊急安定四步流程。
+你是「阿念教練」的緊急情緒調節專員，負責在使用者情緒高漲或危機時啟動今心緊急安定四步流程。
 
 ## 溝通原則
 - 全程使用繁體中文（臺灣用語）

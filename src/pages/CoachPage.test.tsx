@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import CoachPage from './CoachPage';
 import * as client from '../lib/adk/client';
 import { saveChatHistory } from '../lib/adk/storage';
@@ -447,5 +449,13 @@ describe('CoachPage', () => {
 
     expect(screen.queryByRole('button', { name: '個人設定' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '今心' })).toBeInTheDocument();
+  });
+
+  it('Coach 樣式應提供深色模式覆寫，避免頁面停留在淺色底', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/pages/CoachPage.module.css'), 'utf8');
+
+    expect(css).toContain(':global([data-theme="dark"]) .coachPage');
+    expect(css).toContain(':global([data-theme="dark"]) .agentIntro');
+    expect(css).toContain(':global([data-theme="dark"]) .inputDock');
   });
 });

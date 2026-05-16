@@ -4,15 +4,78 @@
 
 ---
 
-## 目前主線（2026-05-15）
+## 目前主線（2026-05-16）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- 目前本地主線與 `origin/main`：`baa6275 docs: 同步 Agentic Action Loop 實作計畫`。
-- Agentic Action Loop MVP 已直接 push 到 `origin/main`，包含 commits `8f58d28` through `baa6275`。
-- 重要前序：`636b8e4 Rename 知心四式 moves`；方法語言風險收斂 commit 為 `582659e Reduce method language overlap risk`。
+- `origin/main` HEAD：`e8eee98 fix: 收斂正式站測後修正`（2026-05-15 提交）。
+- 目前收斂分支：`codex/integrate-claude-debug-state`。
+  - 已合入 `claude/festive-fermi-fe3154` 的兩個安全修正 commit：
+    - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
+    - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
+  - 也整合了後續 Debug / Review 的未提交修正：登入使用者情緒記錄同步 `ruler_logs`、`setUserId()` 真正切換 user cache、Timeline / Coach 深色模式對比、匯入/快速記錄後刷新成長進度、achievement-checker 補齊前台成就規則、阿念教練文案收斂。
+  - 這個整合分支尚未部署 production；部署前需再跑完整測試並確認工作區乾淨。
+- 重要前序：`636b8e4 Rename 知心四式 moves`（心照/喚名/安神/動念 命名）；`582659e Reduce method language overlap risk`（清掉 Mood Meter / Meta-Moment）。
 - 前一個發布工作分支：`codex/stitch-ui-release-20260513`，已快轉合入 `main`。
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
+
+## 部署現況（2026-05-16 11:20 GMT+8）
+
+**重點：production 狀態是 Claude 交接時的快照；Codex 目前只做本地整合，尚未重新部署。** 修改完代碼後一定要記得部署，否則 LINE / PWA 使用者看到的是舊版。
+
+| 服務 | URL | 目前跑的代碼 | 對齊 main? | 證據 |
+|---|---|---|---|---|
+| Bot Server | `imxin-bot.zeabur.app` | `claude/festive-fermi-fe3154` HEAD（含危機檢測、production 簽名強制、adapter logger） | **領先 main 2 commits**（需合入 main） | 2026-05-16 11:13 剛 deploy；`/health` uptime 是分鐘級 |
+| PWA | `today-mood.zeabur.app` | 不明確的中間版本（bundle `index-CEH332th.js`） | **落後 main**（main HEAD build 出來是 `index-eWsQXyXU.js`） | 對照本機 build hash |
+
+最近 main 上跑的 5 個還沒確定都 deploy 出去的 commit（按時間倒序）：
+
+1. `e8eee98 fix: 收斂正式站測後修正` — `src/adapters/storage.ts`、`OnboardingFlow`、`UserProfile`、`NotificationService`
+2. `1e596f8 feat: 補齊今晚上線所需的驗收入口與阿念教練頁面` — 大量 src/ + Edge Function soul.md + soulInstruction
+3. `b4010cc fix: 調整 Coach Beta 響應式導覽` — MainLayout / CoachPage RWD
+4. `c5c3da2 feat: 標記 Coach Beta 內測額度` — CoachPage Beta tag
+5. `213122f docs: 更新 Agentic Action Loop 交接文件` — 文件 only
+
+## 部署指令（誰要部署都從這裡抄）
+
+```bash
+# Bot Server（從 server/ 目錄）
+cd server && npx zeabur@latest deploy \
+  --project-id 6a032e42dd502f86055b3f22 \
+  --service-id 6a032e7f5e7e3bf5e93f155e \
+  --json -i=false
+
+# PWA（從專案根目錄）
+npx zeabur@latest deploy \
+  --project-id 6958b4dd85bfb0039750b2f4 \
+  --service-id 6958b4f0b8dd347fac234e9f \
+  --json -i=false
+```
+
+Zeabur 部署是「上傳當前工作目錄」，不看 git 狀態。所以**部署前要先確認工作區就是你想要 production 跑的那個 branch/commit**。
+
+## 如何快速確認 production 跑哪個版本
+
+```bash
+# Bot Server：看 uptime；剛部署的 uptime 是秒/分鐘級。adapter 應為 "insforge"
+curl -s https://imxin-bot.zeabur.app/health
+
+# PWA：抓 bundle hash，跟你本機 build 出來的 dist/assets/index-*.js 比對
+curl -s https://today-mood.zeabur.app | grep -oE 'index-[A-Za-z0-9_-]+\.js' | head -1
+ls dist/assets/ | grep "^index-.*\.js$"
+```
+
+bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需要 redeploy。
+
+## 多 agent 協作備忘
+
+- 兩個 agent（Claude 與 Codex）會同時動這個 repo。每次接手前都要：
+  1. `git fetch && git log origin/main -5 --oneline` 看主線最新。
+  2. `git branch -a | grep -E "claude/|codex/"` 看有沒有別人工作中的 branch。
+  3. 跑上面的 production 確認指令看 drift。
+  4. 動代碼前先確認自己在對的 branch（不要直接動 main）。
+- 動完代碼之後：commit + push + 在 memory.md 記一筆「現在 production 跑哪個 commit」。
+- 高風險動作（合入 main、部署 production）要先跟使用者確認。
 
 ## Agentic Action Loop MVP（2026-05-15）
 
@@ -116,9 +179,36 @@
 
 ## 下一步
 
-1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
-2. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
-3. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄；暫不測 LINE 建立小行動。
-4. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。
-5. P1 只根據真回饋補：7 日小陪跑文案、LINE 綁定三步驟圖解、首頁入口分流。
-6. P2 再考慮：LINE Bot 小行動、金幣商店、個人排行榜頁、Pro fake-door、WeChat Bot、LINE Push quota 長期監控、正式法律式隱私與免責審稿。
+**緊急（收斂整合分支）**
+
+1. 在 `codex/integrate-claude-debug-state` 完成完整驗證：frontend tests/build/lint、server tests/build/lint、`git diff --check`。
+2. 驗證通過後，把整合分支合入 `main`（PR 或 fast-forward），避免下次從 main 部署 Bot 時覆蓋危機檢測 + production 簽名強制。
+3. **PWA**：從整合後的 main 重新部署一次，把 production bundle 對齊最新 build。
+4. **Bot**：從整合後的 main 重新部署一次，確保 production 不再跑孤立的 Claude 分支。
+
+**產品驗證**
+
+5. 在 LINE 真的測「我撐不下去」確認看到 1925 安心專線、不會走練習流程。
+6. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
+7. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
+8. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄；暫不測 LINE 建立小行動。
+9. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。
+
+**規劃**
+
+10. P1 只根據真回饋補：7 日小陪跑文案、LINE 綁定三步驟圖解、首頁入口分流。
+11. P2 再考慮：LINE Bot 小行動、金幣商店、個人排行榜頁、Pro fake-door、WeChat Bot、LINE Push quota 長期監控、正式法律式隱私與免責審稿。
+
+## 後續 ticket（這次掃描挖到但沒修）
+
+詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌。**待修**：
+
+- Coach Edge Function `appendEvent()` fire-and-forget，conversation 失敗可能漏存 → 改 await + 重試或在 response metadata 標記失敗。
+- PWA 三處直接 localStorage 繞過 adapter 加密：`src/services/ThemeContext.tsx`、`src/services/BotSyncService.ts`、`src/lib/adk/storage.ts`（這個是阿念教練 chat history，沒加密）。
+- `rulerBot.ts` session 永不過期（每次互動 reset `updatedAt`，使用者 29 分內回一次就活下去）。
+- Coach 第一輪 crisis 後第二輪 Gemini call 沒重檢 crisis。
+- Coach `executeTool()` 對 LLM args 沒 schema 驗證，invalid `goalKey` 可寫進 DB。
+- `insforgeAdapter` catch 區塊回 stub 值（不是連線洩漏，但寫入失敗對使用者透明）— 長期應改為向上拋 + 統一在 `handleTextMessage` 回友善訊息。
+- 加密資料解密失敗時靜默回 fallback，`src/adapters/storage.ts:49-56` 需要在 `decrypted === null` 時明確警告。
+- CORS `*` 全開（`server/src/index.ts:54-63`）。
+- body parser 沒設 limit（webhook 用 64kb 即可）。
