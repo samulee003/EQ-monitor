@@ -7,34 +7,30 @@
 ## 目前主線（2026-05-16）
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
-- `origin/main` HEAD：`e8eee98 fix: 收斂正式站測後修正`（2026-05-15 提交）。
-- 目前收斂分支：`codex/integrate-claude-debug-state`。
-  - 已合入 `claude/festive-fermi-fe3154` 的兩個安全修正 commit：
-    - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
-    - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
-  - 也整合了後續 Debug / Review 的未提交修正：登入使用者情緒記錄同步 `ruler_logs`、`setUserId()` 真正切換 user cache、Timeline / Coach 深色模式對比、匯入/快速記錄後刷新成長進度、achievement-checker 補齊前台成就規則、阿念教練文案收斂。
-  - 這個整合分支尚未部署 production；部署前需再跑完整測試並確認工作區乾淨。
+- `main` / `origin/main` HEAD：`0ef72fd fix: 整合 Debug Review 修正`。
+- `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
+  - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
+  - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
+- 同一個整合版也包含後續 Debug / Review 修正：登入使用者情緒記錄同步 `ruler_logs`、`setUserId()` 真正切換 user cache、Timeline / Coach 深色模式對比、匯入/快速記錄後刷新成長進度、achievement-checker 補齊前台成就規則、阿念教練文案收斂、Coach 首屏保留 LINE 綁定入口。
 - 重要前序：`636b8e4 Rename 知心四式 moves`（心照/喚名/安神/動念 命名）；`582659e Reduce method language overlap risk`（清掉 Mood Meter / Meta-Moment）。
 - 前一個發布工作分支：`codex/stitch-ui-release-20260513`，已快轉合入 `main`。
 - 根目錄已新增 `AGENTS.md`，作為後續 agent 的工程與產品語言規範。
 - 產品判斷：可以給 1-3 位熟人封閉試玩；不要用正式醫療、治療或大量公開宣傳語氣。
 
-## 部署現況（2026-05-16 11:20 GMT+8）
+## 部署現況（2026-05-16 12:13 GMT+8）
 
-**重點：production 狀態是 Claude 交接時的快照；Codex 目前只做本地整合，尚未重新部署。** 修改完代碼後一定要記得部署，否則 LINE / PWA 使用者看到的是舊版。
+**重點：production 已重新部署到 `main` 最新整合版 `0ef72fd`。** 後續修改完代碼仍要重新部署，否則 LINE / PWA 使用者會看到舊版。
 
 | 服務 | URL | 目前跑的代碼 | 對齊 main? | 證據 |
 |---|---|---|---|---|
-| Bot Server | `imxin-bot.zeabur.app` | `claude/festive-fermi-fe3154` HEAD（含危機檢測、production 簽名強制、adapter logger） | **領先 main 2 commits**（需合入 main） | 2026-05-16 11:13 剛 deploy；`/health` uptime 是分鐘級 |
-| PWA | `today-mood.zeabur.app` | 不明確的中間版本（bundle `index-CEH332th.js`） | **落後 main**（main HEAD build 出來是 `index-eWsQXyXU.js`） | 對照本機 build hash |
+| PWA | `today-mood.zeabur.app` | `0ef72fd` 整合版，bundle `index-CEnu7gE2.js` | 是 | Zeabur deployment `6a07ee11bbc71468fc733b81` RUNNING；live bundle 已比對 |
+| Bot Server | `imxin-bot.zeabur.app` | `0ef72fd` 整合版 | 是 | Zeabur deployment `6a07ee2bbbc71468fc733b92` RUNNING；`/health` uptime 已重置、adapter=`insforge` |
 
-最近 main 上跑的 5 個還沒確定都 deploy 出去的 commit（按時間倒序）：
+Live checks：
 
-1. `e8eee98 fix: 收斂正式站測後修正` — `src/adapters/storage.ts`、`OnboardingFlow`、`UserProfile`、`NotificationService`
-2. `1e596f8 feat: 補齊今晚上線所需的驗收入口與阿念教練頁面` — 大量 src/ + Edge Function soul.md + soulInstruction
-3. `b4010cc fix: 調整 Coach Beta 響應式導覽` — MainLayout / CoachPage RWD
-4. `c5c3da2 feat: 標記 Coach Beta 內測額度` — CoachPage Beta tag
-5. `213122f docs: 更新 Agentic Action Loop 交接文件` — 文件 only
+- PWA root 回 `index-CEnu7gE2.js`。
+- Bot `/health` 回 `status=healthy`、`adapter=insforge`。
+- Bot `/webhook` 無 `x-line-signature` 時回 `401`。
 
 ## 部署指令（誰要部署都從這裡抄）
 
@@ -179,25 +175,18 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 下一步
 
-**緊急（收斂整合分支）**
-
-1. 在 `codex/integrate-claude-debug-state` 完成完整驗證：frontend tests/build/lint、server tests/build/lint、`git diff --check`。
-2. 驗證通過後，把整合分支合入 `main`（PR 或 fast-forward），避免下次從 main 部署 Bot 時覆蓋危機檢測 + production 簽名強制。
-3. **PWA**：從整合後的 main 重新部署一次，把 production bundle 對齊最新 build。
-4. **Bot**：從整合後的 main 重新部署一次，確保 production 不再跑孤立的 Claude 分支。
-
 **產品驗證**
 
-5. 在 LINE 真的測「我撐不下去」確認看到 1925 安心專線、不會走練習流程。
-6. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
-7. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
-8. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄；暫不測 LINE 建立小行動。
-9. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。
+1. 在 LINE 真的測「我撐不下去」確認看到 1925 安心專線、不會走練習流程。
+2. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
+3. 找 1 位非開發者用手機完整試玩，記錄哪一步不懂、卡住或不安心。
+4. LINE 使用者：測 PWA → 加 LINE → 綁定 → LINE 情緒整理 → 回 Coach 問最近記錄；暫不測 LINE 建立小行動。
+5. WeChat 使用者：直接開 PWA 網頁，測「網頁記錄 + Coach」，不要要求他先裝 LINE。
 
 **規劃**
 
-10. P1 只根據真回饋補：7 日小陪跑文案、LINE 綁定三步驟圖解、首頁入口分流。
-11. P2 再考慮：LINE Bot 小行動、金幣商店、個人排行榜頁、Pro fake-door、WeChat Bot、LINE Push quota 長期監控、正式法律式隱私與免責審稿。
+6. P1 只根據真回饋補：7 日小陪跑文案、LINE 綁定三步驟圖解、首頁入口分流。
+7. P2 再考慮：LINE Bot 小行動、金幣商店、個人排行榜頁、Pro fake-door、WeChat Bot、LINE Push quota 長期監控、正式法律式隱私與免責審稿。
 
 ## 後續 ticket（這次掃描挖到但沒修）
 

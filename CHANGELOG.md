@@ -11,14 +11,14 @@
 - **[V1.0.0]**：今心產品起點版，是目前對外小圈封測的產品基線。
 - **4.x / 3.x / 2.x / 1.x**：V1.0 前的內部衝刺與架構演進紀錄，保留作為追溯用。
 
-## 目前狀態摘要（2026-05-15）
+## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 目前指向 `213122f docs: 更新 Agentic Action Loop 交接文件`。
+- `main` / `origin/main` 目前指向 `0ef72fd fix: 整合 Debug Review 修正`。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
-- 2026-05-15 已將 PWA 部署到 Zeabur 並完成 final Live Mock；正式站目前 serve bundle `index-B-9lzdP6.js`。
+- 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-CEnu7gE2.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 
 ## 下一步
 
@@ -27,6 +27,37 @@
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
 ---
+
+## [V1.0.0] - 2026-05-16 — Debug Review 整合與 production 同步
+
+### 同步狀態
+
+- 合入 Claude 安全修正分支 `claude/festive-fermi-fe3154`，並把整合版推到 `main` / `origin/main`：`0ef72fd fix: 整合 Debug Review 修正`。
+- PWA 已重新部署到 Zeabur；最新 live bundle 為 `index-CEnu7gE2.js`，deployment `6a07ee11bbc71468fc733b81` 為 `RUNNING`。
+- Bot Server 已重新部署到 Zeabur；deployment `6a07ee2bbbc71468fc733b92` 為 `RUNNING`，`/health` uptime 已重置，adapter 為 `insforge`。
+- Live check：PWA root 取得 `index-CEnu7gE2.js`；Bot `/health` 回 healthy；Bot `/webhook` 無簽名回 `401`。
+
+### 修正摘要
+
+- LINE Bot 新增共用危機字詞偵測，命中時直接回 SOS 資源，不建立或推進知心四式 session。
+- Production 缺少 LINE credentials 時拒絕啟動，避免 webhook 進入未簽名 demo mode。
+- InsForge adapter 補強結構化錯誤日誌，讓 production 問題較容易追查。
+- 登入使用者新增情緒記錄時同步寫入 `ruler_logs`，並讓 `storageService.setUserId()` 真正切換使用者資料 cache。
+- Coach 首屏保留 LINE 綁定入口，修復 E2E 找不到綁定面板的問題。
+- Timeline / Coach 深色模式補強文字對比；匯入記錄與快速記錄後會刷新成長進度。
+- `achievement-checker` 補齊前台可見成就規則，避免畫面看得到但 backend 不會解鎖。
+- 文案持續收斂為「阿念教練」，降低「AI 教練」泛稱造成的角色漂移。
+
+### 驗證
+
+- `npm run test:run` → 393 tests / 44 files passed。
+- `cd server && npm run test:run` → 210 tests / 19 files passed。
+- `npm run build` → passed。
+- `cd server && npm run build` → passed。
+- `npm run lint` → 0 errors / 31 warnings。
+- `cd server && npm run lint` → 0 errors / 24 warnings。
+- `npm run test:e2e` → 4 passed。
+- `git diff --check` → passed。
 
 ## [Unreleased] - 2026-05-15 — Agentic Action Loop MVP + 知心四式語言收斂
 
