@@ -21,12 +21,22 @@
 - 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-C0yGyERj.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
 - 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；刪帳清除範圍已納入 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，並已回讀線上 function code 確認。
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；對話事件持久化不再 fire-and-forget，response metadata 會標記 `conversationPersisted` 與失敗角色。
+- 2026-05-16 13:20 已再次部署 InsForge `coach` Edge Function；mutating tool args 由 deterministic code 驗證後才可建立或回報小行動。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+
+## [V1.0.0] - 2026-05-16 — Coach mutating tool args 驗證補強
+
+- `create_micro_action` 與 `report_micro_action` 不再直接信任 Gemini function call args；`goalKey`、`category`、`microActionId`、`status`、`taskKey`、`title` 都先由 deterministic code 驗證。
+- invalid `goalKey/category/status/microActionId` 會回 `invalid_create_micro_action_args` 或 `invalid_report_micro_action_args`，不會寫入 `coach_micro_actions` 或發放回報獎勵。
+- 新增發布守門測試，避免之後退回 TypeScript cast + fallback default 的危險寫法。
+- Production 已重新打包並部署 `coach`，並以 `functions code coach` 回讀確認線上版本包含 `validateCreateMicroActionArgs` / `validateReportMicroActionArgs`。
+- Live smoke：`OPTIONS /coach` 回 204；未帶 Authorization 的有效 UUID `POST /coach` 回 401。
+- 驗證：`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 13 tests passed；`cd server && npm run test:run` → 213 tests / 19 files passed；`cd server && npm run build` → passed；`cd server && npm run lint` → 0 errors / 24 warnings；`git diff --check` → passed。
 
 ## [V1.0.0] - 2026-05-16 — Coach 對話持久化狀態補強
 

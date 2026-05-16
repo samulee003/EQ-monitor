@@ -139,6 +139,19 @@ describe('發布前 P0/P1 守門', () => {
     expect(source).not.toContain('appendEvent(APP_NAME, userId, sessionId, \'user\', message).catch');
   });
 
+  it('production coach mutating tool args 必須由 deterministic code 驗證', () => {
+    const source = readProjectFile('server/insforge/functions/coach-simple.ts');
+
+    expect(source).toContain('function validateCreateMicroActionArgs');
+    expect(source).toContain('function validateReportMicroActionArgs');
+    expect(source).toContain('isCompanionGoalKey');
+    expect(source).toContain('isMicroActionCategory');
+    expect(source).toContain('isMicroActionReportStatus');
+    expect(source).toContain("return { success: false, error: parsed.error }");
+    expect(source).not.toContain("goalKey: (args.goalKey as CompanionGoalKey) ?? 'daily_care'");
+    expect(source).not.toContain("args.status as 'completed' | 'partial' | 'skipped'");
+  });
+
   it('action loop schema 必須限制每個使用者只能有一個 active micro action', () => {
     const schema = readProjectFile('server/insforge/schema/011_coach_action_loop.sql');
 

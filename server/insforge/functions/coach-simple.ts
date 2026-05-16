@@ -393,6 +393,15 @@ const TOOLS = [
 
 const RESTRICTED_CRISIS_TOOLS = TOOLS.filter((tool) => tool.name === 'trigger_action');
 const MUTATING_ACTION_LOOP_TOOLS = new Set(['create_micro_action', 'report_micro_action']);
+const COMPANION_GOAL_KEYS = new Set<CompanionGoalKey>(['sleep_anxiety', 'parent_repair', 'daily_care']);
+const MICRO_ACTION_CATEGORIES = new Set<MicroActionCategory>([
+  'body_downshift',
+  'settling',
+  'repair',
+  'daily_care',
+]);
+const MICRO_ACTION_REPORT_STATUSES = new Set(['completed', 'partial', 'skipped'] as const);
+type MicroActionReportStatus = 'completed' | 'partial' | 'skipped';
 
 // ═══════════════════════════════════════════════════════════════
 // Database Helpers
@@ -1061,6 +1070,63 @@ async function persistConversationEvents(
   };
 }
 
+function asNonEmptyString(value: unknown, maxLength: number): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > maxLength) return null;
+  return trimmed;
+}
+
+function isCompanionGoalKey(value: unknown): value is CompanionGoalKey {
+  return typeof value === 'string' && COMPANION_GOAL_KEYS.has(value as CompanionGoalKey);
+}
+
+function isMicroActionCategory(value: unknown): value is MicroActionCategory {
+  return typeof value === 'string' && MICRO_ACTION_CATEGORIES.has(value as MicroActionCategory);
+}
+
+function isMicroActionReportStatus(value: unknown): value is MicroActionReportStatus {
+  return typeof value === 'string' && MICRO_ACTION_REPORT_STATUSES.has(value as MicroActionReportStatus);
+}
+
+function validateCreateMicroActionArgs(args: Record<string, unknown>):
+  | { ok: true; task: TaskTemplate }
+  | { ok: false; error: string } {
+  const goalKey = args.goalKey;
+  const category = args.category;
+  const taskKey = asNonEmptyString(args.taskKey, 80);
+  const title = asNonEmptyString(args.title, 160);
+
+  if (!isCompanionGoalKey(goalKey) || !isMicroActionCategory(category) || !taskKey || !title) {
+    return { ok: false, error: 'invalid_create_micro_action_args' };
+  }
+
+  return {
+    ok: true,
+    task: {
+      key: taskKey,
+      goalKey,
+      category,
+      title,
+      dueHours: 24,
+    },
+  };
+}
+
+function validateReportMicroActionArgs(args: Record<string, unknown>):
+  | { ok: true; microActionId: string; status: MicroActionReportStatus; reportText?: string }
+  | { ok: false; error: string } {
+  const microActionId = asNonEmptyString(args.microActionId, 80);
+  const status = args.status;
+  const reportText = asNonEmptyString(args.reportText, 500) ?? undefined;
+
+  if (!microActionId || !isUuid(microActionId) || !isMicroActionReportStatus(status)) {
+    return { ok: false, error: 'invalid_report_micro_action_args' };
+  }
+
+  return { ok: true, microActionId, status, reportText };
+}
+
 // ═══════════════════════════════════════════════════════════════
 // Tool Executor
 // ═══════════════════════════════════════════════════════════════
@@ -1105,21 +1171,14 @@ async function executeTool(
       case 'create_micro_action': {
         const active = await loadActiveMicroAction(userId, new Date().toISOString());
         if (active) return { success: false, reason: 'active_micro_action_exists', microAction: active };
-        return await createMicroAction(userId, {
-          key: String(args.taskKey ?? 'drink_water_and_need'),
-          goalKey: (args.goalKey as CompanionGoalKey) ?? 'daily_care',
-          category: (args.category as MicroActionCategory) ?? 'daily_care',
-          title: String(args.title ?? '喝一杯水，坐下來寫一句「我現在其實需要……」'),
-          dueHours: 24,
-        });
+        const parsed = validateCreateMicroActionArgs(args);
+        if (!parsed.ok) return { success: false, error: parsed.error };
+        return await createMicroAction(userId, parsed.task);
       }
       case 'report_micro_action': {
-        return await reportMicroAction(
-          userId,
-          String(args.microActionId ?? ''),
-          args.status as 'completed' | 'partial' | 'skipped',
-          args.reportText as string | undefined
-        );
+        const parsed = validateReportMicroActionArgs(args);
+        if (!parsed.ok) return { success: false, error: parsed.error };
+        return await reportMicroAction(userId, parsed.microActionId, parsed.status, parsed.reportText);
       }
       case 'get_gamification_summary': {
         return buildGamificationSummary(await loadGamificationStats(userId));

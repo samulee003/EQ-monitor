@@ -110,7 +110,7 @@ git diff --check
 目前最新本地基線（2026-05-16）：
 
 - Frontend tests: 44 files / 393 tests passed
-- Server tests: 19 files / 212 tests passed
+- Server tests: 19 files / 213 tests passed
 - E2E: 4 passed
 - Frontend lint: 0 errors / 31 warnings
 - Server lint: 0 errors / 24 warnings
