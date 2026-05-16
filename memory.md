@@ -31,6 +31,8 @@ Live checks：
 - PWA root 回 `index-C0yGyERj.js`。
 - Bot `/health` 回 `status=healthy`、`adapter=insforge`。
 - Bot `/webhook` 無 `x-line-signature` 時回 `401`。
+- 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；線上 code 回讀確認刪帳清單包含 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
+- `delete-account` live smoke：`OPTIONS /delete-account` 回 204；未帶 Authorization 的 `POST /delete-account` 回 401。
 
 ## 部署指令（誰要部署都從這裡抄）
 
@@ -120,14 +122,14 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
   - `coach`
   - `weekly-report`
   - `achievement-checker`
-  - `delete-account`
+  - `delete-account`（2026-05-16 13:08 已補齊 Agentic Action Loop 三張資料表刪除範圍並重新部署）
 - InsForge Auth 已接入 PWA：登入、註冊、session 保留、`coach_context` 初始化已驗。
 - 真 LINE 綁定 E2E 已驗：LINE 取碼 → production PWA Coach 貼碼 → 畫面顯示已綁定。
 - Production LINE 情緒資料流已驗：有效簽名 webhook → 完整知心四式 → `agent_ruler_logs` → `weekly-report` → Coach 讀到資料。
 - Bot `/webhook` 已啟用 LINE 簽名驗證：缺少或無效 `x-line-signature` 回 401。
 - 主動推送排程已啟用：`pg_cron` / `pg_net` installed，`weekly-report-batch` 與 `care-scan-daily` active。
 - 主動推送守門已補齊：需要有 LINE 綁定與 opt-in，避免未同意推送。
-- 刪除帳號已補齊：`delete-account` 清理 app/public 資料並寫入 `account_deletions` 最小 tombstone；前端阻擋已刪帳號再次進入產品。
+- 刪除帳號已補齊：`delete-account` 清理 app/public 資料與 Agentic Action Loop 資料（`coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`），並寫入 `account_deletions` 最小 tombstone；前端阻擋已刪帳號再次進入產品。
 - `privacy.html` 與 `account-deletion.html` 已補上資料刪除範圍與最小刪除紀錄說明。
 - Agentic Action Loop MVP 已落地到 production `coach` Edge Function source，但仍需部署後 live smoke 才能宣稱 production data path 已驗。
 
@@ -142,9 +144,9 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 - 這輪 Live Mock 使用 mock 攔截 Coach / LINE 綁定 mutating requests，避免污染 production 資料；production DB trace/stats 的 live data path 仍需另跑。
 - 本輪修正：`src/stores/appStore.ts` 讓無 hash / unknown hash 導回 `#home`、舊 `#landing` 導到 `#about`，並讓應用鎖首次啟用時進入 PIN 設定；`src/adapters/storage.ts` 讓 log update 產生新列表引用，修正記錄回顧編輯後畫面不刷新。
 - `npm run test:run` → 384 tests / 43 files passed
-- `cd server && npm run test:run` → 164 tests / 17 files passed
+- `cd server && npm run test:run` → 211 tests / 19 files passed（2026-05-16 刪帳範圍修補後重跑）
 - `npx vitest run src/pages/CoachPage.test.tsx src/components/coach/MicroActionCard.test.tsx src/components/coach/GamificationStrip.test.tsx` → 30 tests / 3 files passed
-- `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed
+- `cd server && npx vitest run insforge/functions/_shared/coachActionLoop.test.ts insforge/functions/_shared/coachActionLoopEval.test.ts insforge/functions/publishingGuardrails.test.ts` → 41 tests / 3 files passed；`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 11 tests passed（刪帳守門追加後）
 - `npm run build` → passed
 - `cd server && npm run build` → passed
 - `npm run lint` → 0 errors / 31 warnings
@@ -190,7 +192,7 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 後續 ticket（這次掃描挖到但沒修）
 
-詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌。**待修**：
+詳細見 2026-05-16 全專案 bug 掃描的對話紀錄。已修：#1 LINE 危機字詞、#2 production 簽名強制、#3 insforgeAdapter 結構化日誌、#4 `delete-account` 補清 Agentic Action Loop 三張資料表並已部署。**待修**：
 
 - Coach Edge Function `appendEvent()` fire-and-forget，conversation 失敗可能漏存 → 改 await + 重試或在 response metadata 標記失敗。
 - PWA 三處直接 localStorage 繞過 adapter 加密：`src/services/ThemeContext.tsx`、`src/services/BotSyncService.ts`、`src/lib/adk/storage.ts`（這個是阿念教練 chat history，沒加密）。

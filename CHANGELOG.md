@@ -19,12 +19,21 @@
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
 - 產品可給 1-3 位熟人封閉試玩；尚不建議以正式醫療、治療服務或大規模公開宣傳語氣推出。
 - 2026-05-16 已將 Debug / Review 整合版部署到 Zeabur；正式站 PWA 目前 serve bundle `index-C0yGyERj.js`，Bot Server deployment 已重新啟動並以 `insforge` adapter 運行。
+- 2026-05-16 13:08 已重新部署 InsForge `delete-account` Edge Function；刪帳清除範圍已納入 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，並已回讀線上 function code 確認。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
+
+## [V1.0.0] - 2026-05-16 — 刪帳範圍補齊 Agentic Action Loop 資料
+
+- `delete-account` Edge Function 刪除清單補上 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`，避免使用者刪除帳號後仍殘留 7 日小陪跑資料。
+- 新增發布守門測試，之後若 Agentic Action Loop 資料表從刪帳流程漏掉會直接失敗。
+- Production 已重新部署 `delete-account`，並以 `functions code delete-account` 回讀確認線上版本包含三張新表。
+- Live smoke：`OPTIONS /delete-account` 回 204；未帶 Authorization 的 `POST /delete-account` 回 401。
+- 驗證：`cd server && npx vitest run insforge/functions/publishingGuardrails.test.ts` → 11 tests passed；`cd server && npm run test:run` → 211 tests / 19 files passed；`cd server && npm run build` → passed；`cd server && npm run lint` → 0 errors / 24 warnings；`git diff --check` → passed。
 
 ## [V1.0.0] - 2026-05-16 — Coach 首屏 LINE 對話入口補強
 

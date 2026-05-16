@@ -80,6 +80,14 @@ describe('發布前 P0/P1 守門', () => {
     expect(schema).toContain('Service role full access coach agent traces');
   });
 
+  it('刪除帳號必須清除 Agentic Action Loop 使用者資料', () => {
+    const source = readProjectFile('server/insforge/functions/delete-account.ts');
+
+    expect(source).toContain("{ table: 'coach_micro_actions', column: 'user_id' }");
+    expect(source).toContain("{ table: 'coach_gamification_stats', column: 'user_id' }");
+    expect(source).toContain("{ table: 'coach_agent_traces', column: 'user_id' }");
+  });
+
   it('production coach 必須是多步 Agentic Action Loop，不可退回單次工具呼叫', () => {
     const source = readProjectFile('server/insforge/functions/coach-simple.ts');
 
