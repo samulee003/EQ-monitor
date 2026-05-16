@@ -27,7 +27,7 @@
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-bottom: var(--s-8);
+    margin-bottom: var(--s-5);
     flex-wrap: wrap;
 }
 
@@ -52,6 +52,10 @@
     display: flex;
     flex-direction: column;
     min-height: 380px;
+}
+
+.onboarding-step.is-welcome-step {
+    min-height: 0;
 }
 
 .onboarding-step h2 {
@@ -81,11 +85,26 @@
     height: 100%;
 }
 
+.is-welcome-step .step-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: var(--s-3);
+}
+
+.is-welcome-step h2 {
+    margin-bottom: var(--s-3);
+}
+
 .agentic-intro {
     display: grid;
     gap: var(--s-3);
     margin-bottom: var(--s-5);
     text-align: left;
+}
+
+.is-welcome-step .agentic-intro {
+    gap: var(--s-2);
+    margin-bottom: var(--s-3);
 }
 
 .agentic-intro p {
@@ -97,6 +116,12 @@
     color: var(--text-secondary);
     line-height: 1.6;
     font-size: 0.92rem;
+}
+
+.is-welcome-step .agentic-intro p {
+    padding: var(--s-2) var(--s-3);
+    line-height: 1.45;
+    font-size: 0.84rem;
 }
 
 .step-actions {
@@ -410,6 +435,11 @@ input[type=range] {
     margin-bottom: var(--s-4);
     text-align: left;
 }
+
+.is-welcome-step .disclaimer-box {
+    padding: var(--s-3);
+    margin-bottom: var(--s-3);
+}
 .disclaimer-title {
     font-size: 0.8rem;
     font-weight: 700;
@@ -421,6 +451,11 @@ input[type=range] {
     color: var(--text-secondary);
     line-height: 1.5;
     margin: 0 0 var(--s-2) 0;
+}
+
+.is-welcome-step .disclaimer-text {
+    font-size: 0.72rem;
+    line-height: 1.42;
 }
 .disclaimer-hotline {
     font-size: 0.8rem;
@@ -473,8 +508,12 @@ input[type=range] {
 
 /* Responsive */
 @media (max-width: 400px) {
+    .onboarding-overlay {
+        padding: var(--s-3);
+    }
     .onboarding-card {
         padding: var(--s-6) var(--s-4);
+        max-height: calc(100dvh - 24px);
     }
     .onboarding-step h2 {
         font-size: 1.4rem;

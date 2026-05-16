@@ -33,7 +33,7 @@ describe('OnboardingFlow', () => {
     });
 
     const goToStep = (targetStep: number) => {
-        fireEvent.click(screen.getByRole('button', { name: '我了解，開始導覽' }));
+        fireEvent.click(screen.getByRole('button', { name: '看完整導覽' }));
         for (let step = 2; step < targetStep; step += 1) {
             fireEvent.click(screen.getByRole('button', { name: '下一步' }));
         }
@@ -45,6 +45,20 @@ describe('OnboardingFlow', () => {
         expect(screen.getByText('歡迎來到 今心')).toBeInTheDocument();
         expect(screen.getByText('今心不只是情緒記錄工具，也有一位會主動陪你整理下一步的阿念教練。')).toBeInTheDocument();
         expect(screen.getByText('阿念會看見你的紀錄、接續你的情緒線索，必要時帶你做呼吸或緊急安定練習。用得越久，它越能看懂你的節奏。')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '看完整導覽' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '先試一次' })).toBeInTheDocument();
+    });
+
+    it('先試一次應直接進入今日心情，不啟動通知流程', () => {
+        const onComplete = vi.fn();
+        render(<OnboardingFlow onComplete={onComplete} />);
+
+        fireEvent.click(screen.getByRole('button', { name: '先試一次' }));
+
+        expect(settingsStoreMock.setUserRole).toHaveBeenCalledWith('general');
+        expect(notificationMock.setReminderTime).not.toHaveBeenCalled();
+        expect(notificationMock.setEnabled).not.toHaveBeenCalled();
+        expect(onComplete).toHaveBeenCalledTimes(1);
     });
 
     it('角色選擇應使用清楚標籤，不顯示單字大圖示', () => {
@@ -98,7 +112,7 @@ describe('OnboardingFlow', () => {
     it('提醒時間導覽應直接說明通知會顯示什麼，並可試發提醒', async () => {
         render(<OnboardingFlow onComplete={vi.fn()} />);
 
-        fireEvent.click(screen.getByRole('button', { name: '跳過導覽' }));
+        goToStep(9);
 
         expect(screen.getByText('提醒會像這樣')).toBeInTheDocument();
         expect(screen.getByText('今心 • 每日心情記錄')).toBeInTheDocument();
@@ -118,7 +132,7 @@ describe('OnboardingFlow', () => {
 
         render(<OnboardingFlow onComplete={onComplete} />);
 
-        fireEvent.click(screen.getByRole('button', { name: '跳過導覽' }));
+        goToStep(9);
         fireEvent.click(screen.getByRole('button', { name: '開始旅程 ✨' }));
 
         expect(settingsStoreMock.setUserRole).toHaveBeenCalledWith('general');

@@ -8,6 +8,7 @@
 
 - 產品版本：`V1.0.0`，定為今心產品起點。
 - `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`，以及導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`。
+- 2026-05-16 晚間本地分支 `codex/product-polish-agent-team-20260516` 已完成第一輪今日心情封測打磨：第一屏改為手機優先 2×2 狀態卡、常駐顯示四個狀態文案、選取後提示下一步、首次導覽「先試一次」直接進今日心情。此分支尚未合入 `main`，也尚未上 production。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
@@ -140,6 +141,7 @@ bundle hash 一樣 = production 與本機同步。不一樣就是有 drift，需
 
 ## 最新驗證基線
 
+- 2026-05-16 今日心情第一屏本地打磨：`npm run test:run -- src/components/EmotionQuadrantPicker.test.tsx src/components/CheckInFlow.test.tsx src/components/OnboardingFlow.test.tsx` → 22 tests / 3 files passed；`npm run test:e2e -- e2e/check-in-flow.spec.ts` → 1 passed；Playwright mobile 390×844 截圖確認今日心情第一屏與首次導覽「先試一次」主路徑可見。
 - 2026-05-15 PM 驗收修正：onboarding 角色選擇移除單字大圖示；隱私導覽改成未登入本機保存、登入同意同步、可匯出/刪帳；模式導覽改成每日提醒/週洞察/成就收藏；Coach 首屏壓成「先說一句就好」與三個低負擔開始按鈕；提醒時間頁新增通知內容預覽與試發提醒；個人中心匯出資料改為等待實際 logs 載入。
 - 2026-05-15 追加修正：提醒時間導覽最後一步不再等待通知權限 Promise；`開始旅程` 會先完成 onboarding，通知開啟改為背景 best-effort。`NotificationService.getSettings()` 改用同步快取讀取本機提醒設定。
 - 追加修正驗證：`npm run test:run -- src/components/OnboardingFlow.test.tsx` → 6 tests passed；`npm run build` passed；`git diff --check` passed；正式站 deployment `6a073696bbc71468fc730cbc` 已 RUNNING，bundle `index-B-9lzdP6.js`，live smoke 模擬通知權限永不回應時仍可離開導覽並進入 `今日心情`。

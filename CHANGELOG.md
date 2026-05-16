@@ -30,6 +30,15 @@
 2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
+## [Unreleased] - 2026-05-16 — 今日心情第一屏封測打磨
+
+- 目前狀態：本地分支 `codex/product-polish-agent-team-20260516` 已完成，尚未合入 `main`，也尚未上 production。
+- 今日心情第一屏從 hover 才看得到說明的球體布局，改成手機優先的 2×2 狀態卡；四個狀態名稱與描述常駐顯示，降低新朋友第一次打開時的猜測成本。
+- 首屏文案改成「先選一個最像現在的狀態」，副文提示「不用想很準，選接近的就好」，確認按鈕改為「用這個狀態開始」。
+- 選取狀態後會提示「下一步：幫你找一個更準的情緒詞」，讓使用者知道按下去會發生什麼。
+- 首次導覽的「跳過導覽」改為「先試一次」，並直接進入今日心情，不再先跳到提醒設定；完整導覽仍可從「看完整導覽」進入。
+- 驗證：`npm run test:run -- src/components/EmotionQuadrantPicker.test.tsx src/components/CheckInFlow.test.tsx src/components/OnboardingFlow.test.tsx` → 22 tests / 3 files passed；`npm run test:e2e -- e2e/check-in-flow.spec.ts` → 1 passed；Playwright 截圖確認 390×844 今日心情第一屏與首次導覽主按鈕可見。
+
 ## [V1.0.0] - 2026-05-16 — 導覽情緒科普文案修正
 
 - App onboarding 第 3 步從「身體速度 / 心裡順卡」改成情緒心理學科普常見的二軸說明：「身體喚醒程度」與「感受愉悅度」。

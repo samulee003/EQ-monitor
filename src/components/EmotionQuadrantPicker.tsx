@@ -48,8 +48,9 @@ const EmotionQuadrantPicker: React.FC<EmotionQuadrantPickerProps> = ({ onSelectQ
   return (
     <div className="emotion-quadrant-picker-container fade-in">
       <div className="emotion-quadrant-picker-header">
-        <h1>{t('你現在感覺如何？')}</h1>
-        <p>{t('可以選擇多個最貼近你此刻身體速度與心裡狀態的色塊')}</p>
+        <span className="emotion-kicker">{t('今日心情')}</span>
+        <h1>{t('先選一個最像現在的狀態')}</h1>
+        <p>{t('不用想很準，選接近的就好。等一下阿念會陪你慢慢整理。')}</p>
       </div>
 
       <div className="spheres-layout">
@@ -58,10 +59,10 @@ const EmotionQuadrantPicker: React.FC<EmotionQuadrantPickerProps> = ({ onSelectQ
         <div className="axis-line axis-horizontal" aria-hidden="true" />
 
         {/* 軸標籤 */}
-        <span className="axis-label axis-top">{t('很滿')}</span>
-        <span className="axis-label axis-bottom">{t('很慢')}</span>
-        <span className="axis-label axis-left">{t('卡住')}</span>
-        <span className="axis-label axis-right">{t('順心')}</span>
+        <span className="axis-label axis-top">{t('身體很滿')}</span>
+        <span className="axis-label axis-bottom">{t('身體很慢')}</span>
+        <span className="axis-label axis-left">{t('不太舒服')}</span>
+        <span className="axis-label axis-right">{t('比較順心')}</span>
 
         {quadrants.map((q) => (
           <div
@@ -73,8 +74,13 @@ const EmotionQuadrantPicker: React.FC<EmotionQuadrantPickerProps> = ({ onSelectQ
             role="button"
             tabIndex={0}
             aria-pressed={selectedQs.includes(q.id)}
-            aria-label={`${q.label.replace(/\s*\/\s*/g, '')} - ${q.id === 'red' ? '紅色' : q.id === 'yellow' ? '黃色' : q.id === 'blue' ? '藍色' : '綠色'}狀態區`}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleQuadrant(q.id)}
+            aria-label={`${q.label}，${q.desc}，${q.id === 'red' ? '紅色' : q.id === 'yellow' ? '黃色' : q.id === 'blue' ? '藍色' : '綠色'}狀態區`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleQuadrant(q.id);
+              }
+            }}
             data-testid={`emotion-quadrant-${q.id}`}
           >
             <div className="sphere-orbital">
@@ -91,13 +97,19 @@ const EmotionQuadrantPicker: React.FC<EmotionQuadrantPickerProps> = ({ onSelectQ
         ))}
       </div>
 
+      <p className="selection-hint" aria-live="polite">
+        {selectedQs.length > 0
+          ? t('下一步：幫你找一個更準的情緒詞')
+          : t('先不用知道原因，點一格就好')}
+      </p>
+
       <button
         className="morandi-main-btn confirm-btn"
         disabled={selectedQs.length === 0}
         onClick={() => onSelectQuadrants(selectedQs)}
         data-testid="emotion-confirm"
       >
-        {t('確認選擇')}
+        {selectedQs.length > 1 ? t('用這些狀態開始') : t('用這個狀態開始')}
       </button>
 
     </div>

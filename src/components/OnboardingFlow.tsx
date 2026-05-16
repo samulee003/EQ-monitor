@@ -47,9 +47,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         setNotificationFeedback(t('已送出測試提醒。如果沒有看到，請檢查瀏覽器通知權限。'));
     };
 
-    const handleSkip = () => {
-        // Skip to reminder setting
-        setStep(9);
+    const handleTryNow = () => {
+        settingsStore.setUserRole(userRole);
+        onComplete();
     };
 
     const renderProgressDots = () => {
@@ -72,7 +72,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
 
                 {/* Step 1: Welcome */}
                 {step === 1 && (
-                    <div className="onboarding-step fade-slide-up">
+                    <div className="onboarding-step is-welcome-step fade-slide-up">
                         <div className="step-icon leaf-float">{uiIcons.leaf}</div>
                         <h2>{t('歡迎來到 今心')}</h2>
                         <div className="agentic-intro">
@@ -85,8 +85,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                             <p className="disclaimer-hotline">{t('台灣安心專線')} <strong>1925</strong>｜{t('生命線')} <strong>1909</strong></p>
                         </div>
                         <div className="step-actions">
-                            <button className="morandi-main-btn" onClick={handleNext}>{t('我了解，開始導覽')}</button>
-                            <button className="skip-link" onClick={handleSkip}>{t('跳過導覽')}</button>
+                            <button className="morandi-main-btn" onClick={handleNext}>{t('看完整導覽')}</button>
+                            <button className="skip-link" onClick={handleTryNow}>{t('先試一次')}</button>
                         </div>
                     </div>
                 )}

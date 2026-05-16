@@ -2,38 +2,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rem;
-  min-height: 60vh;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  min-height: min(68vh, 640px);
   justify-content: center;
 }
 
 .emotion-quadrant-picker-header {
   text-align: center;
-  max-width: 320px;
+  max-width: 520px;
+  display: grid;
+  gap: 0.6rem;
 }
 
 .emotion-quadrant-picker-header h1 {
-  font-size: 2rem;
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
   font-weight: 800;
-  margin-bottom: 1rem;
-  letter-spacing: -0.5px;
-  line-height: 1.2;
+  margin: 0;
+  letter-spacing: 0;
+  line-height: 1.15;
 }
 
 .emotion-quadrant-picker-header p {
   color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
+  margin: 0;
+}
+
+.emotion-kicker {
+  justify-self: center;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(170, 176, 155, 0.28);
+  border-radius: 999px;
+  color: var(--color-green);
+  background: rgba(170, 176, 155, 0.12);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 /* Orbital Layout */
 .spheres-layout {
   position: relative;
-  width: 340px;
-  height: 340px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: min(100%, 560px);
+  height: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.7rem, 2vw, 1rem);
 }
 
 /* Axis Lines */
@@ -41,6 +58,7 @@
   position: absolute;
   background: var(--glass-border);
   z-index: 1;
+  opacity: 0.22;
 }
 .axis-vertical {
   width: 1px;
@@ -57,42 +75,50 @@
 .axis-label {
   position: absolute;
   font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-weight: 800;
+  letter-spacing: 0;
   color: var(--text-secondary);
-  opacity: 0.7;
-  text-transform: uppercase;
+  opacity: 0.55;
   z-index: 1;
+  pointer-events: none;
 }
-.axis-top { top: -8px; left: 50%; transform: translateX(-50%); }
-.axis-bottom { bottom: -8px; left: 50%; transform: translateX(-50%); }
-.axis-left { left: -12px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
-.axis-right { right: -12px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+.axis-top { top: -18px; left: 50%; transform: translateX(-50%); }
+.axis-bottom { bottom: -18px; left: 50%; transform: translateX(-50%); }
+.axis-left { left: -4px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+.axis-right { right: -4px; top: 50%; transform: translateY(-50%) rotate(90deg); }
 
 .sphere-wrapper {
-  position: absolute;
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.85rem;
+  min-height: 124px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--radius-md) + 2px);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
   cursor: pointer;
   transition: var(--transition-luxe);
   z-index: 2;
+  text-align: left;
 }
 
 /* Staggered Orbital Mapping */
-.sphere-wrapper.red { transform: translate(-80px, -90px); }
-.sphere-wrapper.yellow { transform: translate(90px, -70px); }
-.sphere-wrapper.blue { transform: translate(-95px, 90px); }
-.sphere-wrapper.green { transform: translate(75px, 85px); }
+.sphere-wrapper.red { transform: none; }
+.sphere-wrapper.yellow { transform: none; }
+.sphere-wrapper.blue { transform: none; }
+.sphere-wrapper.green { transform: none; }
 
 .sphere-orbital {
-  padding: 20px;
+  padding: 0;
   transition: var(--transition-luxe);
+  flex-shrink: 0;
 }
 
 .sphere {
-  width: 85px;
-  height: 85px;
+  width: 48px;
+  height: 48px;
   position: relative;
   transition: var(--transition-luxe);
 }
@@ -127,14 +153,14 @@
 .green { color: var(--color-green); }
 
 .sphere-info {
-  position: absolute;
-  bottom: -45px;
-  text-align: center;
-  opacity: 0;
+  position: static;
+  text-align: left;
+  opacity: 1;
   transition: var(--transition-luxe);
-  transform: translateY(10px);
+  transform: none;
   pointer-events: none;
-  min-width: 140px;
+  min-width: 0;
+  flex: 1;
 }
 
 .sphere-label {
@@ -149,19 +175,23 @@
   display: block;
   font-size: 0.75rem;
   color: var(--text-secondary);
+  line-height: 1.45;
 }
 
 /* Hover States - Luxe Magnetic Feel */
 .sphere-wrapper:hover {
   z-index: 10;
+  border-color: rgba(213, 193, 165, 0.26);
+  background: rgba(255, 255, 255, 0.065);
+  transform: translateY(-2px);
 }
 
 .sphere-wrapper:hover .sphere-orbital {
-  transform: translateY(-8px);
+  transform: none;
 }
 
 .sphere-wrapper:hover .sphere {
-  transform: scale(1.15);
+  transform: scale(1.08);
 }
 
 .sphere-wrapper:hover .sphere-inner {
@@ -180,10 +210,17 @@
 
 .sphere-wrapper:hover .sphere-info {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* Active/Selected State */
+.sphere-wrapper.active {
+  border-color: rgba(245, 243, 239, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 12px 26px rgba(0, 0, 0, 0.16);
+}
 .sphere-wrapper.active .sphere {
   transform: scale(1.1);
 }
@@ -199,49 +236,80 @@
 }
 .sphere-wrapper.active .sphere-info {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+}
+
+.selection-hint {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .confirm-btn {
-  max-width: 200px;
-  margin-top: -1rem;
+  max-width: 280px;
+  margin-top: 0;
 }
 
 @media (max-width: 480px) {
   .spheres-layout {
-    transform: scale(0.75);
-    margin: -2rem 0;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin: 0;
   }
-  .emotion-quadrant-picker-header h1 { font-size: 1.6rem; }
+  .emotion-quadrant-picker-container {
+    min-height: auto;
+    gap: 0.85rem;
+  }
   .emotion-quadrant-picker-header p { font-size: 0.85rem; }
-  .emotion-quadrant-picker-container { gap: 2rem; }
-
-  .sphere-info {
-    bottom: -55px;
-    transform: translateY(5px) scale(1.15); /* Slightly larger text to compensate for container scale */
+  .sphere-wrapper {
+    min-height: 118px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem;
+    gap: 0.65rem;
+  }
+  .sphere {
+    width: 38px;
+    height: 38px;
+  }
+  .sphere-label {
+    font-size: 0.82rem;
+  }
+  .sphere-desc {
+    font-size: 0.72rem;
+  }
+  .axis-label,
+  .axis-line {
+    display: none;
   }
 }
 
 @media (max-height: 670px) {
-  .spheres-layout {
-    transform: scale(0.65);
+  .emotion-quadrant-picker-container { gap: 0.75rem; }
+  .sphere-wrapper {
+    min-height: 104px;
   }
-  .emotion-quadrant-picker-container { gap: 1rem; }
 }
 
 @media (min-width: 768px) {
   .spheres-layout {
-    width: 420px;
-    height: 420px;
+    width: min(100%, 620px);
   }
-  .emotion-quadrant-picker-header h1 { font-size: 2.2rem; }
   .emotion-quadrant-picker-header { max-width: 400px; }
+  .sphere-wrapper {
+    min-height: 140px;
+  }
+  .sphere {
+    width: 58px;
+    height: 58px;
+  }
 }
 
 @media (min-width: 1024px) {
   .spheres-layout {
-    width: 480px;
-    height: 480px;
+    width: min(100%, 680px);
   }
-  .emotion-quadrant-picker-header h1 { font-size: 2.4rem; }
 }

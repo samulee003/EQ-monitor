@@ -18,8 +18,11 @@ test.describe('知心四式關鍵路徑', () => {
     await skipSplash(page);
 
     // 今日心情應顯示四象限選擇器（心照）
-    const heading = page.getByRole('heading', { name: /你現在感覺如何/ });
+    const heading = page.getByRole('heading', { name: /先選一個最像現在的狀態/ });
     await expect(heading).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('不用想很準，選接近的就好。')).toBeVisible();
+    await expect(page.getByText('很滿 / 卡住')).toBeVisible();
+    await expect(page.getByText('很慢 / 順心')).toBeVisible();
 
     // 首頁保持極簡，只顯示四象限，不在第一屏放進度條
     await expect(page.getByTestId('ruler-progress')).toHaveCount(0);
@@ -30,6 +33,7 @@ test.describe('知心四式關鍵路徑', () => {
     // 確認進入下一步
     const confirm = page.getByTestId('emotion-confirm');
     await expect(confirm).toBeEnabled();
+    await expect(confirm).toContainText('用這個狀態開始');
     await confirm.click();
 
     // 進入下一步後才顯示流程進度
