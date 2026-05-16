@@ -109,9 +109,9 @@ git diff --check
 
 目前最新本地基線（2026-05-16）：
 
-- Frontend tests: 44 files / 393 tests passed
+- Frontend tests: 44 files / 407 tests passed
 - Server tests: 19 files / 213 tests passed
-- E2E: 4 passed
+- E2E: 5 passed
 - Frontend lint: 0 errors / 31 warnings
 - Server lint: 0 errors / 24 warnings
 - Frontend build: passed
@@ -119,13 +119,19 @@ git diff --check
 
 ## 最新主線
 
+- `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`
+  - 今日心情完整閉環補強：喚名強度會保存到紀錄，完成頁顯示「已保存到記錄回顧 / 查看記錄」，可直接回時間軸確認。
+  - 未登入 Coach 改成預先說明登入需求，鎖定對話與 7 日陪跑，但保留呼吸與 SOS。
+  - PWA production 已確認 live bundle `index-BIi8Bv0J.js`，Zeabur deployment 已切到 `RUNNING`。
+- `93b308c fix: 打磨今日心情封測入口`
+  - 今日心情第一屏改為手機優先 2×2 狀態卡；首次導覽新增「先試一次」，可直接進入今日心情。
 - `1c4a634 fix: 未登入 Coach 顯示登入提示`
   - 未登入使用者點 Coach 或 7 日小陪跑時不再呼叫 production `coach` API；會直接提示先登入。
   - 未登入提交 LINE 綁定碼也不再送出 claim request。
-  - PWA production 已確認 live bundle `index-3JqI49Ya.js`。
+  - 先前 PWA production 曾確認 live bundle `index-3JqI49Ya.js`；目前以更新後的 `index-BIi8Bv0J.js` 為準。
 - `34b549c fix: 補 Coach 首屏 LINE 入口`
   - Coach 開場卡新增「也可以用 LINE 對話」入口，直接露出 `@980pqrhn` 與綁定步驟。
-  - 舊 PWA production 曾確認 live bundle `index-C0yGyERj.js`；目前以更新後的 `index-3JqI49Ya.js` 為準。
+  - 舊 PWA production 曾確認 live bundle `index-C0yGyERj.js`；目前以更新後的 `index-BIi8Bv0J.js` 為準。
 - `0ef72fd fix: 整合 Debug Review 修正`
   - 合入 Claude 安全修正與 Debug / Review 修正。
   - 包含 LINE 危機字詞、production 簽名強制、InsForge adapter 結構化日誌、登入使用者 `ruler_logs` 同步、深色模式對比、成就檢查規則與相關測試。
@@ -147,7 +153,7 @@ git diff --check
 
 ## 近期下一步
 
-1. 找 1 位非開發者用手機完整試玩 `#coach` 的 7 日小陪跑：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
-2. 觀察使用者是否理解「阿念推動我生活一點點」與「回來看一眼，不是成績單」。
+1. 找 1 位非開發者用手機完整試玩：今日心情 → 保存 → 記錄回顧，再試 `#coach` 的登入後 7 日小陪跑。
+2. 觀察使用者是否理解「先記一筆」與「阿念推動我生活一點點」，以及「回來看一眼，不是成績單」。
 3. 驗證 production schema / Edge Function 部署後，再做一次 live API smoke，確認 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces` 都有最小資料流。
 4. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。

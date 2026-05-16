@@ -13,7 +13,7 @@
 
 ## 目前狀態摘要（2026-05-16）
 
-- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`，以及導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`。
+- `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`，以及今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`。
 - 今心目前定位為開源情緒覺察 PWA + LINE Bot；核心方法語言是 **知心四式：心照、喚名、安神、動念**。
 - 阿念主線已轉為 **Agentic Action Loop**：Observe → Orient → Plan → Act → Persist → Evaluate → Adjust。
 - 第一個可見閉環是 PWA Coach 的 **7 日小陪跑**：提案小行動 → 使用者確認 → 24 小時內回報 completed / partial / skipped → 阿念調整下一步。
@@ -23,16 +23,17 @@
 - 2026-05-16 13:16 已重新部署 InsForge `coach` Edge Function；對話事件持久化不再 fire-and-forget，response metadata 會標記 `conversationPersisted` 與失敗角色。
 - 2026-05-16 13:20 已再次部署 InsForge `coach` Edge Function；mutating tool args 由 deterministic code 驗證後才可建立或回報小行動。
 - 2026-05-16 16:50 已重新部署 PWA；App onboarding 第 3 步改用情緒心理學科普常用的「身體喚醒程度」與「感受愉悅度」說法，live bundle 已切到 `index-DdGwYiyB.js`。
+- 2026-05-16 22:29 已重新部署 PWA；今日心情封測打磨已上 production，live bundle 已切到 `index-BIi8Bv0J.js`，Zeabur deployment 已切到 `RUNNING`。
 
 ## 下一步
 
 1. 做 Agentic Action Loop live API smoke：開始 7 日小陪跑 → 建立小行動 → 回報 partial → 查 `coach_micro_actions`、`coach_gamification_stats`、`coach_agent_traces`。
-2. 找 1 位非開發者用手機完整試玩 `#coach`：開始陪跑 → 看見小行動提案 → 明確確認 → 回來回報 completed / partial / skipped。
+2. 找 1 位非開發者用手機完整試玩：今日心情 → 保存 → 記錄回顧，再試 `#coach` 的登入後 7 日小陪跑。
 3. LINE Bot 暫不建立小行動；先讓 PWA Coach 小行動閉環穩定。
 
-## [Unreleased] - 2026-05-16 — 今日心情第一屏封測打磨
+## [V1.0.0] - 2026-05-16 — 今日心情第一屏封測打磨
 
-- 目前狀態：本地分支 `codex/product-polish-agent-team-20260516` 已完成，尚未合入 `main`，也尚未上 production。
+- 目前狀態：分支 `codex/product-polish-agent-team-20260516` 已快轉合入 `main` / `origin/main`，並已部署到 PWA production；live bundle 為 `index-BIi8Bv0J.js`。
 - 今日心情第一屏從 hover 才看得到說明的球體布局，改成手機優先的 2×2 狀態卡；四個狀態名稱與描述常駐顯示，降低新朋友第一次打開時的猜測成本。
 - 首屏文案改成「先選一個最像現在的狀態」，副文提示「不用想很準，選接近的就好」，確認按鈕改為「用這個狀態開始」。
 - 選取狀態後會提示「下一步：幫你找一個更準的情緒詞」，讓使用者知道按下去會發生什麼。
@@ -40,7 +41,7 @@
 - 今日心情完整閉環補強：喚名頁的強度滑桿現在會寫入保存紀錄；完成頁新增「已保存到記錄回顧」與「查看記錄」，可直接回到時間軸確認剛才那一筆。
 - Coach 未登入體驗補強：未登入時會先說明「登入後，阿念才能記住你的陪跑進度」，對話與 7 日陪跑入口鎖定；仍保留呼吸練習、SOS 與回今日心情入口，避免封測者誤以為伺服器壞掉。
 - 修正 Coach 浮層層級與手機底部導覽 Beta 標籤擠壓問題，避免主 App 頁首壓住 Coach 畫布或「教練 Beta」在窄螢幕變形。
-- 驗證：`npm run test:run` → 407 tests / 44 files passed；`npm run test:e2e` → 5 passed；`npm run build` → passed；`npm run lint` → 0 errors / 31 warnings；`git diff --check` → passed；Playwright 截圖確認 390×844 今日心情保存頁、記錄回顧與未登入 Coach 入口可見。
+- 驗證：`npm run test:run` → 407 tests / 44 files passed；`npm run test:e2e` → 5 passed；`npm run build` → passed；`npm run lint` → 0 errors / 31 warnings；`git diff --check` → passed；live browser smoke 確認正式站可完成「先試一次 → 選狀態 → 喚名 → 保存 → 查看記錄」，時間軸顯示 `壓力很大的` 與 `強度 9/10`，未登入 Coach 入口可見並正確鎖定陪跑。
 
 ## [V1.0.0] - 2026-05-16 — 導覽情緒科普文案修正
 
