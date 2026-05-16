@@ -94,8 +94,16 @@ describe('CoachPage', () => {
     render(<CoachPage />);
 
     expect(screen.getByText('也可以用 LINE 對話')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /加入 LINE 官方帳號 @980pqrhn/ })).toBeInTheDocument();
-    expect(screen.getByText('加入後輸入「綁定」，再回來貼上 6 位碼。')).toBeInTheDocument();
+    expect(screen.getByText('@980pqrhn')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '加入 LINE 官方帳號 @980pqrhn' })).toHaveAttribute(
+      'href',
+      'https://line.me/R/ti/p/@980pqrhn'
+    );
+    expect(screen.getByText('加入後輸入「綁定」')).toBeInTheDocument();
+    expect(screen.queryByTestId('line-binding-panel')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '我已有 6 位碼' }));
+    expect(screen.getByTestId('line-binding-panel')).toBeInTheDocument();
   });
 
   it('Coach 首屏提供簡短 7 日小陪跑入口', () => {
@@ -396,6 +404,10 @@ describe('CoachPage', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
+    saveChatHistory([
+      { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+    ], 'guest');
     render(<CoachPage />);
     fireEvent.change(screen.getByLabelText('LINE 綁定碼'), { target: { value: 'ABC123' } });
     fireEvent.click(screen.getByText('綁定'));

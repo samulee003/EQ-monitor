@@ -10,6 +10,14 @@ import { bypassSplashViaSession, skipSplash } from './helpers';
 test.describe('LINE 綁定流程', () => {
   test.beforeEach(async ({ page }) => {
     await bypassSplashViaSession(page);
+    await page.addInitScript(() => {
+      const history = [
+        { id: '1', role: 'model', content: '歡迎', timestamp: new Date().toISOString() },
+        { id: '2', role: 'user', content: '你好', timestamp: new Date().toISOString() },
+      ];
+      localStorage.setItem('imxin_coach_chat_v1', JSON.stringify(history));
+      localStorage.setItem('imxin_coach_chat_v1_user_local_001', JSON.stringify(history));
+    });
 
     // 攔截綁定 API
     await page.route('**/api/line-binding/claim', async (route) => {
@@ -27,9 +35,11 @@ test.describe('LINE 綁定流程', () => {
     });
   });
 
-  test('使用者輸入綁定碼後應顯示「已綁定」成功訊息', async ({ page }) => {
+  test('未登入使用者輸入綁定碼時應提示先登入', async ({ page }) => {
     await page.goto('/#coach');
     await skipSplash(page);
+
+    await page.getByRole('button', { name: '我已有 6 位碼' }).click();
 
     const panel = page.getByTestId('line-binding-panel');
     await expect(panel).toBeVisible({ timeout: 10_000 });
@@ -39,13 +49,14 @@ test.describe('LINE 綁定流程', () => {
 
     const message = page.getByTestId('line-binding-message');
     await expect(message).toBeVisible();
-    await expect(message).toContainText('已綁定 LINE Bot');
-    await expect(message).toContainText('U-ABC123');
+    await expect(message).toContainText('請先登入或註冊帳號，再綁定 LINE Bot');
   });
 
   test('綁定碼為空時應顯示提示訊息', async ({ page }) => {
     await page.goto('/#coach');
     await skipSplash(page);
+
+    await page.getByRole('button', { name: '我已有 6 位碼' }).click();
 
     await page.getByTestId('line-binding-submit').click();
 

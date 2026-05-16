@@ -165,6 +165,7 @@ export default function CoachPage() {
   const [bindingCode, setBindingCode] = useState('');
   const [bindingMessage, setBindingMessage] = useState('');
   const [bindingSubmitting, setBindingSubmitting] = useState(false);
+  const [showBindingSetup, setShowBindingSetup] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
 
@@ -363,6 +364,7 @@ export default function CoachPage() {
   }, [bindingCode, bindingSubmitting, user?.id]);
 
   const showWelcome = messages.length <= 1;
+  const showBindingPanel = !showWelcome || showBindingSetup;
   const visibleMessages = showWelcome
     ? messages.filter((message) => message.id !== WELCOME_MSG.id)
     : messages;
@@ -407,17 +409,26 @@ export default function CoachPage() {
                 <p className={styles.betaNotice}>
                   內測中
                 </p>
+                <div className={styles.lineEntryRow} aria-label={`LINE 官方帳號 ${LINE_BOT_BASIC_ID}`}>
+                  <span>也可以用 LINE 對話</span>
+                  <strong>{LINE_BOT_BASIC_ID}</strong>
+                </div>
                 <a
-                  className={styles.lineEntryCard}
+                  className={styles.lineEntryLink}
                   href={LINE_BOT_ADD_FRIEND_URL}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={`加入 LINE 官方帳號 ${LINE_BOT_BASIC_ID}，用 LINE 和阿念對話`}
+                  aria-label={`加入 LINE 官方帳號 ${LINE_BOT_BASIC_ID}`}
                 >
-                  <span className={styles.lineEntryKicker}>也可以用 LINE 對話</span>
-                  <strong>{LINE_BOT_BASIC_ID}</strong>
-                  <span>加入後輸入「綁定」，再回來貼上 6 位碼。</span>
+                  加入後輸入「綁定」
                 </a>
+                <button
+                  type="button"
+                  className={styles.lineCodeButton}
+                  onClick={() => setShowBindingSetup(true)}
+                >
+                  我已有 6 位碼
+                </button>
                 <div className={styles.startActions} aria-label="阿念教練開始選項">
                   {START_ACTIONS.map((item) => (
                     <button
@@ -448,6 +459,7 @@ export default function CoachPage() {
           onReportAction={handleReportMicroAction}
         />
 
+        {showBindingPanel && (
         <section className={styles.bindingPanel} aria-label="LINE Bot 綁定" data-testid="line-binding-panel">
           <div>
             <p className={styles.bindingTitle}>把 LINE 變成日常入口</p>
@@ -496,6 +508,7 @@ export default function CoachPage() {
             </p>
           )}
         </section>
+        )}
 
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
