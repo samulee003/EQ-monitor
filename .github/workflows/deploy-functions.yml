@@ -1,0 +1,80 @@
+name: Deploy InsForge Edge Functions
+
+# 部署 InsForge Edge Functions 到 production。
+# 觸發條件：
+#   1. push 到 main 且有 server/insforge/functions/ 下的變更
+#   2. 手動觸發（workflow_dispatch）
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/insforge/functions/**'
+  workflow_dispatch:
+    inputs:
+      function:
+        description: '要部署的 Edge Function 名稱（留空則全部部署）'
+        required: false
+        default: ''
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install InsForge CLI
+        run: npm install -g @insforge/cli
+
+      - name: Link project to InsForge
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          test -n "$SERVICE_ROLE_KEY" || { echo "::error::INSFORGE_SERVICE_ROLE_KEY 未設定"; exit 1; }
+          npx @insforge/cli link --project-id b88egxiz             --api-base-url https://b88egxiz.ap-southeast.insforge.app             --api-key "$SERVICE_ROLE_KEY"
+
+      - name: Deploy achievement-checker
+        if: ${{ github.event_name == 'push' || github.event.inputs.function == '' || github.event.inputs.function == 'achievement-checker' }}
+        run: |
+          npx @insforge/cli functions deploy achievement-checker \
+            --file server/insforge/functions/achievement-checker.ts
+
+      - name: Deploy weekly-report
+        if: ${{ github.event_name == 'push' || github.event.inputs.function == '' || github.event.inputs.function == 'weekly-report' }}
+        run: |
+          npx @insforge/cli functions deploy weekly-report \
+            --file server/insforge/functions/weekly-report.ts
+
+      - name: Deploy delete-account
+        if: ${{ github.event_name == 'push' || github.event.inputs.function == '' || github.event.inputs.function == 'delete-account' }}
+        run: |
+          npx @insforge/cli functions deploy delete-account \
+            --file server/insforge/functions/delete-account.ts
+
+      - name: Deploy coach (bundled)
+        if: ${{ github.event_name == 'push' || github.event.inputs.function == '' || github.event.inputs.function == 'coach' }}
+        run: |
+          npx esbuild server/insforge/functions/coach-simple.ts \
+            --bundle --platform=neutral --format=esm \
+            --external:npm:@insforge/sdk \
+            --outfile=/tmp/imxin-coach-edge-bundled.ts
+          npx @insforge/cli functions deploy coach \
+            --file /tmp/imxin-coach-edge-bundled.ts
+
+      - name: Smoke test achievement-checker
+        if: ${{ github.event_name == 'push' || github.event.inputs.function == '' || github.event.inputs.function == 'achievement-checker' }}
+        env:
+          INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
+            -H "Authorization: ******" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"scan"}' | head -c 200

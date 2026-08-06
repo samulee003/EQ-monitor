@@ -48,7 +48,15 @@ jobs:
         run: |
           set -e
           test -n "$SERVICE_ROLE_KEY"
-          curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
+          HTTP_CODE=$(curl -sS -o /tmp/response.json -w "%{http_code}" \
+            -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
             -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
-            -d '{"mode":"scan"}'
+            -d '{"mode":"scan"}')
+          echo "HTTP status: $HTTP_CODE"
+          cat /tmp/response.json
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "::error::achievement-checker 回傳錯誤 HTTP $HTTP_CODE（函式可能未部署）"
+            echo "::notice::請手動執行 \"Deploy InsForge Edge Functions\" 工作流程"
+            exit 1
+          fi
