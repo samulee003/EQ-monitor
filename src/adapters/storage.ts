@@ -276,10 +276,12 @@ export function clearLogsCache(): void {
 }
 
 async function syncLogsToCloud(entries: RulerLogEntry[]): Promise<void> {
-  if (!isUuid(currentUserId) || entries.length === 0) return;
+  // 先取為區域常數：currentUserId 是 let，型別收窄無法延續到 map 的閉包內
+  const userId = currentUserId;
+  if (!isUuid(userId) || entries.length === 0) return;
   const { error } = await insforge.database
     .from('ruler_logs')
-    .insert(entries.map(entry => toCloudRulerLogRow(currentUserId, entry)));
+    .insert(entries.map(entry => toCloudRulerLogRow(userId, entry)));
   if (error) throw new Error(`ruler_logs sync failed: ${error.message}`);
 }
 
