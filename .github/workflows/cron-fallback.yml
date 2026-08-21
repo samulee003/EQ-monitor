@@ -33,7 +33,7 @@ jobs:
           set -e
           test -n "$SERVICE_ROLE_KEY"
           curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/weekly-report" \
-            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Authorization: ******" \
             -H "Content-Type: application/json" \
             -d '{"mode":"batch"}'
 
@@ -41,6 +41,23 @@ jobs:
     if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'achievement-checker') }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy achievement-checker function
+        env:
+          INSFORGE_ACCESS_TOKEN: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+          INSFORGE_PROJECT_ID: b88egxiz
+          INSFORGE_URL: https://b88egxiz.ap-southeast.insforge.app
+        run: |
+          set -e
+          npx --yes @insforge/cli functions deploy achievement-checker \
+            --file server/insforge/functions/achievement-checker.ts \
+            --yes
+
       - name: Trigger achievement-checker scan
         env:
           INSFORGE_FUNCTIONS_URL: https://b88egxiz.functions.insforge.app
@@ -49,6 +66,6 @@ jobs:
           set -e
           test -n "$SERVICE_ROLE_KEY"
           curl -fsS -X POST "$INSFORGE_FUNCTIONS_URL/achievement-checker" \
-            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Authorization: ******" \
             -H "Content-Type: application/json" \
             -d '{"mode":"scan"}'
