@@ -47,16 +47,22 @@ jobs:
         with:
           node-version: 20
 
-      - name: Deploy achievement-checker function
+      - name: Link InsForge project for CLI
         env:
-          INSFORGE_ACCESS_TOKEN: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
-          INSFORGE_PROJECT_ID: b88egxiz
-          INSFORGE_URL: https://b88egxiz.ap-southeast.insforge.app
+          INSFORGE_API_BASE_URL: https://b88egxiz.ap-southeast.insforge.app
+          INSFORGE_API_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
         run: |
-          set -e
-          npx --yes @insforge/cli functions deploy achievement-checker \
-            --file server/insforge/functions/achievement-checker.ts \
-            --yes
+          set -euo pipefail
+          test -n "$INSFORGE_API_KEY"
+          npx --yes @insforge/cli --json link \
+            --api-base-url "$INSFORGE_API_BASE_URL" \
+            --api-key "$INSFORGE_API_KEY"
+
+      - name: Deploy achievement-checker function
+        run: |
+          set -euo pipefail
+          npx --yes @insforge/cli --json functions deploy achievement-checker \
+            --file server/insforge/functions/achievement-checker.ts
 
       - name: Trigger achievement-checker scan
         env:
