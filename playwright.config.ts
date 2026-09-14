@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
  * - 只跑 Chromium（節省 CI 時間與磁碟空間）
  * - 本地：自動啟動 Vite dev server (npm run dev → :5173)
  * - CI：重試 2 次；本地：不重試
- * - 報告：list + html（artifact 上傳於 CI workflow）
+ * - 報告：list + html（失敗時保留 trace、截圖與影片）
  */
 const isCI = !!process.env.CI;
 const devPort = process.env.PLAYWRIGHT_PORT || '4173';

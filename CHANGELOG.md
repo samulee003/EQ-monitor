@@ -11,6 +11,11 @@
 - **[V1.0.0]**：今心產品起點版，是目前對外小圈封測的產品基線。
 - **4.x / 3.x / 2.x / 1.x**：V1.0 前的內部衝刺與架構演進紀錄，保留作為追溯用。
 
+## [Unreleased] - 2026-09-14 — 停用 GitHub Actions
+
+- 移除 CI、Bot CI、Playwright E2E 與 cron fallback workflow，停止此 repository 透過 GitHub Actions 自動執行。
+- 主動推送排程保留 InsForge `pg_cron` / `pg_net` 原生路徑，不再提供 GitHub Actions 備援。
+
 ## 目前狀態摘要（2026-05-16）
 
 - `main` / `origin/main` 已包含 app 整合版 `0ef72fd fix: 整合 Debug Review 修正`、Coach LINE 首屏入口修補 `34b549c fix: 補 Coach 首屏 LINE 入口`、未登入 Coach 守門修補 `1c4a634 fix: 未登入 Coach 顯示登入提示`、導覽情緒科普文案修正 `688f954 fix: 更新導覽情緒科普文案`、今日心情封測打磨 `c6aa7d9 fix: 補完整今日心情閉環與 Coach 訪客入口`、安全分流修補 `f6340e4 fix: 補強今日心情安全分流與 SOS 收束`，以及交接文件同步 `23a8b63 docs: 同步安全分流部署狀態`。

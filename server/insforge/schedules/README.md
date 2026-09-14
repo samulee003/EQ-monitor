@@ -26,7 +26,7 @@ bash server/scripts/check-pg-cron.sh
 create extension if not exists pg_cron;
 ```
 
-InsForge 雲端版若無 superuser 權限，請聯絡平台支援，或改用 GitHub Actions 備援（見 `.github/workflows/cron-fallback.yml`）。
+InsForge 雲端版若無 superuser 權限，請聯絡平台支援。GitHub Actions 備援已停用，排程需使用 InsForge 原生 `pg_cron` / `pg_net`。
 
 ### 2. 透過 InsForge CLI（如支援）
 
