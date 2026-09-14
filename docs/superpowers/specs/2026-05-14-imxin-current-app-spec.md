@@ -387,7 +387,7 @@ flowchart LR
 | `weekly-report-batch` | `0 13 * * 0` | 每週日 21:00 | 週報批次 |
 | `care-scan-daily` | `0 2 * * *` | 每日 10:00 | 主動關懷掃描 |
 
-Production DB 已啟用 `pg_cron` 與 `pg_net`。GitHub Actions fallback 保留，避免平台排程異常時完全失效。
+Production DB 已啟用 `pg_cron` 與 `pg_net`。GitHub Actions fallback 已停用，排程僅由 InsForge 原生機制負責。
 
 ---
 

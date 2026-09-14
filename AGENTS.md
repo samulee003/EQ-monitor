@@ -51,6 +51,7 @@ Observe → Orient → Plan → Act → Persist → Evaluate → Adjust
 - 保留內部資料模型與相容命名，例如 `ruler_logs`、`RulerLogEntry`、`useRulerFlow`、`server/src/rulerBot.ts`，除非使用者明確要求資料遷移。
 - `server/insforge/functions/coach-simple.ts` 是 production `coach` Edge Function 自包含 prompt builder；改 AI 教練方法語言時要同步它、`server/src/agents/soulInstruction.ts`、`server/insforge/agents/soul.md` 與相關測試。
 - 改 Agentic Action Loop 時要同步 `server/insforge/functions/_shared/coachActionLoop.ts`、`server/insforge/functions/coach-simple.ts`、`server/insforge/schema/011_coach_action_loop.sql`、`src/lib/adk/types.ts`、`src/pages/CoachPage.tsx` 與相關測試。
+- GitHub Actions 工作流程已停用；CI、E2E 與主動推送排程不再透過 `.github/workflows/` 執行，主動推送僅由 InsForge `pg_cron` / `pg_net` 負責。
 - 根目錄 `memory.md` 是短交接板；`CHANGELOG.md` 是產品變更紀錄；`AGENTS.md` 是長期工程與產品規範。重要命名、安全邊界、部署、驗證狀態變更後三者要同步更新。
 
 ## 防漂移工作規範

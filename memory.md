@@ -11,6 +11,7 @@
 - 2026-05-16 晚間分支 `codex/product-polish-agent-team-20260516` 已快轉合入 `main` / `origin/main` 並部署到 PWA production：第一屏改為手機優先 2×2 狀態卡、常駐顯示四個狀態文案、選取後提示下一步、首次導覽「先試一次」直接進今日心情；後續又補上喚名強度保存、完成頁「已保存到記錄回顧 / 查看記錄」、完整保存到時間軸 E2E，以及未登入 Coach 的預先說明 / 鎖定 7 日陪跑 / 保留呼吸與 SOS。
 - 2026-05-16 深夜分支 `codex/clinical-ai-safety-polish-20260516` 已快轉合入 `main` / `origin/main` 並部署：今日心情在高風險情緒或強度 8/10 以上時會先開安全確認，不會直接把高強度情緒當一般完成；身體掃描新增「改做外在接地」；完成頁高強度情緒改為低慶祝的「已記下這一刻」；SOS 第 3 步改成「看見安全的一步」，完成後只做本地安全收束，不再自動送回 Coach API；production `coach` Edge Function 新增最終回覆 deterministic safety guard。
 - 2026-05-16 深夜 `23a8b63` 後，三份交接文件已對齊：`AGENTS.md` 補入今日心情 / SOS 安全規格，`memory.md` 記錄 production 真實狀態，`CHANGELOG.md` 記錄 release history 與驗證證據。
+- 2026-09-14 已移除 `.github/workflows/` 下的 CI、Bot CI、E2E 與 cron fallback；GitHub Actions 不再由此 repo 自動執行，主動推送仍由 InsForge `pg_cron` / `pg_net` 負責。
 - `0ef72fd` 已整合 Claude 安全修正分支 `claude/festive-fermi-fe3154`：
   - `c8e8574 docs: 更新 CLAUDE.md 補齊 Agentic Action Loop 與語言邊界`
   - `8b3ea4a fix: 補強 LINE Bot 危機檢測、production 簽名強制與 adapter 結構化日誌`
